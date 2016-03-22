@@ -1,3 +1,9 @@
+module Paths
+
+using ForwardDiff
+import Devices: gdspy
+import Devices: cell, render
+
 export Path
 
 export CPW
@@ -44,7 +50,7 @@ Path{S<:Real,T<:Real}(start::Tuple{S,T}=(0.0,0.0), angle::Real=0.0) =
     Path([0.0], Tuple{Float64,Float64}[start], [angle], Expr[])
 
 "How to draw along the path."
-abstract PathStyle
+abstract Style
 
 """
 Two adjacent traces to form a coplanar waveguide.
@@ -55,7 +61,7 @@ Two adjacent traces to form a coplanar waveguide.
 May need to be inverted with respect to a ground plane,
  depending on how the pattern is written.
 """
-type CPW <: PathStyle
+type CPW <: Style
     trace::Function
     gap::Function
 end
@@ -73,7 +79,7 @@ Single trace.
 
 - `width`: trace width
 """
-type Trace <: PathStyle
+type Trace <: Style
     width::Function
 end
 Trace(width::Real) = Trace(x->float(width))
@@ -173,7 +179,7 @@ Keyword arguments give a `layer` and `datatype` (default to 0),
 a `start` and `stop` point in range [0,1] to draw only part of the path,
 as well as number of `segments` (defaults to 100).
 """
-function render(p::Path, s::PathStyle, name="main"; layer::Real=0, datatype::Real=0,
+function render(p::Path, s::Style, name="main"; layer::Real=0, datatype::Real=0,
         start=0.0, stop=1.0, segments=100)
     stop <= start && error("Check start and stop arguments.")
     f = param(p)
@@ -200,4 +206,6 @@ function render(p::Path, s::PathStyle, name="main"; layer::Real=0, datatype::Rea
             distance=distance(s,t))
         last = t
     end
+end
+
 end

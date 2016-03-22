@@ -4,7 +4,7 @@ using PyCall
 using ForwardDiff
 import PyPlot
 
-import Base: length, show
+import Base: cell, length, show
 @pyimport numpy
 @pyimport gdspy
 
@@ -36,8 +36,22 @@ export xor
 
 export interdigit
 
+function render end
+
 include("Paths.jl")
+import .Paths: Path, aim, param, preview, straight, turn
+export Paths
+export Path
+export aim
+export param
+export preview
+export straight
+export turn
+
 include("Rectangles.jl")
+import .Rectangles: Rectangle
+export Rectangles
+export Rectangle
 
 and(x,y) = x & y
 or(x,y) = x | y
@@ -62,7 +76,7 @@ Otherwise, the top of the cell will be rotated closest to the path edge.
 A tangential `offset` may be given to move the cell with +x
 being the direction to the right of the path.
 """
-function attach(name::AbstractString, p::Path, s::PathStyle, t::Real,
+function attach(name::AbstractString, p::Path, s::Paths.Style, t::Real,
         direction::Integer, offset::Real, incell::AbstractString)
 
     (direction < -1 || direction > 1) && error("Invalid direction.")
