@@ -23,31 +23,108 @@ export FEATURES_LAYER
 export UNIT
 export PRECISION
 
+export andnot
+export attach
+export boolean
 export bounds
 export heal
+export intersect
+export render
+export union
 export view
+export xor
 
 export interdigit
 
 include("Paths.jl")
+include("Rectangles.jl")
 
 and(x,y) = x & y
 or(x,y) = x | y
+xor(x,y) = x $ y
+andnot(x,y) = x &~ y
 
-union(iterable, layer, datatype, name) =
-    boolean(iterable, layer, datatype, name, (x...)->reduce(and, true, [x...]))
-intersect(iterable, layer, datatype, name) =
-    boolean(iterable, layer, datatype, name, (x...)->reduce(or, true, [x...]))
-
-
+union(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
+    boolean(iterable, name, layer, datatype, (x...)->reduce(or, true, [x...]))
+intersect(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
+    boolean(iterable, name, layer, datatype, (x...)->reduce(and, true, [x...]))
+xor(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
+    boolean(iterable, name, layer, datatype, (x...)->reduce(xor, true, [x...]))
+andnot(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
+    boolean(iterable, name, layer, datatype, (x...)->reduce(andnot, true, [x...]))
 
 """
+Attach a cell `name` along a path `p` rendered with style `s` at location
+`t` ∈ [0,1]. The `direction` is 1,0,-1 (left, center, or right of path,
+respectively). If 0, the center of the cell will be centered on the path, with
+the top of the cell tangent to the path direction (and leading the bottom).
+Otherwise, the top of the cell will be rotated closest to the path edge.
+A tangential `offset` may be given to move the cell with +x
+being the direction to the right of the path.
+"""
+function attach(name::AbstractString, p::Path, s::PathStyle, t::Real,
+        direction::Integer, offset::Real, incell::AbstractString)
+
+    (direction < -1 || direction > 1) && error("Invalid direction.")
+    f = param(p)
+    fx(t) = f(t)[1]
+    fy(t) = f(t)[2]
+    dirx,diry = (derivative(fx,t), derivative(fy,t))
+    α0 = atan(diry/dirx)
+
+    ((x1,y1),(x2,y2)) = bounds(name)
+    dtop = max(y1,y2) - (y1+y2)/2       # distance from center to top
+
+    newcell = cell(incell)
+    if direction == 0
+        ∠ = α0-π/2
+        newx = offset*cos(∠)
+        newy = offset*sin(∠)
+        ref = gdspy.CellReference(cell(name), origin=f(t)+[newx,newy],
+            rotation=∠*180/π)
+    else
+        ∠ = α0-π/2
+        offset -= direction*extent(s,t)
+        offset -= direction*dtop
+        newx = offset*cos(∠)
+        newy = offset*sin(∠)
+        rot = (α0 + (direction==1 ? π:0))*180/π
+        ref = gdspy.CellReference(cell(name), origin=f(t)+[newx,newy],
+            rotation=rot)
+    end
+    newcell[:add](ref)
+end
+
+"""
+Performs a boolean operation.
+"""
+function boolean(iterable::AbstractArray, name,
+        layer::Integer, datatype::Integer, λ::Function)
+    newp = gdspy.boolean(iterable, λ, layer=layer, datatype=datatype)
+    c = cell(name)
+    c[:add](newp)
+end
+
+"""
+`bounds(name::AbstractString, layer::Integer, datatype::Integer)`
+
 Returns coordinates for a bounding box around all polygons of `layer`
-and `datatype` in cell `name`. The return format is a ((x1,y1),(x2,y2)).
+and `datatype` in cell `name`. The return format is ((x1,y1),(x2,y2)).
 """
-function bounds(name, layer=0, datatype=0)
+function bounds(name, layer::Integer, datatype::Integer)
     p = get_polygons(name,layer,datatype)
     x1,x2,y1,y2 = p[:get_bounding_box]()
+    ((x1,y1),(x2,y2))
+end
+
+"""
+`bounds(name::AbstractString)`
+
+Returns coordinates for a bounding box around all polygons in cell `name`.
+The return format is ((x1,y1),(x2,y2)).
+"""
+function bounds(name)
+    x1,x2,y1,y2 = cell(name)[:get_bounding_box]()
     ((x1,y1),(x2,y2))
 end
 
@@ -62,15 +139,20 @@ function cell(name)
 end
 
 "Get polygons from `cell`, `layer`, and `datatype`."
-function get_polygons(name, layer=0, datatype=0)
+function get_polygons(name::AbstractString, layer::Integer, datatype::Integer)
     c = cell(name)
     gdspy.PolygonSet(c[:get_polygons](by_spec=true)[(layer,datatype)])
 end
 
+"Get all polygons from cell `name`."
+function get_polygons(name::AbstractString)
+    c = cell(name)
+    gdspy.PolygonSet(c[:get_polygons]())
+end
+
 """
 Will remove overlaps and may reduce polygon count, depending on geometry.
-Seems a little bit slow.
-Healing may also be done in Beamer. YMMV.
+Seems a little bit slow. Healing may also be done in Beamer. YMMV.
 """
 function heal(name, layer0, datatype0, newname, layer, datatype)
     plgs = get_polygons(name, layer0, datatype0)

@@ -1,12 +1,37 @@
-export CPW
 export Path
 
-# export aim
+export CPW
+export Trace
+
+export aim
 export param
 export preview
-export render
 export straight
 export turn
+
+"""
+For a style `s` and parameteric argument `t`, returns the distance
+between the centers of parallel paths rendered by gdspy.
+"""
+function distance end
+
+"""
+For a style `s` and parameteric argument `t`, returns a distance tangential
+to the path specifying the lateral extent of the polygons rendered by gdspy.
+"""
+function extent end
+
+"""
+For a style `s` and parameteric argument `t`, returns the number of parallel
+paths rendered by gdspy.
+"""
+function paths end
+
+"""
+For a style `s` and parameteric argument `t`, returns the width
+of paths rendered by gdspy.
+"""
+function width end
 
 "Unstyled path. Can describe any path in the plane."
 type Path
@@ -19,24 +44,47 @@ Path{S<:Real,T<:Real}(start::Tuple{S,T}=(0.0,0.0), angle::Real=0.0) =
     Path([0.0], Tuple{Float64,Float64}[start], [angle], Expr[])
 
 "How to draw along the path."
-abstract Style
+abstract PathStyle
 
 """
-trace - center conductor width
-gap - distance between center condctor and ground plane
-May need to be inverted depending on how the pattern is written.
+Two adjacent traces to form a coplanar waveguide.
+
+- `trace`: center conductor width
+- `gap`: distance between center conductor edges and ground plane
+
+May need to be inverted with respect to a ground plane,
+ depending on how the pattern is written.
 """
-type CPW <: Style
+type CPW <: PathStyle
     trace::Function
     gap::Function
 end
 CPW(trace::Real, gap::Real) = CPW(x->float(trace), x->float(gap))
-paths(::CPW) = 2
+CPW(trace::Function, gap::Real) = CPW(trace, x->float(gap))
+CPW(trace::Real, gap::Function) = CPW(x->float(trace), gap)
+
 distance(s::CPW, t) = s.gap(t)+s.trace(t)
+extent(s::CPW, t) = s.trace(t)/2 + s.gap(t)
+paths(::CPW) = 2
 width(s::CPW, t) = s.gap(t)
 
-# "Aim the path in a different direction."
-# aim(p::Path, α::Real) = begin p.angle = α end
+"""
+Single trace.
+
+- `width`: trace width
+"""
+type Trace <: PathStyle
+    width::Function
+end
+Trace(width::Real) = Trace(x->float(width))
+
+distance(::Trace, t) = 0.0
+extent(s::Trace, t) = s.width(t)/2
+paths(::Trace) = 1
+width(s::Trace, t) = s.width(t)
+
+"Aim the path in a different direction."
+aim(p::Path, α::Real) = begin p.angle = α end
 
 "Overall length of a path."
 length(p::Path) = p.length[end]
@@ -48,7 +96,7 @@ function straight(p::Path, l::Real)
     α = p.angle[end]
     push!(p.exprs, quote
         ($L/c <= x < ($L+$l)/c) &&
-            return ($a+(x*c-$L)*cos($α),$b+(x*c-$L)*sin($α))
+            return [$a+(x*c-$L)*cos($α),$b+(x*c-$L)*sin($α)]
     end)
     a += l*cos(α)
     b += l*sin(α)
@@ -69,8 +117,8 @@ function turn(p::Path, α::Real, r::Real)
 
     push!(p.exprs, quote
         ($L/c <= x < ($L+$l)/c) &&
-            return ($c+$r*cos($α0-π/2+$α*(x*c-$L)/($l)),
-                        $d+$r*sin($α0-π/2+$α*(x*c-$L)/($l)))
+            return [$c+$r*cos($α0-π/2+$α*(x*c-$L)/($l)),
+                        $d+$r*sin($α0-π/2+$α*(x*c-$L)/($l))]
     end)
 
     push!(p.lastpt, (c+r*cos(α0-π/2+α), d+r*sin(α0-π/2+α)))
@@ -99,9 +147,9 @@ function param(p::Path)
     α = p.angle[end]
     push!(expr.args, quote
         (x >= 1) &&
-            return ($a+(x*c-$L)*cos($α), $b+(x*c-$L)*sin($α))
+            return [$a+(x*c-$L)*cos($α), $b+(x*c-$L)*sin($α)]
         (x < 0) &&
-            return ($a0+(x*c)*cos($α0), $b0+(x*c)*sin($α0))
+            return [$a0+(x*c)*cos($α0), $b0+(x*c)*sin($α0)]
     end)
 
     # Return our parametric function
@@ -125,7 +173,7 @@ Keyword arguments give a `layer` and `datatype` (default to 0),
 a `start` and `stop` point in range [0,1] to draw only part of the path,
 as well as number of `segments` (defaults to 100).
 """
-function render(p::Path, s::Style, name="main"; layer::Real=0, datatype::Real=0,
+function render(p::Path, s::PathStyle, name="main"; layer::Real=0, datatype::Real=0,
         start=0.0, stop=1.0, segments=100)
     stop <= start && error("Check start and stop arguments.")
     f = param(p)
@@ -135,7 +183,7 @@ function render(p::Path, s::Style, name="main"; layer::Real=0, datatype::Real=0,
     last = start
     first = true
     c = cell(name)
-    gp = gdspy.Path(width(s,start), f(0.0), number_of_paths=paths(s),
+    gp = gdspy.Path(width(s,start), (0.0,0.0), number_of_paths=paths(s),
         distance=distance(s,start))
     for t in linspace(start,stop,segments+1)
         if first
@@ -148,7 +196,7 @@ function render(p::Path, s::Style, name="main"; layer::Real=0, datatype::Real=0,
             final_distance=distance(s,t),
             layer=layer, datatype=datatype)
         c[:add](gp)
-        gp = gdspy.Path(width(s,t), f(0.0), number_of_paths=paths(s),
+        gp = gdspy.Path(width(s,t), (0.0,0.0), number_of_paths=paths(s),
             distance=distance(s,t))
         last = t
     end
