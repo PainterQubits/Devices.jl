@@ -4,7 +4,7 @@ using ForwardDiff
 import Devices: gdspy
 import Devices: render
 import Devices.Paths
-using Devices.Paths: Path, straight, turn
+using Devices.Paths: Path, straight!, turn!
 
 export Rectangle
 export Plain
@@ -58,14 +58,14 @@ function render(r::Rectangle, s::Rounded, name="main";
         layer=layer, datatype=datatype)
     c[:add](gr)
     p = Path((r.llx+rad,r.lly+rad/2))
-    straight(p, r.urx-r.llx-2*rad)
-    turn(p, π/2, rad/2)
-    straight(p, r.ury-r.lly-2*rad)
-    turn(p, π/2, rad/2)
-    straight(p, r.urx-r.llx-2*rad)
-    turn(p, π/2, rad/2)
-    straight(p, r.ury-r.lly-2*rad)
-    turn(p, π/2, rad/2)
+    straight!(p, r.urx-r.llx-2*rad)
+    turn!(p, π/2, rad/2)
+    straight!(p, r.ury-r.lly-2*rad)
+    turn!(p, π/2, rad/2)
+    straight!(p, r.urx-r.llx-2*rad)
+    turn!(p, π/2, rad/2)
+    straight!(p, r.ury-r.lly-2*rad)
+    turn!(p, π/2, rad/2)
     render(p, Paths.Trace(s.r), name, layer=layer, datatype=datatype)
 end
 

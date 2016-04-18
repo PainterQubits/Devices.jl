@@ -38,15 +38,18 @@ export interdigit
 
 function render end
 
+include("Points.jl")
+import .Points: Point, getx, gety
+
 include("Paths.jl")
-import .Paths: Path, aim, param, preview, straight, turn
+import .Paths: Path, param, preview, launch!, straight!, turn!
 export Paths
 export Path
-export aim
 export param
 export preview
-export straight
-export turn
+export launch!
+export straight!
+export turn!
 
 include("Rectangles.jl")
 import .Rectangles: Rectangle
