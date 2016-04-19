@@ -66,11 +66,15 @@ of paths rendered by gdspy.
 """
 function width end
 
+"""
+`direction(p::Function, t)`
+
+For some parameteric function `p(t)↦Point(x(t),y(t))`, returns the angle at
+which the path is pointing for a given `t`.
+"""
 function direction(p::Function, t)
-    fx(t) = p(t)[1]
-    fy(t) = p(t)[2]
-    fx′ = derivative(fx, t)
-    fy′ = derivative(fy, t)
+    f′ = gradient(p, t)
+    fx′,fy′ = getx(f′),gety(f′)
     if !(fx′ ≈ 0)
         atan(fy′/fx′)
     else
@@ -84,19 +88,26 @@ function direction(p::Function, t)
     end
 end
 
-"How to draw along the path."
+"""
+`abstract Style`
+
+How to render a given path segment.
+"""
 abstract Style
 
 divs(s::Style) = s.divs
 
 """
-Two adjacent traces to form a coplanar waveguide.
+`type CPW <: Style`
 
-- `trace`: center conductor width
-- `gap`: distance between center conductor edges and ground plane
+Two adjacent traces can form a coplanar waveguide.
+
+- `trace::Function`: center conductor width.
+- `gap::Function`: distance between center conductor edges and ground plane
+- `divs::Int`: number of segments to render. Increase if you see artifacts.
 
 May need to be inverted with respect to a ground plane,
- depending on how the pattern is written.
+depending on how the pattern is written.
 """
 type CPW <: Style
     trace::Function
@@ -116,9 +127,10 @@ width(s::CPW, t) = s.gap(t)
 """
 `type Trace <: Style`
 
-Single trace.
+Simple, single trace.
 
-- `width`: trace width
+- `width::Function`: trace width.
+- `divs::Int`: number of segments to render. Increase if you see artifacts.
 """
 type Trace <: Style
     width::Function
@@ -132,11 +144,25 @@ extent(s::Trace, t) = s.width(t)/2
 paths(::Trace) = 1
 width(s::Trace, t) = s.width(t)
 
-"Segment of a path."
-abstract Segment{T<:AbstractFloat}
-"First point of a segment."
+"""
+`abstract Segment{T<:Real}`
+
+Path segment in the plane.
+"""
+abstract Segment{T<:Real}
+
+"""
+`firstpoint{T}(s::Segment{T})`
+
+Return the first point in a segment.
+"""
 firstpoint{T}(s::Segment{T}) = s.f(0.0)::Point{T}
-"Last point of a segment."
+
+"""
+`lastpoint{T}(s::Segment{T})`
+
+Return the last point in a segment.
+"""
 lastpoint{T}(s::Segment{T}) = s.f(1.0)::Point{T}
 
 """
@@ -219,9 +245,19 @@ Path{T<:Real}(origin::Tuple{T,T}) =
 Path{T<:Real}(origin::Tuple{T,T}, α0::Real) =
     Path(Point(float(origin[1]),float(origin[2])), α0)
 
-"Physical length of a path."
+"""
+`pathlength(p::Path)`
+
+Physical length of a path. Note that `length` will return the number of
+segments in a path, not the physical length.
+"""
 pathlength(p::Path) = mapreduce(length, +, p.segments)
 
+"""
+`firstangle(p::Path)`
+
+First angle of a path.
+"""
 function firstangle(p::Path)
     if isempty(p)
         p.α0
@@ -230,6 +266,11 @@ function firstangle(p::Path)
     end
 end
 
+"""
+`lastangle(p::Path)`
+
+Last angle of a path.
+"""
 function lastangle(p::Path)
     if isempty(p)
         p.α0
@@ -238,6 +279,11 @@ function lastangle(p::Path)
     end
 end
 
+"""
+`firstpoint(p::Path)`
+
+First point of a path.
+"""
 function firstpoint(p::Path)
     if isempty(p)
         p.origin
@@ -246,6 +292,11 @@ function firstpoint(p::Path)
     end
 end
 
+"""
+`lastpoint(p::Path)`
+
+Last point of a path.
+"""
 function lastpoint(p::Path)
     if isempty(p)
         p.origin
@@ -254,6 +305,11 @@ function lastpoint(p::Path)
     end
 end
 
+"""
+`firststyle(p::Path)`
+
+Style of the first segment of a path.
+"""
 function firststyle(p::Path)
     if isempty(p)
         p.style0
@@ -262,6 +318,11 @@ function firststyle(p::Path)
     end
 end
 
+"""
+`laststyle(p::Path)`
+
+Style of the last segment of a path.
+"""
 function laststyle(p::Path)
     if isempty(p)
         p.style0
@@ -360,6 +421,26 @@ function turn!(p::Path, α::Real, r::Real, sty::Style=laststyle(p))
     push!(p, (turn,sty))
 end
 
+"""
+`launch!(p::Path; extround=5, trace0=300, trace1=5,
+        gap0=150, gap1=2.5, flatlen=250, taperlen=250)`
+
+Add a launcher to the path. Somewhat intelligent in that the launcher will
+reverse it's orientation depending on if it is at the start or the end of a path.
+
+There are numerous keyword arguments to control the behavior:
+
+- `extround`: Rounding radius of the outermost corners; should be less than `gap0`.
+- `trace0`: Bond pad width.
+- `trace1`: Center trace width of next CPW segment.
+- `gap0`: Gap width adjacent to bond pad.
+- `gap1`: Gap width of next CPW segment.
+- `flatlen`: Bond pad length.
+- `taperlen`: Length of taper region between bond pad and next CPW segment.
+
+Returns a `Style` object suitable for continuity with the next segment.
+Ignore the returned style if you are terminating a path.
+"""
 function launch!(p::Path; extround=5, trace0=300, trace1=5,
         gap0=150, gap1=2.5, flatlen=250, taperlen=250)
     if isempty(p)
@@ -443,9 +524,13 @@ end
 `preview(p::Path, pts::Integer=100; kw...)`
 
 Plot the path using `Plots.jl`, enforcing square aspect ratio of the x and y limits.
-If using the UnicodePlots backend, pass size=(60,30) for a nice display.
+If using the UnicodePlots backend, pass keyword argument `size=(60,30)`
+or a similar ratio for display with proper aspect ratio.
 
-We use `xlims` and `ylims` keyword arguments in this function but all other valid
+No styling of the path is shown, only the abstract path in the plane. A launcher
+will look no different than a straight line, for instance.
+
+We reserve `xlims` and `ylims` keyword arguments but all other valid Plots.jl
 keyword arguments are passed along to the plotting function.
 """
 function preview(p::Path, pts::Integer=100; kw...)

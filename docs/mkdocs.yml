@@ -26,4 +26,5 @@ docs_dir: 'build'
 
 pages:
 - Home: index.md
+- API: api.md
 - 'License': LICENSE.md

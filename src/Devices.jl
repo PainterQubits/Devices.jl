@@ -40,6 +40,7 @@ function render end
 
 include("Points.jl")
 import .Points: Point, getx, gety
+export Points
 export Point, getx, gety
 
 include("Paths.jl")
