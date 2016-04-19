@@ -1,6 +1,21 @@
 module Paths
 
-import Base: length
+import Base:
+    start,
+    done,
+    next,
+    zip,
+    enumerate,
+    rest,
+    take,
+    drop,
+    cycle,
+    isempty,
+    empty!,
+    length,
+    endof,
+    size
+
 using ForwardDiff
 import Plots
 import Devices: gdspy
@@ -63,6 +78,8 @@ end
 "How to draw along the path."
 abstract Style
 
+divs(s::Style) = s.divs
+
 """
 Two adjacent traces to form a coplanar waveguide.
 
@@ -75,10 +92,12 @@ May need to be inverted with respect to a ground plane,
 type CPW <: Style
     trace::Function
     gap::Function
+    divs::Int
 end
-CPW(trace::Real, gap::Real) = CPW(x->float(trace), x->float(gap))
-CPW(trace::Function, gap::Real) = CPW(trace, x->float(gap))
-CPW(trace::Real, gap::Function) = CPW(x->float(trace), gap)
+CPW(trace::Real, gap::Real) = CPW(x->float(trace), x->float(gap), 1)
+CPW(trace::Function, gap::Function) = CPW(trace, gap, 100)
+CPW(trace::Function, gap::Real, divs::Integer=100) = CPW(trace, x->float(gap), divs)
+CPW(trace::Real, gap::Function, divs::Integer=100) = CPW(x->float(trace), gap, divs)
 
 distance(s::CPW, t) = s.gap(t)+s.trace(t)
 extent(s::CPW, t) = s.trace(t)/2 + s.gap(t)
@@ -92,8 +111,11 @@ Single trace.
 """
 type Trace <: Style
     width::Function
+    divs::Int
 end
-Trace(width::Real) = Trace(x->float(width))
+Trace(width::Function) = Trace(width, 100)
+Trace(width::Real) = Trace(x->float(width), 1)
+
 
 distance(::Trace, t) = 0.0
 extent(s::Trace, t) = s.width(t)/2
@@ -135,7 +157,7 @@ firstangle(s::Turn) = s.firstangle
 lastangle(s::Turn) = s.lastangle
 
 "Unstyled path. Can describe any path in the plane."
-type Path{T<:AbstractFloat}
+type Path{T<:AbstractFloat} <: AbstractArray{Segment{T},1}
     firstpt::Tuple{T,T}
     firstangle::Real
     segments::Array{Segment{T},1}
@@ -147,11 +169,26 @@ Path{T<:Real}(start::Tuple{T,T}) =
 Path{T<:Real}(start::Tuple{T,T}, angle::Real) =
     Path((float(start[1], float[start[2]])), angle)
 
-"Total length of a path."
-length(p::Path) = mapreduce(length, +, p.segments)
+"Physical length of a path."
+pathlength(p::Path) = mapreduce(length, +, p.segments)
+length(p::Path) = length(p.segments)
+start(p::Path) = start(p.segments)
+done(p::Path, state) = done(p.segments, state)
+next(p::Path, state) = next(p.segments, state)
+zip(paths::Path...) = zip(map(x->x.segments, paths))
+enumerate(p::Path) = enumerate(p.segments)
+rest(p::Path, state) = rest(p.segments, state)
+take(p::Path, n) = take(p.segments, n)
+drop(p::Path, n) = drop(p.segments, n)
+cycle(p::Path) = cycle(p.segments)
+isempty(p::Path) = isempty(p.segments)
+empty!(p::Path) = empty!(p.segments)
+length(p::Path) = length(p.segments)
+endof(p::Path) = endof(p.segments)
+size(p::Path) = size(p.segments)
 
 function firstangle(p::Path)
-    if length(p.segments) == 0
+    if length(p) == 0
         p.firstangle
     else
         firstangle(p.segments[1])
@@ -159,7 +196,7 @@ function firstangle(p::Path)
 end
 
 function lastangle(p::Path)
-    if length(p.segments) == 0
+    if length(p) == 0
         p.firstangle
     else
         lastangle(p.segments[end])
@@ -167,7 +204,7 @@ function lastangle(p::Path)
 end
 
 function firstpoint(p::Path)
-    if length(p.segments) == 0
+    if length(p) == 0
         p.firstpt
     else
         firstpoint(p.segments[1])
@@ -175,7 +212,7 @@ function firstpoint(p::Path)
 end
 
 function lastpoint(p::Path)
-    if length(p.segments) == 0
+    if length(p) == 0
         p.firstpt
     else
         lastpoint(p.segments[end])
@@ -222,41 +259,33 @@ function turn!(p::Path, α::Real, r::Real)
 end
 
 function launch!(p::Path; extround=5, trace0=300, trace1=5, gap0=150, gap1=2.5, flatlen=250, taperlen=250)
-    if length(p.segments) == 0
-        starting = true
+
+    if length(p) == 0
+        flip(f::Function) = f
     else
-        starting = false
+        flip(f::Function) = t->f(1.0-t)
     end
 
-    L = gap0+flatlen+taperlen
-    straight!(p, L)
+    s0 = CPW(0.0, flip(t->(trace0/2+gap0-extround+
+        sqrt(extround^2-(t*extround-extround)^2))))
+    s1 = CPW(0.0, trace0/2+gap0)
+    s2 = CPW(trace0, gap0)
+    s3 = CPW(flip(t->(trace0 + t * (trace1 - trace0))),
+        flip(t->(gap0 + t * (gap1 - gap0))),1)
 
-    trace(t) = begin
-        if 0.0 <= t < gap0/L
-            return 0.0
-        elseif gap0/L <= t < (flatlen+gap0)/L
-            return trace0
-        else # (flatlen+gap0)/L <= t < 1.0
-            return trace0 + (t*L-(flatlen+gap0))/taperlen * (trace1 - trace0)
-        end
-    end
-    gap(t) = begin
-        if 0.0 <= t < extround/L
-            return trace0/2+gap0-extround+sqrt(extround^2-(t*L-extround)^2)
-        elseif extround/L <= t < gap0/L
-            return trace0/2+gap0
-        elseif gap0/L <= t < (flatlen+gap0)/L
-            return gap0
-        else # (flatlen+gap)/L <= t < 1.0
-            return gap0 + (t*L-(flatlen+gap0))/taperlen * (gap1 - gap0)
-        end
-    end
-
-    if starting
-        CPW(trace,gap)
+    if length(p) == 0
+        args = [extround, gap0-extround, flatlen, taperlen]
+        styles = Style[s0, s1, s2, s3]
     else
-        CPW(t->trace(1.0-t),t->gap(1.0-t))
+        args = [taperlen, flatlen, gap0-extround, extround]
+        styles = Style[s3, s2, s1, s0]
     end
+
+    for x in args
+        straight!(p, x)
+    end
+
+    styles
 end
 
 """
@@ -266,16 +295,16 @@ Return a parametric function over the domain [0,1] that represents the path.
 """
 function param(p::Path)
 
-    if length(p.segments) == 0
+    if length(p) == 0
         error("Cannot parameterize an empty path.")
     end
 
     # Build up our piecewise parametric function
     f = Expr(:(->), :t, Expr(:block))
 
-    L = length(p)
+    L = pathlength(p)
     l0 = zero(length(p.segments[1]))
-    for i in 1:length(p.segments)
+    for i in 1:length(p)
         fn = p.segments[i].f
         l1 = l0 + length(p.segments[i])
         push!(f.args[2].args, quote
@@ -371,6 +400,37 @@ function render(p::Path, s::Style; name="main", layer::Real=0, datatype::Real=0,
         gp = gdspy.Path(width(s,t), (0.0,0.0), number_of_paths=paths(s),
             distance=distance(s,t))
         last = t
+    end
+end
+
+function render(p::Path, styles::AbstractArray{Style,1}; name="main", layer::Real=0, datatype::Real=0)
+
+    c = cell(name)
+    s1 = styles[1]
+    for (segment,s) in zip(p, styles)
+        f = segment.f
+        fx(t) = f(t)[1]
+        fy(t) = f(t)[2]
+        g(t) = (derivative(fx,t), derivative(fy,t))
+        last = 0.0
+        first = true
+        gp = gdspy.Path(width(s, 0.0), (0.0, 0.0), number_of_paths=paths(s),
+            distance=distance(s, 0.0))
+        for t in linspace(0.0,1.0,divs(s)+1)
+            if first
+                first = false
+                continue
+            end
+            gp[:parametric](x->f(last+x*(t-last)),
+                curve_derivative=x->g(last+x*(t-last)),
+                final_width=width(s,t),
+                final_distance=distance(s,t),
+                layer=layer, datatype=datatype)
+            c[:add](gp)
+            gp = gdspy.Path(width(s,t), (0.0,0.0), number_of_paths=paths(s),
+                distance=distance(s,t))
+            last = t
+        end
     end
 end
 
