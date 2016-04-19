@@ -43,10 +43,12 @@ import .Points: Point, getx, gety
 export Point, getx, gety
 
 include("Paths.jl")
-import .Paths: Path, param, preview, launch!, straight!, turn!
+import .Paths: Path, adjust!, param, pathlength, preview, launch!, straight!, turn!
 export Paths
 export Path
+export adjust!
 export param
+export pathlength
 export preview
 export launch!
 export straight!
