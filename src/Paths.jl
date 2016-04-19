@@ -1,5 +1,7 @@
 module Paths
 
+using ..Points
+
 import Base:
     start,
     done,
@@ -116,7 +118,6 @@ end
 Trace(width::Function) = Trace(width, 100)
 Trace(width::Real) = Trace(x->float(width), 1)
 
-
 distance(::Trace, t) = 0.0
 extent(s::Trace, t) = s.width(t)/2
 paths(::Trace) = 1
@@ -125,9 +126,9 @@ width(s::Trace, t) = s.width(t)
 "Segment of a path."
 abstract Segment{T<:AbstractFloat}
 "First point of a segment."
-firstpoint(s::Segment) = s.f(0.0)
+firstpoint{T}(s::Segment{T}) = s.f(0.0)::Point{T}
 "Last point of a segment."
-lastpoint(s::Segment) = s.f(1.0)
+lastpoint{T}(s::Segment{T}) = s.f(1.0)::Point{T}
 
 "Straight segment."
 immutable Straight{T<:AbstractFloat} <: Segment{T}
@@ -158,16 +159,16 @@ lastangle(s::Turn) = s.lastangle
 
 "Unstyled path. Can describe any path in the plane."
 type Path{T<:AbstractFloat} <: AbstractArray{Segment{T},1}
-    firstpt::Tuple{T,T}
+    firstpt::Point{T}
     firstangle::Real
     segments::Array{Segment{T},1}
 end
-Path{T<:AbstractFloat}(start::Tuple{T,T}=(0.0,0.0), angle::Real=0.0) =
+Path{T<:AbstractFloat}(start::Point{T}=Point(0.0,0.0), angle::Real=0.0) =
     Path{T}(start, angle, Segment{T}[])
 Path{T<:Real}(start::Tuple{T,T}) =
-    Path((float(start[1], float[start[2]])))
+    Path(Point(float(start[1]),float(start[2])))
 Path{T<:Real}(start::Tuple{T,T}, angle::Real) =
-    Path((float(start[1], float[start[2]])), angle)
+    Path(Point(float(start[1]),float(start[2])), angle)
 
 "Physical length of a path."
 pathlength(p::Path) = mapreduce(length, +, p.segments)
@@ -229,7 +230,7 @@ velocity. Uses a parametric function over the domain [0,l]:
 function straight!(p::Path, l::Real)
     a,b = lastpoint(p)
     α = lastangle(p)
-    s = Straight(t->[a+t*l*cos(α),b+t*l*sin(α)], float(l), α)
+    s = Straight(t->Point(a+t*l*cos(α),b+t*l*sin(α)), float(l), α)
     push!(p.segments, s)
 end
 
@@ -254,7 +255,7 @@ function turn!(p::Path, α::Real, r::Real)
     # Figure out center of curve.
     c,d = a+r*cos(α0+sign(α)*π/2), b+r*sin(α0+sign(α)*π/2)
 
-    turn = Turn(t->[c+r*cos(α0-π/2+α*t), d+r*sin(α0-π/2+α*t)], l, α0, α0+α)
+    turn = Turn(t->Point(c+r*cos(α0-π/2+α*t), d+r*sin(α0-π/2+α*t)), l, α0, α0+α)
     push!(p.segments, turn)
 end
 
@@ -317,21 +318,21 @@ function param(p::Path)
     g = p.segments[1].f
     h = p.segments[end].f
 
-    gx(t) = g(t)[1]
-    gy(t) = g(t)[2]
-    hx(t) = h(t)[1]
-    hy(t) = h(t)[2]
+    gx(t) = getx(g(t))
+    gy(t) = gety(g(t))
+    hx(t) = getx(h(t))
+    hy(t) = gety(h(t))
     D0x, D0y = derivative(gx,0.0), derivative(gy,0.0)
     D1x, D1y = derivative(hx,1.0), derivative(hy,1.0)
 
-    a0,b0 = firstpoint(p)
-    a,b = lastpoint(p)
+    a0 = firstpoint(p)
+    a = lastpoint(p)
     l0,l1 = length(p.segments[1]), length(p.segments[end])
     push!(f.args[2].args, quote
         (t >= 1.0) &&
-            return [$a+$D1x*(t-1)*$(L/l1), $b+$D1y*(t-1)*$(L/l1)]
+            return $a+Point($D1x*(t-1)*$(L/l1), $D1y*(t-1)*$(L/l1))
         (t < 0.0) &&
-            return [$a0+$D0x*t*$(L/l0), $b0+$D0y*t*$(L/l0)]
+            return $a0+Point($D0x*t*$(L/l0), $D0y*t*$(L/l0))
     end)
 
     # Return our parametric function
@@ -350,8 +351,8 @@ keyword arguments are passed along to the plotting function.
 function preview(p::Path, pts::Integer=100; kw...)
     d = 0:(1/(pts-1)):1
     f = param(p)
-    fx(t) = f(t)[1]
-    fy(t) = f(t)[2]
+    fx(t) = getx(f(t))
+    fy(t) = gety(f(t))
     xv,yv = map(fx,d), map(fy,d)
     xmin, xmax = minimum(xv), maximum(xv)
     ymin, ymax = minimum(yv), maximum(yv)
@@ -378,13 +379,11 @@ function render(p::Path, s::Style; name="main", layer::Real=0, datatype::Real=0,
         start=0.0, stop=1.0, segments=100)
     stop <= start && error("Check start and stop arguments.")
     f = param(p)
-    fx(t) = f(t)[1]
-    fy(t) = f(t)[2]
-    g(t) = (derivative(fx,t), derivative(fy,t))
+    g(t) = gradient(f,t)
     last = start
     first = true
     c = cell(name)
-    gp = gdspy.Path(width(s,start), (0.0,0.0), number_of_paths=paths(s),
+    gp = gdspy.Path(width(s,start), Point(0.0,0.0), number_of_paths=paths(s),
         distance=distance(s,start))
     for t in linspace(start,stop,segments+1)
         if first
@@ -397,7 +396,7 @@ function render(p::Path, s::Style; name="main", layer::Real=0, datatype::Real=0,
             final_distance=distance(s,t),
             layer=layer, datatype=datatype)
         c[:add](gp)
-        gp = gdspy.Path(width(s,t), (0.0,0.0), number_of_paths=paths(s),
+        gp = gdspy.Path(width(s,t), Point(0.0,0.0), number_of_paths=paths(s),
             distance=distance(s,t))
         last = t
     end
@@ -409,12 +408,10 @@ function render(p::Path, styles::AbstractArray{Style,1}; name="main", layer::Rea
     s1 = styles[1]
     for (segment,s) in zip(p, styles)
         f = segment.f
-        fx(t) = f(t)[1]
-        fy(t) = f(t)[2]
-        g(t) = (derivative(fx,t), derivative(fy,t))
+        g(t) = gradient(f,t)
         last = 0.0
         first = true
-        gp = gdspy.Path(width(s, 0.0), (0.0, 0.0), number_of_paths=paths(s),
+        gp = gdspy.Path(width(s, 0.0), Point(0.0,0.0), number_of_paths=paths(s),
             distance=distance(s, 0.0))
         for t in linspace(0.0,1.0,divs(s)+1)
             if first
@@ -427,7 +424,7 @@ function render(p::Path, styles::AbstractArray{Style,1}; name="main", layer::Rea
                 final_distance=distance(s,t),
                 layer=layer, datatype=datatype)
             c[:add](gp)
-            gp = gdspy.Path(width(s,t), (0.0,0.0), number_of_paths=paths(s),
+            gp = gdspy.Path(width(s,t), Point(0.0,0.0), number_of_paths=paths(s),
                 distance=distance(s,t))
             last = t
         end
