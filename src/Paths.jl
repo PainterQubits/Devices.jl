@@ -3,6 +3,7 @@ module Paths
 using ..Points
 
 import Base:
+    convert,
     start,
     done,
     next,
@@ -26,8 +27,9 @@ import Base:
 
 using ForwardDiff
 import Plots
-import Devices: gdspy
+import Devices
 import Devices: cell, render
+gdspy() = Devices._gdspy
 
 export Path
 
@@ -186,8 +188,10 @@ type Straight{T<:Real} <: Segment{T}
         s
     end
 end
-Straight{T<:Real}(l::Real, origin::Point{T}, α0::Real) =
+Straight{T<:Real}(l::T, origin::Point{Real}=Point(0.0,0.0), α0::Real=0.0) =
     Straight{T}(l, origin, α0)
+convert{T<:Real}(::Type{Straight{T}}, x::Straight) =
+    Straight(T(x.l), convert(Point{T},x.origin), x.α0)
 
 length(s::Straight) = s.l
 firstangle(s::Straight) = s.α0
@@ -205,7 +209,7 @@ The center of the circle is given by:
 
 The parametric function over `t ∈ [0,1]` describing the turn is given by:
 
-`t -> cen + Point(r*cos(α0-π/2+α*t), r*sin(α0-π/2+α*t))`
+`t -> cen + Point(r*cos(α0-sign(α)*π/2+α*t), r*sin(α0-sign(α)*π/2+α*t))`
 """
 type Turn{T<:Real} <: Segment{T}
     α::Real
@@ -218,13 +222,15 @@ type Turn{T<:Real} <: Segment{T}
         s = new(α, r, origin, α0)
         s.f = t->begin
             cen = s.origin + Point(s.r*cos(s.α0+sign(s.α)*π/2), s.r*sin(s.α0+sign(s.α)*π/2))
-            cen + Point(s.r*cos(s.α0-π/2+s.α*t), s.r*sin(s.α0-π/2+s.α*t))
+            cen + Point(s.r*cos(s.α0-sign(α)*π/2+s.α*t), s.r*sin(s.α0-sign(α)*π/2+s.α*t))
         end
         s
     end
 end
-Turn{T<:Real}(α::Real, r::Real, origin::Point{T}, α0::Real) =
+Turn{T<:Real}(α::Real, r::T, origin::Point{Real}=Point(0.0,0.0), α0::Real=0.0) =
     Turn{T}(α, r, origin, α0)
+convert{T<:Real}(::Type{Turn{T}}, x::Turn) =
+    Turn(x.α, T(x.r), convert(Point{T}, x.origin), x.α0)
 
 length(s::Turn) = s.r*s.α
 firstangle(s::Turn) = s.α0
@@ -376,6 +382,15 @@ function setindex!(p::Path, v::Tuple{Segment,Style}, i::Integer)
     adjust!(p, i)
 end
 
+function setindex!(p::Path, v::Segment, i::Integer)
+    p.segments[i] = v
+    adjust!(p, i)
+end
+
+function setindex!(p::Path, v::Style, i::Integer)
+    p.styles[i] = v
+end
+
 for x in [:push!, :unshift!]
     @eval function ($x)(p::Path, segsty::Tuple{Segment, Style})
         ($x)(p.segments, segsty[1])
@@ -401,10 +416,10 @@ shift!(p::Path) = shift!(p.segments), shift!(p.styles)
 
 Extend a path `p` straight by length `l` in the current direction.
 """
-function straight!(p::Path, l::Real, sty::Style=laststyle(p))
+function straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=laststyle(p))
     origin = lastpoint(p)
     α = lastangle(p)
-    s = Straight(l, origin, α)
+    s = Straight{T}(l, origin, α)
     push!(p, (s,sty))
 end
 
@@ -414,10 +429,10 @@ end
 Turn a path `p` by angle `α` with a turning radius `r` at unit velocity in the
 path direction. Positive angle turns left.
 """
-function turn!(p::Path, α::Real, r::Real, sty::Style=laststyle(p))
+function turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=laststyle(p))
     origin = lastpoint(p)
     α0 = lastangle(p)
-    turn = Turn(α, r, origin, α0)
+    turn = Turn{T}(α, r, origin, α0)
     push!(p, (turn,sty))
 end
 
@@ -568,7 +583,7 @@ function render(p::Path; name="main", layer::Int=0, datatype::Int=0)
         g(t) = gradient(f,t)
         last = 0.0
         first = true
-        gp = gdspy.Path(width(s, 0.0), Point(0.0,0.0), number_of_paths=paths(s),
+        gp = gdspy()[:Path](width(s, 0.0), Point(0.0,0.0), number_of_paths=paths(s),
             distance=distance(s, 0.0))
         for t in linspace(0.0,1.0,divs(s)+1)
             if first
@@ -581,7 +596,7 @@ function render(p::Path; name="main", layer::Int=0, datatype::Int=0)
                 final_distance=distance(s,t),
                 layer=layer, datatype=datatype)
             c[:add](gp)
-            gp = gdspy.Path(width(s,t), Point(0.0,0.0), number_of_paths=paths(s),
+            gp = gdspy()[:Path](width(s,t), Point(0.0,0.0), number_of_paths=paths(s),
                 distance=distance(s,t))
             last = t
         end

@@ -1,5 +1,6 @@
 module Points
 
+import Base.convert
 import FixedSizeArrays: FixedVectorNoTuple
 import PyCall.PyObject
 export Point
@@ -17,6 +18,7 @@ immutable Point{T<:Real} <: FixedVectorNoTuple{2,T}
 end
 Point{T<:Real}(x::T,y::T) = Point{T}(x,y)
 Point{S<:Real, T<:Real}(x::S,y::T) = Point{promote_type(x,y)}(x,y)
+convert{T<:Real}(::Type{Point{T}}, p::Point) = Point(T(p.x),T(p.y))
 
 """
 `getx(p::Point)`

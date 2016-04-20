@@ -1,3 +1,4 @@
+__precompile__()
 module Devices
 
 using PyCall
@@ -5,8 +6,17 @@ using ForwardDiff
 import PyPlot
 
 import Base: cell, length, show
-@pyimport numpy
-@pyimport gdspy
+
+const numpy = PyCall.PyNULL()
+const _gdspy = PyCall.PyNULL()
+
+function __init__()
+    copy!(numpy, pyimport("numpy"))
+    copy!(_gdspy, pyimport("gdspy"))
+end
+# @pyimport pyqrcode
+
+gdspy() = Devices._gdspy
 
 const FEATURE_BOUNDING_LAYER = 1
 const CHIP_BOUNDING_LAYER    = 2
@@ -60,6 +70,8 @@ import .Rectangles: Rectangle
 export Rectangles
 export Rectangle
 
+include("Tags.jl")
+
 and(x,y) = x & y
 or(x,y) = x | y
 xor(x,y) = x $ y
@@ -101,7 +113,7 @@ function attach(name::AbstractString, p::Path, s::Paths.Style, t::Real,
         ∠ = α0-π/2
         newx = offset*cos(∠)
         newy = offset*sin(∠)
-        ref = gdspy.CellReference(cell(name), origin=f(t)+[newx,newy],
+        ref = gdspy()[:CellReference](cell(name), origin=f(t)+[newx,newy],
             rotation=∠*180/π)
     else
         ∠ = α0-π/2
@@ -110,7 +122,7 @@ function attach(name::AbstractString, p::Path, s::Paths.Style, t::Real,
         newx = offset*cos(∠)
         newy = offset*sin(∠)
         rot = (α0 + (direction==1 ? π:0))*180/π
-        ref = gdspy.CellReference(cell(name), origin=f(t)+[newx,newy],
+        ref = gdspy()[:CellReference](cell(name), origin=f(t)+[newx,newy],
             rotation=rot)
     end
     newcell[:add](ref)
@@ -121,7 +133,7 @@ Performs a boolean operation.
 """
 function boolean(iterable::AbstractArray, name,
         layer::Integer, datatype::Integer, λ::Function)
-    newp = gdspy.boolean(iterable, λ, layer=layer, datatype=datatype)
+    newp = gdspy()[:boolean](iterable, λ, layer=layer, datatype=datatype)
     c = cell(name)
     c[:add](newp)
 end
@@ -149,12 +161,13 @@ function bounds(name)
     ((x1,y1),(x2,y2))
 end
 
+
 "Return a PyObject representing a cell."
 function cell(name)
-    if haskey(gdspy.Cell[:cell_dict], name)
-        c = gdspy.Cell[:cell_dict][name]
+    if haskey(gdspy()[:Cell][:cell_dict], name)
+        c = gdspy()[:Cell][:cell_dict][name]
     else
-        c = gdspy.Cell(name)
+        c = gdspy()[:Cell](name)
     end
     return c
 end
@@ -162,13 +175,13 @@ end
 "Get polygons from `cell`, `layer`, and `datatype`."
 function get_polygons(name::AbstractString, layer::Integer, datatype::Integer)
     c = cell(name)
-    gdspy.PolygonSet(c[:get_polygons](by_spec=true)[(layer,datatype)])
+    gdspy()[:PolygonSet](c[:get_polygons](by_spec=true)[(layer,datatype)])
 end
 
 "Get all polygons from cell `name`."
 function get_polygons(name::AbstractString)
     c = cell(name)
-    gdspy.PolygonSet(c[:get_polygons]())
+    gdspy()[:PolygonSet](c[:get_polygons]())
 end
 
 """
@@ -178,20 +191,20 @@ Seems a little bit slow. Healing may also be done in Beamer. YMMV.
 function heal(name, layer0, datatype0, newname, layer, datatype)
     plgs = get_polygons(name, layer0, datatype0)
     λ = pyeval("lambda p1: p1")
-    newp = gdspy.boolean([plgs], λ, layer=layer, datatype=datatype)
+    newp = gdspy()[:boolean]([plgs], λ, layer=layer, datatype=datatype)
     c = cell(newname)
     c[:add](newp)
 end
 
 "Launch a LayoutViewer window."
-view() = gdspy.LayoutViewer()
+view() = gdspy()[:LayoutViewer]()
 
 function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, layer=FEATURES_LAYER)
-    c = gdspy.Cell(cellname)
+    c = gdspy()[:Cell](cellname)
 
     for i = 1:npairs
-        c[:add](gdspy.Rectangle((0,(i-1)*2*(width+ygap)), (length,(i-1)*2*(width+ygap)+width), layer=layer))
-        c[:add](gdspy.Rectangle((xgap,(2i-1)*(width+ygap)), (xgap+length,width+(2i-1)*(width+ygap)), layer=layer))
+        c[:add](gdspy()[:Rectangle]((0,(i-1)*2*(width+ygap)), (length,(i-1)*2*(width+ygap)+width), layer=layer))
+        c[:add](gdspy()[:Rectangle]((xgap,(2i-1)*(width+ygap)), (xgap+length,width+(2i-1)*(width+ygap)), layer=layer))
     end
 
     c
