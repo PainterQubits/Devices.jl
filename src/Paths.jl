@@ -23,7 +23,8 @@ import Base:
     push!,
     pop!,
     unshift!,
-    shift!
+    shift!,
+    append!
 
 using ForwardDiff
 import Plots
@@ -41,6 +42,7 @@ export param
 export pathlength
 export preview
 export launch!
+export simplify!
 export straight!
 export turn!
 
@@ -100,6 +102,26 @@ abstract Style
 divs(s::Style) = s.divs
 
 """
+`type Trace <: Style`
+
+Simple, single trace.
+
+- `width::Function`: trace width.
+- `divs::Int`: number of segments to render. Increase if you see artifacts.
+"""
+type Trace <: Style
+    width::Function
+    divs::Int
+end
+Trace(width::Function) = Trace(width, 100)
+Trace(width::Real) = Trace(x->float(width), 1)
+
+distance(::Trace, t) = 0.0
+extent(s::Trace, t) = s.width(t)/2
+paths(::Trace, t...) = 1
+width(s::Trace, t) = s.width(t)
+
+"""
 `type CPW <: Style`
 
 Two adjacent traces can form a coplanar waveguide.
@@ -123,28 +145,21 @@ CPW(trace::Real, gap::Function, divs::Integer=100) = CPW(x->float(trace), gap, d
 
 distance(s::CPW, t) = s.gap(t)+s.trace(t)
 extent(s::CPW, t) = s.trace(t)/2 + s.gap(t)
-paths(::CPW) = 2
+paths(::CPW, t...) = 2
 width(s::CPW, t) = s.gap(t)
 
-"""
-`type Trace <: Style`
-
-Simple, single trace.
-
-- `width::Function`: trace width.
-- `divs::Int`: number of segments to render. Increase if you see artifacts.
-"""
-type Trace <: Style
-    width::Function
+type CompoundStyle <: Style
+    styles::Array{Style,1}
     divs::Int
 end
-Trace(width::Function) = Trace(width, 100)
-Trace(width::Real) = Trace(x->float(width), 1)
 
-distance(::Trace, t) = 0.0
-extent(s::Trace, t) = s.width(t)/2
-paths(::Trace) = 1
-width(s::Trace, t) = s.width(t)
+for x in (:distance, :extent, :paths, :width)
+    @eval function ($x)(s::CompoundStyle, t)
+        idx = Int(ceil(t*length(s.styles)))
+        idx == 0 && (idx+=1)
+        ($x)(s.styles[idx], mod(t*length(s.styles), 1.0))
+    end
+end
 
 """
 `abstract Segment{T<:Real}`
@@ -154,11 +169,11 @@ Path segment in the plane.
 abstract Segment{T<:Real}
 
 """
-`firstpoint{T}(s::Segment{T})`
+`origin{T}(s::Segment{T})`
 
 Return the first point in a segment.
 """
-firstpoint{T}(s::Segment{T}) = s.f(0.0)::Point{T}
+origin{T}(s::Segment{T}) = s.f(0.0)::Point{T}
 
 """
 `lastpoint{T}(s::Segment{T})`
@@ -191,10 +206,13 @@ end
 Straight{T<:Real}(l::T, origin::Point{Real}=Point(0.0,0.0), α0::Real=0.0) =
     Straight{T}(l, origin, α0)
 convert{T<:Real}(::Type{Straight{T}}, x::Straight) =
-    Straight(T(x.l), convert(Point{T},x.origin), x.α0)
+    Straight(T(x.l), convert(Point{T}, x.origin), x.α0)
 
 length(s::Straight) = s.l
-firstangle(s::Straight) = s.α0
+origin(s::Straight) = s.origin
+α0(s::Straight) = s.α0
+setorigin(s::Straight, p::Point) = s.origin = p
+setα0(s::Straight, α0′) = s.α0 = α0′
 lastangle(s::Straight) = s.α0
 
 """
@@ -232,17 +250,50 @@ Turn{T<:Real}(α::Real, r::T, origin::Point{Real}=Point(0.0,0.0), α0::Real=0.0)
 convert{T<:Real}(::Type{Turn{T}}, x::Turn) =
     Turn(x.α, T(x.r), convert(Point{T}, x.origin), x.α0)
 
-length(s::Turn) = s.r*s.α
-firstangle(s::Turn) = s.α0
+length{T<:Real}(s::Turn{T}) = T(s.r*s.α)
+origin(s::Turn) = s.origin
+α0(s::Turn) = s.α0
+setorigin(s::Turn, p::Point) = s.origin = p
+setα0(s::Turn, α0′) = s.α0 = α0′
 lastangle(s::Turn) = s.α0 + s.α
 
+"""
+`type CompoundSegment{T<:Real} <: Segment{T}`
+
+Consider an array of segments as one contiguous segment.
+Useful e.g. for applying styles, uninterrupted over segment changes.
+"""
+type CompoundSegment{T<:Real} <: Segment{T}
+    segments::Array{Segment{T},1}
+    f::Function
+
+    CompoundSegment(segments) = begin
+        s = new(segments)
+        s.f = param(s)
+        s
+    end
+end
+CompoundSegment{T<:Real}(segments::Array{Segment{T},1}) =
+    CompoundSegment{T}(segments)
+
+length(s::CompoundSegment) = pathlength(s.segments)
+origin(s::CompoundSegment) = origin(s.segments[1])
+α0(s::CompoundSegment) = α0(s.segments[1])
+setorigin(s::CompoundSegment, p::Point) = setorigin(s.segments[1], p)
+setα0(s::CompoundSegment, α0′) = setα0(s.segments[1], α0′)
+lastangle(s::CompoundSegment) = lastangle(s.segments[end])
+
 "Unstyled path. Can describe any path in the plane."
-type Path{T<:Real} <: AbstractArray{Segment{T},1}
+type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     origin::Point{T}
     α0::Real
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
+    Path(origin::Point{T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
+        styles::Array{Style,1}) = new(origin, α0, style0, segments, styles)
+    Path(style::Style) =
+        new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
 end
 Path{T<:Real}(origin::Point{T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0)) =
     Path{T}(origin, α0, style0, Segment{T}[], Style[])
@@ -257,18 +308,25 @@ Path{T<:Real}(origin::Tuple{T,T}, α0::Real) =
 Physical length of a path. Note that `length` will return the number of
 segments in a path, not the physical length.
 """
-pathlength(p::Path) = mapreduce(length, +, p.segments)
+pathlength(p::Path) = pathlength(p.segments)
 
 """
-`firstangle(p::Path)`
+`pathlength(p::AbstractArray{Segment})`
+
+Total physical length of segments.
+"""
+pathlength{T<:Real}(parr::AbstractArray{Segment{T},1}) = mapreduce(length, +, parr)
+
+"""
+`α0(p::Path)`
 
 First angle of a path.
 """
-function firstangle(p::Path)
+function α0(p::Path)
     if isempty(p)
         p.α0
     else
-        firstangle(p.segments[1])
+        α0(p.segments[1])
     end
 end
 
@@ -286,15 +344,15 @@ function lastangle(p::Path)
 end
 
 """
-`firstpoint(p::Path)`
+`origin(p::Path)`
 
 First point of a path.
 """
-function firstpoint(p::Path)
+function origin(p::Path)
     if isempty(p)
         p.origin
     else
-        firstpoint(p.segments[1])
+        origin(p.segments[1])
     end
 end
 
@@ -348,15 +406,15 @@ function adjust!(p::Path, n::Integer)
     m = n
     if m == 1
         seg,sty = p[1]
-        seg.origin = p.origin
-        seg.α0 = p.α0
+        setorigin(seg, p.origin)
+        setα0(seg, p.α0)
         m += 1
     end
     for j in m:length(p)
         seg,sty = p[j]
         seg0,sty0 = p[j-1]
-        seg.origin = lastpoint(seg0)
-        seg.α0 = lastangle(seg0)
+        setorigin(seg, lastpoint(seg0))
+        setα0(seg, lastangle(seg0))
     end
 end
 
@@ -412,6 +470,33 @@ pop!(p::Path) = pop!(p.segments), pop!(p.styles)
 shift!(p::Path) = shift!(p.segments), shift!(p.styles)
 
 """
+`append!(p::Path, p′::Path)`
+
+Given paths `p` and `p′`, path `p′` is appended to path `p`.
+The origin and initial angle of the first segment from path `p′` is
+modified to match the last point and last angle of path `p`.
+The segments and styles of path `p′` are deep copied so that `p` and `p′`
+end up with independent `Segment` and `Style` objects.
+"""
+function append!(p::Path, p′::Path)
+    isempty(p′) && return
+    i = length(p)
+    lp, la = lastpoint(p), lastangle(p)
+    append!(p.segments, deepcopy(p′.segments))
+    append!(p.styles, deepcopy(p′.styles))
+    setorigin(p.segments[i+1], lp)
+    setα0(p.segments[i+1], la)
+    adjust!(p, i+1)
+end
+
+function simplify!(p::Path)
+    cseg = CompoundSegment(copy(p.segments))
+    csty = CompoundStyle(copy(p.styles), 100)
+    empty!(p)
+    push!(p, (cseg,csty))
+end
+
+"""
 `straight!(p::Path, l::Real)`
 
 Extend a path `p` straight by length `l` in the current direction.
@@ -426,14 +511,37 @@ end
 """
 `turn!(p::Path, α::Real, r::Real, sty::Style=laststyle(p))`
 
-Turn a path `p` by angle `α` with a turning radius `r` at unit velocity in the
-path direction. Positive angle turns left.
+Turn a path `p` by angle `α` with a turning radius `r` in the current direction.
+Positive angle turns left.
 """
 function turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=laststyle(p))
     origin = lastpoint(p)
     α0 = lastangle(p)
     turn = Turn{T}(α, r, origin, α0)
     push!(p, (turn,sty))
+end
+
+"""
+`turn!(p::Path, s::ASCIIString, r::Real, sty::Style=laststyle(p))`
+
+Turn a path `p` with direction coded by string `s`:
+
+- "l": turn by π/2 (left)
+- "r": turn by -π/2 (right)
+- "lrlrllrrll": do those turns in that order
+"""
+function turn!{T<:Real}(p::Path{T}, s::ASCIIString, r::Real, sty::Style=laststyle(p))
+    for ch in s
+        if ch == 'l'
+            α = π/2
+        elseif ch == 'r'
+            α = -π/2
+        else
+            error("Unrecognizable turn command.")
+        end
+        turn = Turn{T}(α, r, lastpoint(p), lastangle(p))
+        push!(p, (turn,sty))
+    end
 end
 
 """
@@ -488,47 +596,43 @@ function launch!(p::Path; extround=5, trace0=300, trace1=5,
 end
 
 """
-`param(p::Path)`
+`param(p)`
 
 Return a parametric function over the domain [0,1] that represents the path.
 """
-function param(p::Path)
-
-    if length(p) == 0
-        error("Cannot parameterize an empty path.")
-    end
+function param{T<:Real}(c::CompoundSegment{T})
+    isempty(c.segments) && error("Cannot parameterize with zero segments.")
 
     # Build up our piecewise parametric function
     f = Expr(:(->), :t, Expr(:block))
+    push!(f.args[2].args, quote
+        L = pathlength(($c).segments)
+        l0 = zero($T)
+    end)
 
-    L = pathlength(p)
-    l0 = zero(length(p.segments[1]))
-    for i in 1:length(p)
-        fn = p.segments[i].f
-        l1 = l0 + length(p.segments[i])
+    for i in 1:length(c.segments)
         push!(f.args[2].args, quote
-            ($(l0/L) <= t < $(l1/L)) && return ($fn)((t*$L-$l0)/$(l1-l0))
+            fn = (($c).segments)[$i].f
+            l1 = l0 + length((($c).segments)[$i])
+            (l0/L <= t < l1/L) && return (fn)((t*L-l0)/(l1-l0))
+            l0 = l1
         end)
-        l0 = l1
     end
 
-    # For continuity of the derivative.
-    g = p.segments[1].f
-    h = p.segments[end].f
-
-    g′ = gradient(g,0.0)
-    h′ = gradient(h,1.0)
-    D0x, D0y = getx(g′), gety(g′)
-    D1x, D1y = getx(h′), gety(h′)
-
-    a0 = firstpoint(p)
-    a = lastpoint(p)
-    l0,l1 = length(p.segments[1]), length(p.segments[end])
+    # For continuity of the derivative
     push!(f.args[2].args, quote
+        g = (($c).segments)[1].f
+        h = (($c).segments)[end].f
+        g′ = gradient(g,0.0)
+        h′ = gradient(h,1.0)
+        D0x, D0y = getx(g′), gety(g′)
+        D1x, D1y = getx(h′), gety(h′)
+        a0,a = origin((($c).segments)[1]),lastpoint((($c).segments)[end])
+        l0,l1 = length((($c).segments)[1]), length((($c).segments)[end])
         (t >= 1.0) &&
-            return $a+Point($D1x*(t-1)*$(L/l1), $D1y*(t-1)*$(L/l1))
+            return a + Point(D1x*(t-1)*(L/l1), D1y*(t-1)*(L/l1))
         (t < 0.0) &&
-            return $a0+Point($D0x*t*$(L/l0), $D0y*t*$(L/l0))
+            return a0 + Point(D0x*t*(L/l0), D0y*t*(L/l0))
     end)
 
     # Return our parametric function
@@ -583,8 +687,8 @@ function render(p::Path; name="main", layer::Int=0, datatype::Int=0)
         g(t) = gradient(f,t)
         last = 0.0
         first = true
-        gp = gdspy()[:Path](width(s, 0.0), Point(0.0,0.0), number_of_paths=paths(s),
-            distance=distance(s, 0.0))
+        gp = gdspy()[:Path](width(s, 0.0), Point(0.0,0.0),
+            number_of_paths=paths(s, 0.0), distance=distance(s, 0.0))
         for t in linspace(0.0,1.0,divs(s)+1)
             if first
                 first = false
@@ -596,8 +700,8 @@ function render(p::Path; name="main", layer::Int=0, datatype::Int=0)
                 final_distance=distance(s,t),
                 layer=layer, datatype=datatype)
             c[:add](gp)
-            gp = gdspy()[:Path](width(s,t), Point(0.0,0.0), number_of_paths=paths(s),
-                distance=distance(s,t))
+            gp = gdspy()[:Path](width(s,t), Point(0.0,0.0),
+                number_of_paths=paths(s,t), distance=distance(s,t))
             last = t
         end
     end

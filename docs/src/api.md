@@ -36,9 +36,9 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
 ### Path interrogation
 
     {docs}
-    Paths.firstpoint
+    Paths.origin
     Paths.lastpoint
-    Paths.firstangle
+    Paths.α0
     Paths.lastangle
     Paths.firststyle
     Paths.laststyle
