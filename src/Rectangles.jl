@@ -21,7 +21,6 @@ type Rectangle{T<:Real}
 end
 Rectangle{T<:Real}(width::T, height::T) =
     Rectangle{T}(Point(-width/2, -height/2), Point(width/2, height/2))
-Rectangle{T<:Real}(ll::Point{T}, ur::Point{T}) = Rectangle{T}(ll, ur)
 
 width(r::Rectangle) = getx(r.ur)-getx(r.ll)
 height(r::Rectangle) = gety(r.ur)-gety(r.ll)

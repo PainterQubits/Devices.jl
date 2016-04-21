@@ -38,10 +38,11 @@ export CPW
 export Trace
 
 export adjust!
+export launch!
+export meander!
 export param
 export pathlength
 export preview
-export launch!
 export simplify!
 export straight!
 export turn!
@@ -95,11 +96,31 @@ end
 """
 `abstract Style`
 
-How to render a given path segment.
+How to render a given path segment. All styles should implement the following
+methods:
+
+ - `distance`
+ - `extent`
+ - `paths`
+ - `width`
+ - `divs`
 """
 abstract Style
 
-divs(s::Style) = s.divs
+"""
+`abstract Segment{T<:Real}`
+
+Path segment in the plane. All Segment objects should have the implement
+the following methods:
+
+- `length`
+- `origin`
+- `α0`
+- `setorigin!`
+- `setα0!`
+- `lastangle`
+"""
+abstract Segment{T<:Real}
 
 """
 `type Trace <: Style`
@@ -115,6 +136,7 @@ type Trace <: Style
 end
 Trace(width::Function) = Trace(width, 100)
 Trace(width::Real) = Trace(x->float(width), 1)
+divs(s::Trace) = linspace(0.0, 1.0, s.divs+1)
 
 distance(::Trace, t) = 0.0
 extent(s::Trace, t) = s.width(t)/2
@@ -147,40 +169,142 @@ distance(s::CPW, t) = s.gap(t)+s.trace(t)
 extent(s::CPW, t) = s.trace(t)/2 + s.gap(t)
 paths(::CPW, t...) = 2
 width(s::CPW, t) = s.gap(t)
+divs(s::CPW) = linspace(0.0, 1.0, s.divs+1)
 
-type CompoundStyle <: Style
+"""
+`type CompoundStyle{T<:Real} <: Style`
+
+Combines styles together for use with a `CompoundSegment`.
+
+- `segments`: Needed for divs function.
+- `styles`: Array of styles making up the object.
+- `f`: returns tuple of style index and the `t` to use for that
+style's parametric function.
+"""
+type CompoundStyle{T<:Real} <: Style
+    segments::Array{Segment{T},1}
     styles::Array{Style,1}
-    divs::Int
+    f::Function
+
+    CompoundStyle(segments, styles) = begin
+        s = new(segments, styles)
+        s.f = param(s)
+        s
+    end
+end
+CompoundStyle{T<:Real}(segments::AbstractArray{Segment{T},1},
+    styles::AbstractArray{Style,1}) = CompoundStyle{T}(segments, styles)
+
+"""
+`divs{T<:Real}(c::CompoundStyle{T})`
+
+Returns a collection with the values of `t` to use for
+rendering a `CompoundSegment` with this `CompoundStyle`.
+"""
+function divs{T<:Real}(c::CompoundStyle{T})
+    isempty(c.segments) && error("Cannot use divs with zero segments.")
+    length(c.segments) != length(c.styles) &&
+        error("Number of segments and styles do not match.")
+
+    L = pathlength(c.segments)
+    l0 = zero(T)
+    ts = Float64[]
+    for i in 1:length(c.segments)
+        l1 = l0 + length(c.segments[i])
+        # Someone who enjoys thinking about IEEE floating points,
+        # please make this less awful. It seems like the loop runs
+        # approximately powers-of-2 times.
+
+        # Start just past the boundary to pick the right style
+        offset = l0/L + eps(l0/L)
+
+        # Go almost to the next boundary
+        scale = (l1/L-offset)
+        while offset+scale*1.0 >= l1/L
+            scale -= eps(scale)
+        end
+
+        append!(ts, divs(c.styles[i])*scale+offset)
+        l0 = l1
+    end
+    sort!(unique(ts))
+end
+
+function param{T<:Real}(c::CompoundStyle{T})
+    isempty(c.segments) && error("Cannot parameterize with zero segments.")
+    length(c.segments) != length(c.styles) &&
+        error("Number of segments and styles do not match.")
+
+    # Build up our piecewise parametric function
+    f = Expr(:(->), :t, Expr(:block))
+    push!(f.args[2].args, quote
+        L = pathlength(($c).segments)
+        l0 = zero($T)
+    end)
+
+    for i in 1:length(c.segments)
+        push!(f.args[2].args, quote
+            l1 = l0 + length((($c).segments)[$i])
+            (l0/L <= t) &&
+                ($(i == length(c.segments) ? :(<=) : :(<))(t, l1/L)) &&
+                    return $i, (t*L-l0)/(l1-l0)
+            l0 = l1
+        end)
+    end
+
+    # Return our parametric function
+    return eval(f)
 end
 
 for x in (:distance, :extent, :paths, :width)
     @eval function ($x)(s::CompoundStyle, t)
-        idx = Int(ceil(t*length(s.styles)))
-        idx == 0 && (idx+=1)
-        ($x)(s.styles[idx], mod(t*length(s.styles), 1.0))
+        idx, teff = s.f(t)
+        ($x)(s.styles[idx], teff)
     end
 end
 
-"""
-`abstract Segment{T<:Real}`
-
-Path segment in the plane.
-"""
-abstract Segment{T<:Real}
 
 """
 `origin{T}(s::Segment{T})`
 
-Return the first point in a segment.
+Return the first point in a segment (calculated).
 """
 origin{T}(s::Segment{T}) = s.f(0.0)::Point{T}
 
 """
 `lastpoint{T}(s::Segment{T})`
 
-Return the last point in a segment.
+Return the last point in a segment (calculated).
 """
 lastpoint{T}(s::Segment{T}) = s.f(1.0)::Point{T}
+
+"""
+`α0(s::Segment)`
+
+Return the first angle in a segment (calculated).
+"""
+α0(s::Segment) = direction(s.f, 0.0)
+
+"""
+`lastangle(s::Segment)`
+
+Return the last angle in a segment (calculated).
+"""
+lastangle(s::Segment) = direction(s.f, 1.0)
+
+"""
+`length(s::Segment)`
+
+Return the length of a segment (calculated).
+"""
+function length(s::Segment, diag::Bool=false)
+    path = s.f
+    ds(t) = sqrt(dot(gradient(s.f, t), gradient(s.f, t)))
+    val, err = quadgk(ds, 0.0, 1.0)
+    diag && info("Integration estimate: $val")
+    diag && info("Error upper bound estimate: $err")
+    val
+end
 
 """
 `type Straight{T<:Real} <: Segment{T}`
@@ -211,8 +335,21 @@ convert{T<:Real}(::Type{Straight{T}}, x::Straight) =
 length(s::Straight) = s.l
 origin(s::Straight) = s.origin
 α0(s::Straight) = s.α0
-setorigin(s::Straight, p::Point) = s.origin = p
-setα0(s::Straight, α0′) = s.α0 = α0′
+
+"""
+`setorigin!(s::Straight, p::Point)`
+
+Set the origin of a straight segment.
+"""
+setorigin!(s::Straight, p::Point) = s.origin = p
+
+"""
+`setα0!(s::Straight, α0′)`
+
+Set the angle of a straight segment.
+"""
+setα0!(s::Straight, α0′) = s.α0 = α0′
+
 lastangle(s::Straight) = s.α0
 
 """
@@ -250,11 +387,23 @@ Turn{T<:Real}(α::Real, r::T, origin::Point{Real}=Point(0.0,0.0), α0::Real=0.0)
 convert{T<:Real}(::Type{Turn{T}}, x::Turn) =
     Turn(x.α, T(x.r), convert(Point{T}, x.origin), x.α0)
 
-length{T<:Real}(s::Turn{T}) = T(s.r*s.α)
+length{T<:Real}(s::Turn{T}) = T(abs(s.r*s.α))
 origin(s::Turn) = s.origin
 α0(s::Turn) = s.α0
-setorigin(s::Turn, p::Point) = s.origin = p
-setα0(s::Turn, α0′) = s.α0 = α0′
+
+"""
+`setorigin!(s::Turn, p::Point)`
+
+Set the origin of a turn.
+"""
+setorigin!(s::Turn, p::Point) = s.origin = p
+
+"""
+`setα0!(s::Turn, α0′)`
+
+Set the starting angle of a turn.
+"""
+setα0!(s::Turn, α0′) = s.α0 = α0′
 lastangle(s::Turn) = s.α0 + s.α
 
 """
@@ -276,12 +425,29 @@ end
 CompoundSegment{T<:Real}(segments::Array{Segment{T},1}) =
     CompoundSegment{T}(segments)
 
-length(s::CompoundSegment) = pathlength(s.segments)
-origin(s::CompoundSegment) = origin(s.segments[1])
-α0(s::CompoundSegment) = α0(s.segments[1])
-setorigin(s::CompoundSegment, p::Point) = setorigin(s.segments[1], p)
-setα0(s::CompoundSegment, α0′) = setα0(s.segments[1], α0′)
-lastangle(s::CompoundSegment) = lastangle(s.segments[end])
+"""
+`setorigin!(s::CompoundSegment, p::Point)`
+
+Set the origin of a compound segment.
+"""
+function setorigin!(s::CompoundSegment, p::Point)
+    setorigin!(s.segments[1], p)
+    for i in 2:length(s.segments)
+        setorigin!(s.segments[i], lastpoint(s.segments[i-1]))
+    end
+end
+
+"""
+`setα0!(s::CompoundSegment, α0′)`
+
+Set the starting angle of a compound segment.
+"""
+function setα0!(s::CompoundSegment, α0′)
+    setα0!(s.segments[1], α0′)
+    for i in 2:length(s.segments)
+        setα0!(s.segments[i], lastangle(s.segments[i-1]))
+    end
+end
 
 "Unstyled path. Can describe any path in the plane."
 type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
@@ -396,25 +562,25 @@ function laststyle(p::Path)
 end
 
 """
-`adjust!(p::Path, n::Integer)`
+`adjust!(p::Path, n::Integer=1)`
 
 Adjust a path's parametric functions starting from index `n`.
 Used internally whenever segments are inserted into the path.
 """
-function adjust!(p::Path, n::Integer)
+function adjust!(p::Path, n::Integer=1)
     isempty(p) && return
     m = n
     if m == 1
         seg,sty = p[1]
-        setorigin(seg, p.origin)
-        setα0(seg, p.α0)
+        setorigin!(seg, p.origin)
+        setα0!(seg, p.α0)
         m += 1
     end
     for j in m:length(p)
         seg,sty = p[j]
         seg0,sty0 = p[j-1]
-        setorigin(seg, lastpoint(seg0))
-        setα0(seg, lastangle(seg0))
+        setorigin!(seg, lastpoint(seg0))
+        setα0!(seg, lastangle(seg0))
     end
 end
 
@@ -475,25 +641,38 @@ shift!(p::Path) = shift!(p.segments), shift!(p.styles)
 Given paths `p` and `p′`, path `p′` is appended to path `p`.
 The origin and initial angle of the first segment from path `p′` is
 modified to match the last point and last angle of path `p`.
-The segments and styles of path `p′` are deep copied so that `p` and `p′`
-end up with independent `Segment` and `Style` objects.
 """
 function append!(p::Path, p′::Path)
     isempty(p′) && return
     i = length(p)
     lp, la = lastpoint(p), lastangle(p)
-    append!(p.segments, deepcopy(p′.segments))
-    append!(p.styles, deepcopy(p′.styles))
-    setorigin(p.segments[i+1], lp)
-    setα0(p.segments[i+1], la)
+    append!(p.segments, p′.segments)
+    append!(p.styles, p′.styles)
+    setorigin!(p.segments[i+1], lp)
+    setα0!(p.segments[i+1], la)
     adjust!(p, i+1)
+    nothing
 end
 
+"""
+`simplify!(p::Path)`
+
+All segments of a path are turned into a `CompoundSegment` and all
+styles of a path are turned into a `CompoundStyle`. The idea here is:
+
+- Indexing the path becomes more sane when you can combine several path
+segments into one logical element. A launcher would have several indices
+in a path unless you could simplify it.
+- You don't need to think hard about boundaries between straights and turns
+when you want a continuous styling of a very long path.
+"""
 function simplify!(p::Path)
-    cseg = CompoundSegment(copy(p.segments))
-    csty = CompoundStyle(copy(p.styles), 100)
+    segs = copy(p.segments)
+    cseg = CompoundSegment(segs)
+    csty = CompoundStyle(segs, copy(p.styles))
     empty!(p)
     push!(p, (cseg,csty))
+    nothing
 end
 
 """
@@ -506,6 +685,7 @@ function straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=laststyle(p))
     α = lastangle(p)
     s = Straight{T}(l, origin, α)
     push!(p, (s,sty))
+    nothing
 end
 
 """
@@ -519,6 +699,7 @@ function turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=laststyle(p))
     α0 = lastangle(p)
     turn = Turn{T}(α, r, origin, α0)
     push!(p, (turn,sty))
+    nothing
 end
 
 """
@@ -542,6 +723,34 @@ function turn!{T<:Real}(p::Path{T}, s::ASCIIString, r::Real, sty::Style=laststyl
         turn = Turn{T}(α, r, lastpoint(p), lastangle(p))
         push!(p, (turn,sty))
     end
+    nothing
+end
+
+"""
+`meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)`
+
+Alternate between going straight with length `straightlen` and turning
+with radius `r` and angle `α`. Each turn goes the opposite direction of the
+previous. The total length is `len`. Useful for making resonators.
+
+The straight and turn segments are combined into a `CompoundSegment` and
+appended to the path `p`.
+"""
+function meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
+    ratio = len/(straightlen+r*α)
+    nsegs = Int(ceil(ratio))
+
+    p′ = Path{T}(laststyle(p))
+    for pm in take(cycle([1.0,-1.0]), nsegs)
+        straight!(p′, straightlen)
+        turn!(p′, pm*α, r)     # alternates left and right
+    end
+    simplify!(p′)
+
+    fn = p′.segments[1].f
+    p′.segments[1].f = t->fn(t*ratio/ceil(ratio))
+    append!(p, p′)
+    nothing
 end
 
 """
@@ -549,7 +758,7 @@ end
         gap0=150, gap1=2.5, flatlen=250, taperlen=250)`
 
 Add a launcher to the path. Somewhat intelligent in that the launcher will
-reverse it's orientation depending on if it is at the start or the end of a path.
+reverse its orientation depending on if it is at the start or the end of a path.
 
 There are numerous keyword arguments to control the behavior:
 
@@ -566,11 +775,12 @@ Ignore the returned style if you are terminating a path.
 """
 function launch!(p::Path; extround=5, trace0=300, trace1=5,
         gap0=150, gap1=2.5, flatlen=250, taperlen=250)
-    if isempty(p)
-        flip(f::Function) = f
-    else
-        flip(f::Function) = t->f(1.0-t)
-    end
+    flip = f::Function->(isempty(p) ? f : t->f(1.0-t))
+    # if isempty(p)
+    #     flip(f::Function) = f
+    # else
+    #     flip(f::Function) = t->f(1.0-t)
+    # end
 
     s0 = CPW(0.0, flip(t->(trace0/2+gap0-extround+
         sqrt(extround^2-(t*extround-extround)^2))))
@@ -596,9 +806,10 @@ function launch!(p::Path; extround=5, trace0=300, trace1=5,
 end
 
 """
-`param(p)`
+`param{T<:Real}(c::CompoundSegment{T})`
 
-Return a parametric function over the domain [0,1] that represents the path.
+Return a parametric function over the domain [0,1] that represents the
+compound segment.
 """
 function param{T<:Real}(c::CompoundSegment{T})
     isempty(c.segments) && error("Cannot parameterize with zero segments.")
@@ -689,7 +900,7 @@ function render(p::Path; name="main", layer::Int=0, datatype::Int=0)
         first = true
         gp = gdspy()[:Path](width(s, 0.0), Point(0.0,0.0),
             number_of_paths=paths(s, 0.0), distance=distance(s, 0.0))
-        for t in linspace(0.0,1.0,divs(s)+1)
+        for t in divs(s)
             if first
                 first = false
                 continue

@@ -1,5 +1,4 @@
-## Index
-    {index}
+
 
 ## Points
 
@@ -23,8 +22,10 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
 ### Segments
 
     {docs}
+    Paths.Segment
     Paths.Straight
     Paths.Turn
+    Paths.CompoundSegment
 
 ### Styles
 
@@ -32,13 +33,16 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
     Paths.Style
     Paths.Trace
     Paths.CPW
+    Paths.CompoundStyle
 
 ### Path interrogation
 
     {docs}
     Paths.origin
-    Paths.lastpoint
+    Paths.setorigin!
     Paths.α0
+    Paths.setα0!
+    Paths.lastpoint
     Paths.lastangle
     Paths.firststyle
     Paths.laststyle
@@ -47,6 +51,7 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
 
     {docs}
     launch!
+    meander!
     straight!
     turn!
 
@@ -54,6 +59,7 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
 
     {docs}
     preview
+    render
     view
 
 ## Interfacing with gdspy
@@ -63,3 +69,6 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
     Paths.extent
     Paths.paths
     Paths.width
+
+## Index
+    {index}
