@@ -43,7 +43,7 @@ export launch!
 export meander!
 export param
 export pathlength
-export preview
+# export preview
 export simplify!
 export straight!
 export turn!
@@ -527,39 +527,39 @@ function param{T<:Real}(c::CompoundSegment{T})
     return eval(f)
 end
 
-"""
-`preview(p::Path, pts::Integer=100; kw...)`
-
-Plot the path using `Plots.jl`, enforcing square aspect ratio of the x and y limits.
-If using the UnicodePlots backend, pass keyword argument `size=(60,30)`
-or a similar ratio for display with proper aspect ratio.
-
-No styling of the path is shown, only the abstract path in the plane. A launcher
-will look no different than a straight line, for instance.
-
-We reserve `xlims` and `ylims` keyword arguments but all other valid Plots.jl
-keyword arguments are passed along to the plotting function.
-"""
-function preview(p::Path, pts::Integer=100; kw...)
-    d = 0:(1/(pts-1)):1
-    f = param(p)
-    fx(t) = getx(f(t))
-    fy(t) = gety(f(t))
-    xv,yv = map(fx,d), map(fy,d)
-    xmin, xmax = minimum(xv), maximum(xv)
-    ymin, ymax = minimum(yv), maximum(yv)
-    xrange = xmax-xmin
-    yrange = ymax-ymin
-    if xrange == yrange
-        Plots.plot(map(fx,d), map(fy,d), xlims=[xmin,xmax], ylims=[ymin,ymax]; kw...)
-    elseif xrange < yrange
-        ɛ = (yrange-xrange)/2
-        Plots.plot(map(fx,d), map(fy,d), xlims=[xmin-ɛ,xmax+ɛ], ylims=[ymin,ymax]; kw...)
-    else
-        ɛ = (xrange-yrange)/2
-        Plots.plot(map(fx,d), map(fy,d), xlims=[xmin,xmax], ylims=[ymin-ɛ,ymax+ɛ]; kw...)
-    end
-end
+# """
+# `preview(p::Path, pts::Integer=100; kw...)`
+#
+# Plot the path using `Plots.jl`, enforcing square aspect ratio of the x and y limits.
+# If using the UnicodePlots backend, pass keyword argument `size=(60,30)`
+# or a similar ratio for display with proper aspect ratio.
+#
+# No styling of the path is shown, only the abstract path in the plane. A launcher
+# will look no different than a straight line, for instance.
+#
+# We reserve `xlims` and `ylims` keyword arguments but all other valid Plots.jl
+# keyword arguments are passed along to the plotting function.
+# """
+# function preview(p::Path, pts::Integer=100; kw...)
+#     d = 0:(1/(pts-1)):1
+#     f = param(p)
+#     fx(t) = getx(f(t))
+#     fy(t) = gety(f(t))
+#     xv,yv = map(fx,d), map(fy,d)
+#     xmin, xmax = minimum(xv), maximum(xv)
+#     ymin, ymax = minimum(yv), maximum(yv)
+#     xrange = xmax-xmin
+#     yrange = ymax-ymin
+#     if xrange == yrange
+#         Plots.plot(map(fx,d), map(fy,d), xlims=[xmin,xmax], ylims=[ymin,ymax]; kw...)
+#     elseif xrange < yrange
+#         ɛ = (yrange-xrange)/2
+#         Plots.plot(map(fx,d), map(fy,d), xlims=[xmin-ɛ,xmax+ɛ], ylims=[ymin,ymax]; kw...)
+#     else
+#         ɛ = (xrange-yrange)/2
+#         Plots.plot(map(fx,d), map(fy,d), xlims=[xmin,xmax], ylims=[ymin-ɛ,ymax+ɛ]; kw...)
+#     end
+# end
 
 # """
 # Attach a cell `name` along a path `p` rendered with style `s` at location

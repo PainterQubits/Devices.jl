@@ -149,7 +149,7 @@ end
 
 include("paths/Paths.jl")
 import .Paths: Path, adjust!, attach!, launch!, meander!
-import .Paths: param, pathlength, preview, simplify!, straight!, turn!
+import .Paths: param, pathlength, simplify!, straight!, turn! #, preview
 export Paths
 export Path
 export adjust!
@@ -158,7 +158,7 @@ export launch!
 export meander!
 export param
 export pathlength
-export preview
+# export preview
 export simplify!
 export straight!
 export turn!
