@@ -17,8 +17,8 @@ export Rounded
 
 "Rectangle, defined by lower-left and upper-right x,y coordinates."
 type Rectangle{T<:Real}
-    ll::Point{T}
-    ur::Point{T}
+    ll::Point{2,T}
+    ur::Point{2,T}
 end
 Rectangle{T<:Real}(width::T, height::T) =
     Rectangle{T}(Point(-width/2, -height/2), Point(width/2, height/2))

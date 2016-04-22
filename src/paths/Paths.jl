@@ -128,17 +128,17 @@ include("Segments.jl")
 
 "Unstyled path. Can describe any path in the plane."
 type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
-    origin::Point{T}
+    origin::Point{2,T}
     α0::Real
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
-    Path(origin::Point{T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
+    Path(origin::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
         styles::Array{Style,1}) = new(origin, α0, style0, segments, styles)
     Path(style::Style) =
         new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
 end
-Path{T<:Real}(origin::Point{T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0)) =
+Path{T<:Real}(origin::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0)) =
     Path{T}(origin, α0, style0, Segment{T}[], Style[])
 Path{T<:Real}(origin::Tuple{T,T}) =
     Path(Point(float(origin[1]),float(origin[2])))

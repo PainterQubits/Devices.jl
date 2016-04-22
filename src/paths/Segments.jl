@@ -3,14 +3,14 @@
 
 Return the first point in a segment (calculated).
 """
-origin{T}(s::Segment{T}) = s.f(0.0)::Point{T}
+origin{T}(s::Segment{T}) = s.f(0.0)::Point{2,T}
 
 """
 `lastpoint{T}(s::Segment{T})`
 
 Return the last point in a segment (calculated).
 """
-lastpoint{T}(s::Segment{T}) = s.f(1.0)::Point{T}
+lastpoint{T}(s::Segment{T}) = s.f(1.0)::Point{2,T}
 
 """
 `α0(s::Segment)`
@@ -52,7 +52,7 @@ The parametric function over `t ∈ [0,1]` describing the line segment is given 
 """
 type Straight{T<:Real} <: Segment{T}
     l::T
-    origin::Point{T}
+    origin::Point{2,T}
     α0::Real
     f::Function
     Straight(l, origin, α0) = begin
@@ -61,10 +61,10 @@ type Straight{T<:Real} <: Segment{T}
         s
     end
 end
-Straight{T<:Real}(l::T, origin::Point{Real}=Point(0.0,0.0), α0::Real=0.0) =
+Straight{T<:Real}(l::T, origin::Point{2,T}=Point(0.0,0.0), α0::Real=0.0) =
     Straight{T}(l, origin, α0)
 convert{T<:Real}(::Type{Straight{T}}, x::Straight) =
-    Straight(T(x.l), convert(Point{T}, x.origin), x.α0)
+    Straight(T(x.l), convert(Point{2,T}, x.origin), x.α0)
 
 length(s::Straight) = s.l
 origin(s::Straight) = s.origin
@@ -103,7 +103,7 @@ The parametric function over `t ∈ [0,1]` describing the turn is given by:
 type Turn{T<:Real} <: Segment{T}
     α::Real
     r::T
-    origin::Point{T}
+    origin::Point{2,T}
     α0::Real
     f::Function
 
@@ -116,10 +116,10 @@ type Turn{T<:Real} <: Segment{T}
         s
     end
 end
-Turn{T<:Real}(α::Real, r::T, origin::Point{Real}=Point(0.0,0.0), α0::Real=0.0) =
+Turn{T<:Real}(α::Real, r::T, origin::Point{2,T}=Point(0.0,0.0), α0::Real=0.0) =
     Turn{T}(α, r, origin, α0)
 convert{T<:Real}(::Type{Turn{T}}, x::Turn) =
-    Turn(x.α, T(x.r), convert(Point{T}, x.origin), x.α0)
+    Turn(x.α, T(x.r), convert(Point{2,T}, x.origin), x.α0)
 
 length{T<:Real}(s::Turn{T}) = T(abs(s.r*s.α))
 origin(s::Turn) = s.origin

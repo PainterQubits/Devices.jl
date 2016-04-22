@@ -3,8 +3,7 @@ module Devices
 
 using PyCall
 using ForwardDiff
-import PyPlot
-
+import FixedSizeArrays: Point
 import Base: cell, length, show
 
 const _gdspy = PyCall.PyNULL()
