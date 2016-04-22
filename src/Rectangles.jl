@@ -3,6 +3,7 @@ module Rectangles
 using ForwardDiff
 using ..Points
 
+import Base: +
 import Devices
 import Devices: render
 import Devices.Paths
@@ -24,6 +25,14 @@ Rectangle{T<:Real}(width::T, height::T) =
 
 width(r::Rectangle) = getx(r.ur)-getx(r.ll)
 height(r::Rectangle) = gety(r.ur)-gety(r.ll)
+
+function +(r::Rectangle, p::Point)
+    r.ll += p
+    r.ur += p
+    r
+end
+
++(p::Point, r::Rectangle) = +(r,p)
 
 "How to draw the rectangle..."
 abstract Style

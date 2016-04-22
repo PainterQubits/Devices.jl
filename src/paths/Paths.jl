@@ -29,7 +29,7 @@ import Base:
 using ForwardDiff
 import Plots
 import Devices
-import Devices: cell, render
+import Devices: bounds, cell, render
 gdspy() = Devices._gdspy
 
 export Path
@@ -38,6 +38,7 @@ export CPW
 export Trace
 
 export adjust!
+export attach!
 export launch!
 export meander!
 export param
@@ -122,332 +123,8 @@ the following methods:
 """
 abstract Segment{T<:Real}
 
-"""
-`type Trace <: Style`
-
-Simple, single trace.
-
-- `width::Function`: trace width.
-- `divs::Int`: number of segments to render. Increase if you see artifacts.
-"""
-type Trace <: Style
-    width::Function
-    divs::Int
-end
-Trace(width::Function) = Trace(width, 100)
-Trace(width::Real) = Trace(x->float(width), 1)
-divs(s::Trace) = linspace(0.0, 1.0, s.divs+1)
-
-distance(::Trace, t) = 0.0
-extent(s::Trace, t) = s.width(t)/2
-paths(::Trace, t...) = 1
-width(s::Trace, t) = s.width(t)
-
-"""
-`type CPW <: Style`
-
-Two adjacent traces can form a coplanar waveguide.
-
-- `trace::Function`: center conductor width.
-- `gap::Function`: distance between center conductor edges and ground plane
-- `divs::Int`: number of segments to render. Increase if you see artifacts.
-
-May need to be inverted with respect to a ground plane,
-depending on how the pattern is written.
-"""
-type CPW <: Style
-    trace::Function
-    gap::Function
-    divs::Int
-end
-CPW(trace::Real, gap::Real) = CPW(x->float(trace), x->float(gap), 1)
-CPW(trace::Function, gap::Function) = CPW(trace, gap, 100)
-CPW(trace::Function, gap::Real, divs::Integer=100) = CPW(trace, x->float(gap), divs)
-CPW(trace::Real, gap::Function, divs::Integer=100) = CPW(x->float(trace), gap, divs)
-
-distance(s::CPW, t) = s.gap(t)+s.trace(t)
-extent(s::CPW, t) = s.trace(t)/2 + s.gap(t)
-paths(::CPW, t...) = 2
-width(s::CPW, t) = s.gap(t)
-divs(s::CPW) = linspace(0.0, 1.0, s.divs+1)
-
-"""
-`type CompoundStyle{T<:Real} <: Style`
-
-Combines styles together for use with a `CompoundSegment`.
-
-- `segments`: Needed for divs function.
-- `styles`: Array of styles making up the object.
-- `f`: returns tuple of style index and the `t` to use for that
-style's parametric function.
-"""
-type CompoundStyle{T<:Real} <: Style
-    segments::Array{Segment{T},1}
-    styles::Array{Style,1}
-    f::Function
-
-    CompoundStyle(segments, styles) = begin
-        s = new(segments, styles)
-        s.f = param(s)
-        s
-    end
-end
-CompoundStyle{T<:Real}(segments::AbstractArray{Segment{T},1},
-    styles::AbstractArray{Style,1}) = CompoundStyle{T}(segments, styles)
-
-"""
-`divs{T<:Real}(c::CompoundStyle{T})`
-
-Returns a collection with the values of `t` to use for
-rendering a `CompoundSegment` with this `CompoundStyle`.
-"""
-function divs{T<:Real}(c::CompoundStyle{T})
-    isempty(c.segments) && error("Cannot use divs with zero segments.")
-    length(c.segments) != length(c.styles) &&
-        error("Number of segments and styles do not match.")
-
-    L = pathlength(c.segments)
-    l0 = zero(T)
-    ts = Float64[]
-    for i in 1:length(c.segments)
-        l1 = l0 + length(c.segments[i])
-        # Someone who enjoys thinking about IEEE floating points,
-        # please make this less awful. It seems like the loop runs
-        # approximately powers-of-2 times.
-
-        # Start just past the boundary to pick the right style
-        offset = l0/L + eps(l0/L)
-
-        # Go almost to the next boundary
-        scale = (l1/L-offset)
-        while offset+scale*1.0 >= l1/L
-            scale -= eps(scale)
-        end
-
-        append!(ts, divs(c.styles[i])*scale+offset)
-        l0 = l1
-    end
-    sort!(unique(ts))
-end
-
-function param{T<:Real}(c::CompoundStyle{T})
-    isempty(c.segments) && error("Cannot parameterize with zero segments.")
-    length(c.segments) != length(c.styles) &&
-        error("Number of segments and styles do not match.")
-
-    # Build up our piecewise parametric function
-    f = Expr(:(->), :t, Expr(:block))
-    push!(f.args[2].args, quote
-        L = pathlength(($c).segments)
-        l0 = zero($T)
-    end)
-
-    for i in 1:length(c.segments)
-        push!(f.args[2].args, quote
-            l1 = l0 + length((($c).segments)[$i])
-            (l0/L <= t) &&
-                ($(i == length(c.segments) ? :(<=) : :(<))(t, l1/L)) &&
-                    return $i, (t*L-l0)/(l1-l0)
-            l0 = l1
-        end)
-    end
-
-    # Return our parametric function
-    return eval(f)
-end
-
-for x in (:distance, :extent, :paths, :width)
-    @eval function ($x)(s::CompoundStyle, t)
-        idx, teff = s.f(t)
-        ($x)(s.styles[idx], teff)
-    end
-end
-
-
-"""
-`origin{T}(s::Segment{T})`
-
-Return the first point in a segment (calculated).
-"""
-origin{T}(s::Segment{T}) = s.f(0.0)::Point{T}
-
-"""
-`lastpoint{T}(s::Segment{T})`
-
-Return the last point in a segment (calculated).
-"""
-lastpoint{T}(s::Segment{T}) = s.f(1.0)::Point{T}
-
-"""
-`α0(s::Segment)`
-
-Return the first angle in a segment (calculated).
-"""
-α0(s::Segment) = direction(s.f, 0.0)
-
-"""
-`lastangle(s::Segment)`
-
-Return the last angle in a segment (calculated).
-"""
-lastangle(s::Segment) = direction(s.f, 1.0)
-
-"""
-`length(s::Segment)`
-
-Return the length of a segment (calculated).
-"""
-function length(s::Segment, diag::Bool=false)
-    path = s.f
-    ds(t) = sqrt(dot(gradient(s.f, t), gradient(s.f, t)))
-    val, err = quadgk(ds, 0.0, 1.0)
-    diag && info("Integration estimate: $val")
-    diag && info("Error upper bound estimate: $err")
-    val
-end
-
-"""
-`type Straight{T<:Real} <: Segment{T}`
-
-A straight line segment is parameterized by its length.
-It begins at a point `origin` with initial angle `α0`.
-
-The parametric function over `t ∈ [0,1]` describing the line segment is given by:
-
-`t -> origin + Point(t*l*cos(α),t*l*sin(α))`
-"""
-type Straight{T<:Real} <: Segment{T}
-    l::T
-    origin::Point{T}
-    α0::Real
-    f::Function
-    Straight(l, origin, α0) = begin
-        s = new(l, origin, α0)
-        s.f = t->(s.origin+Point(t*s.l*cos(s.α0),t*s.l*sin(s.α0)))
-        s
-    end
-end
-Straight{T<:Real}(l::T, origin::Point{Real}=Point(0.0,0.0), α0::Real=0.0) =
-    Straight{T}(l, origin, α0)
-convert{T<:Real}(::Type{Straight{T}}, x::Straight) =
-    Straight(T(x.l), convert(Point{T}, x.origin), x.α0)
-
-length(s::Straight) = s.l
-origin(s::Straight) = s.origin
-α0(s::Straight) = s.α0
-
-"""
-`setorigin!(s::Straight, p::Point)`
-
-Set the origin of a straight segment.
-"""
-setorigin!(s::Straight, p::Point) = s.origin = p
-
-"""
-`setα0!(s::Straight, α0′)`
-
-Set the angle of a straight segment.
-"""
-setα0!(s::Straight, α0′) = s.α0 = α0′
-
-lastangle(s::Straight) = s.α0
-
-"""
-`type Turn{T<:Real} <: Segment{T}`
-
-A circular turn is parameterized by the turn angle `α` and turning radius `r`.
-It begins at a point `origin` with initial angle `α0`.
-
-The center of the circle is given by:
-
-`cen = origin + Point(r*cos(α0+sign(α)*π/2), r*sin(α0+sign(α)*π/2))`
-
-The parametric function over `t ∈ [0,1]` describing the turn is given by:
-
-`t -> cen + Point(r*cos(α0-sign(α)*π/2+α*t), r*sin(α0-sign(α)*π/2+α*t))`
-"""
-type Turn{T<:Real} <: Segment{T}
-    α::Real
-    r::T
-    origin::Point{T}
-    α0::Real
-    f::Function
-
-    Turn(α, r, origin, α0) = begin
-        s = new(α, r, origin, α0)
-        s.f = t->begin
-            cen = s.origin + Point(s.r*cos(s.α0+sign(s.α)*π/2), s.r*sin(s.α0+sign(s.α)*π/2))
-            cen + Point(s.r*cos(s.α0-sign(α)*π/2+s.α*t), s.r*sin(s.α0-sign(α)*π/2+s.α*t))
-        end
-        s
-    end
-end
-Turn{T<:Real}(α::Real, r::T, origin::Point{Real}=Point(0.0,0.0), α0::Real=0.0) =
-    Turn{T}(α, r, origin, α0)
-convert{T<:Real}(::Type{Turn{T}}, x::Turn) =
-    Turn(x.α, T(x.r), convert(Point{T}, x.origin), x.α0)
-
-length{T<:Real}(s::Turn{T}) = T(abs(s.r*s.α))
-origin(s::Turn) = s.origin
-α0(s::Turn) = s.α0
-
-"""
-`setorigin!(s::Turn, p::Point)`
-
-Set the origin of a turn.
-"""
-setorigin!(s::Turn, p::Point) = s.origin = p
-
-"""
-`setα0!(s::Turn, α0′)`
-
-Set the starting angle of a turn.
-"""
-setα0!(s::Turn, α0′) = s.α0 = α0′
-lastangle(s::Turn) = s.α0 + s.α
-
-"""
-`type CompoundSegment{T<:Real} <: Segment{T}`
-
-Consider an array of segments as one contiguous segment.
-Useful e.g. for applying styles, uninterrupted over segment changes.
-"""
-type CompoundSegment{T<:Real} <: Segment{T}
-    segments::Array{Segment{T},1}
-    f::Function
-
-    CompoundSegment(segments) = begin
-        s = new(segments)
-        s.f = param(s)
-        s
-    end
-end
-CompoundSegment{T<:Real}(segments::Array{Segment{T},1}) =
-    CompoundSegment{T}(segments)
-
-"""
-`setorigin!(s::CompoundSegment, p::Point)`
-
-Set the origin of a compound segment.
-"""
-function setorigin!(s::CompoundSegment, p::Point)
-    setorigin!(s.segments[1], p)
-    for i in 2:length(s.segments)
-        setorigin!(s.segments[i], lastpoint(s.segments[i-1]))
-    end
-end
-
-"""
-`setα0!(s::CompoundSegment, α0′)`
-
-Set the starting angle of a compound segment.
-"""
-function setα0!(s::CompoundSegment, α0′)
-    setα0!(s.segments[1], α0′)
-    for i in 2:length(s.segments)
-        setα0!(s.segments[i], lastangle(s.segments[i-1]))
-    end
-end
+include("Styles.jl")
+include("Segments.jl")
 
 "Unstyled path. Can describe any path in the plane."
 type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
@@ -884,38 +561,99 @@ function preview(p::Path, pts::Integer=100; kw...)
     end
 end
 
+# """
+# Attach a cell `name` along a path `p` rendered with style `s` at location
+# `t` ∈ [0,1]. The `direction` is 1,0,-1 (left, center, or right of path,
+# respectively). If 0, the center of the cell will be centered on the path, with
+# the top of the cell tangent to the path direction (and leading the bottom).
+# Otherwise, the top of the cell will be rotated closest to the path edge.
+# A tangential `offset` may be given to move the cell with +x
+# being the direction to the right of the path.
+# """
+# function attach!(name::AbstractString, p::Path, idx::Int, t::Real,
+#         direction::Integer, offset::Real)
+#
+#
+# end
+
 """
 `render(p::Path; name="main", layer::Int=0, datatype::Int=0)`
 
-Render a path `p`. Keyword arguments give a cell `name`,
-along with `layer` and `datatype`.
+Render a path `p`.
+Keyword arguments give a cell `name`, along with `layer` and `datatype`.
 """
 function render(p::Path; name="main", layer::Int=0, datatype::Int=0)
-
-    c = cell(name)
-    for (segment,s) in p
-        f = segment.f
-        g(t) = gradient(f,t)
-        last = 0.0
-        first = true
-        gp = gdspy()[:Path](width(s, 0.0), Point(0.0,0.0),
-            number_of_paths=paths(s, 0.0), distance=distance(s, 0.0))
-        for t in divs(s)
-            if first
-                first = false
-                continue
-            end
-            gp[:parametric](x->f(last+x*(t-last)),
-                curve_derivative=x->g(last+x*(t-last)),
-                final_width=width(s,t),
-                final_distance=distance(s,t),
-                layer=layer, datatype=datatype)
-            c[:add](gp)
-            gp = gdspy()[:Path](width(s,t), Point(0.0,0.0),
-                number_of_paths=paths(s,t), distance=distance(s,t))
-            last = t
-        end
+    for (segment, s) in p
+        render(segment, s, name, layer, datatype)
     end
+end
+
+"""
+`render(segment::Segment, s::Style, name, layer, datatype)`
+
+Render a `segment` with style `s`.
+"""
+function render(segment::Segment, s::Style, name, layer, datatype)
+    c = cell(name)
+    f = segment.f
+    g(t) = gradient(f,t)
+    last = 0.0
+    first = true
+    gp = gdspy()[:Path](width(s, 0.0), Point(0.0,0.0),
+        number_of_paths=paths(s, 0.0), distance=distance(s, 0.0))
+    for t in divs(s)
+        if first
+            first = false
+            continue
+        end
+        gp[:parametric](x->f(last+x*(t-last)),
+            curve_derivative=x->g(last+x*(t-last)),
+            final_width=width(s,t),
+            final_distance=distance(s,t),
+            layer=layer, datatype=datatype)
+        c[:add](gp)
+        gp = gdspy()[:Path](width(s,t), Point(0.0,0.0),
+            number_of_paths=paths(s,t), distance=distance(s,t))
+        last = t
+    end
+end
+
+"""
+`render(segment::Segment, s::DecoratedStyle, name, layer, datatype)`
+
+Render a `segment` with `DecoratedStyle` `s`. This method draws the decorations
+before the path itself is drawn.
+"""
+function render(segment::Segment, s::DecoratedStyle, name, layer, datatype)
+    for (t, offset, dir, c) in zip(s.ts, s.offsets, s.dirs, s.cells)
+        (dir < -1 || dir > 1) && error("Invalid direction in $s.")
+
+        ((x1,y1),(x2,y2)) = bounds(c)
+        dtop = max(y1,y2) - (y1+y2)/2       # distance from center to top
+
+        ∠0 = direction(segment.f, t)
+        newcell = cell(name)
+        if dir == 0
+            ∠ = ∠0-π/2
+            newx = offset*cos(∠)
+            newy = offset*sin(∠)
+            ref = gdspy()[:CellReference](cell(c),
+                origin=(segment.f(t) + Point(newx,newy)),
+                rotation=∠*180/π)
+        else
+            ∠ = ∠0-π/2
+            offset -= dir * extent(s.s, t)
+            offset -= dir * dtop
+            newx = offset * cos(∠)
+            newy = offset * sin(∠)
+            rot = (∠0 + (dir == 1 ? π:0)) * 180/π
+            ref = gdspy()[:CellReference](cell(c),
+                origin=(segment.f(t)+Point(newx,newy)),
+                rotation=rot)
+        end
+        newcell[:add](ref)
+    end
+    render(segment, s.s, name, layer, datatype)
 end
 
 end

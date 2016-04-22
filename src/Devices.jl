@@ -7,16 +7,16 @@ import PyPlot
 
 import Base: cell, length, show
 
-const numpy = PyCall.PyNULL()
 const _gdspy = PyCall.PyNULL()
+const _qr = PyCall.PyNULL()
 
 function __init__()
-    copy!(numpy, pyimport("numpy"))
     copy!(_gdspy, pyimport("gdspy"))
+    copy!(_qr, pyimport("pyqrcode"))
 end
-# @pyimport pyqrcode
 
 gdspy() = Devices._gdspy
+qr() = Devices._qr
 
 const FEATURE_BOUNDING_LAYER = 1
 const CHIP_BOUNDING_LAYER    = 2
@@ -34,7 +34,6 @@ export UNIT
 export PRECISION
 
 export andnot
-export attach
 export boolean
 export bounds
 export heal
@@ -53,28 +52,6 @@ import .Points: Point, getx, gety
 export Points
 export Point, getx, gety
 
-include("Paths.jl")
-import .Paths: Path, adjust!, launch!, meander!
-import .Paths: param, pathlength, preview, simplify!, straight!, turn!
-export Paths
-export Path
-export adjust!
-export launch!
-export meander!
-export param
-export pathlength
-export preview
-export simplify!
-export straight!
-export turn!
-
-include("Rectangles.jl")
-import .Rectangles: Rectangle
-export Rectangles
-export Rectangle
-
-include("Tags.jl")
-
 and(x,y) = x & y
 or(x,y) = x | y
 xor(x,y) = x $ y
@@ -88,48 +65,6 @@ xor(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
     boolean(iterable, name, layer, datatype, (x...)->reduce(xor, true, [x...]))
 andnot(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
     boolean(iterable, name, layer, datatype, (x...)->reduce(andnot, true, [x...]))
-
-"""
-Attach a cell `name` along a path `p` rendered with style `s` at location
-`t` ∈ [0,1]. The `direction` is 1,0,-1 (left, center, or right of path,
-respectively). If 0, the center of the cell will be centered on the path, with
-the top of the cell tangent to the path direction (and leading the bottom).
-Otherwise, the top of the cell will be rotated closest to the path edge.
-A tangential `offset` may be given to move the cell with +x
-being the direction to the right of the path.
-"""
-function attach(name::AbstractString, p::Path, s::Paths.Style, t::Real,
-        direction::Integer, offset::Real, incell::AbstractString)
-
-    (direction < -1 || direction > 1) && error("Invalid direction.")
-    f = param(p)
-    fx(t) = f(t)[1]
-    fy(t) = f(t)[2]
-    dirx,diry = (derivative(fx,t), derivative(fy,t))
-    α0 = atan(diry/dirx)
-
-    ((x1,y1),(x2,y2)) = bounds(name)
-    dtop = max(y1,y2) - (y1+y2)/2       # distance from center to top
-
-    newcell = cell(incell)
-    if direction == 0
-        ∠ = α0-π/2
-        newx = offset*cos(∠)
-        newy = offset*sin(∠)
-        ref = gdspy()[:CellReference](cell(name), origin=f(t)+[newx,newy],
-            rotation=∠*180/π)
-    else
-        ∠ = α0-π/2
-        offset -= direction*extent(s,t)
-        offset -= direction*dtop
-        newx = offset*cos(∠)
-        newy = offset*sin(∠)
-        rot = (α0 + (direction==1 ? π:0))*180/π
-        ref = gdspy()[:CellReference](cell(name), origin=f(t)+[newx,newy],
-            rotation=rot)
-    end
-    newcell[:add](ref)
-end
 
 """
 Performs a boolean operation.
@@ -212,5 +147,30 @@ function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, la
 
     c
 end
+
+include("paths/Paths.jl")
+import .Paths: Path, adjust!, attach!, launch!, meander!
+import .Paths: param, pathlength, preview, simplify!, straight!, turn!
+export Paths
+export Path
+export adjust!
+export attach!
+export launch!
+export meander!
+export param
+export pathlength
+export preview
+export simplify!
+export straight!
+export turn!
+
+include("Rectangles.jl")
+import .Rectangles: Rectangle
+export Rectangles
+export Rectangle
+
+include("Tags.jl")
+import .Tags: qrcode
+export qrcode
 
 end
