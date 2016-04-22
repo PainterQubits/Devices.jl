@@ -27,7 +27,7 @@ import Base:
     append!
 
 using ForwardDiff
-import Plots
+# import Plots
 import Devices
 import Devices: bounds, cell, render
 gdspy() = Devices._gdspy
