@@ -165,7 +165,7 @@ DecoratedStyle{S<:Real}(s::Style, ts::AbstractArray{Float64,1},
     DecoratedStyle{S}(s, ts, offsets, dirs, cells)
 
 # distance(s::DecoratedStyle, t) = distance(s.s, t)
-# extent(s::DecoratedStyle, t) = extent(s.s, t)
+extent(s::DecoratedStyle, t) = extent(s.s, t)
 # paths(s::DecoratedStyle, t...) = paths(s.s, t...)
 # width(s::DecoratedStyle, t) = width(s.s, t)
 # divs(s::DecoratedStyle) = divs(s.s)

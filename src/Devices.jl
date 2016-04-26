@@ -4,18 +4,22 @@ module Devices
 using PyCall
 using ForwardDiff
 import FixedSizeArrays: Point
-import Base: cell, length, show
+import Base: cell, length, show, .+, .-
 
 const _gdspy = PyCall.PyNULL()
+const _pyclipper = PyCall.PyNULL()
 const _qr = PyCall.PyNULL()
 
 function __init__()
     copy!(_gdspy, pyimport("gdspy"))
     copy!(_qr, pyimport("pyqrcode"))
+    copy!(_pyclipper, pyimport("pyclipper"))
+    @osx_only push!(Libdl.DL_LOAD_PATH, joinpath(Pkg.dir("Devices"), "deps"))
 end
 
 gdspy() = Devices._gdspy
 qr() = Devices._qr
+pyclipper() = Devices._pyclipper
 
 const FEATURE_BOUNDING_LAYER = 1
 const CHIP_BOUNDING_LAYER    = 2
@@ -47,9 +51,9 @@ export interdigit
 function render end
 
 include("Points.jl")
-import .Points: Point, getx, gety
+import .Points: Point, getx, gety, setx!, sety!
 export Points
-export Point, getx, gety
+export Point, getx, gety, setx!, sety!
 
 and(x,y) = x & y
 or(x,y) = x | y
@@ -57,13 +61,13 @@ xor(x,y) = x $ y
 andnot(x,y) = x &~ y
 
 union(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
-    boolean(iterable, name, layer, datatype, (x...)->reduce(or, true, [x...]))
+    boolean(iterable, name, layer, datatype, (x...)->reduce(or, [x...]))
 intersect(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
-    boolean(iterable, name, layer, datatype, (x...)->reduce(and, true, [x...]))
+    boolean(iterable, name, layer, datatype, (x...)->reduce(and, [x...]))
 xor(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
-    boolean(iterable, name, layer, datatype, (x...)->reduce(xor, true, [x...]))
+    boolean(iterable, name, layer, datatype, (x...)->reduce(xor, [x...]))
 andnot(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
-    boolean(iterable, name, layer, datatype, (x...)->reduce(andnot, true, [x...]))
+    boolean(iterable, name, layer, datatype, (x...)->reduce(andnot, [x...]))
 
 """
 Performs a boolean operation.
@@ -74,30 +78,6 @@ function boolean(iterable::AbstractArray, name,
     c = cell(name)
     c[:add](newp)
 end
-
-"""
-`bounds(name::AbstractString, layer::Integer, datatype::Integer)`
-
-Returns coordinates for a bounding box around all polygons of `layer`
-and `datatype` in cell `name`. The return format is ((x1,y1),(x2,y2)).
-"""
-function bounds(name, layer::Integer, datatype::Integer)
-    p = get_polygons(name,layer,datatype)
-    x1,x2,y1,y2 = p[:get_bounding_box]()
-    ((x1,y1),(x2,y2))
-end
-
-"""
-`bounds(name::AbstractString)`
-
-Returns coordinates for a bounding box around all polygons in cell `name`.
-The return format is ((x1,y1),(x2,y2)).
-"""
-function bounds(name)
-    x1,x2,y1,y2 = cell(name)[:get_bounding_box]()
-    ((x1,y1),(x2,y2))
-end
-
 
 "Return a PyObject representing a cell."
 function cell(name)
@@ -147,13 +127,36 @@ function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, la
     c
 end
 
+"""
+`bounds(name::AbstractString, layer::Integer, datatype::Integer)`
+
+Returns coordinates for a bounding box around all polygons of `layer`
+and `datatype` in cell `name`. The return format is ((x1,y1),(x2,y2)).
+"""
+function bounds(name, layer::Integer, datatype::Integer)
+    p = get_polygons(name,layer,datatype)
+    x1,x2,y1,y2 = p[:get_bounding_box]()
+    (Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
+end
+
+"""
+`bounds(name::AbstractString)`
+
+Returns coordinates for a bounding box around all polygons in cell `name`.
+The return format is ((x1,y1),(x2,y2)).
+"""
+function bounds(name)
+    x1,x2,y1,y2 = cell(name)[:get_bounding_box]()
+    (Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
+end
+
 include("paths/Paths.jl")
-import .Paths: Path, adjust!, attach!, launch!, meander!
+import .Paths: Path, adjust!, launch!, meander! #,attach!
 import .Paths: param, pathlength, simplify!, straight!, turn! #, preview
 export Paths
 export Path
 export adjust!
-export attach!
+# export attach!
 export launch!
 export meander!
 export param
@@ -163,13 +166,44 @@ export simplify!
 export straight!
 export turn!
 
+abstract AbstractPolygon{T}
+
 include("Rectangles.jl")
-import .Rectangles: Rectangle
+import .Rectangles: Rectangle, center, height, width
 export Rectangles
 export Rectangle
+export center
+export height
+export width
+
+include("polygons/Polygons.jl")
+import .Polygons: Polygon, gpc_clip, clip, offset,
+    CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
+    JT_SQUARE, JT_ROUND, JT_MITER,
+    ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
+    PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
+export Polygons
+export Polygon
+export gpc_clip, clip, offset
+export CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
+    JT_SQUARE, JT_ROUND, JT_MITER,
+    ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
+    PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
 
 include("Tags.jl")
-import .Tags: qrcode
+import .Tags: qrcode, radialstub
+export Tags
 export qrcode
+export radialstub
+
+for (op, dotop) in [(:+, :.+), (:-, :.-)]
+    @eval function ($dotop){T<:AbstractPolygon}(a::AbstractArray{T,1}, p::Point)
+        b = deepcopy(a)
+        for x in b
+            x = ($op)(x,p)
+        end
+        b
+    end
+end
 
 end

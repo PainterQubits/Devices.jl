@@ -62,6 +62,25 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
     render
     view
 
+## Polygons
+
+### Clipping and offsetting
+
+As of now this package's notion of polygons is that there are no "inner holes."
+Probably it would be helpful if we expanded our definition.
+
+For clipping polygons we use [GPC](http://www.cs.man.ac.uk/~toby/gpc/) to get
+triangle strips which never have holes in them. These are then rendered as
+polygons individually. An obvious downside is that subsequent offsetting will not
+work as desired.
+
+For offsetting polygons we use [Clipper](http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm).
+Clipper does not seem to support triangle strips so although the clipping is
+probably superior we cannot use it easily for now.
+
+    {docs}
+    offset
+
 ## Interfacing with gdspy
 
     {docs}

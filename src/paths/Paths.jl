@@ -38,7 +38,7 @@ export CPW
 export Trace
 
 export adjust!
-export attach!
+# export attach!
 export launch!
 export meander!
 export param
@@ -643,7 +643,7 @@ function render(segment::Segment, s::DecoratedStyle, name, layer, datatype)
         else
             ∠ = ∠0-π/2
             offset -= dir * extent(s.s, t)
-            offset -= dir * dtop
+            # offset -= dir * dtop
             newx = offset * cos(∠)
             newy = offset * sin(∠)
             rot = (∠0 + (dir == 1 ? π:0)) * 180/π
