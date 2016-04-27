@@ -34,8 +34,7 @@ points{T<:Real}(x::Rectangle{T}) = points(convert(Polygon{T}, x))
 
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
     @eval function ($op)(r::Polygon, p::Point)
-        r.p = ($dotop)(r.p, p)
-        r
+        Polygon(($dotop)(r.p, p))
     end
     @eval ($op)(p::Point, r::Polygon) = ($op)(r,p)
 end
@@ -63,8 +62,7 @@ Tristrip{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T}, p3::Point{2,T}
 points(x::Tristrip) = x.p
 
 function +(r::Tristrip, p::Point)
-    r.p .+= p
-    r
+    Tristrip(r.p .+ p)
 end
 +(p::Point, r::Tristrip) = +(r,p)
 

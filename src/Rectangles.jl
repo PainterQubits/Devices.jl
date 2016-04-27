@@ -6,11 +6,9 @@ using ..Points
 import Base: +, -, minimum, maximum
 import Devices
 import Devices: AbstractPolygon
-import Devices: bounds, render
-import Devices.Paths
+import Devices: bounds
 gdspy() = Devices._gdspy
 
-using Devices.Paths: Path, straight!, turn!
 using AffineTransforms
 
 export Rectangle
@@ -38,9 +36,7 @@ maximum(r::Rectangle) = max(r.ll, r.ur)
 
 for op in [:+, :-]
     @eval function ($op)(r::Rectangle, p::Point)
-        r.ll = ($op)(r.ll, p)
-        r.ur = ($op)(r.ur, p)
-        r
+        Rectangle(($op)(r.ll, p), ($op)(r.ur, p))
     end
     @eval ($op)(p::Point, r::Rectangle) = ($op)(r,p)
 end
@@ -55,44 +51,6 @@ end
 "The corners are rounded off (bounding box of the plain rectangle unaffected)."
 type Rounded <: Style
     r::Float64
-end
-
-function render(r::Rectangle, s::Style=Plain(); name="main", layer::Real=0, datatype::Real=0)
-    render(r, s, name, layer, datatype)
-end
-
-"""
-Render a rect `r` to the cell with name `name`.
-Keyword arguments give a `layer` and `datatype` (default to 0).
-"""
-function render(r::Rectangle, ::Plain, name, layer, datatype)
-    c = cell(name)
-    gr = gdspy()[:Rectangle](r.ll,r.ur,layer=layer,datatype=datatype)
-    c[:add](gr)
-end
-
-"""
-Render a rounded rectangle `r` to the cell `name`.
-This is accomplished by rendering a path around the outside of a
-(smaller than requested) solid rectangle.
-"""
-function render(r::Rectangle, s::Rounded, name, layer, datatype)
-    c = cell(name)
-    rad = s.r
-    ll, ur = minimum(r), maximum(r)
-    gr = gdspy()[:Rectangle](ll+Point(rad,rad),ur-Point(rad,rad),
-        layer=layer, datatype=datatype)
-    c[:add](gr)
-    p = Path(ll+Point(rad,rad/2), 0.0, Paths.Trace(s.r))
-    straight!(p, width(r)-2*rad)
-    turn!(p, π/2, rad/2)
-    straight!(p, height(r)-2*rad)
-    turn!(p, π/2, rad/2)
-    straight!(p, width(r)-2*rad)
-    turn!(p, π/2, rad/2)
-    straight!(p, height(r)-2*rad)
-    turn!(p, π/2, rad/2)
-    render(p, name=name, layer=layer, datatype=datatype)
 end
 
 end

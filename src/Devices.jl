@@ -127,6 +127,18 @@ function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, la
     c
 end
 
+function bounds end
+
+abstract AbstractPolygon{T}
+
+include("Rectangles.jl")
+import .Rectangles: Rectangle, center, height, width
+export Rectangles
+export Rectangle
+export center
+export height
+export width
+
 """
 `bounds(name::AbstractString, layer::Integer, datatype::Integer)`
 
@@ -136,7 +148,7 @@ and `datatype` in cell `name`. The return format is ((x1,y1),(x2,y2)).
 function bounds(name, layer::Integer, datatype::Integer)
     p = get_polygons(name,layer,datatype)
     x1,x2,y1,y2 = p[:get_bounding_box]()
-    (Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
+    Rectangle(Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
 end
 
 """
@@ -147,8 +159,9 @@ The return format is ((x1,y1),(x2,y2)).
 """
 function bounds(name)
     x1,x2,y1,y2 = cell(name)[:get_bounding_box]()
-    (Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
+    Rectangle(Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
 end
+
 
 include("paths/Paths.jl")
 import .Paths: Path, adjust!, launch!, meander! #,attach!
@@ -166,15 +179,44 @@ export simplify!
 export straight!
 export turn!
 
-abstract AbstractPolygon{T}
+function render(r::Rectangle, s::Rectangles.Style=Rectangles.Plain();
+        name="main", layer::Real=0, datatype::Real=0)
+    render(r, s, name, layer, datatype)
+end
 
-include("Rectangles.jl")
-import .Rectangles: Rectangle, center, height, width
-export Rectangles
-export Rectangle
-export center
-export height
-export width
+"""
+Render a rect `r` to the cell with name `name`.
+Keyword arguments give a `layer` and `datatype` (default to 0).
+"""
+function render(r::Rectangle, ::Rectangles.Plain, name, layer, datatype)
+    c = cell(name)
+    gr = gdspy()[:Rectangle](r.ll,r.ur,layer=layer,datatype=datatype)
+    c[:add](gr)
+end
+
+"""
+Render a rounded rectangle `r` to the cell `name`.
+This is accomplished by rendering a path around the outside of a
+(smaller than requested) solid rectangle.
+"""
+function render(r::Rectangle, s::Rectangles.Rounded, name, layer, datatype)
+    c = cell(name)
+    rad = s.r
+    ll, ur = minimum(r), maximum(r)
+    gr = gdspy()[:Rectangle](ll+Point(rad,rad),ur-Point(rad,rad),
+        layer=layer, datatype=datatype)
+    c[:add](gr)
+    p = Path(ll+Point(rad,rad/2), 0.0, Paths.Trace(s.r))
+    straight!(p, width(r)-2*rad)
+    turn!(p, π/2, rad/2)
+    straight!(p, height(r)-2*rad)
+    turn!(p, π/2, rad/2)
+    straight!(p, width(r)-2*rad)
+    turn!(p, π/2, rad/2)
+    straight!(p, height(r)-2*rad)
+    turn!(p, π/2, rad/2)
+    render(p, name=name, layer=layer, datatype=datatype)
+end
 
 include("polygons/Polygons.jl")
 import .Polygons: Polygon, gpc_clip, clip, offset,
@@ -196,11 +238,12 @@ export Tags
 export qrcode
 export radialstub
 
+# Operations on arrays of AbstractPolygons
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
-    @eval function ($dotop){T<:AbstractPolygon}(a::AbstractArray{T,1}, p::Point)
-        b = deepcopy(a)
-        for x in b
-            x = ($op)(x,p)
+    @eval function ($dotop){S<:Real, T<:Real}(a::AbstractArray{AbstractPolygon{S},1}, p::Point{2,T})
+        b = similar(a)
+        for (ia, ib) in zip(eachindex(a), eachindex(b))
+            @inbounds b[ib] = ($op)(a[ia], p)
         end
         b
     end
