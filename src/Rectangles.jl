@@ -28,8 +28,8 @@ end
 Rectangle{T<:Real}(width::T, height::T) =
     Rectangle{T}(Point(-width/2, -height/2), Point(width/2, height/2))
 
-width(r::Rectangle) = getx(r.ur)-getx(r.ll)
-height(r::Rectangle) = gety(r.ur)-gety(r.ll)
+width(r::Rectangle) = abs(getx(r.ur)-getx(r.ll))
+height(r::Rectangle) = abs(gety(r.ur)-gety(r.ll))
 bounds(p::Rectangle) = p
 center(r::Rectangle) = (r.ur+r.ll)/2
 
@@ -79,10 +79,11 @@ This is accomplished by rendering a path around the outside of a
 function render(r::Rectangle, s::Rounded, name, layer, datatype)
     c = cell(name)
     rad = s.r
-    gr = gdspy()[:Rectangle](r.ll+Point(rad,rad),r.ur-Point(rad,rad),
+    ll, ur = minimum(r), maximum(r)
+    gr = gdspy()[:Rectangle](ll+Point(rad,rad),ur-Point(rad,rad),
         layer=layer, datatype=datatype)
     c[:add](gr)
-    p = Path(r.ll+Point(rad,rad/2), 0.0, Paths.Trace(s.r))
+    p = Path(ll+Point(rad,rad/2), 0.0, Paths.Trace(s.r))
     straight!(p, width(r)-2*rad)
     turn!(p, π/2, rad/2)
     straight!(p, height(r)-2*rad)
