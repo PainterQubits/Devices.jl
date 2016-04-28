@@ -1,8 +1,13 @@
 module GDS
 
 import Base: bswap, bits, convert, write
+import Devices: AbstractPolygon
+import ..Rectangles: Rectangle
+import ..Polygons: Polygon
+using ..Cells
+
 export GDS64
-export gdsbegin, gdsend, gdscell
+export gdsbegin, gdsend, gdswrite
 
 const GDSVERSION   = UInt16(600)
 const HEADER       = 0x0002
@@ -19,11 +24,13 @@ const SREF         = 0x0A00
 const AREF         = 0x0B00
 const TEXT         = 0x0C00
 const LAYER        = 0x0D02
+const DATATYPE     = 0x0E02
 const WIDTH        = 0x0F03
 const XY           = 0x1003
 const ENDEL        = 0x1100
 const SNAME        = 0x1206
 const COLROW       = 0x1302
+const TEXTNODE     = 0x1400
 const NODE         = 0x1500
 const TEXTTYPE     = 0x1602
 const PRESENTATION = 0x1701
@@ -137,15 +144,15 @@ function gdsbegin(io::IO, libname::ASCIIString, precision, unit, acc::DateTime=n
     gdswrite(io, UNITS, precision/unit, precision)
 end
 
-function gdscell(io::IO, cellname::ASCIIString, create::DateTime=now())
-    namecheck(cellname)
+function gdswrite(io::IO, cell::Cell)
+    namecheck(cell.name)
 
-    y    = UInt16(Dates.Year(create))
-    mo   = UInt16(Dates.Month(create))
-    d    = UInt16(Dates.Day(create))
-    h    = UInt16(Dates.Hour(create))
-    min  = UInt16(Dates.Minute(create))
-    s    = UInt16(Dates.Second(create))
+    y    = UInt16(Dates.Year(cell.create))
+    mo   = UInt16(Dates.Month(cell.create))
+    d    = UInt16(Dates.Day(cell.create))
+    h    = UInt16(Dates.Hour(cell.create))
+    min  = UInt16(Dates.Minute(cell.create))
+    s    = UInt16(Dates.Second(cell.create))
 
     modify = now()
     y1   = UInt16(Dates.Year(modify))
@@ -155,9 +162,26 @@ function gdscell(io::IO, cellname::ASCIIString, create::DateTime=now())
     min1 = UInt16(Dates.Minute(modify))
     s1   = UInt16(Dates.Second(modify))
 
-    gdswrite(io, BGNSTR, y,mo,d,h,min,s, y1,mo1,d1,h1,min1,s1) +
-    gdswrite(io, STRNAME, cellname) +
-    gdswrite(io, ENDSTR)
+    bytes = gdswrite(io, BGNSTR, y,mo,d,h,min,s, y1,mo1,d1,h1,min1,s1)
+    bytes += gdswrite(io, STRNAME, cell.name)
+    for x in cell.elements
+        bytes += gdswrite(io, x)
+    end
+    bytes += gdswrite(io, ENDSTR)
+end
+
+function gdswrite{T}(io::IO, el::AbstractPolygon{T})
+    poly = convert(Polygon{T}, el)
+    bytes =  gdswrite(io, BOUNDARY)
+    bytes += gdswrite(io, LAYER, 0)
+    bytes += gdswrite(io, DATATYPE, 0)
+
+    xy = reinterpret(T, poly.p)
+    xy .*= 1e3
+    xy = round(xy)
+    xyInt = convert(Array{Int,1}, xy)
+    bytes += gdswrite(io, XY, xyInt..., xyInt[1])   # closed polygons
+    bytes += gdswrite(io, ENDEL)
 end
 
 function namecheck(a::ASCIIString)

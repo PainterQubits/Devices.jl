@@ -257,11 +257,17 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
     end
 end
 
+include("Cells.jl")
+import .Cells: Cell, CellReference
+export Cells
+export Cell
+export CellReference
+
 include("GDS.jl")
 import .GDS: GDS64
-import .GDS: gdsbegin, gdscell, gdsend
+import .GDS: gdsbegin, gdsend, gdswrite
 export GDS
 export GDS64
-export gdsbegin, gdscell, gdsend
+export gdsbegin, gdsend, gdswrite
 
 end

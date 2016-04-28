@@ -24,7 +24,7 @@ type Rectangle{T<:Real} <: AbstractPolygon{T}
     ur::Point{2,T}
 end
 Rectangle{T<:Real}(width::T, height::T) =
-    Rectangle{T}(Point(-width/2, -height/2), Point(width/2, height/2))
+    Rectangle{Float64}(Point(-width/2, -height/2), Point(width/2, height/2))
 
 width(r::Rectangle) = abs(getx(r.ur)-getx(r.ll))
 height(r::Rectangle) = abs(gety(r.ur)-gety(r.ll))
