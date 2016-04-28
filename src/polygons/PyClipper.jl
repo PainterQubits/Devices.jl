@@ -24,7 +24,8 @@ function clip{S<:Real, T<:Real}(op::ClipperOp, subject::Polygon{S}, clip::Polygo
     pc[:AddPath](c, pyclipper()[:PT_CLIP], true)
     pc[:AddPath](s, pyclipper()[:PT_SUBJECT], true)
     result = pycall(pc[:Execute], PyVector{Array{Point{2,Int64},1}}, Int(op))
-    Polygon(convert(Array{Point{2,Float64},1}, result[1]) ./ PCSCALE)
+    result2 = map(x->Polygon(convert(Array{Point{2,Float64},1}, x) ./ PCSCALE), result)
+    result2
 end
 clip{S<:Real, T<:Real}(op::ClipperOp, s::AbstractPolygon{S}, c::AbstractPolygon{T}) =
     clip(op, convert(Polygon{S}, s), convert(Polygon{T}, c))

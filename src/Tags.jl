@@ -17,7 +17,7 @@ export radialstub
 
 Renders a QR code of the string `a` to cell `name` with pixel size `pixel`.
 """
-function qrcode(a::AbstractString, name::ASCIIString; pixel=10.0)
+function qrcode(a::AbstractString, name::ASCIIString; pixel=1.0, layer=0, datatype=0)
     myqr = qr()[:create](a)
     str = myqr[:text](quiet_zone=0)
 
@@ -36,7 +36,7 @@ function qrcode(a::AbstractString, name::ASCIIString; pixel=10.0)
 
     for r in rects
         r += Point(y/2, -y/2)
-        render(r, Plain(), name=name)
+        render(r, Rectangles.Plain(), name=name, layer=layer, datatype=datatype)
     end
     nothing
 end

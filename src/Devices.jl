@@ -147,7 +147,10 @@ and `datatype` in cell `name`. The return format is ((x1,y1),(x2,y2)).
 """
 function bounds(name, layer::Integer, datatype::Integer)
     p = get_polygons(name,layer,datatype)
-    x1,x2,y1,y2 = p[:get_bounding_box]()
+    tup = p[:get_bounding_box]()
+    tup == nothing &&
+        return Rectangle(Point{2,Float64}(0.0,0.0), Point{2,Float64}(0.0,0.0))
+    (x1,x2,y1,y2) = tup
     Rectangle(Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
 end
 
@@ -158,7 +161,10 @@ Returns coordinates for a bounding box around all polygons in cell `name`.
 The return format is ((x1,y1),(x2,y2)).
 """
 function bounds(name)
-    x1,x2,y1,y2 = cell(name)[:get_bounding_box]()
+    tup = cell(name)[:get_bounding_box]()
+    tup == nothing &&
+        return Rectangle(Point{2,Float64}(0.0,0.0), Point{2,Float64}(0.0,0.0))
+    (x1,x2,y1,y2) = tup
     Rectangle(Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
 end
 
@@ -249,4 +255,5 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
     end
 end
 
+include("GDS.jl")
 end

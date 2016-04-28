@@ -3,7 +3,7 @@ module Rectangles
 using ForwardDiff
 using ..Points
 
-import Base: +, -, minimum, maximum
+import Base: +, -, *, /, minimum, maximum
 import Devices
 import Devices: AbstractPolygon
 import Devices: bounds
@@ -40,6 +40,10 @@ for op in [:+, :-]
     end
     @eval ($op)(p::Point, r::Rectangle) = ($op)(r,p)
 end
+
+*(r::Rectangle, a::Real) = Rectangle(*(r.ll,a), *(r.ur,a))
+*(a::Real, r::Rectangle) = *(r,a)
+/(r::Rectangle, a::Real) = Rectangle(/(r.ll,a), /(r.ur,a))
 
 "How to draw the rectangle..."
 abstract Style

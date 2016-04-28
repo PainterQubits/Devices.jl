@@ -6,7 +6,7 @@ using AffineTransforms
 using ..Points
 using ..Rectangles
 
-import Base: +, -, *, minimum, maximum, convert
+import Base: +, -, *, /, minimum, maximum, convert
 import Devices
 import Devices: AbstractPolygon
 import Devices: bounds, render
@@ -38,6 +38,9 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
     end
     @eval ($op)(p::Point, r::Polygon) = ($op)(r,p)
 end
+*(r::Polygon, a::Real) = Polygon(r.p .* a)
+*(a::Real, r::Polygon) = *(r,a)
+/(r::Polygon, a::Real) = Rectangle(r.p ./ a)
 
 minimum(x::Polygon) = minimum(x.p)
 maximum(x::Polygon) = maximum(x.p)
