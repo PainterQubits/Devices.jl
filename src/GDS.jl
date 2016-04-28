@@ -2,6 +2,7 @@ module GDS
 
 import Base: bswap, bits, convert, write
 import Devices: AbstractPolygon
+using ..Points
 import ..Rectangles: Rectangle
 import ..Polygons: Polygon
 using ..Cells
@@ -78,7 +79,9 @@ function gdswrite(io::IO, x::UInt16, y::ASCIIString)
     write(io, hton(x), y)
 end
 
-gdswrite(io::IO, x::UInt16, y::AbstractFloat...) = gdswrite(io, x, map(GDS64, y)...)
+gdswrite(io::IO, x::UInt16, y::AbstractFloat...) =
+    gdswrite(io, x, map(GDS64, y)...)
+
 function gdswrite(io::IO, x::UInt16, y::Int...)
     datatype = x & 0x00ff
     if datatype == 0x0002
@@ -118,9 +121,11 @@ function convert{T<:AbstractFloat}(::Type{GDS64}, y::T)
     Intrinsics.box(GDS64, (y < 0. ? result | neg : result & pos))
 end
 
-function convert(::Type{Float64}, y::GDS64)
-
-end
+# Yet to be implemented
+#
+# function convert(::Type{Float64}, y::GDS64)
+#
+# end
 
 function gdsbegin(io::IO, libname::ASCIIString, precision, unit, acc::DateTime=now())
     dt   = now()
@@ -170,8 +175,9 @@ function gdswrite(io::IO, cell::Cell)
     bytes += gdswrite(io, ENDSTR)
 end
 
+# Do we want to write BOX elements for Rectangles? Probably not.
 function gdswrite{T}(io::IO, el::AbstractPolygon{T})
-    poly = convert(Polygon{T}, el)
+    poly  =  convert(Polygon{T}, el)
     bytes =  gdswrite(io, BOUNDARY)
     bytes += gdswrite(io, LAYER, 0)
     bytes += gdswrite(io, DATATYPE, 0)
@@ -179,8 +185,32 @@ function gdswrite{T}(io::IO, el::AbstractPolygon{T})
     xy = reinterpret(T, poly.p)
     xy .*= 1e3
     xy = round(xy)
-    xyInt = convert(Array{Int,1}, xy)
+    xyInt =  convert(Array{Int32,1}, xy)
     bytes += gdswrite(io, XY, xyInt..., xyInt[1])   # closed polygons
+    bytes += gdswrite(io, ENDEL)
+end
+
+function gdswrite(io::IO, el::CellReference; unit=1e-6, precision=1e-9)
+    bytes =  gdswrite(io, SREF)
+    bytes += gdswrite(io, SNAME, el.cell.name)
+
+    bits = 0x0000
+    values = ()
+    el.xrefl && (bits += 0x8000)
+    if el.mag != 1.0
+        bits += 0x0004
+    end
+    if el.rot != 0.0
+        bits += 0x0002
+    end
+
+    bits != 0 && (bytes += gdswrite(io, STRANS, bits))
+    bits & 0x0004 > 0 && (bytes += gdswrite(io, MAG, el.mag))
+    bits & 0x0002 > 0 && (bytes += gdswrite(io, ANGLE, el.rot))
+
+    o = el.origin * unit/precision
+    x,y = Int(round(getx(o))), Int(round(gety(o)))
+    bytes += gdswrite(io, XY, x, y)
     bytes += gdswrite(io, ENDEL)
 end
 

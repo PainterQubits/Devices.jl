@@ -11,12 +11,14 @@ type Cell
     Cell(x) = new(x, Any[], now())
 end
 
-type CellReference
+type CellReference{T<:Real}
+    cell::Cell
+    origin::Point{2,T}
     xrefl::Bool
-    origin::Point{2,Float64}
     mag::Float64
     rot::Float64
-    cell::Cell
 end
+CellReference{T<:Real}(x::Cell, y::Point{2,T}; xrefl=false, mag=1.0, rot=0.0) =
+    CellReference(x,y,xrefl,mag,rot)
 
 end
