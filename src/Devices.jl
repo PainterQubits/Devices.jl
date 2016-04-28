@@ -81,10 +81,12 @@ end
 
 "Return a PyObject representing a cell."
 function cell(name)
-    if haskey(gdspy()[:Cell][:cell_dict], name)
-        c = gdspy()[:Cell][:cell_dict][name]
+    C = gdspy()[:Cell]
+    dict = C[:cell_dict]
+    if haskey(dict, name)
+        c = dict[name]
     else
-        c = gdspy()[:Cell](name)
+        c = C(name)
     end
     return c
 end
@@ -256,4 +258,10 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
 end
 
 include("GDS.jl")
+import .GDS: GDS64
+import .GDS: gdsbegin, gdscell, gdsend
+export GDS
+export GDS64
+export gdsbegin, gdscell, gdsend
+
 end
