@@ -9,7 +9,7 @@ import Devices: AbstractPolygon
 import Devices: bounds
 gdspy() = Devices._gdspy
 
-using AffineTransforms
+# using AffineTransforms
 
 export Rectangle
 export Plain

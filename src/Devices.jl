@@ -3,6 +3,8 @@ module Devices
 
 using PyCall
 using ForwardDiff
+using FileIO
+import FileIO: save
 import FixedSizeArrays: Point
 import Base: cell, length, show, .+, .-
 
@@ -15,6 +17,7 @@ function __init__()
     copy!(_qr, pyimport("pyqrcode"))
     copy!(_pyclipper, pyimport("pyclipper"))
     @osx_only push!(Libdl.DL_LOAD_PATH, joinpath(Pkg.dir("Devices"), "deps"))
+    add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02, 0x02, 0x58], ".gds")
 end
 
 gdspy() = Devices._gdspy
@@ -141,6 +144,27 @@ export center
 export height
 export width
 
+include("polygons/Polygons.jl")
+import .Polygons: Polygon, gpc_clip, clip, offset,
+    CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
+    JT_SQUARE, JT_ROUND, JT_MITER,
+    ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
+    PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
+export Polygons
+export Polygon
+export gpc_clip, clip, offset
+export CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
+    JT_SQUARE, JT_ROUND, JT_MITER,
+    ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
+    PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
+
+include("Cells.jl")
+import .Cells: Cell, CellReference
+export Cells
+export Cell
+export CellReference
+
+
 """
 `bounds(name::AbstractString, layer::Integer, datatype::Integer)`
 
@@ -155,21 +179,6 @@ function bounds(name, layer::Integer, datatype::Integer)
     (x1,x2,y1,y2) = tup
     Rectangle(Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
 end
-
-"""
-`bounds(name::AbstractString)`
-
-Returns coordinates for a bounding box around all polygons in cell `name`.
-The return format is ((x1,y1),(x2,y2)).
-"""
-function bounds(name)
-    tup = cell(name)[:get_bounding_box]()
-    tup == nothing &&
-        return Rectangle(Point{2,Float64}(0.0,0.0), Point{2,Float64}(0.0,0.0))
-    (x1,x2,y1,y2) = tup
-    Rectangle(Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
-end
-
 
 include("paths/Paths.jl")
 import .Paths: Path, adjust!, launch!, meander! #,attach!
@@ -226,20 +235,6 @@ function render(r::Rectangle, s::Rectangles.Rounded, name, layer, datatype)
     render(p, name=name, layer=layer, datatype=datatype)
 end
 
-include("polygons/Polygons.jl")
-import .Polygons: Polygon, gpc_clip, clip, offset,
-    CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
-    JT_SQUARE, JT_ROUND, JT_MITER,
-    ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
-    PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
-export Polygons
-export Polygon
-export gpc_clip, clip, offset
-export CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
-    JT_SQUARE, JT_ROUND, JT_MITER,
-    ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
-    PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
-
 include("Tags.jl")
 import .Tags: qrcode, radialstub
 export Tags
@@ -256,12 +251,6 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
         b
     end
 end
-
-include("Cells.jl")
-import .Cells: Cell, CellReference
-export Cells
-export Cell
-export CellReference
 
 include("GDS.jl")
 import .GDS: GDS64

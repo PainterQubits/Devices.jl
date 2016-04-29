@@ -7,6 +7,8 @@ import ..Rectangles: Rectangle
 import ..Polygons: Polygon
 using ..Cells
 
+import FileIO: File, @format_str, load, save, stream, magic
+
 export GDS64
 export gdsbegin, gdsend, gdswrite
 
@@ -49,14 +51,92 @@ const NODETYPE     = 0x2A02
 const PROPATTR     = 0x2B02
 const PROPVALUE    = 0x2C06
 
+"""
+`abstract GDSFloat <: Real`
+
+Floating-point formats found in GDS-II files.
+"""
 abstract GDSFloat <: Real
+
+"""
+`bitstype 64 GDS64 <: GDSFloat`
+
+"8-byte (64-bit) real" format found in GDS-II files.
+"""
 bitstype 64 GDS64 <: GDSFloat
 
-bits(x::GDS64) = bin(reinterpret(UInt64,x),64)
+"""
+`bits(x::GDS64)`
+
+A string giving the literal bit representation of a GDS64 number.
+"""
+bits(x::GDS64) = bits(reinterpret(UInt64,x))
+
+"""
+`bswap(x::GDS64)`
+
+Byte-swap a GDS64 number. Used implicitly by `hton`, `ntoh` for endian conversion.
+"""
 bswap(x::GDS64) = Intrinsics.box(GDS64, Base.bswap_int(Intrinsics.unbox(GDS64,x)))
-write(s::IO, x::GDS64) = write(s, reinterpret(UInt64, x))    # check for v0.5
+
+function convert{T<:AbstractFloat}(::Type{GDS64}, y::T)
+    !isfinite(y) && error("May we suggest you consider using ",
+                          "only finite numbers in your CAD file.")
+
+    inty      = reinterpret(UInt64, convert(Float64, y))
+    neg       = 0x8000000000000000
+    pos       = 0x7fffffffffffffff
+    smask     = 0x000fffffffffffff
+    hiddenbit = 0x0010000000000000
+    z         = 0x0000000000000000
+
+    significand = (smask & inty) | hiddenbit
+    floatexp    = (pos & inty) >> 52
+
+    if floatexp <= 0x00000000000002fa   # 762
+        # too small to represent
+        result = 0x0000000000000000
+    else
+        while floatexp & 3 != 2         # cheap modulo
+            floatexp += 1
+            significand >>= 1
+        end
+        result = ((floatexp-766) >> 2) << 56
+        result |= (significand << 3)
+    end
+    reinterpret(GDS64, (y < 0. ? result | neg : result & pos))
+end
+
+function convert(::Type{Float64}, y::GDS64)
+    inty   = reinterpret(UInt64, y)
+    smask  = 0x00ffffffffffffff
+    emask  = 0x7f00000000000000
+    result = 0x8000000000000000 & inty
+
+    significand = (inty & smask)
+    significand == 0 && return result
+    significand >>= 4
+
+    exponent = (((inty & emask) >> 56) * 4 + 767)
+    while significand & 0x0010000000000000 == 0
+        significand <<= 1
+        exponent -= 1
+    end
+
+    significand &= 0x000fffffffffffff
+    result |= (exponent << 52)
+    result |= significand
+    reinterpret(Float64, result)
+end
 
 gdswerr(x) = error("Wrong data type for token 0x$(hex(x,4)).")
+
+"""
+`write(s::IO, x::GDS64)`
+
+Write a GDS64 number to an IO stream.
+"""
+write(s::IO, x::GDS64) = write(s, reinterpret(UInt64, x))    # check for v0.5
 
 function gdswrite(io::IO, x::UInt16)
     (x & 0x00ff != 0x0000) && gdswerr(x)
@@ -73,10 +153,12 @@ end
 
 function gdswrite(io::IO, x::UInt16, y::ASCIIString)
     (x & 0x00ff != 0x0006) && gdswerr(x)
+    z = y
+    mod(length(z),2) == 1 && (z*="\0")
     l = length(y) + 2
     l+2 > 0xFFFF && error("Too many bytes in record for GDS-II format.")    # 7fff?
     write(io, hton(UInt16(l+2))) +
-    write(io, hton(x), y)
+    write(io, hton(x), z)
 end
 
 gdswrite(io::IO, x::UInt16, y::AbstractFloat...) =
@@ -95,46 +177,14 @@ function gdswrite(io::IO, x::UInt16, y::Int...)
     end
 end
 
-function convert{T<:AbstractFloat}(::Type{GDS64}, y::T)
-    inty      = reinterpret(UInt64, convert(Float64, y))
-    neg       = 0x8000000000000000
-    pos       = 0x7fffffffffffffff
-    smask     = 0x000fffffffffffff
-    hiddenbit = 0x0010000000000000
-    z         = 0x0000000000000000
-
-    significand = (smask & inty) | hiddenbit
-    floatexp    = (pos & inty) >> 52
-
-    if floatexp <= 0x00000000000002fa   # 762
-        # too small to represent
-        result = 0x0000000000000000
-    else
-        # we ignore trouble with very large exponents
-        while floatexp & 3 != 2         # cheap modulo
-            floatexp += 1
-            significand >>= 1
-        end
-        result = ((floatexp-766) >> 2) << 56
-        result |= (significand << 3)
-    end
-    Intrinsics.box(GDS64, (y < 0. ? result | neg : result & pos))
-end
-
-# Yet to be implemented
-#
-# function convert(::Type{Float64}, y::GDS64)
-#
-# end
-
-function gdsbegin(io::IO, libname::ASCIIString, precision, unit, acc::DateTime=now())
-    dt   = now()
-    y    = UInt16(Dates.Year(dt))
-    mo   = UInt16(Dates.Month(dt))
-    d    = UInt16(Dates.Day(dt))
-    h    = UInt16(Dates.Hour(dt))
-    min  = UInt16(Dates.Minute(dt))
-    s    = UInt16(Dates.Second(dt))
+function gdsbegin(io::IO, libname::ASCIIString,
+        precision, unit, modify::DateTime, acc::DateTime)
+    y    = UInt16(Dates.Year(modify))
+    mo   = UInt16(Dates.Month(modify))
+    d    = UInt16(Dates.Day(modify))
+    h    = UInt16(Dates.Hour(modify))
+    min  = UInt16(Dates.Minute(modify))
+    s    = UInt16(Dates.Second(modify))
 
     y1   = UInt16(Dates.Year(acc))
     mo1  = UInt16(Dates.Month(acc))
@@ -143,7 +193,7 @@ function gdsbegin(io::IO, libname::ASCIIString, precision, unit, acc::DateTime=n
     min1 = UInt16(Dates.Minute(acc))
     s1   = UInt16(Dates.Second(acc))
 
-    gdswrite(io, HEADER, GDSVERSION) +
+    # gdswrite(io, HEADER, GDSVERSION) +
     gdswrite(io, BGNLIB, y,mo,d,h,min,s, y1,mo1,d1,h1,min1,s1) +
     gdswrite(io, LIBNAME, libname) +
     gdswrite(io, UNITS, precision/unit, precision)
@@ -186,7 +236,7 @@ function gdswrite{T}(io::IO, el::AbstractPolygon{T})
     xy .*= 1e3
     xy = round(xy)
     xyInt =  convert(Array{Int32,1}, xy)
-    bytes += gdswrite(io, XY, xyInt..., xyInt[1])   # closed polygons
+    bytes += gdswrite(io, XY, xyInt..., xyInt[1], xyInt[2])   # closed polygons
     bytes += gdswrite(io, ENDEL)
 end
 
@@ -195,7 +245,7 @@ function gdswrite(io::IO, el::CellReference; unit=1e-6, precision=1e-9)
     bytes += gdswrite(io, SNAME, el.cell.name)
 
     bits = 0x0000
-    values = ()
+
     el.xrefl && (bits += 0x8000)
     if el.mag != 1.0
         bits += 0x0004
@@ -227,5 +277,20 @@ function layercheck(layer)
 end
 
 gdsend(io::IO) = gdswrite(io, ENDLIB)
+
+function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
+        name="GDSIII", precision=1e-9, unit=1e-6, modify=now(), acc=now())
+    open(f, "w") do s
+        io = stream(s)
+        bytes = 0
+        bytes += write(s, magic(format"GDS"))
+        bytes += gdsbegin(io, name, precision, unit, modify, acc)
+        bytes += gdswrite(io, cell0)
+        for c in cell
+            bytes += gdswrite(io, c)
+        end
+        bytes += gdsend(io)
+    end
+end
 
 end
