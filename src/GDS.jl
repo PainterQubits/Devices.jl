@@ -12,6 +12,10 @@ import FileIO: File, @format_str, load, save, stream, magic
 export GDS64
 export gdsbegin, gdsend, gdswrite
 
+# Used if a polygon does not specify a layer or datatype.
+const DEFAULT_LAYER = 0
+const DEFAULT_DATATYPE = 0
+
 const GDSVERSION   = UInt16(600)
 const HEADER       = 0x0002
 const BGNLIB       = 0x0102
@@ -222,50 +226,86 @@ function gdswrite(io::IO, cell::Cell)
     for x in cell.elements
         bytes += gdswrite(io, x)
     end
+    for x in cell.refs
+        bytes += gdswrite(io, x)
+    end
     bytes += gdswrite(io, ENDSTR)
 end
 
 # Do we want to write BOX elements for Rectangles? Probably not.
-function gdswrite{T}(io::IO, el::AbstractPolygon{T})
+function gdswrite{T}(io::IO, el::AbstractPolygon{T}; unit=1e-6, precision=1e-9)
     poly  =  convert(Polygon{T}, el)
     bytes =  gdswrite(io, BOUNDARY)
-    bytes += gdswrite(io, LAYER, 0)
-    bytes += gdswrite(io, DATATYPE, 0)
+    props = el.properties
+    layer = haskey(props, :layer) ? props[:layer] : DEFAULT_LAYER
+    datatype = haskey(props, :datatype) ? props[:datatype] : DEFAULT_DATATYPE
+    bytes += gdswrite(io, LAYER, layer)
+    bytes += gdswrite(io, DATATYPE, datatype)
 
     xy = reinterpret(T, poly.p)
-    xy .*= 1e3
+    xy .*= unit/precision
     xy = round(xy)
     xyInt =  convert(Array{Int32,1}, xy)
     bytes += gdswrite(io, XY, xyInt..., xyInt[1], xyInt[2])   # closed polygons
     bytes += gdswrite(io, ENDEL)
 end
 
-function gdswrite(io::IO, el::CellReference; unit=1e-6, precision=1e-9)
+function gdswrite(io::IO, ref::CellReference; unit=1e-6, precision=1e-9)
     bytes =  gdswrite(io, SREF)
-    bytes += gdswrite(io, SNAME, el.cell.name)
+    bytes += gdswrite(io, SNAME, ref.cell.name)
 
-    bits = 0x0000
+    bytes += strans(io, ref)
 
-    el.xrefl && (bits += 0x8000)
-    if el.mag != 1.0
-        bits += 0x0004
-    end
-    if el.rot != 0.0
-        bits += 0x0002
-    end
-
-    bits != 0 && (bytes += gdswrite(io, STRANS, bits))
-    bits & 0x0004 > 0 && (bytes += gdswrite(io, MAG, el.mag))
-    bits & 0x0002 > 0 && (bytes += gdswrite(io, ANGLE, el.rot))
-
-    o = el.origin * unit/precision
+    o = ref.origin * unit/precision
     x,y = Int(round(getx(o))), Int(round(gety(o)))
     bytes += gdswrite(io, XY, x, y)
     bytes += gdswrite(io, ENDEL)
 end
 
+function gdswrite(io::IO, a::CellArray; unit=1e-6, precision=1e-9)
+    colrowcheck(a.cols)
+    colrowcheck(a.rows)
+
+    bytes =  gdswrite(io, AREF)
+    bytes += gdswrite(io, SNAME, a.cell.name)
+
+    bytes += strans(io, a)
+
+    gdswrite(io, COLROW, a.col, a.row)
+    o = a.origin * unit/precision
+    dc = a.deltacol * unit/precision
+    dr = a.deltarow * unit/precision
+    x,y = Int(round(getx(o))), Int(round(gety(o)))
+    cx,cy = Int(round(getx(o)))*a.col, Int(round(gety(o)))*a.col
+    rx,ry = Int(round(getx(o)))*a.row, Int(round(gety(o)))*a.row
+    bytes += gdswrite(io, XY, cx, cy, x, y, rx, ry)
+    bytes += gdswrite(io, ENDEL)
+end
+
+function strans(io::IO, ref)
+    bits = 0x0000
+
+    ref.xrefl && (bits += 0x8000)
+    if ref.mag != 1.0
+        bits += 0x0004
+    end
+    if ref.rot != 0.0
+        bits += 0x0002
+    end
+    bytes = 0
+    bits != 0 && (bytes += gdswrite(io, STRANS, bits))
+    bits & 0x0004 > 0 && (bytes += gdswrite(io, MAG, ref.mag))
+    bits & 0x0002 > 0 && (bytes += gdswrite(io, ANGLE, ref.rot))
+    bytes
+end
+
+function colrowcheck(c)
+    (0 <= c <= 32767) ||
+        warn("The GDS-II spec only permits 0 to 32767 rows or columns.")
+end
+
 function namecheck(a::ASCIIString)
-    invalid = r"[^A-Za-z0-9_\?\$]+"
+    invalid = r"[^A-Za-z0-9_\?\0\$]+"
     (length(a) > 32 || ismatch(invalid, a)) && warn(
         "The GDS-II spec says that cell names must only have characters A-Z, a-z, ",
         "0-9, '_', '?', '\$', and be less than or equal to 32 characters long."
@@ -279,18 +319,47 @@ end
 gdsend(io::IO) = gdswrite(io, ENDLIB)
 
 function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
-        name="GDSIII", precision=1e-9, unit=1e-6, modify=now(), acc=now())
+        name="GDSIILIB", precision=1e-9, unit=1e-6, modify=now(), acc=now(),
+        verbose=false)
+    pad = mod(length(name), 2) == 1 ? "\0" : ""
     open(f, "w") do s
         io = stream(s)
         bytes = 0
-        bytes += write(s, magic(format"GDS"))
-        bytes += gdsbegin(io, name, precision, unit, modify, acc)
-        bytes += gdswrite(io, cell0)
+        bytes += write(io, magic(format"GDS"))
+        bytes += gdsbegin(io, name*pad, precision, unit, modify, acc)
+        a = Tuple{Int,Cell}[]
+        traverse!(a, cell0)
         for c in cell
+            traverse!(a, c)
+        end
+        if verbose
+            info("Traversal tree:")
+            display(a)
+            print("\n")
+        end
+        ordered = order!(a)
+        if verbose
+            info("Cells written in order:")
+            display(ordered)
+            print("\n")
+        end
+        for c in ordered
             bytes += gdswrite(io, c)
         end
         bytes += gdsend(io)
     end
+end
+
+function traverse!(a::AbstractArray, c::Cell, level=1)
+    push!(a, (level, c))
+    for ref in c.refs
+        traverse!(a, ref.cell, level+1)
+    end
+end
+
+function order!(a::AbstractArray)
+    a = sort!(a, lt=(x,y)->x[1]<y[1], rev=true)
+    unique(map(x->x[2], a))
 end
 
 end

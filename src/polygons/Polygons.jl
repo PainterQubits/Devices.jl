@@ -9,7 +9,7 @@ using ..Rectangles
 import Base: +, -, *, /, minimum, maximum, convert
 import Devices
 import Devices: AbstractPolygon
-import Devices: bounds, render
+import Devices: bounds
 gdspy() = Devices._gdspy
 pyclipper() = Devices._pyclipper
 
@@ -26,27 +26,35 @@ Polygon defined by list of coordinates (not repeating start).
 """
 type Polygon{T<:Real} <: AbstractPolygon{T}
     p::Array{Point{2,T},1}
+    properties::Dict{Symbol, Any}
+    Polygon(x,y) = new(x,y)
+    Polygon(x) = new(x, Dict{Symbol, Any}())
 end
-Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T}, p3::Point{2,T}...) =
-    Polygon{T}([p0, p1, p2, p3...])
+Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}; kwargs...) =
+    Polygon{T}(parr, Dict{Symbol,Any}(kwargs))
+Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, kwargs) =
+    Polygon{T}(parr, kwargs)
+Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
+    p3::Point{2,T}...; kwargs...) =
+        Polygon{T}([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
 points(x::Polygon) = x.p
 points{T<:Real}(x::Rectangle{T}) = points(convert(Polygon{T}, x))
 
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
     @eval function ($op)(r::Polygon, p::Point)
-        Polygon(($dotop)(r.p, p))
+        Polygon(($dotop)(r.p, p), r.properties)
     end
     @eval ($op)(p::Point, r::Polygon) = ($op)(r,p)
 end
-*(r::Polygon, a::Real) = Polygon(r.p .* a)
+*(r::Polygon, a::Real) = Polygon(r.p .* a, r.properties)
 *(a::Real, r::Polygon) = *(r,a)
-/(r::Polygon, a::Real) = Rectangle(r.p ./ a)
+/(r::Polygon, a::Real) = Polygon(r.p ./ a, r.properties)
 
 minimum(x::Polygon) = minimum(x.p)
 maximum(x::Polygon) = maximum(x.p)
 
 function *(a::AffineTransform, x::Polygon)
-    Polygon(map(x->Point(a*Array(x)), x.p))
+    Polygon(map(x->Point(a*Array(x)), x.p), x.properties)
 end
 *{T<:Real}(a::AffineTransform, x::Rectangle{T}) = *(a, convert(Polygon{T}, x))
 
@@ -98,7 +106,7 @@ function convert{T<:Real}(::Type{Polygon{T}}, s::Rectangle)
     ur = convert(Point{2,T}, s.ur)
     lr = Point(T(getx(ur)), T(gety(ll)))
     ul = Point(T(getx(ll)), T(gety(ur)))
-    Polygon(Point{2,T}[ll,lr,ur,ul])
+    Polygon{T}(Point{2,T}[ll,lr,ur,ul], s.properties)
 end
 
 bounds(p::Polygon) = Rectangle(minimum(p), maximum(p))
@@ -115,20 +123,6 @@ abstract Style
 
 "Simple solid polygon."
 type Plain <: Style end
-
-"""
-Render a rect `r` to the cell with name `name`.
-Keyword arguments give a `layer` and `datatype` (default to 0).
-"""
-function render(r::Polygon, s::Style=Plain(); name="main", layer::Real=0, datatype::Real=0)
-    c = cell(name)
-    gr = gdspy()[:Polygon](r.p,layer=layer,datatype=datatype)
-    c[:add](gr)
-end
-
-# function render(r::Tristrip, ::Plain; name="main", layer::Real=0, datatype::Real=0)
-#
-# end
 
 include("GPC.jl")
 include("PyClipper.jl")

@@ -1,11 +1,12 @@
 module Tags
 
 import Devices
-import Devices: render
+import Devices: render!
 using Devices.Paths
 using Devices.Rectangles
 using Devices.Polygons
 using Devices.Points
+using Devices.Cells
 qr() = Devices._qr
 gdspy() = Devices._gdspy
 
@@ -34,11 +35,12 @@ function qrcode(a::AbstractString, name::ASCIIString; pixel=1.0, layer=0, dataty
         y -= pixel
     end
 
+    c = Cell(name)
     for r in rects
         r += Point(y/2, -y/2)
-        render(r, Rectangles.Plain(), name=name, layer=layer, datatype=datatype)
+        render!(c, r, Rectangles.Plain(), layer=layer, datatype=datatype)
     end
-    nothing
+    c
 end
 
 function radialstub(r, Θ, c, name::ASCIIString; narc=197)
@@ -55,8 +57,9 @@ function radialstub(r, Θ, c, name::ASCIIString; narc=197)
     c != 0.0 && push!(pts, Paths.origin(p))
     poly = Polygon(pts) + Point(0.0, c) # + Point(0.0, (r-c)/2)
 
-    render(poly, Polygons.Plain(), name=name)
-    nothing
+    cell = Cell(name)
+    render!(cell, poly, Polygons.Plain())
+    cell
 end
 
 end

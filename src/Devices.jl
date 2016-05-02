@@ -44,14 +44,14 @@ export boolean
 export bounds
 export heal
 export intersect
-export render
+export render!
 export union
 export view
 export xor
 
 export interdigit
 
-function render end
+function render! end
 
 include("Points.jl")
 import .Points: Point, getx, gety, setx!, sety!
@@ -159,11 +159,11 @@ export CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
     PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
 
 include("Cells.jl")
-import .Cells: Cell, CellReference
+import .Cells: Cell, CellArray, CellReference
 export Cells
 export Cell
+export CellArray
 export CellReference
-
 
 """
 `bounds(name::AbstractString, layer::Integer, datatype::Integer)`
@@ -196,19 +196,18 @@ export simplify!
 export straight!
 export turn!
 
-function render(r::Rectangle, s::Rectangles.Style=Rectangles.Plain();
-        name="main", layer::Real=0, datatype::Real=0)
-    render(r, s, name, layer, datatype)
+function render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)
+    render!(c, r, s; kwargs...)
 end
 
 """
 Render a rect `r` to the cell with name `name`.
 Keyword arguments give a `layer` and `datatype` (default to 0).
 """
-function render(r::Rectangle, ::Rectangles.Plain, name, layer, datatype)
-    c = cell(name)
-    gr = gdspy()[:Rectangle](r.ll,r.ur,layer=layer,datatype=datatype)
-    c[:add](gr)
+function render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)
+    d = Dict(kwargs)
+    r.properties = merge(r.properties, d)
+    push!(c.elements, r)
 end
 
 """
@@ -216,13 +215,14 @@ Render a rounded rectangle `r` to the cell `name`.
 This is accomplished by rendering a path around the outside of a
 (smaller than requested) solid rectangle.
 """
-function render(r::Rectangle, s::Rectangles.Rounded, name, layer, datatype)
-    c = cell(name)
+function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
+    d = Dict(kwargs)
+    r.properties = merge(r.properties, d)
+
     rad = s.r
     ll, ur = minimum(r), maximum(r)
-    gr = gdspy()[:Rectangle](ll+Point(rad,rad),ur-Point(rad,rad),
-        layer=layer, datatype=datatype)
-    c[:add](gr)
+    gr = Rectangle(ll+Point(rad,rad),ur-Point(rad,rad), r.properties)
+    push!(c.elements, gr)
     p = Path(ll+Point(rad,rad/2), 0.0, Paths.Trace(s.r))
     straight!(p, width(r)-2*rad)
     turn!(p, π/2, rad/2)
@@ -232,7 +232,95 @@ function render(r::Rectangle, s::Rectangles.Rounded, name, layer, datatype)
     turn!(p, π/2, rad/2)
     straight!(p, height(r)-2*rad)
     turn!(p, π/2, rad/2)
-    render(p, name=name, layer=layer, datatype=datatype)
+    render!(c, p; r.properties...)
+end
+
+"""
+`render!(c::Cell, r::Polygon, s::Style=Plain(); layer::Real=0, datatype::Real=0)`
+
+Render a rect `r` to the cell `c`.
+Keyword arguments give a `layer` and `datatype` (default to 0).
+"""
+function render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
+    d = Dict(kwargs)
+    r.properties = merge(r.properties, d)
+    push!(c.elements, r)
+end
+
+"""
+`render!(c::Cell, p::Path; layer::Int=0, datatype::Int=0)`
+
+Render a path `p` to a cell `c`.
+Keyword arguments give a `layer` and `datatype`.
+"""
+function render!(c::Cell, p::Path; kwargs...)
+    for (segment, s) in p
+        render!(c, segment, s; kwargs...)
+    end
+end
+
+"""
+`render!(c::Cell, segment::Segment, s::Style; kwargs...)`
+
+Render a `segment` with style `s` to cell `c`.
+"""
+function render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
+    f = segment.f
+    g(t) = gradient(f,t)
+    last = 0.0
+    first = true
+    gp = gdspy()[:Path](Paths.width(s, 0.0), Point(0.0,0.0),
+        number_of_paths=Paths.paths(s, 0.0), distance=Paths.distance(s, 0.0))
+    for t in Paths.divs(s)
+        if first
+            first = false
+            continue
+        end
+        gp[:parametric](x->f(last+x*(t-last)),
+            curve_derivative=x->g(last+x*(t-last)),
+            final_width=Paths.width(s,t),
+            final_distance=Paths.distance(s,t))
+        for a in gp[:polygons]
+            points = reinterpret(Point{2,Float64}, reshape(transpose(a), length(a)))
+            push!(c.elements, Polygon{Float64}(points, Dict{Symbol,Any}(kwargs)))
+        end
+        gp = gdspy()[:Path](Paths.width(s,t), Point(0.0,0.0),
+            number_of_paths=Paths.paths(s,t), distance=Paths.distance(s,t))
+            last = t
+    end
+end
+
+"""
+`render!(c::Cell, segment::Segment, s::DecoratedStyle; kwargs...)`
+
+Render a `segment` with `DecoratedStyle` `s` to cell `c`.
+This method draws the decorations before the path itself is drawn.
+"""
+function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)
+    for (t, offset, dir, c) in zip(s.ts, s.offsets, s.dirs, s.cells)
+        (dir < -1 || dir > 1) && error("Invalid direction in $s.")
+
+        rect = bounds(c)
+        dtop = gety(maximum(rect)) - (gety(rect.ur+rect.ll)/2)       # distance from center to top
+
+        ∠0 = direction(segment.f, t)
+        if dir == 0
+            ∠ = ∠0-π/2
+            newx = offset*cos(∠)
+            newy = offset*sin(∠)
+            ref = CellReference(c, (segment.f(t) + Point(newx,newy)), rot=∠*180/π)
+        else
+            ∠ = ∠0-π/2
+            offset -= dir * extent(s.s, t)
+            # offset -= dir * dtop
+            newx = offset * cos(∠)
+            newy = offset * sin(∠)
+            rot = (∠0 + (dir == 1 ? π:0)) * 180/π
+            ref = CellReference(c, (segment.f(t)+Point(newx,newy)), rot=rot)
+        end
+        push!(c.refs, ref)
+    end
+    render!(c, segment, s.s; kwargs...)
 end
 
 include("Tags.jl")

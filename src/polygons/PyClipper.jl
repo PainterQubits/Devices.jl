@@ -24,7 +24,7 @@ function clip{S<:Real, T<:Real}(op::ClipperOp, subject::Polygon{S}, clip::Polygo
     pc[:AddPath](c, pyclipper()[:PT_CLIP], true)
     pc[:AddPath](s, pyclipper()[:PT_SUBJECT], true)
     result = pycall(pc[:Execute], PyVector{Array{Point{2,Int64},1}}, Int(op))
-    result2 = map(x->Polygon(convert(Array{Point{2,Float64},1}, x) ./ PCSCALE), result)
+    result2 = map(x->Polygon(convert(Array{Point{2,Float64},1}, x) ./ PCSCALE, subject.properties), result)
     result2
 end
 clip{S<:Real, T<:Real}(op::ClipperOp, s::AbstractPolygon{S}, c::AbstractPolygon{T}) =
@@ -63,6 +63,6 @@ function offset{S<:Real}(subject::Polygon{S}, delta::Real,
 
     result = convert(Array{Point{2,Float64}}, result[1])
     result ./= PCSCALE
-    Polygon(result)
+    Polygon(result, subject.properties)
 end
 offset{T<:Real}(s::Rectangle{T}, args...) = offset(convert(Polygon{T}, s), args...)
