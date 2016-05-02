@@ -13,8 +13,11 @@ const PCSCALE = 2^31
 """
 `clip{S<:Real, T<:Real}(op::ClipperOp, subject::Polygon{S}, clip::Polygon{T})`
 
-To some polygon `subject`, clip by polygon `clip` using operation `op` from the
+Clip polygon `subject` by polygon `clip` using operation `op` from the
 [Clipper library](http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm).
+The [Python wrapper](https://github.com/greginvm/pyclipper) over the C++ library is used.
+
+Valid `ClipperOp` include `CT_INTERSECTION`, `CT_UNION`, `CT_DIFFERENCE`, `CT_XOR`.
 """
 function clip{S<:Real, T<:Real}(op::ClipperOp, subject::Polygon{S}, clip::Polygon{T})
     pc = pyclipper()[:Pyclipper]()

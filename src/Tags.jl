@@ -16,7 +16,7 @@ export radialstub
 """
 `qrcode(a::AbstractString, name::ASCIIString; pixel=10.0)`
 
-Renders a QR code of the string `a` to cell `name` with pixel size `pixel`.
+Renders a QR code of the string `a` with pixel size `pixel` to a new cell with `name`.
 """
 function qrcode(a::AbstractString, name::ASCIIString; pixel=1.0, layer=0, datatype=0)
     myqr = qr()[:create](a)

@@ -23,12 +23,12 @@ immutable GPCTristrip
 end
 
 """
-`gpc_clip(op::GPCOp, subject::Polygon{Cdouble}, clip::Polygon{Cdouble})`
+`clip(op::GPCOp, subject::Polygon{Cdouble}, clip::Polygon{Cdouble})`
 
 Use the GPC clipping library to do polygon manipulations.
 Valid GPCOp include `GPC_DIFF`, `GPC_INT`, `GPC_XOR`, `GPC_UNION`.
 """
-function gpc_clip(op::GPCOp, subject::Polygon{Cdouble}, clip::Polygon{Cdouble})
+function clip(op::GPCOp, subject::Polygon{Cdouble}, clip::Polygon{Cdouble})
     # Prepare polygons for use with GPC
     v_subj = reinterpret(GPCVertex, subject.p)
     v_clip = reinterpret(GPCVertex, clip.p)

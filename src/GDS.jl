@@ -318,6 +318,22 @@ end
 
 gdsend(io::IO) = gdswrite(io, ENDLIB)
 
+"""
+```
+save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
+name="GDSIILIB", precision=1e-9, unit=1e-6, modify=now(), acc=now(),
+verbose=false)`
+```
+
+This method is implicitly called when you use the convenient syntax:
+`save("/path/to/my.gds", cells_i_want_to_save...)`
+
+The `name` keyword argument is used for the internal library name of the GDS-II
+file and is probably inconsequential for modern workflows.
+
+The `verbose` keyword argument allows you to monitor the output of [`traverse!`]({ref})
+and [`order!`]({ref}) if something funny is happening while saving.
+"""
 function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
         name="GDSIILIB", precision=1e-9, unit=1e-6, modify=now(), acc=now(),
         verbose=false)
@@ -348,18 +364,6 @@ function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
         end
         bytes += gdsend(io)
     end
-end
-
-function traverse!(a::AbstractArray, c::Cell, level=1)
-    push!(a, (level, c))
-    for ref in c.refs
-        traverse!(a, ref.cell, level+1)
-    end
-end
-
-function order!(a::AbstractArray)
-    a = sort!(a, lt=(x,y)->x[1]<y[1], rev=true)
-    unique(map(x->x[2], a))
 end
 
 end

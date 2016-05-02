@@ -1,19 +1,15 @@
-
-
 ## Points
 
 Points are implemented using the abstract type `FixedVectorNoTuple`
 from [FixedSizeArrays.jl](https://github.com/SimonDanisch/FixedSizeArrays.jl).
 This permits a fast, efficient representation of
-coordinates in the plane, which would not be true using ordinary `Array` objects,
-which can have variable length. Additionally, unlike `Tuple` objects, we can
+coordinates in the plane. Additionally, unlike `Tuple` objects, we can
 add points together, simplifying many function definitions.
 
 To interface with gdspy, we simply convert the `Point` object to a `Tuple` and
 let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
 
     {docs}
-    Points.Point
     Points.getx
     Points.gety
 
@@ -38,6 +34,8 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
 ### Path interrogation
 
     {docs}
+    Paths.direction
+    Paths.pathlength
     Paths.origin
     Paths.setorigin!
     Paths.α0
@@ -50,19 +48,42 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
 ### Path building
 
     {docs}
+    adjust!
     launch!
     meander!
+    param
+    simplify!
     straight!
     turn!
 
-### Rendering
-
+### Interfacing with gdspy
     {docs}
-    preview
-    render
-    view
+    Paths.distance
+    Paths.extent
+    Paths.paths
+    Paths.width
 
 ## Polygons
+
+### Rectangles
+    {docs}
+    Rectangle
+    bounds(::Rectangle)
+    center(::Rectangle)
+    height(::Rectangle)
+    minimum(::Rectangle)
+    maximum(::Rectangle)
+    width(::Rectangle)
+
+### Polygons
+
+    {docs}
+    Polygon
+    bounds(::Polygon)
+    bounds{T<:Devices.AbstractPolygon}(::AbstractArray{T})
+    bounds(::Devices.AbstractPolygon, ::Devices.AbstractPolygon...)
+    minimum(::Polygon)
+    maximum(::Polygon)
 
 ### Clipping and offsetting
 
@@ -79,15 +100,32 @@ Clipper does not seem to support triangle strips so although the clipping is
 probably superior we cannot use it easily for now.
 
     {docs}
+    clip
     offset
 
-## Interfacing with gdspy
+
+## Cells
 
     {docs}
-    Paths.distance
-    Paths.extent
-    Paths.paths
-    Paths.width
+    Cell
+    CellArray
+    CellReference
+    bounds(::Cell)
+    bounds(::CellReference)
+    traverse!
+    order!
+
+## Rendering
+
+    {docs}
+    render!
+
+## Saving patterns
+
+To save a pattern, make sure you are `using FileIO`.
+
+    {docs}
+    save(::File{format"GDS"}, ::Cell, ::Cell...)
 
 ## Index
     {index}

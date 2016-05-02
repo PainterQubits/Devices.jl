@@ -17,7 +17,7 @@ export Polygon
 export Tristrip
 export Plain
 export points
-export gpc_clip, clip, offset
+export clip, offset
 
 """
 `type Polygon{T<:Real}`
@@ -50,7 +50,20 @@ end
 *(a::Real, r::Polygon) = *(r,a)
 /(r::Polygon, a::Real) = Polygon(r.p ./ a, r.properties)
 
+"""
+`minimum(x::Polygon)`
+
+Return the lower-left-most corner of a rectangle bounding polygon `x`.
+Note that this point doesn't have to be in the polygon.
+"""
 minimum(x::Polygon) = minimum(x.p)
+
+"""
+`maximum(x::Polygon)`
+
+Return the upper-right-most corner of a rectangle bounding polygon `x`.
+Note that this point doesn't have to be in the polygon.
+"""
 maximum(x::Polygon) = maximum(x.p)
 
 function *(a::AffineTransform, x::Polygon)
@@ -67,13 +80,15 @@ only used for interfacing with GPC.
 """
 type Tristrip{T<:Real}
     p::Array{Point{2,T},1}
+    properties::Dict{Symbol,Any}
 end
-Tristrip{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T}, p3::Point{2,T}...) =
-    Tristrip{T}([p0, p1, p2, p3...])
+Tristrip{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
+    p3::Point{2,T}...; kwargs...) =
+    Tristrip{T}([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
 points(x::Tristrip) = x.p
 
 function +(r::Tristrip, p::Point)
-    Tristrip(r.p .+ p)
+    Tristrip(r.p .+ p, r.properties)
 end
 +(p::Point, r::Tristrip) = +(r,p)
 
@@ -109,13 +124,31 @@ function convert{T<:Real}(::Type{Polygon{T}}, s::Rectangle)
     Polygon{T}(Point{2,T}[ll,lr,ur,ul], s.properties)
 end
 
+"""
+`bounds(p::Polygon)`
+
+Return a bounding Rectangle with no properties for polygon `p`.
+"""
 bounds(p::Polygon) = Rectangle(minimum(p), maximum(p))
-function bounds{T<:AbstractPolygon}(parr::AbstractArray{T,1})
+
+"""
+`bounds{T<:AbstractPolygon}(parr::AbstractArray{T,1})`
+
+Return a bounding `Rectangle` with no properties for an array `parr` of
+`AbstractPolygon`s.
+"""
+function bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
     rects = map(bounds, parr)
     ll = minimum(map(minimum, rects))
     ur = maximum(map(maximum, rects))
     Rectangle(ll, ur)
 end
+
+"""
+`bounds(p0::AbstractPolygon, p::AbstractPolygon...)`
+
+Return a bounding `Rectangle` with no properties for several `AbstractPolygon`s.
+"""
 bounds(p0::AbstractPolygon, p::AbstractPolygon...) = bounds([p0, p...])
 
 "How to draw the polygon..."

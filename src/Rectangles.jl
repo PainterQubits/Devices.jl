@@ -18,7 +18,11 @@ export center
 export height
 export width
 
-"Rectangle, defined by lower-left and upper-right x,y coordinates."
+"""
+`type Rectangle{T<:Real} <: AbstractPolygon{T}`
+
+A rectangle, defined by opposing corner coordinates.
+"""
 type Rectangle{T<:Real} <: AbstractPolygon{T}
     ll::Point{2,T}
     ur::Point{2,T}
@@ -29,12 +33,46 @@ Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}; kwargs...) =
 Rectangle{T<:Real}(width::T, height::T; kwargs...) = Rectangle{typeof(one(T)/2)}(
     Point(-width/2, -height/2), Point(width/2, height/2), Dict{Symbol,Any}(kwargs))
 
+"""
+`width(r::Rectangle)`
+
+Return the width of a rectangle.
+"""
 width(r::Rectangle) = abs(getx(r.ur)-getx(r.ll))
+
+"""
+`height(r::Rectangle)`
+
+Return the height of a rectangle.
+"""
 height(r::Rectangle) = abs(gety(r.ur)-gety(r.ll))
-bounds(p::Rectangle) = p
+
+"""
+`bounds(r::Rectangle)`
+
+No-op (just returns `r`).
+"""
+bounds(r::Rectangle) = r
+
+"""
+`center(r::Rectangle)`
+
+Returns a Point corresponding to the center of the rectangle.
+"""
 center(r::Rectangle) = (r.ur+r.ll)/2
 
+"""
+`minimum(r::Rectangle)`
+
+Returns the lower-left corner of a rectangle (Point object).
+"""
 minimum(r::Rectangle) = min(r.ll, r.ur)
+
+"""
+`maximum(r::Rectangle)`
+
+Returns the upper-right corner of a rectangle (Point object).
+"""
 maximum(r::Rectangle) = max(r.ll, r.ur)
 
 for op in [:+, :-]
@@ -48,14 +86,14 @@ end
 *(a::Real, r::Rectangle) = *(r,a)
 /(r::Rectangle, a::Real) = Rectangle(/(r.ll,a), /(r.ur,a), r.properties)
 
-"How to draw the rectangle..."
+"How to draw the rectangle."
 abstract Style
 
 "Simple solid rectangle."
 type Plain <: Style
 end
 
-"The corners are rounded off (bounding box of the plain rectangle unaffected)."
+"The corners are rounded off (bounding box of the unstyled rectangle unaffected)."
 type Rounded <: Style
     r::Float64
 end

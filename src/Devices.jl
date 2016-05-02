@@ -8,6 +8,7 @@ import FileIO: save
 import FixedSizeArrays: Point
 import Base: cell, length, show, .+, .-
 
+# The PyNULL() and __init__() are necessary to use PyCall with precompiled modules.
 const _gdspy = PyCall.PyNULL()
 const _pyclipper = PyCall.PyNULL()
 const _qr = PyCall.PyNULL()
@@ -17,6 +18,8 @@ function __init__()
     copy!(_qr, pyimport("pyqrcode"))
     copy!(_pyclipper, pyimport("pyclipper"))
     @osx_only push!(Libdl.DL_LOAD_PATH, joinpath(Pkg.dir("Devices"), "deps"))
+
+    # The magic bytes specify GDS version 6.0.0, which probably everyone is using
     add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02, 0x02, 0x58], ".gds")
 end
 
@@ -39,15 +42,9 @@ export FEATURES_LAYER
 export UNIT
 export PRECISION
 
-export andnot
-export boolean
 export bounds
 export heal
-export intersect
 export render!
-export union
-export view
-export xor
 
 export interdigit
 
@@ -57,69 +54,6 @@ include("Points.jl")
 import .Points: Point, getx, gety, setx!, sety!
 export Points
 export Point, getx, gety, setx!, sety!
-
-and(x,y) = x & y
-or(x,y) = x | y
-xor(x,y) = x $ y
-andnot(x,y) = x &~ y
-
-union(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
-    boolean(iterable, name, layer, datatype, (x...)->reduce(or, [x...]))
-intersect(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
-    boolean(iterable, name, layer, datatype, (x...)->reduce(and, [x...]))
-xor(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
-    boolean(iterable, name, layer, datatype, (x...)->reduce(xor, [x...]))
-andnot(iterable::AbstractArray, name, layer::Integer, datatype::Integer) =
-    boolean(iterable, name, layer, datatype, (x...)->reduce(andnot, [x...]))
-
-"""
-Performs a boolean operation.
-"""
-function boolean(iterable::AbstractArray, name,
-        layer::Integer, datatype::Integer, λ::Function)
-    newp = gdspy()[:boolean](iterable, λ, layer=layer, datatype=datatype)
-    c = cell(name)
-    c[:add](newp)
-end
-
-"Return a PyObject representing a cell."
-function cell(name)
-    C = gdspy()[:Cell]
-    dict = C[:cell_dict]
-    if haskey(dict, name)
-        c = dict[name]
-    else
-        c = C(name)
-    end
-    return c
-end
-
-"Get polygons from `cell`, `layer`, and `datatype`."
-function get_polygons(name::AbstractString, layer::Integer, datatype::Integer)
-    c = cell(name)
-    gdspy()[:PolygonSet](c[:get_polygons](by_spec=true)[(layer,datatype)])
-end
-
-"Get all polygons from cell `name`."
-function get_polygons(name::AbstractString)
-    c = cell(name)
-    gdspy()[:PolygonSet](c[:get_polygons]())
-end
-
-"""
-Will remove overlaps and may reduce polygon count, depending on geometry.
-Seems a little bit slow. Healing may also be done in Beamer. YMMV.
-"""
-function heal(name, layer0, datatype0, newname, layer, datatype)
-    plgs = get_polygons(name, layer0, datatype0)
-    λ = pyeval("lambda p1: p1")
-    newp = gdspy()[:boolean]([plgs], λ, layer=layer, datatype=datatype)
-    c = cell(newname)
-    c[:add](newp)
-end
-
-"Launch a LayoutViewer window."
-view() = gdspy()[:LayoutViewer]()
 
 function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, layer=FEATURES_LAYER)
     c = gdspy()[:Cell](cellname)
@@ -134,6 +68,12 @@ end
 
 function bounds end
 
+"""
+`abstract AbstractPolygon{T}`
+
+Anything you could call a polygon regardless of the underlying representation.
+Currently only `Rectangle` or `Polygon` are concrete subtypes.
+"""
 abstract AbstractPolygon{T}
 
 include("Rectangles.jl")
@@ -145,40 +85,24 @@ export height
 export width
 
 include("polygons/Polygons.jl")
-import .Polygons: Polygon, gpc_clip, clip, offset,
+import .Polygons: Polygon, clip, offset,
     CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
     JT_SQUARE, JT_ROUND, JT_MITER,
     ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
     PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
 export Polygons
 export Polygon
-export gpc_clip, clip, offset
+export clip, offset
 export CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
     JT_SQUARE, JT_ROUND, JT_MITER,
     ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
     PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
 
 include("Cells.jl")
-import .Cells: Cell, CellArray, CellReference
+import .Cells: Cell, CellArray, CellReference, traverse!, order!
 export Cells
-export Cell
-export CellArray
-export CellReference
-
-"""
-`bounds(name::AbstractString, layer::Integer, datatype::Integer)`
-
-Returns coordinates for a bounding box around all polygons of `layer`
-and `datatype` in cell `name`. The return format is ((x1,y1),(x2,y2)).
-"""
-function bounds(name, layer::Integer, datatype::Integer)
-    p = get_polygons(name,layer,datatype)
-    tup = p[:get_bounding_box]()
-    tup == nothing &&
-        return Rectangle(Point{2,Float64}(0.0,0.0), Point{2,Float64}(0.0,0.0))
-    (x1,x2,y1,y2) = tup
-    Rectangle(Point{2,Float64}(x1,y1),Point{2,Float64}(x2,y2))
-end
+export Cell, CellArray, CellReference
+export traverse!, order!
 
 include("paths/Paths.jl")
 import .Paths: Path, adjust!, launch!, meander! #,attach!
@@ -196,13 +120,19 @@ export simplify!
 export straight!
 export turn!
 
+"""
+`render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)`
+
+Render a rectangle `r` to cell `c`, defaulting to plain styling.
+"""
 function render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)
     render!(c, r, s; kwargs...)
 end
 
 """
-Render a rect `r` to the cell with name `name`.
-Keyword arguments give a `layer` and `datatype` (default to 0).
+`render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)`
+
+Render a rectangle `r` to cell `c` with plain styling.
 """
 function render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)
     d = Dict(kwargs)
@@ -211,9 +141,11 @@ function render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)
 end
 
 """
-Render a rounded rectangle `r` to the cell `name`.
-This is accomplished by rendering a path around the outside of a
-(smaller than requested) solid rectangle.
+`render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)`
+
+Render a rounded rectangle `r` to cell `c`. This is accomplished by rendering
+a path around the outside of a (smaller than requested) solid rectangle. The
+bounding box of `r` is preserved.
 """
 function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
     d = Dict(kwargs)
@@ -236,10 +168,9 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
 end
 
 """
-`render!(c::Cell, r::Polygon, s::Style=Plain(); layer::Real=0, datatype::Real=0)`
+`render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)`
 
-Render a rect `r` to the cell `c`.
-Keyword arguments give a `layer` and `datatype` (default to 0).
+Render a polygon `r` to cell `c`, defaulting to plain styling.
 """
 function render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
     d = Dict(kwargs)
@@ -248,10 +179,9 @@ function render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs
 end
 
 """
-`render!(c::Cell, p::Path; layer::Int=0, datatype::Int=0)`
+`render!(c::Cell, p::Path; kwargs...)`
 
 Render a path `p` to a cell `c`.
-Keyword arguments give a `layer` and `datatype`.
 """
 function render!(c::Cell, p::Path; kwargs...)
     for (segment, s) in p
@@ -260,7 +190,7 @@ function render!(c::Cell, p::Path; kwargs...)
 end
 
 """
-`render!(c::Cell, segment::Segment, s::Style; kwargs...)`
+`render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)`
 
 Render a `segment` with style `s` to cell `c`.
 """
@@ -291,9 +221,9 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
 end
 
 """
-`render!(c::Cell, segment::Segment, s::DecoratedStyle; kwargs...)`
+`render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)`
 
-Render a `segment` with `DecoratedStyle` `s` to cell `c`.
+Render a `segment` with decorated style `s` to cell `c`.
 This method draws the decorations before the path itself is drawn.
 """
 function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)
