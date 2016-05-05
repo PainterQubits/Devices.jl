@@ -155,6 +155,14 @@ function gdswrite(io::IO, x::UInt16, y::Number...)
     write(io, hton(x), map(hton, y)...)
 end
 
+function gdswrite{T<:Real}(io::IO, x::UInt16, y::AbstractArray{T,1})
+    l = sizeof(y) + 2
+    l+2 > 0xFFFF && error("Too many bytes in record for GDS-II format.")    # 7fff?
+    write(io, hton(UInt16(l+2))) +
+    write(io, hton(x)) +
+    write(io, map(hton, y))
+end
+
 function gdswrite(io::IO, x::UInt16, y::ASCIIString)
     (x & 0x00ff != 0x0006) && gdswerr(x)
     z = y
@@ -246,7 +254,8 @@ function gdswrite{T}(io::IO, el::AbstractPolygon{T}; unit=1e-6, precision=1e-9)
     xy .*= unit/precision
     xy = round(xy)
     xyInt =  convert(Array{Int32,1}, xy)
-    bytes += gdswrite(io, XY, xyInt..., xyInt[1], xyInt[2])   # closed polygons
+    push!(xyInt, xyInt[1], xyInt[2]) # closed polygons
+    bytes += gdswrite(io, XY, xyInt)
     bytes += gdswrite(io, ENDEL)
 end
 
