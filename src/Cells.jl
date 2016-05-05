@@ -104,10 +104,10 @@ Returns a `Rectangle` bounding box with no properties around all objects in `cel
 """
 function bounds{T<:Real}(cell::Cell{T}; kwargs...)
     mi, ma = Point(typemax(T), typemax(T)), Point(typemin(T), typemin(T))
-    bfl{T<:Integer}(::Type{T}, x) = floor(x)
-    bfl(::Type{T},x) = x
-    bce{T<:Integer}(::Type{T}, x) = ceil(x)
-    bce(::Type{T},x) = x
+    bfl{S<:Integer}(::Type{S}, x) = floor(x)
+    bfl(S,x) = x
+    bce{S<:Integer}(::Type{S}, x) = ceil(x)
+    bce(S,x) = x
 
     isempty(cell.elements) && isempty(cell.refs) &&
         return Rectangle(mi, ma; kwargs...)
