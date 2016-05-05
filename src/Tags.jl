@@ -14,22 +14,23 @@ export qrcode
 export radialstub
 
 """
-`qrcode(a::AbstractString, name::ASCIIString; pixel=10.0)`
+`qrcode{T<:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0; kwargs...)`
 
 Renders a QR code of the string `a` with pixel size `pixel` to a new cell with `name`.
+The lower left of the QR code will be at the origin of the cell.
 """
-function qrcode(a::AbstractString, name::ASCIIString; pixel=1.0, layer=0, datatype=0)
+function qrcode{T<:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0, center::Bool=false; kwargs...)
     myqr = qr()[:create](a)
     str = myqr[:text](quiet_zone=0)
 
     y = zero(pixel)
-    rects = Rectangle{typeof(pixel)}[]
+    rects = Rectangle{T}[]
     for line in eachline(IOBuffer(str))
         ones0s = chomp(line)
         where = findin(ones0s, '1')
         for i in where
-            r = Rectangle(Point(zero(pixel),-pixel), Point(pixel,zero(pixel)))
-            r += Point((i-1)*pixel, y)
+            r = Rectangle(Point(zero(pixel),-pixel), Point(pixel,zero(pixel)); kwargs...)
+            r += Point{2,T}((i-1)*pixel, y)
             push!(rects, r)
         end
         y -= pixel
@@ -37,8 +38,8 @@ function qrcode(a::AbstractString, name::ASCIIString; pixel=1.0, layer=0, dataty
 
     c = Cell(name)
     for r in rects
-        r += Point(y/2, -y/2)
-        render!(c, r, Rectangles.Plain(), layer=layer, datatype=datatype)
+        r += Point(zero(pixel), -y)
+        render!(c, r, Rectangles.Plain())
     end
     c
 end

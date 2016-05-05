@@ -5,10 +5,12 @@ using ..Points
 using ..Rectangles
 using ..Polygons
 
-import Base: show
-import Devices: AbstractPolygon, bounds
+import Base: show, +, -
+import Devices: AbstractPolygon, bounds, center, center!
 export Cell, CellArray, CellReference
 export traverse!, order!
+
+abstract CellRef{S, T<:Real}
 
 """
 `CellReference{S,T<:Real}`
@@ -18,7 +20,7 @@ Reference to a `cell` positioned at `origin`, with optional x-reflection
 
 The type variable `S` is to avoid circular definitions with `Cell`.
 """
-type CellReference{S,T<:Real}
+type CellReference{S,T} <: CellRef{S,T}
     cell::S
     origin::Point{2,T}
     xrefl::Bool
@@ -36,7 +38,7 @@ are for the array as a whole.
 
 The type variable `S` is to avoid circular definitions with `Cell`.
 """
-type CellArray{S,T<:Real}
+type CellArray{S,T} <: CellRef{S,T}
     cell::S
     origin::Point{2,T}
     deltacol::Point{2,T}
@@ -57,10 +59,10 @@ A cell has a name and contains polygons and references to `CellArray` or
 To add elements, push them to `elements` field;
 to add references, push them to `refs` field.
 """
-type Cell
+type Cell{T<:Real}
     name::ASCIIString
-    elements::Array{Any,1}
-    refs::Array{CellReference,1}
+    elements::Array{AbstractPolygon{T},1}
+    refs::Array{CellRef,1}
     create::DateTime
     function even(str)
         if mod(length(str),2) == 1
@@ -71,34 +73,44 @@ type Cell
     end
     Cell(x,y,z) = new(even(x), y, z, now())
     Cell(x,y) = new(even(x), y, CellReference[], now())
-    Cell(x) = new(even(x), Any[], CellReference[], now())
+    Cell(x) = new(even(x), AbstractPolygon{T}[], CellReference[], now())
 end
+
+Cell(name::AbstractString) = Cell{Float64}(name)
+Cell{T<:Real}(name::AbstractString, elements::AbstractArray{AbstractPolygon{T},1}) =
+    Cell{T}(name, elements)
+Cell{T<:Real}(name::AbstractString, elements::AbstractArray{AbstractPolygon{T},1},
+    refs::AbstractArray{CellReference,1}) =
+    Cell{T}(name, elements, refs)
 
 # Don't print out everything in the cell, it is a mess that way.
 show(io::IO, c::Cell) = print(io,
     "Cell \"$(c.name)\" with $(length(c.elements)) els, $(length(c.refs)) refs")
 
 CellReference{T<:Real}(x::Cell, y::Point{2,T}; xrefl=false, mag=1.0, rot=0.0) =
-    CellReference{Cell, T}(x,y,xrefl,mag,rot)
+    CellReference{typeof(x), T}(x,y,xrefl,mag,rot)
 CellArray{T<:Real}(x::Cell, o::Point{2,T}, dc::Point{2,T}, dr::Point{2,T},
     c::Integer, r::Integer; xrefl=false, mag=1.0, rot=0.0) =
-    CellArray{Cell,T}(x,o,dc,dr,c,r,xrefl,mag,rot)
+    CellArray{typeof(x),T}(x,o,dc,dr,c,r,xrefl,mag,rot)
 CellArray{T<:Real}(x::Cell, c::Range{T}, r::Range{T};
     xrefl=false, mag=1.0, rot=0.0) =
-    CellArray{Cell,T}(x, Point(first(c),first(r)), Point(step(c),zero(step(c))),
+    CellArray{typeof(x),T}(x, Point(first(c),first(r)), Point(step(c),zero(step(c))),
         Point(zero(step(r)), step(r)), length(c), length(r), xrefl, mag, rot)
 
 """
 `bounds(cell::Cell; kwargs...)`
 
 Returns a `Rectangle` bounding box with no properties around all objects in `cell`.
-`Point(NaN, NaN)` is used for the corners if there is nothing inside the cell.
 """
-function bounds(cell::Cell; kwargs...)
-    mi, ma = Point(NaN, NaN), Point(NaN, NaN)
+function bounds{T<:Real}(cell::Cell{T}; kwargs...)
+    mi, ma = Point(typemax(T), typemax(T)), Point(typemin(T), typemin(T))
+    bfl{T<:Integer}(::Type{T}, x) = floor(x)
+    bfl(::Type{T},x) = x
+    bce{T<:Integer}(::Type{T}, x) = ceil(x)
+    bce(::Type{T},x) = x
 
     isempty(cell.elements) && isempty(cell.refs) &&
-        return Rectangle(mi, ma)
+        return Rectangle(mi, ma; kwargs...)
 
     for el in cell.elements
         b = bounds(el)
@@ -106,31 +118,58 @@ function bounds(cell::Cell; kwargs...)
     end
 
     for el in cell.refs
-        b = bounds(el)
+        # The referenced cells may not return the same Rectangle{T} type.
+        # We should grow to accommodate if necessary.
+        br = bounds(el)
+        b = Rectangle{T}(bfl(T, br.ll), bce(T, br.ur))
         mi, ma = min(mi,minimum(b)), max(ma,maximum(b))
     end
 
-    Rectangle(mi, ma)
+    Rectangle(mi, ma; kwargs...)
+end
+
+"""
+`center(cell::Cell)`
+
+Return the center of the bounding box of the cell.
+"""
+center(cell::Cell) = center(bounds(cell))
+
+"""
+`bounds(ref::CellArray; kwargs...)`
+
+Rewrite this method when feeling less lazy... it is highly inefficient.
+"""
+function bounds{S<:Real, T<:Real}(ref::CellArray{Cell{S},T}; kwargs...)
+    b = bounds(ref.cell)::Rectangle{S}
+    !isproper(b) && return b
+    lls = [(b.ll + (i-1) * ref.deltarow + (j-1) * ref.deltacol)::Point{2,promote_type(S,T)}
+            for i in 1:(ref.row), j in 1:(ref.col)]
+    urs = lls .+ Point(width(b), height(b))
+    mb = Rectangle(minimum(lls[1:end]), maximum(urs[1:end]))
+    sgn = ref.xrefl ? -1 : 1
+    a = AffineTransform(
+        [sgn*ref.mag*cosd(ref.rot) -ref.mag*sind(ref.rot);
+         sgn*ref.mag*sind(ref.rot) ref.mag*cosd(ref.rot)], ref.origin)
+    c = a * convert(Polygon{Float64}, mb)
+    bounds(c; kwargs...)
 end
 
 """
 `bounds(ref::CellReference; kwargs...)`
 
 Returns a `Rectangle` bounding box with no properties around all objects in `ref`.
-`Point(NaN, NaN)` is used for the corners if there is nothing inside the cell
-referenced by `ref`. The bounding box respects reflection, rotation, and magnification
-specified by `ref`.
+The bounding box respects reflection, rotation, and magnification specified by `ref`.
 """
 function bounds(ref::CellReference; kwargs...)
-    mi, ma = Point(NaN, NaN), Point(NaN, NaN)
-
-    b = bounds(ref.cell; kwargs...)
+    b = bounds(ref.cell)
+    !isproper(b) && return b
     sgn = ref.xrefl ? -1 : 1
     a = AffineTransform(
         [sgn*ref.mag*cosd(ref.rot) -ref.mag*sind(ref.rot);
          sgn*ref.mag*sind(ref.rot) ref.mag*cosd(ref.rot)], ref.origin)
     c = a * convert(Polygon{Float64}, b)
-    bounds(c)
+    bounds(c; kwargs...)
 end
 
 """
@@ -164,5 +203,24 @@ function order!(a::AbstractArray)
     unique(map(x->x[2], a))
 end
 
+for op in [:+, :-]
+    @eval function ($op){T<:Real}(r::Cell{T}, p::Point)
+        n = Cell{T}(r.name, similar(r.elements), similar(r.refs))
+        for (ia, ib) in zip(eachindex(r.elements), eachindex(n.elements))
+            @inbounds n.elements[ib] = ($op)(r.elements[ia], p)
+        end
+        for (ia, ib) in zip(eachindex(r.refs), eachindex(n.refs))
+            @inbounds n.refs[ib] = ($op)(r.refs[ia], p)
+        end
+        n
+    end
+    @eval function ($op){S,T<:Real}(r::CellArray{S,T}, p::Point)
+        CellArray(r.cell, ($op)(r.origin,p), r.deltacol, r.deltarow,
+            r.col, r.row, r.xrefl, r.mag, r.rot)
+    end
+    @eval function ($op){S,T<:Real}(r::CellReference{S,T}, p::Point)
+        CellReference(r.cell, ($op)(r.origin,p), r.xrefl, r.mag, r.rot)
+    end
+end
 
 end

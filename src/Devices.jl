@@ -43,6 +43,7 @@ export UNIT
 export PRECISION
 
 export bounds
+export center
 export heal
 export render!
 
@@ -67,6 +68,8 @@ function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, la
 end
 
 function bounds end
+function center end
+function center! end
 
 """
 `abstract AbstractPolygon{T}`
@@ -77,22 +80,23 @@ Currently only `Rectangle` or `Polygon` are concrete subtypes.
 abstract AbstractPolygon{T}
 
 include("Rectangles.jl")
-import .Rectangles: Rectangle, center, height, width
+import .Rectangles: Rectangle, center!, height, width, isproper
 export Rectangles
 export Rectangle
-export center
+export center!
 export height
 export width
+export isproper
 
 include("polygons/Polygons.jl")
-import .Polygons: Polygon, clip, offset,
+import .Polygons: Polygon, clip, offset, points,
     CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
     JT_SQUARE, JT_ROUND, JT_MITER,
     ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
     PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
 export Polygons
 export Polygon
-export clip, offset
+export clip, offset, points
 export CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
     JT_SQUARE, JT_ROUND, JT_MITER,
     ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,

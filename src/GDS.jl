@@ -263,8 +263,8 @@ function gdswrite(io::IO, ref::CellReference; unit=1e-6, precision=1e-9)
 end
 
 function gdswrite(io::IO, a::CellArray; unit=1e-6, precision=1e-9)
-    colrowcheck(a.cols)
-    colrowcheck(a.rows)
+    colrowcheck(a.col)
+    colrowcheck(a.row)
 
     bytes =  gdswrite(io, AREF)
     bytes += gdswrite(io, SNAME, a.cell.name)
@@ -276,9 +276,10 @@ function gdswrite(io::IO, a::CellArray; unit=1e-6, precision=1e-9)
     dc = a.deltacol * unit/precision
     dr = a.deltarow * unit/precision
     x,y = Int(round(getx(o))), Int(round(gety(o)))
-    cx,cy = Int(round(getx(o)))*a.col, Int(round(gety(o)))*a.col
-    rx,ry = Int(round(getx(o)))*a.row, Int(round(gety(o)))*a.row
-    bytes += gdswrite(io, XY, cx, cy, x, y, rx, ry)
+    cx,cy = Int(round(getx(dc)*(a.col))), Int(round(gety(dc)*(a.col)))
+    rx,ry = Int(round(getx(dr)*(a.row))), Int(round(gety(dr)*(a.row)))
+    cx += x; cy += y; rx += x; ry += y;
+    bytes += gdswrite(io, XY, x, y, cx, cy, rx, ry)
     bytes += gdswrite(io, ENDEL)
 end
 

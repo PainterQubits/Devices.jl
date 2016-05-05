@@ -44,7 +44,7 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
     @eval function ($op)(r::Polygon, p::Point)
         Polygon(($dotop)(r.p, p), r.properties)
     end
-    @eval ($op)(p::Point, r::Polygon) = ($op)(r,p)
+    # @eval ($op)(p::Point, r::Polygon) = ($op)(r,p)
 end
 *(r::Polygon, a::Real) = Polygon(r.p .* a, r.properties)
 *(a::Real, r::Polygon) = *(r,a)
