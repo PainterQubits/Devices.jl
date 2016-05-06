@@ -26,5 +26,10 @@ docs_dir: 'build'
 
 pages:
 - Home: index.md
-- API: api.md
+- Points: points.md
+- Paths: paths.md
+- Abstract polygons: polygons.md
+- Cells: cells.md
+- Rendering / saving: render.md
+- Index: idx.md
 - 'License': LICENSE.md

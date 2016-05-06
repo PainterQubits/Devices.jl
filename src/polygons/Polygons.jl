@@ -20,9 +20,17 @@ export points
 export clip, offset
 
 """
-`type Polygon{T<:Real}`
+```
+type Polygon{T<:Real} <: AbstractPolygon{T}
+    p::Array{Point{2,T},1}
+    properties::Dict{Symbol, Any}
+    Polygon(x,y) = new(x,y)
+    Polygon(x) = new(x, Dict{Symbol, Any}())
+end
+```
 
-Polygon defined by list of coordinates (not repeating start).
+Polygon defined by list of coordinates. The first point should not be repeated
+at the end (although this is true for the GDS format).
 """
 type Polygon{T<:Real} <: AbstractPolygon{T}
     p::Array{Point{2,T},1}
@@ -30,14 +38,55 @@ type Polygon{T<:Real} <: AbstractPolygon{T}
     Polygon(x,y) = new(x,y)
     Polygon(x) = new(x, Dict{Symbol, Any}())
 end
+
+"""
+```
+Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}; kwargs...)
+```
+
+Convenience constructor for a `Polygon{T}` object.
+"""
 Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}; kwargs...) =
     Polygon{T}(parr, Dict{Symbol,Any}(kwargs))
-Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, kwargs) =
+
+"""
+```
+Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, dict)
+```
+
+Convenience constructor for a `Polygon{T}` object.
+"""
+Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, dict) =
     Polygon{T}(parr, kwargs)
+
+"""
+```
+Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
+    p3::Point{2,T}...; kwargs...)
+```
+
+Convenience constructor for a `Polygon{T}` object.
+"""
 Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
     p3::Point{2,T}...; kwargs...) =
         Polygon{T}([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
+
+"""
+```
+points(x::Polygon)
+```
+
+Returns the array of `Point` objects defining the polygon.
+"""
 points(x::Polygon) = x.p
+
+"""
+```
+points{T<:Real}(x::Rectangle{T})
+```
+
+Returns the array of `Point` objects defining the rectangle.
+"""
 points{T<:Real}(x::Rectangle{T}) = points(convert(Polygon{T}, x))
 
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
@@ -51,7 +100,9 @@ end
 /(r::Polygon, a::Real) = Polygon(r.p ./ a, r.properties)
 
 """
-`minimum(x::Polygon)`
+```
+minimum(x::Polygon)
+```
 
 Return the lower-left-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
@@ -59,7 +110,9 @@ Note that this point doesn't have to be in the polygon.
 minimum(x::Polygon) = minimum(x.p)
 
 """
-`maximum(x::Polygon)`
+```
+maximum(x::Polygon)
+```
 
 Return the upper-right-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
@@ -72,7 +125,12 @@ end
 *{T<:Real}(a::AffineTransform, x::Rectangle{T}) = *(a, convert(Polygon{T}, x))
 
 """
-`type Tristrip{T<:Real}`
+```
+type Tristrip{T<:Real}
+    p::Array{Point{2,T},1}
+    properties::Dict{Symbol,Any}
+end
+```
 
 Tristrip defined by list of coordinates. See
 [here](https://en.wikipedia.org/wiki/Triangle_strip) for further details. Currently
@@ -85,6 +143,7 @@ end
 Tristrip{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
     p3::Point{2,T}...; kwargs...) =
     Tristrip{T}([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
+
 points(x::Tristrip) = x.p
 
 function +(r::Tristrip, p::Point)
@@ -93,7 +152,9 @@ end
 +(p::Point, r::Tristrip) = +(r,p)
 
 """
-`convert{T<:Real}(::Type{Array{Polygon{T},1}}, x::Tristrip)`
+```
+convert{T<:Real}(::Type{Array{Polygon{T},1}}, x::Tristrip)
+```
 
 Convert a Tristrip into an array of polygons. Until we support polygons with
 holes in them we do this ourselves, otherwise GPC could be used.
@@ -112,7 +173,9 @@ function convert{T<:Real}(::Type{Array{Polygon{T},1}}, x::Tristrip)
 end
 
 """
-`convert{T<:Real}(::Type{Polygon{T}}, s::Rectangle)`
+```
+convert{T<:Real}(::Type{Polygon{T}}, s::Rectangle)
+```
 
 Convert a Rectangle into a Polygon (explicitly keep all points).
 """
@@ -125,17 +188,21 @@ function convert{T<:Real}(::Type{Polygon{T}}, s::Rectangle)
 end
 
 """
-`bounds(p::Polygon)`
+```
+bounds(p::Polygon)
+```
 
 Return a bounding Rectangle with no properties for polygon `p`.
 """
 bounds(p::Polygon) = Rectangle(minimum(p), maximum(p))
 
 """
-`bounds{T<:AbstractPolygon}(parr::AbstractArray{T,1})`
+```
+bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
+```
 
 Return a bounding `Rectangle` with no properties for an array `parr` of
-`AbstractPolygon`s.
+`AbstractPolygon` objects.
 """
 function bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
     rects = map(bounds, parr)
@@ -145,9 +212,12 @@ function bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
 end
 
 """
-`bounds(p0::AbstractPolygon, p::AbstractPolygon...)`
+```
+bounds(p0::AbstractPolygon, p::AbstractPolygon...)
+```
 
-Return a bounding `Rectangle` with no properties for several `AbstractPolygon`s.
+Return a bounding `Rectangle` with no properties for several `AbstractPolygon`
+objects.
 """
 bounds(p0::AbstractPolygon, p::AbstractPolygon...) = bounds([p0, p...])
 

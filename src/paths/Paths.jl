@@ -73,7 +73,9 @@ of paths rendered by gdspy.
 function width end
 
 """
-`direction(p::Function, t)`
+```
+direction(p::Function, t)
+```
 
 For some parameteric function `p(t)↦Point(x(t),y(t))`, returns the angle at
 which the path is pointing for a given `t`.
@@ -95,7 +97,9 @@ function direction(p::Function, t)
 end
 
 """
-`abstract Style`
+```
+abstract Style
+```
 
 How to render a given path segment. All styles should implement the following
 methods:
@@ -109,7 +113,9 @@ methods:
 abstract Style
 
 """
-`abstract Segment{T<:Real}`
+```
+abstract Segment{T<:Real}
+```
 
 Path segment in the plane. All Segment objects should have the implement
 the following methods:
@@ -126,7 +132,8 @@ abstract Segment{T<:Real}
 include("Styles.jl")
 include("Segments.jl")
 
-"Unstyled path. Can describe any path in the plane."
+"""
+```
 type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     origin::Point{2,T}
     α0::Real
@@ -138,15 +145,57 @@ type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     Path(style::Style) =
         new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
 end
+```
+
+Type for abstracting an arbitrary styled path in the plane. Iterating returns
+tuples of (`segment`, `style`).
+"""
+type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
+    origin::Point{2,T}
+    α0::Real
+    style0::Style
+    segments::Array{Segment{T},1}
+    styles::Array{Style,1}
+    Path(origin::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
+        styles::Array{Style,1}) = new(origin, α0, style0, segments, styles)
+    Path(style::Style) =
+        new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
+end
+
+"""
+```
+Path{T<:Real}(origin::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0))
+```
+
+Convenience constructor for `Path{T}` object.
+"""
 Path{T<:Real}(origin::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0)) =
     Path{T}(origin, α0, style0, Segment{T}[], Style[])
+
+"""
+```
+Path{T<:Real}(origin::Tuple{T,T})
+```
+
+Convenience constructor for `Path{T}` object.
+"""
 Path{T<:Real}(origin::Tuple{T,T}) =
     Path(Point(float(origin[1]),float(origin[2])))
+
+"""
+```
+Path{T<:Real}(origin::Tuple{T,T}, α0::Real)
+```
+
+Convenience constructor for `Path{T}` object.
+"""
 Path{T<:Real}(origin::Tuple{T,T}, α0::Real) =
     Path(Point(float(origin[1]),float(origin[2])), α0)
 
 """
-`pathlength(p::Path)`
+```
+pathlength(p::Path)
+```
 
 Physical length of a path. Note that `length` will return the number of
 segments in a path, not the physical length.
@@ -154,14 +203,18 @@ segments in a path, not the physical length.
 pathlength(p::Path) = pathlength(p.segments)
 
 """
-`pathlength(p::AbstractArray{Segment})`
+```
+pathlength(p::AbstractArray{Segment})
+```
 
 Total physical length of segments.
 """
 pathlength{T<:Real}(parr::AbstractArray{Segment{T},1}) = mapreduce(length, +, parr)
 
 """
-`α0(p::Path)`
+```
+α0(p::Path)
+```
 
 First angle of a path.
 """
@@ -174,7 +227,9 @@ function α0(p::Path)
 end
 
 """
-`lastangle(p::Path)`
+```
+lastangle(p::Path)
+```
 
 Last angle of a path.
 """
@@ -187,7 +242,9 @@ function lastangle(p::Path)
 end
 
 """
-`origin(p::Path)`
+```
+origin(p::Path)
+```
 
 First point of a path.
 """
@@ -200,7 +257,9 @@ function origin(p::Path)
 end
 
 """
-`lastpoint(p::Path)`
+```
+lastpoint(p::Path)
+```
 
 Last point of a path.
 """
@@ -213,7 +272,9 @@ function lastpoint(p::Path)
 end
 
 """
-`firststyle(p::Path)`
+```
+firststyle(p::Path)
+```
 
 Style of the first segment of a path.
 """
@@ -226,7 +287,9 @@ function firststyle(p::Path)
 end
 
 """
-`laststyle(p::Path)`
+```
+laststyle(p::Path)
+```
 
 Style of the last segment of a path.
 """
@@ -239,7 +302,9 @@ function laststyle(p::Path)
 end
 
 """
-`adjust!(p::Path, n::Integer=1)`
+```
+adjust!(p::Path, n::Integer=1)
+```
 
 Adjust a path's parametric functions starting from index `n`.
 Used internally whenever segments are inserted into the path.
@@ -313,7 +378,9 @@ pop!(p::Path) = pop!(p.segments), pop!(p.styles)
 shift!(p::Path) = shift!(p.segments), shift!(p.styles)
 
 """
-`append!(p::Path, p′::Path)`
+```
+append!(p::Path, p′::Path)
+```
 
 Given paths `p` and `p′`, path `p′` is appended to path `p`.
 The origin and initial angle of the first segment from path `p′` is
@@ -332,7 +399,9 @@ function append!(p::Path, p′::Path)
 end
 
 """
-`simplify!(p::Path)`
+```
+simplify!(p::Path)
+```
 
 All segments of a path are turned into a `CompoundSegment` and all
 styles of a path are turned into a `CompoundStyle`. The idea here is:
@@ -353,7 +422,9 @@ function simplify!(p::Path)
 end
 
 """
-`straight!(p::Path, l::Real)`
+```
+straight!(p::Path, l::Real)
+```
 
 Extend a path `p` straight by length `l` in the current direction.
 """
@@ -366,7 +437,9 @@ function straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=laststyle(p))
 end
 
 """
-`turn!(p::Path, α::Real, r::Real, sty::Style=laststyle(p))`
+```
+turn!(p::Path, α::Real, r::Real, sty::Style=laststyle(p))
+```
 
 Turn a path `p` by angle `α` with a turning radius `r` in the current direction.
 Positive angle turns left.
@@ -380,7 +453,9 @@ function turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=laststyle(p))
 end
 
 """
-`turn!(p::Path, s::ASCIIString, r::Real, sty::Style=laststyle(p))`
+```
+turn!(p::Path, s::ASCIIString, r::Real, sty::Style=laststyle(p))
+```
 
 Turn a path `p` with direction coded by string `s`:
 
@@ -404,7 +479,9 @@ function turn!{T<:Real}(p::Path{T}, s::ASCIIString, r::Real, sty::Style=laststyl
 end
 
 """
-`meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)`
+```
+meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
+```
 
 Alternate between going straight with length `straightlen` and turning
 with radius `r` and angle `α`. Each turn goes the opposite direction of the
@@ -431,8 +508,10 @@ function meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
 end
 
 """
-`launch!(p::Path; extround=5, trace0=300, trace1=5,
-        gap0=150, gap1=2.5, flatlen=250, taperlen=250)`
+```
+launch!(p::Path; extround=5, trace0=300, trace1=5,
+        gap0=150, gap1=2.5, flatlen=250, taperlen=250)
+```
 
 Add a launcher to the path. Somewhat intelligent in that the launcher will
 reverse its orientation depending on if it is at the start or the end of a path.
@@ -483,7 +562,9 @@ function launch!(p::Path; extround=5, trace0=300, trace1=5,
 end
 
 """
-`param{T<:Real}(c::CompoundSegment{T})`
+```
+param{T<:Real}(c::CompoundSegment{T})
+```
 
 Return a parametric function over the domain [0,1] that represents the
 compound segment.

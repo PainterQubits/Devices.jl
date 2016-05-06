@@ -27,11 +27,6 @@ gdspy() = Devices._gdspy
 qr() = Devices._qr
 pyclipper() = Devices._pyclipper
 
-const FEATURE_BOUNDING_LAYER = 1
-const CHIP_BOUNDING_LAYER    = 2
-const CLIP_PLACEMENT_LAYER   = 3
-const FEATURES_LAYER         = 5
-
 const UNIT      = 1.0e-6
 const PRECISION = 1.0e-9
 
@@ -72,7 +67,9 @@ function center end
 function center! end
 
 """
-`abstract AbstractPolygon{T}`
+```
+abstract AbstractPolygon{T}
+```
 
 Anything you could call a polygon regardless of the underlying representation.
 Currently only `Rectangle` or `Polygon` are concrete subtypes.
@@ -125,7 +122,9 @@ export straight!
 export turn!
 
 """
-`render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)`
+```
+render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)
+```
 
 Render a rectangle `r` to cell `c`, defaulting to plain styling.
 """
@@ -134,7 +133,9 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); 
 end
 
 """
-`render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)`
+```
+render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)
+```
 
 Render a rectangle `r` to cell `c` with plain styling.
 """
@@ -145,7 +146,9 @@ function render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)
 end
 
 """
-`render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)`
+```
+render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
+```
 
 Render a rounded rectangle `r` to cell `c`. This is accomplished by rendering
 a path around the outside of a (smaller than requested) solid rectangle. The
@@ -172,7 +175,9 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
 end
 
 """
-`render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)`
+```
+render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
+```
 
 Render a polygon `r` to cell `c`, defaulting to plain styling.
 """
@@ -183,7 +188,9 @@ function render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs
 end
 
 """
-`render!(c::Cell, p::Path; kwargs...)`
+```
+render!(c::Cell, p::Path; kwargs...)
+```
 
 Render a path `p` to a cell `c`.
 """
@@ -194,7 +201,9 @@ function render!(c::Cell, p::Path; kwargs...)
 end
 
 """
-`render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)`
+```
+render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
+```
 
 Render a `segment` with style `s` to cell `c`.
 """
@@ -220,12 +229,14 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
         end
         gp = gdspy()[:Path](Paths.width(s,t), Point(0.0,0.0),
             number_of_paths=Paths.paths(s,t), distance=Paths.distance(s,t))
-            last = t
+        last = t
     end
 end
 
 """
-`render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)`
+```
+render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)
+```
 
 Render a `segment` with decorated style `s` to cell `c`.
 This method draws the decorations before the path itself is drawn.

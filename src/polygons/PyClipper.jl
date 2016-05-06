@@ -11,7 +11,9 @@ export PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
 const PCSCALE = 2^31
 
 """
-`clip{S<:Real, T<:Real}(op::ClipperOp, subject::Polygon{S}, clip::Polygon{T})`
+```
+clip{S<:Real, T<:Real}(op::ClipperOp, subject::Polygon{S}, clip::Polygon{T})
+```
 
 Clip polygon `subject` by polygon `clip` using operation `op` from the
 [Clipper library](http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm).
@@ -34,8 +36,10 @@ clip{S<:Real, T<:Real}(op::ClipperOp, s::AbstractPolygon{S}, c::AbstractPolygon{
     clip(op, convert(Polygon{S}, s), convert(Polygon{T}, c))
 
 """
-`offset{S<:Real}(subject::Polygon{S}, delta::Real,
-        j::ClipperJoin=JT_MITER, e::ClipperEnd=ET_CLOSEDPOLYGON)`
+```
+offset{S<:Real}(subject::Polygon{S}, delta::Real,
+        j::ClipperJoin=JT_MITER, e::ClipperEnd=ET_CLOSEDPOLYGON)
+```
 
 Offset a polygon `subject` by some amount `delta` using the
 [Clipper library](http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm).

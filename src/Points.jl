@@ -7,14 +7,18 @@ export Point
 export getx, gety, setx!, sety!
 
 """
-`getx(p::Point)`
+```
+getx(p::Point)
+```
 
 Get the x-coordinate of a point.
 """
 @inline getx(p::Point) = p._[1]
 
 """
-`gety(p::Point)`
+```
+gety(p::Point)
+```
 
 Get the y-coordinate of a point.
 """
@@ -37,7 +41,5 @@ for dotop in [:.+, :.-]
         ($dotop)(a,p)
     end
 end
-
-
 
 end

@@ -330,13 +330,15 @@ gdsend(io::IO) = gdswrite(io, ENDLIB)
 
 """
 ```
+save(::Union{AbstractString,IO}, cell0::Cell, cell::Cell...)
+
 save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
 name="GDSIILIB", precision=1e-9, unit=1e-6, modify=now(), acc=now(),
 verbose=false)`
 ```
 
-This method is implicitly called when you use the convenient syntax:
-`save("/path/to/my.gds", cells_i_want_to_save...)`
+This bottom method is implicitly called when you use the convenient syntax of
+the top method: `save("/path/to/my.gds", cells_i_want_to_save...)`
 
 The `name` keyword argument is used for the internal library name of the GDS-II
 file and is probably inconsequential for modern workflows.

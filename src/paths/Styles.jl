@@ -1,6 +1,11 @@
 
 """
-`type Trace <: Style`
+```
+type Trace <: Style
+    width::Function
+    divs::Int
+end
+```
 
 Simple, single trace.
 
@@ -21,7 +26,13 @@ paths(::Trace, t...) = 1
 width(s::Trace, t) = s.width(t)
 
 """
-`type CPW <: Style`
+```
+type CPW <: Style
+    trace::Function
+    gap::Function
+    divs::Int
+end
+```
 
 Two adjacent traces can form a coplanar waveguide.
 
@@ -49,7 +60,18 @@ width(s::CPW, t) = s.gap(t)
 divs(s::CPW) = linspace(0.0, 1.0, s.divs+1)
 
 """
-`type CompoundStyle{T<:Real} <: Style`
+```
+type CompoundStyle{T<:Real} <: Style
+    segments::Array{Segment{T},1}
+    styles::Array{Style,1}
+    f::Function
+    CompoundStyle(segments, styles) = begin
+        s = new(segments, styles)
+        s.f = param(s)
+        s
+    end
+end
+```
 
 Combines styles together for use with a `CompoundSegment`.
 
@@ -62,7 +84,6 @@ type CompoundStyle{T<:Real} <: Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
     f::Function
-
     CompoundStyle(segments, styles) = begin
         s = new(segments, styles)
         s.f = param(s)
@@ -141,7 +162,23 @@ for x in (:distance, :extent, :paths, :width)
 end
 
 """
-`type DecoratedStyle <: Style`
+```
+type DecoratedStyle{S<:Real} <: Style
+    s::Style
+    ts::AbstractArray{Float64,1}
+    offsets::Array{S,1}
+    dirs::Array{Int,1}
+    cells::Array{ASCIIString,1}
+    DecoratedStyle(s) = begin
+        a = new(s)
+        a.ts = Float64[]
+        a.offsets = S[]
+        a.dirs = Int[]
+        a.cells = ASCIIString[]
+    end
+    DecoratedStyle(s,t,o,r,c) = new(s,t,o,r,c)
+end
+```
 
 Style with decorations, like periodic structures along the path, etc.
 """
@@ -160,6 +197,7 @@ type DecoratedStyle{S<:Real} <: Style
     end
     DecoratedStyle(s,t,o,r,c) = new(s,t,o,r,c)
 end
+
 DecoratedStyle{S<:Real}(s::Style, ts::AbstractArray{Float64,1},
     offsets::Array{S,1}, dirs::Array{Int,1}, cells::Array{ASCIIString, 1}) =
     DecoratedStyle{S}(s, ts, offsets, dirs, cells)
