@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="no-js ie6"><![endif]-->
+<!--[if IE 7 ]><html class="no-js ie7"><![endif]-->
+<!--[if IE 8 ]><html class="no-js ie8"><![endif]-->
+<!--[if IE 9 ]><html class="no-js ie9"><![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1">
+    
+      
+        <title>Paths - Devices.jl</title>
+      
+      
+      
+      
+        <meta name="author" content="Andrew Keller">
+      
+    
+    <meta property="og:url" content="None">
+    <meta property="og:title" content="Devices.jl">
+    <meta property="og:image" content="None/../">
+    <meta name="apple-mobile-web-app-title" content="Devices.jl">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../None">
+    <link rel="icon" type="image/x-icon" href="../None">
+    <style>
+      @font-face {
+      	font-family: 'Icon';
+      	src: url('../assets/fonts/icon.eot?52m981');
+      	src: url('../assets/fonts/icon.eot?#iefix52m981')
+               format('embedded-opentype'),
+      		   url('../assets/fonts/icon.woff?52m981')
+               format('woff'),
+      		   url('../assets/fonts/icon.ttf?52m981')
+               format('truetype'),
+      		   url('../assets/fonts/icon.svg?52m981#icon')
+               format('svg');
+      	font-weight: normal;
+      	font-style: normal;
+      }
+    </style>
+    <link rel="stylesheet" href="../assets/stylesheets/application-54f87043f3.css">
+    
+      <link rel="stylesheet" href="../assets/stylesheets/palettes-05ab2406df.css">
+    
+    
+      
+      
+      
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Ubuntu:400,700|Ubuntu+Mono">
+      <style>
+        body, input {
+          font-family: 'Ubuntu', Helvetica, Arial, sans-serif;
+        }
+        pre, code {
+          font-family: 'Ubuntu Mono', 'Courier New', 'Courier', monospace;
+        }
+      </style>
+    
+    
+      <link rel="stylesheet" href="../assets/Documenter.css">
+    
+    <script src="../assets/javascripts/modernizr-4ab42b99fd.js"></script>
+    
+  </head>
+  
+  
+  
+  <body class="palette-primary-indigo palette-accent-blue">
+    
+      
+      
+    
+    <div class="backdrop">
+      <div class="backdrop-paper"></div>
+    </div>
+    <input class="toggle" type="checkbox" id="toggle-drawer">
+    <input class="toggle" type="checkbox" id="toggle-search">
+    <label class="toggle-button overlay" for="toggle-drawer"></label>
+    <header class="header">
+      <nav aria-label="Header">
+  <div class="bar default">
+    <div class="button button-menu" role="button" aria-label="Menu">
+      <label class="toggle-button icon icon-menu" for="toggle-drawer">
+        <span></span>
+      </label>
+    </div>
+    <div class="stretch">
+      <div class="title">
+        
+          <span class="path">
+            
+          </span>
+        
+        Paths
+      </div>
+    </div>
+    
+    
+    <div class="button button-search" role="button" aria-label="Search">
+      <label class="toggle-button icon icon-search" title="Search" for="toggle-search"></label>
+    </div>
+  </div>
+  <div class="bar search">
+    <div class="button button-close" role="button" aria-label="Close">
+      <label class="toggle-button icon icon-back" for="toggle-search"></label>
+    </div>
+    <div class="stretch">
+      <div class="field">
+        <input class="query" type="text" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck>
+      </div>
+    </div>
+    <div class="button button-reset" role="button" aria-label="Search">
+      <button class="toggle-button icon icon-close" id="reset-search"></button>
+    </div>
+  </div>
+</nav>
+    </header>
+    <main class="main">
+      
+      <div class="drawer">
+        <nav aria-label="Navigation">
+  
+  <a href="https://github.com/ajkeller34/Devices.jl" class="project">
+    <div class="banner">
+      
+      <div class="name">
+        <strong>
+          Devices.jl
+          <span class="version">
+            
+          </span>
+        </strong>
+        
+          <br>
+          ajkeller34/Devices.jl
+        
+      </div>
+    </div>
+  </a>
+  <div class="scrollable">
+    <div class="wrapper">
+      
+        <ul class="repo">
+          <li class="repo-download">
+            
+            <a href="https://github.com/ajkeller34/Devices.jl/archive/master.zip" target="_blank" title="Download" data-action="download">
+              <i class="icon icon-download"></i> Download
+            </a>
+          </li>
+          <li class="repo-stars">
+            <a href="https://github.com/ajkeller34/Devices.jl/stargazers" target="_blank" title="Stargazers" data-action="star">
+              <i class="icon icon-star"></i> Stars
+              <span class="count">&ndash;</span>
+            </a>
+          </li>
+        </ul>
+        <hr>
+      
+      <div class="toc">
+        <ul>
+          
+            
+  <li>
+    <a class="" title="Home" href="..">
+      Home
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Points" href="../points/">
+      Points
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="current" title="Paths" href="./">
+      Paths
+    </a>
+    
+      
+      
+        <ul>
+          
+            <li class="anchor">
+              <a title="Paths" href="#paths">
+                Paths
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Segments" href="#segments">
+                Segments
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Styles" href="#styles">
+                Styles
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Path interrogation" href="#path-interrogation">
+                Path interrogation
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Path building" href="#path-building">
+                Path building
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Interfacing with gdspy" href="#interfacing-with-gdspy">
+                Interfacing with gdspy
+              </a>
+            </li>
+          
+        </ul>
+      
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Abstract polygons" href="../polygons/">
+      Abstract polygons
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Cells" href="../cells/">
+      Cells
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Rendering / saving" href="../render/">
+      Rendering / saving
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Index" href="../idx/">
+      Index
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="License" href="../LICENSE/">
+      License
+    </a>
+    
+  </li>
+
+          
+        </ul>
+        
+      </div>
+    </div>
+  </div>
+</nav>
+      </div>
+      <article class="article">
+        <div class="wrapper">
+          
+            <h1>Paths</h1>
+          
+          <p><a id='Paths-1'></a></p>
+<h2 id="paths">Paths</h2>
+<p><a id='Devices.Paths.Path' href='#Devices.Paths.Path'>#</a>
+<strong><code>Devices.Paths.Path</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>type Path{T&lt;:Real} &lt;: AbstractArray{Tuple{Segment{T},Style},1}
+    origin::Point{2,T}
+    α0::Real
+    style0::Style
+    segments::Array{Segment{T},1}
+    styles::Array{Style,1}
+    Path(origin::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
+        styles::Array{Style,1}) = new(origin, α0, style0, segments, styles)
+    Path(style::Style) =
+        new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
+end
+</pre></div>
+
+
+<p>Type for abstracting an arbitrary styled path in the plane. Iterating returns tuples of (<code>segment</code>, <code>style</code>).</p>
+<p><a id='Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real},Real,Devices.Paths.Style}' href='#Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real},Real,Devices.Paths.Style}'>#</a>
+<strong><code>Devices.Paths.Path</code></strong> &mdash; <em>Method</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>Path{T&lt;:Real}(origin::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0))
+</pre></div>
+
+
+<p>Convenience constructor for <code>Path{T}</code> object.</p>
+<p><a id='Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real}}' href='#Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real}}'>#</a>
+<strong><code>Devices.Paths.Path</code></strong> &mdash; <em>Method</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>Path{T&lt;:Real}(origin::Tuple{T,T})
+</pre></div>
+
+
+<p>Convenience constructor for <code>Path{T}</code> object.</p>
+<p><a id='Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real},Real}' href='#Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real},Real}'>#</a>
+<strong><code>Devices.Paths.Path</code></strong> &mdash; <em>Method</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>Path{T&lt;:Real}(origin::Tuple{T,T}, α0::Real)
+</pre></div>
+
+
+<p>Convenience constructor for <code>Path{T}</code> object.</p>
+<p><a id='Devices.Paths.pathlength-Tuple{Devices.Paths.Path{T<:Real}}' href='#Devices.Paths.pathlength-Tuple{Devices.Paths.Path{T<:Real}}'>#</a>
+<strong><code>Devices.Paths.pathlength</code></strong> &mdash; <em>Method</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>pathlength(p::Path)
+</pre></div>
+
+
+<p>Physical length of a path. Note that <code>length</code> will return the number of segments in a path, not the physical length.</p>
+<p><a id='Segments-1'></a></p>
+<h2 id="segments">Segments</h2>
+<p><a id='Devices.Paths.Segment' href='#Devices.Paths.Segment'>#</a>
+<strong><code>Devices.Paths.Segment</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>abstract Segment{T&lt;:Real}
+</pre></div>
+
+
+<p>Path segment in the plane. All Segment objects should have the implement the following methods:</p>
+<ul>
+<li><code>length</code></li>
+<li><code>origin</code></li>
+<li><code>α0</code></li>
+<li><code>setorigin!</code></li>
+<li><code>setα0!</code></li>
+<li><code>lastangle</code></li>
+</ul>
+<p><a id='Devices.Paths.Straight' href='#Devices.Paths.Straight'>#</a>
+<strong><code>Devices.Paths.Straight</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>type Straight{T&lt;:Real} &lt;: Segment{T}
+    l::T
+    origin::Point{2,T}
+    α0::Real
+    f::Function
+    Straight(l, origin, α0) = begin
+        s = new(l, origin, α0)
+        s.f = t-&gt;(s.origin+Point(t*s.l*cos(s.α0),t*s.l*sin(s.α0)))
+        s
+    end
+end
+</pre></div>
+
+
+<p>A straight line segment is parameterized by its length. It begins at a point <code>origin</code> with initial angle <code>α0</code>.</p>
+<p>The parametric function over <code>t ∈ [0,1]</code> describing the line segment is given by:</p>
+<p><code>t -&gt; origin + Point(t*l*cos(α),t*l*sin(α))</code></p>
+<p><a id='Devices.Paths.Turn' href='#Devices.Paths.Turn'>#</a>
+<strong><code>Devices.Paths.Turn</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>type Turn{T&lt;:Real} &lt;: Segment{T}
+    α::Real
+    r::T
+    origin::Point{2,T}
+    α0::Real
+    f::Function
+    Turn(α, r, origin, α0) = begin
+        s = new(α, r, origin, α0)
+        s.f = t-&gt;begin
+            cen = s.origin + Point(s.r*cos(s.α0+sign(s.α)*π/2), s.r*sin(s.α0+sign(s.α)*π/2))
+            cen + Point(s.r*cos(s.α0-sign(α)*π/2+s.α*t), s.r*sin(s.α0-sign(α)*π/2+s.α*t))
+        end
+        s
+    end
+end
+</pre></div>
+
+
+<p>A circular turn is parameterized by the turn angle <code>α</code> and turning radius <code>r</code>. It begins at a point <code>origin</code> with initial angle <code>α0</code>.</p>
+<p>The center of the circle is given by:</p>
+<p><code>cen = origin + Point(r*cos(α0+sign(α)*π/2), r*sin(α0+sign(α)*π/2))</code></p>
+<p>The parametric function over <code>t ∈ [0,1]</code> describing the turn is given by:</p>
+<p><code>t -&gt; cen + Point(r*cos(α0-sign(α)*π/2+α*t), r*sin(α0-sign(α)*π/2+α*t))</code></p>
+<p><a id='Devices.Paths.CompoundSegment' href='#Devices.Paths.CompoundSegment'>#</a>
+<strong><code>Devices.Paths.CompoundSegment</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>type CompoundSegment{T&lt;:Real} &lt;: Segment{T}
+    segments::Array{Segment{T},1}
+    f::Function
+
+    CompoundSegment(segments) = begin
+        s = new(segments)
+        s.f = param(s)
+        s
+    end
+end
+</pre></div>
+
+
+<p>Consider an array of segments as one contiguous segment. Useful e.g. for applying styles, uninterrupted over segment changes.</p>
+<p><a id='Styles-1'></a></p>
+<h2 id="styles">Styles</h2>
+<p><a id='Devices.Paths.Style' href='#Devices.Paths.Style'>#</a>
+<strong><code>Devices.Paths.Style</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>abstract Style
+</pre></div>
+
+
+<p>How to render a given path segment. All styles should implement the following methods:</p>
+<ul>
+<li><code>distance</code></li>
+<li><code>extent</code></li>
+<li><code>paths</code></li>
+<li><code>width</code></li>
+<li><code>divs</code></li>
+</ul>
+<p><a id='Devices.Paths.Trace' href='#Devices.Paths.Trace'>#</a>
+<strong><code>Devices.Paths.Trace</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>type Trace &lt;: Style
+    width::Function
+    divs::Int
+end
+</pre></div>
+
+
+<p>Simple, single trace.</p>
+<ul>
+<li><code>width::Function</code>: trace width.</li>
+<li><code>divs::Int</code>: number of segments to render. Increase if you see artifacts.</li>
+</ul>
+<p><a id='Devices.Paths.CPW' href='#Devices.Paths.CPW'>#</a>
+<strong><code>Devices.Paths.CPW</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>type CPW &lt;: Style
+    trace::Function
+    gap::Function
+    divs::Int
+end
+</pre></div>
+
+
+<p>Two adjacent traces can form a coplanar waveguide.</p>
+<ul>
+<li><code>trace::Function</code>: center conductor width.</li>
+<li><code>gap::Function</code>: distance between center conductor edges and ground plane</li>
+<li><code>divs::Int</code>: number of segments to render. Increase if you see artifacts.</li>
+</ul>
+<p>May need to be inverted with respect to a ground plane, depending on how the pattern is written.</p>
+<p><a id='Devices.Paths.CompoundStyle' href='#Devices.Paths.CompoundStyle'>#</a>
+<strong><code>Devices.Paths.CompoundStyle</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>type CompoundStyle{T&lt;:Real} &lt;: Style
+    segments::Array{Segment{T},1}
+    styles::Array{Style,1}
+    f::Function
+    CompoundStyle(segments, styles) = begin
+        s = new(segments, styles)
+        s.f = param(s)
+        s
+    end
+end
+</pre></div>
+
+
+<p>Combines styles together for use with a <code>CompoundSegment</code>.</p>
+<ul>
+<li><code>segments</code>: Needed for divs function.</li>
+<li><code>styles</code>: Array of styles making up the object.</li>
+<li><code>f</code>: returns tuple of style index and the <code>t</code> to use for that style's parametric function.</li>
+</ul>
+<p><a id='Devices.Paths.DecoratedStyle' href='#Devices.Paths.DecoratedStyle'>#</a>
+<strong><code>Devices.Paths.DecoratedStyle</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>type DecoratedStyle{S&lt;:Real} &lt;: Style
+    s::Style
+    ts::AbstractArray{Float64,1}
+    offsets::Array{S,1}
+    dirs::Array{Int,1}
+    cells::Array{ASCIIString,1}
+    DecoratedStyle(s) = begin
+        a = new(s)
+        a.ts = Float64[]
+        a.offsets = S[]
+        a.dirs = Int[]
+        a.cells = ASCIIString[]
+    end
+    DecoratedStyle(s,t,o,r,c) = new(s,t,o,r,c)
+end
+</pre></div>
+
+
+<p>Style with decorations, like periodic structures along the path, etc.</p>
+<p><a id='Path-interrogation-1'></a></p>
+<h2 id="path-interrogation">Path interrogation</h2>
+<p><a id='Devices.Paths.direction' href='#Devices.Paths.direction'>#</a>
+<strong><code>Devices.Paths.direction</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>direction(p::Function, t)
+</pre></div>
+
+
+<p>For some parameteric function <code>p(t)↦Point(x(t),y(t))</code>, returns the angle at which the path is pointing for a given <code>t</code>.</p>
+<p><a id='Devices.Paths.pathlength' href='#Devices.Paths.pathlength'>#</a>
+<strong><code>Devices.Paths.pathlength</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>pathlength(p::AbstractArray{Segment})
+</pre></div>
+
+
+<p>Total physical length of segments.</p>
+<div class="codehilite"><pre><span></span>pathlength(p::Path)
+</pre></div>
+
+
+<p>Physical length of a path. Note that <code>length</code> will return the number of segments in a path, not the physical length.</p>
+<p><a id='Devices.Paths.origin' href='#Devices.Paths.origin'>#</a>
+<strong><code>Devices.Paths.origin</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>origin(p::Path)
+</pre></div>
+
+
+<p>First point of a path.</p>
+<div class="codehilite"><pre><span></span>origin{T}(s::Segment{T})
+</pre></div>
+
+
+<p>Return the first point in a segment (calculated).</p>
+<p><a id='Devices.Paths.setorigin!' href='#Devices.Paths.setorigin!'>#</a>
+<strong><code>Devices.Paths.setorigin!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>setorigin!(s::CompoundSegment, p::Point)
+</pre></div>
+
+
+<p>Set the origin of a compound segment.</p>
+<div class="codehilite"><pre><span></span>setorigin!(s::Turn, p::Point)
+</pre></div>
+
+
+<p>Set the origin of a turn.</p>
+<div class="codehilite"><pre><span></span>setorigin!(s::Straight, p::Point)
+</pre></div>
+
+
+<p>Set the origin of a straight segment.</p>
+<p><a id='Devices.Paths.α0' href='#Devices.Paths.α0'>#</a>
+<strong><code>Devices.Paths.α0</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>α0(p::Path)
+</pre></div>
+
+
+<p>First angle of a path.</p>
+<div class="codehilite"><pre><span></span>α0(s::Segment)
+</pre></div>
+
+
+<p>Return the first angle in a segment (calculated).</p>
+<p><a id='Devices.Paths.setα0!' href='#Devices.Paths.setα0!'>#</a>
+<strong><code>Devices.Paths.setα0!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>setα0!(s::CompoundSegment, α0′)
+</pre></div>
+
+
+<p>Set the starting angle of a compound segment.</p>
+<div class="codehilite"><pre><span></span>setα0!(s::Turn, α0′)
+</pre></div>
+
+
+<p>Set the starting angle of a turn.</p>
+<div class="codehilite"><pre><span></span>setα0!(s::Straight, α0′)
+</pre></div>
+
+
+<p>Set the angle of a straight segment.</p>
+<p><a id='Devices.Paths.lastpoint' href='#Devices.Paths.lastpoint'>#</a>
+<strong><code>Devices.Paths.lastpoint</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>lastpoint(p::Path)
+</pre></div>
+
+
+<p>Last point of a path.</p>
+<div class="codehilite"><pre><span></span>lastpoint{T}(s::Segment{T})
+</pre></div>
+
+
+<p>Return the last point in a segment (calculated).</p>
+<p><a id='Devices.Paths.lastangle' href='#Devices.Paths.lastangle'>#</a>
+<strong><code>Devices.Paths.lastangle</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>lastangle(p::Path)
+</pre></div>
+
+
+<p>Last angle of a path.</p>
+<div class="codehilite"><pre><span></span>lastangle(s::Segment)
+</pre></div>
+
+
+<p>Return the last angle in a segment (calculated).</p>
+<p><a id='Devices.Paths.firststyle' href='#Devices.Paths.firststyle'>#</a>
+<strong><code>Devices.Paths.firststyle</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>firststyle(p::Path)
+</pre></div>
+
+
+<p>Style of the first segment of a path.</p>
+<p><a id='Devices.Paths.laststyle' href='#Devices.Paths.laststyle'>#</a>
+<strong><code>Devices.Paths.laststyle</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>laststyle(p::Path)
+</pre></div>
+
+
+<p>Style of the last segment of a path.</p>
+<p><a id='Path-building-1'></a></p>
+<h2 id="path-building">Path building</h2>
+<p><a id='Base.append!-Tuple{Devices.Paths.Path{T<:Real},Devices.Paths.Path{T<:Real}}' href='#Base.append!-Tuple{Devices.Paths.Path{T<:Real},Devices.Paths.Path{T<:Real}}'>#</a>
+<strong><code>Base.append!</code></strong> &mdash; <em>Method</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>append!(p::Path, p′::Path)
+</pre></div>
+
+
+<p>Given paths <code>p</code> and <code>p′</code>, path <code>p′</code> is appended to path <code>p</code>. The origin and initial angle of the first segment from path <code>p′</code> is modified to match the last point and last angle of path <code>p</code>.</p>
+<p><a id='Devices.Paths.adjust!' href='#Devices.Paths.adjust!'>#</a>
+<strong><code>Devices.Paths.adjust!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>adjust!(p::Path, n::Integer=1)
+</pre></div>
+
+
+<p>Adjust a path's parametric functions starting from index <code>n</code>. Used internally whenever segments are inserted into the path.</p>
+<p><a id='Devices.Paths.launch!' href='#Devices.Paths.launch!'>#</a>
+<strong><code>Devices.Paths.launch!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span><span class="nt">launch</span><span class="o">!(</span><span class="nt">p</span><span class="o">:</span><span class="nd">:Path</span><span class="o">;</span> <span class="nt">extround</span><span class="o">=</span><span class="nt">5</span><span class="o">,</span> <span class="nt">trace0</span><span class="o">=</span><span class="nt">300</span><span class="o">,</span> <span class="nt">trace1</span><span class="o">=</span><span class="nt">5</span><span class="o">,</span>
+        <span class="nt">gap0</span><span class="o">=</span><span class="nt">150</span><span class="o">,</span> <span class="nt">gap1</span><span class="o">=</span><span class="nt">2</span><span class="nc">.5</span><span class="o">,</span> <span class="nt">flatlen</span><span class="o">=</span><span class="nt">250</span><span class="o">,</span> <span class="nt">taperlen</span><span class="o">=</span><span class="nt">250</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Add a launcher to the path. Somewhat intelligent in that the launcher will reverse its orientation depending on if it is at the start or the end of a path.</p>
+<p>There are numerous keyword arguments to control the behavior:</p>
+<ul>
+<li><code>extround</code>: Rounding radius of the outermost corners; should be less than <code>gap0</code>.</li>
+<li><code>trace0</code>: Bond pad width.</li>
+<li><code>trace1</code>: Center trace width of next CPW segment.</li>
+<li><code>gap0</code>: Gap width adjacent to bond pad.</li>
+<li><code>gap1</code>: Gap width of next CPW segment.</li>
+<li><code>flatlen</code>: Bond pad length.</li>
+<li><code>taperlen</code>: Length of taper region between bond pad and next CPW segment.</li>
+</ul>
+<p>Returns a <code>Style</code> object suitable for continuity with the next segment. Ignore the returned style if you are terminating a path.</p>
+<p><a id='Devices.Paths.meander!' href='#Devices.Paths.meander!'>#</a>
+<strong><code>Devices.Paths.meander!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>meander!{T&lt;:Real}(p::Path{T}, len, r, straightlen, α::Real)
+</pre></div>
+
+
+<p>Alternate between going straight with length <code>straightlen</code> and turning with radius <code>r</code> and angle <code>α</code>. Each turn goes the opposite direction of the previous. The total length is <code>len</code>. Useful for making resonators.</p>
+<p>The straight and turn segments are combined into a <code>CompoundSegment</code> and appended to the path <code>p</code>.</p>
+<p><a id='Devices.Paths.param' href='#Devices.Paths.param'>#</a>
+<strong><code>Devices.Paths.param</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>param{T&lt;:Real}(c::CompoundSegment{T})
+</pre></div>
+
+
+<p>Return a parametric function over the domain [0,1] that represents the compound segment.</p>
+<p><a id='Devices.Paths.simplify!' href='#Devices.Paths.simplify!'>#</a>
+<strong><code>Devices.Paths.simplify!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>simplify!(p::Path)
+</pre></div>
+
+
+<p>All segments of a path are turned into a <code>CompoundSegment</code> and all styles of a path are turned into a <code>CompoundStyle</code>. The idea here is:</p>
+<ul>
+<li>Indexing the path becomes more sane when you can combine several path segments into one logical element. A launcher would have several indices in a path unless you could simplify it.</li>
+<li>You don't need to think hard about boundaries between straights and turns when you want a continuous styling of a very long path.</li>
+</ul>
+<p><a id='Devices.Paths.straight!' href='#Devices.Paths.straight!'>#</a>
+<strong><code>Devices.Paths.straight!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>straight!(p::Path, l::Real)
+</pre></div>
+
+
+<p>Extend a path <code>p</code> straight by length <code>l</code> in the current direction.</p>
+<p><a id='Devices.Paths.turn!' href='#Devices.Paths.turn!'>#</a>
+<strong><code>Devices.Paths.turn!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span>turn!(p::Path, s::ASCIIString, r::Real, sty::Style=laststyle(p))
+</pre></div>
+
+
+<p>Turn a path <code>p</code> with direction coded by string <code>s</code>:</p>
+<ul>
+<li>"l": turn by π/2 (left)</li>
+<li>"r": turn by -π/2 (right)</li>
+<li>"lrlrllrrll": do those turns in that order</li>
+</ul>
+<div class="codehilite"><pre><span></span>turn!(p::Path, α::Real, r::Real, sty::Style=laststyle(p))
+</pre></div>
+
+
+<p>Turn a path <code>p</code> by angle <code>α</code> with a turning radius <code>r</code> in the current direction. Positive angle turns left.</p>
+<p><a id='Interfacing-with-gdspy-1'></a></p>
+<h2 id="interfacing-with-gdspy">Interfacing with gdspy</h2>
+<p>The Python package <code>gdspy</code> is used for rendering paths into polygons. Ultimately we intend to remove this dependency.</p>
+<p><a id='Devices.Paths.distance' href='#Devices.Paths.distance'>#</a>
+<strong><code>Devices.Paths.distance</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>For a style <code>s</code> and parameteric argument <code>t</code>, returns the distance between the centers of parallel paths rendered by gdspy.</p>
+<p><a id='Devices.Paths.extent' href='#Devices.Paths.extent'>#</a>
+<strong><code>Devices.Paths.extent</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>For a style <code>s</code> and parameteric argument <code>t</code>, returns a distance tangential to the path specifying the lateral extent of the polygons rendered by gdspy.</p>
+<p><a id='Devices.Paths.paths' href='#Devices.Paths.paths'>#</a>
+<strong><code>Devices.Paths.paths</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>For a style <code>s</code> and parameteric argument <code>t</code>, returns the number of parallel paths rendered by gdspy.</p>
+<p><a id='Devices.Paths.width' href='#Devices.Paths.width'>#</a>
+<strong><code>Devices.Paths.width</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>For a style <code>s</code> and parameteric argument <code>t</code>, returns the width of paths rendered by gdspy.</p>
+          <aside class="copyright" role="note">
+            
+            Documentation built with
+            <a href="http://www.mkdocs.org" target="_blank">MkDocs</a>
+            using the
+            <a href="http://squidfunk.github.io/mkdocs-material/" target="_blank">
+              Material
+            </a>
+            theme.
+          </aside>
+          
+            <footer class="footer">
+              
+  <nav class="pagination" aria-label="Footer">
+    <div class="previous">
+      
+        <a href="../points/" title="Points">
+          <span class="direction">
+            Previous
+          </span>
+          <div class="page">
+            <div class="button button-previous" role="button" aria-label="Previous">
+              <i class="icon icon-back"></i>
+            </div>
+            <div class="stretch">
+              <div class="title">
+                Points
+              </div>
+            </div>
+          </div>
+        </a>
+      
+    </div>
+    <div class="next">
+      
+        <a href="../polygons/" title="Abstract polygons">
+          <span class="direction">
+            Next
+          </span>
+          <div class="page">
+            <div class="stretch">
+              <div class="title">
+                Abstract polygons
+              </div>
+            </div>
+            <div class="button button-next" role="button" aria-label="Next">
+              <i class="icon icon-forward"></i>
+            </div>
+          </div>
+        </a>
+      
+    </div>
+  </nav>
+
+            </footer>
+          
+        </div>
+      </article>
+      <div class="results" role="status" aria-live="polite">
+        <div class="scrollable">
+          <div class="wrapper">
+            <div class="meta"></div>
+            <div class="list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      var base_url = '..';
+      var repo_id  = 'ajkeller34/Devices.jl';
+    </script>
+    <script src="../assets/javascripts/application-997097ee0c.js"></script>
+    
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    
+      <script src="../assets/mathjaxhelper.js"></script>
+    
+    
+  </body>
+</html>

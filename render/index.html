@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="no-js ie6"><![endif]-->
+<!--[if IE 7 ]><html class="no-js ie7"><![endif]-->
+<!--[if IE 8 ]><html class="no-js ie8"><![endif]-->
+<!--[if IE 9 ]><html class="no-js ie9"><![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1">
+    
+      
+        <title>Rendering / saving - Devices.jl</title>
+      
+      
+      
+      
+        <meta name="author" content="Andrew Keller">
+      
+    
+    <meta property="og:url" content="None">
+    <meta property="og:title" content="Devices.jl">
+    <meta property="og:image" content="None/../">
+    <meta name="apple-mobile-web-app-title" content="Devices.jl">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../None">
+    <link rel="icon" type="image/x-icon" href="../None">
+    <style>
+      @font-face {
+      	font-family: 'Icon';
+      	src: url('../assets/fonts/icon.eot?52m981');
+      	src: url('../assets/fonts/icon.eot?#iefix52m981')
+               format('embedded-opentype'),
+      		   url('../assets/fonts/icon.woff?52m981')
+               format('woff'),
+      		   url('../assets/fonts/icon.ttf?52m981')
+               format('truetype'),
+      		   url('../assets/fonts/icon.svg?52m981#icon')
+               format('svg');
+      	font-weight: normal;
+      	font-style: normal;
+      }
+    </style>
+    <link rel="stylesheet" href="../assets/stylesheets/application-54f87043f3.css">
+    
+      <link rel="stylesheet" href="../assets/stylesheets/palettes-05ab2406df.css">
+    
+    
+      
+      
+      
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Ubuntu:400,700|Ubuntu+Mono">
+      <style>
+        body, input {
+          font-family: 'Ubuntu', Helvetica, Arial, sans-serif;
+        }
+        pre, code {
+          font-family: 'Ubuntu Mono', 'Courier New', 'Courier', monospace;
+        }
+      </style>
+    
+    
+      <link rel="stylesheet" href="../assets/Documenter.css">
+    
+    <script src="../assets/javascripts/modernizr-4ab42b99fd.js"></script>
+    
+  </head>
+  
+  
+  
+  <body class="palette-primary-indigo palette-accent-blue">
+    
+      
+      
+    
+    <div class="backdrop">
+      <div class="backdrop-paper"></div>
+    </div>
+    <input class="toggle" type="checkbox" id="toggle-drawer">
+    <input class="toggle" type="checkbox" id="toggle-search">
+    <label class="toggle-button overlay" for="toggle-drawer"></label>
+    <header class="header">
+      <nav aria-label="Header">
+  <div class="bar default">
+    <div class="button button-menu" role="button" aria-label="Menu">
+      <label class="toggle-button icon icon-menu" for="toggle-drawer">
+        <span></span>
+      </label>
+    </div>
+    <div class="stretch">
+      <div class="title">
+        
+          <span class="path">
+            
+          </span>
+        
+        Rendering / saving
+      </div>
+    </div>
+    
+    
+    <div class="button button-search" role="button" aria-label="Search">
+      <label class="toggle-button icon icon-search" title="Search" for="toggle-search"></label>
+    </div>
+  </div>
+  <div class="bar search">
+    <div class="button button-close" role="button" aria-label="Close">
+      <label class="toggle-button icon icon-back" for="toggle-search"></label>
+    </div>
+    <div class="stretch">
+      <div class="field">
+        <input class="query" type="text" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck>
+      </div>
+    </div>
+    <div class="button button-reset" role="button" aria-label="Search">
+      <button class="toggle-button icon icon-close" id="reset-search"></button>
+    </div>
+  </div>
+</nav>
+    </header>
+    <main class="main">
+      
+      <div class="drawer">
+        <nav aria-label="Navigation">
+  
+  <a href="https://github.com/ajkeller34/Devices.jl" class="project">
+    <div class="banner">
+      
+      <div class="name">
+        <strong>
+          Devices.jl
+          <span class="version">
+            
+          </span>
+        </strong>
+        
+          <br>
+          ajkeller34/Devices.jl
+        
+      </div>
+    </div>
+  </a>
+  <div class="scrollable">
+    <div class="wrapper">
+      
+        <ul class="repo">
+          <li class="repo-download">
+            
+            <a href="https://github.com/ajkeller34/Devices.jl/archive/master.zip" target="_blank" title="Download" data-action="download">
+              <i class="icon icon-download"></i> Download
+            </a>
+          </li>
+          <li class="repo-stars">
+            <a href="https://github.com/ajkeller34/Devices.jl/stargazers" target="_blank" title="Stargazers" data-action="star">
+              <i class="icon icon-star"></i> Stars
+              <span class="count">&ndash;</span>
+            </a>
+          </li>
+        </ul>
+        <hr>
+      
+      <div class="toc">
+        <ul>
+          
+            
+  <li>
+    <a class="" title="Home" href="..">
+      Home
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Points" href="../points/">
+      Points
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Paths" href="../paths/">
+      Paths
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Abstract polygons" href="../polygons/">
+      Abstract polygons
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Cells" href="../cells/">
+      Cells
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="current" title="Rendering / saving" href="./">
+      Rendering / saving
+    </a>
+    
+      
+      
+        <ul>
+          
+            <li class="anchor">
+              <a title="Rendering" href="#rendering">
+                Rendering
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Saving patterns" href="#saving-patterns">
+                Saving patterns
+              </a>
+            </li>
+          
+        </ul>
+      
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Index" href="../idx/">
+      Index
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="License" href="../LICENSE/">
+      License
+    </a>
+    
+  </li>
+
+          
+        </ul>
+        
+      </div>
+    </div>
+  </div>
+</nav>
+      </div>
+      <article class="article">
+        <div class="wrapper">
+          
+            <h1>Rendering / saving</h1>
+          
+          <p><a id='Rendering-1'></a></p>
+<h2 id="rendering">Rendering</h2>
+<p><a id='Devices.render!' href='#Devices.render!'>#</a>
+<strong><code>Devices.render!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">segment</span><span class="o">:</span><span class="nd">:Paths</span><span class="nc">.Segment</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Paths</span><span class="nc">.Style</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a <code>segment</code> with style <code>s</code> to cell <code>c</code>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">segment</span><span class="o">:</span><span class="nd">:Paths</span><span class="nc">.Segment</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Paths</span><span class="nc">.DecoratedStyle</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a <code>segment</code> with decorated style <code>s</code> to cell <code>c</code>. This method draws the decorations before the path itself is drawn.</p>
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">p</span><span class="o">:</span><span class="nd">:Path</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a path <code>p</code> to a cell <code>c</code>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Polygon</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Polygons</span><span class="nc">.Style</span><span class="o">=</span><span class="nt">Polygons</span><span class="nc">.Plain</span><span class="o">();</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a polygon <code>r</code> to cell <code>c</code>, defaulting to plain styling.</p>
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Rectangle</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Rectangles</span><span class="nc">.Style</span><span class="o">=</span><span class="nt">Rectangles</span><span class="nc">.Plain</span><span class="o">();</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a rectangle <code>r</code> to cell <code>c</code>, defaulting to plain styling.</p>
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Rectangle</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Rectangles</span><span class="nc">.Rounded</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a rounded rectangle <code>r</code> to cell <code>c</code>. This is accomplished by rendering a path around the outside of a (smaller than requested) solid rectangle. The bounding box of <code>r</code> is preserved.</p>
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Rectangle</span><span class="o">,</span> <span class="o">:</span><span class="nd">:Rectangles</span><span class="nc">.Plain</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a rectangle <code>r</code> to cell <code>c</code> with plain styling.</p>
+<p><a id='Saving-patterns-1'></a></p>
+<h2 id="saving-patterns">Saving patterns</h2>
+<p>To save a pattern, make sure you are <code>using FileIO</code>.</p>
+<p><a id='FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}' href='#FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}'>#</a>
+<strong><code>FileIO.save</code></strong> &mdash; <em>Method</em>.</p>
+<hr />
+<div class="codehilite"><pre><span></span><span class="nt">save</span><span class="o">(:</span><span class="nd">:Union</span><span class="p">{</span><span class="n">AbstractString</span><span class="o">,</span><span class="n">IO</span><span class="p">}</span><span class="o">,</span> <span class="nt">cell0</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">cell</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">...)</span>
+
+<span class="nt">save</span><span class="o">(</span><span class="nt">f</span><span class="o">:</span><span class="nd">:File</span><span class="p">{</span><span class="n">format</span><span class="s2">&quot;GDS&quot;</span><span class="p">}</span><span class="o">,</span> <span class="nt">cell0</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">cell</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">...;</span>
+<span class="nt">name</span><span class="o">=</span><span class="s2">&quot;GDSIILIB&quot;</span><span class="o">,</span> <span class="nt">precision</span><span class="o">=</span><span class="nt">1e-9</span><span class="o">,</span> <span class="nt">unit</span><span class="o">=</span><span class="nt">1e-6</span><span class="o">,</span> <span class="nt">modify</span><span class="o">=</span><span class="nt">now</span><span class="o">(),</span> <span class="nt">acc</span><span class="o">=</span><span class="nt">now</span><span class="o">(),</span>
+<span class="nt">verbose</span><span class="o">=</span><span class="nt">false</span><span class="o">)</span><span class="err">`</span>
+</pre></div>
+
+
+<p>This bottom method is implicitly called when you use the convenient syntax of the top method: <code>save("/path/to/my.gds", cells_i_want_to_save...)</code></p>
+<p>The <code>name</code> keyword argument is used for the internal library name of the GDS-II file and is probably inconsequential for modern workflows.</p>
+<p>The <code>verbose</code> keyword argument allows you to monitor the output of <a href="../cells/#Devices.Cells.traverse!"><code>traverse!</code></a> and <a href="../cells/#Devices.Cells.order!"><code>order!</code></a> if something funny is happening while saving.</p>
+          <aside class="copyright" role="note">
+            
+            Documentation built with
+            <a href="http://www.mkdocs.org" target="_blank">MkDocs</a>
+            using the
+            <a href="http://squidfunk.github.io/mkdocs-material/" target="_blank">
+              Material
+            </a>
+            theme.
+          </aside>
+          
+            <footer class="footer">
+              
+  <nav class="pagination" aria-label="Footer">
+    <div class="previous">
+      
+        <a href="../cells/" title="Cells">
+          <span class="direction">
+            Previous
+          </span>
+          <div class="page">
+            <div class="button button-previous" role="button" aria-label="Previous">
+              <i class="icon icon-back"></i>
+            </div>
+            <div class="stretch">
+              <div class="title">
+                Cells
+              </div>
+            </div>
+          </div>
+        </a>
+      
+    </div>
+    <div class="next">
+      
+        <a href="../idx/" title="Index">
+          <span class="direction">
+            Next
+          </span>
+          <div class="page">
+            <div class="stretch">
+              <div class="title">
+                Index
+              </div>
+            </div>
+            <div class="button button-next" role="button" aria-label="Next">
+              <i class="icon icon-forward"></i>
+            </div>
+          </div>
+        </a>
+      
+    </div>
+  </nav>
+
+            </footer>
+          
+        </div>
+      </article>
+      <div class="results" role="status" aria-live="polite">
+        <div class="scrollable">
+          <div class="wrapper">
+            <div class="meta"></div>
+            <div class="list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      var base_url = '..';
+      var repo_id  = 'ajkeller34/Devices.jl';
+    </script>
+    <script src="../assets/javascripts/application-997097ee0c.js"></script>
+    
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    
+      <script src="../assets/mathjaxhelper.js"></script>
+    
+    
+  </body>
+</html>
