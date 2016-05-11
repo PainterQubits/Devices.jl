@@ -20,6 +20,12 @@ Renders a QR code of the string `a` with pixel size `pixel` to a new cell with `
 The lower left of the QR code will be at the origin of the cell.
 """
 function qrcode{T<:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0, center::Bool=false; kwargs...)
+    c = Cell{T}(name)
+    qrcode(a, c, pixel, center; kwargs...)
+    c
+end
+
+function qrcode{T<:Real}(a::AbstractString, c::Cell, pixel::T=1.0, center::Bool=false; kwargs...)
     myqr = qr()[:create](a)
     str = myqr[:text](quiet_zone=0)
 
@@ -36,13 +42,13 @@ function qrcode{T<:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0, cen
         y -= pixel
     end
 
-    c = Cell(name)
     for r in rects
         r += Point(zero(pixel), -y)
         render!(c, r, Rectangles.Plain())
     end
     c
 end
+
 
 function radialstub(r, Θ, c, name::ASCIIString; narc=197)
     p = Path(Point(c*tan(Θ/2),-c), (Θ-π)/2)
