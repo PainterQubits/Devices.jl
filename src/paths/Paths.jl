@@ -121,11 +121,11 @@ Path segment in the plane. All Segment objects should have the implement
 the following methods:
 
 - `length`
-- `origin`
+- `p0`
 - `α0`
-- `setorigin!`
+- `setp0!`
 - `setα0!`
-- `lastangle`
+- `α1`
 """
 abstract Segment{T<:Real}
 
@@ -135,13 +135,13 @@ include("Segments.jl")
 """
 ```
 type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
-    origin::Point{2,T}
+    p0::Point{2,T}
     α0::Real
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
-    Path(origin::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
-        styles::Array{Style,1}) = new(origin, α0, style0, segments, styles)
+    Path(p0::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
+        styles::Array{Style,1}) = new(p0, α0, style0, segments, styles)
     Path(style::Style) =
         new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
 end
@@ -151,46 +151,46 @@ Type for abstracting an arbitrary styled path in the plane. Iterating returns
 tuples of (`segment`, `style`).
 """
 type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
-    origin::Point{2,T}
+    p0::Point{2,T}
     α0::Real
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
-    Path(origin::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
-        styles::Array{Style,1}) = new(origin, α0, style0, segments, styles)
+    Path(p0::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
+        styles::Array{Style,1}) = new(p0, α0, style0, segments, styles)
     Path(style::Style) =
         new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
 end
 
 """
 ```
-Path{T<:Real}(origin::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0))
+Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0))
 ```
 
 Convenience constructor for `Path{T}` object.
 """
-Path{T<:Real}(origin::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0)) =
-    Path{T}(origin, α0, style0, Segment{T}[], Style[])
+Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0)) =
+    Path{T}(p0, α0, style0, Segment{T}[], Style[])
 
 """
 ```
-Path{T<:Real}(origin::Tuple{T,T})
-```
-
-Convenience constructor for `Path{T}` object.
-"""
-Path{T<:Real}(origin::Tuple{T,T}) =
-    Path(Point(float(origin[1]),float(origin[2])))
-
-"""
-```
-Path{T<:Real}(origin::Tuple{T,T}, α0::Real)
+Path{T<:Real}(p0::Tuple{T,T})
 ```
 
 Convenience constructor for `Path{T}` object.
 """
-Path{T<:Real}(origin::Tuple{T,T}, α0::Real) =
-    Path(Point(float(origin[1]),float(origin[2])), α0)
+Path{T<:Real}(p0::Tuple{T,T}) =
+    Path(Point(float(p0[1]),float(p0[2])))
+
+"""
+```
+Path{T<:Real}(p0::Tuple{T,T}, α0::Real)
+```
+
+Convenience constructor for `Path{T}` object.
+"""
+Path{T<:Real}(p0::Tuple{T,T}, α0::Real) =
+    Path(Point(float(p0[1]),float(p0[2])), α0)
 
 """
 ```
@@ -228,46 +228,46 @@ end
 
 """
 ```
-lastangle(p::Path)
+α1(p::Path)
 ```
 
 Last angle of a path.
 """
-function lastangle(p::Path)
+function α1(p::Path)
     if isempty(p)
         p.α0
     else
-        lastangle(p.segments[end])
+        α1(p.segments[end])
     end
 end
 
 """
 ```
-origin(p::Path)
+p0(p::Path)
 ```
 
 First point of a path.
 """
-function origin(p::Path)
+function p0(p::Path)
     if isempty(p)
-        p.origin
+        p.p0
     else
-        origin(p.segments[1])
+        p0(p.segments[1])
     end
 end
 
 """
 ```
-lastpoint(p::Path)
+p1(p::Path)
 ```
 
 Last point of a path.
 """
-function lastpoint(p::Path)
+function p1(p::Path)
     if isempty(p)
-        p.origin
+        p.p0
     else
-        lastpoint(p.segments[end])
+        p1(p.segments[end])
     end
 end
 
@@ -314,15 +314,15 @@ function adjust!(p::Path, n::Integer=1)
     m = n
     if m == 1
         seg,sty = p[1]
-        setorigin!(seg, p.origin)
+        setp0!(seg, p.p0)
         setα0!(seg, p.α0)
         m += 1
     end
     for j in m:length(p)
         seg,sty = p[j]
         seg0,sty0 = p[j-1]
-        setorigin!(seg, lastpoint(seg0))
-        setα0!(seg, lastangle(seg0))
+        setp0!(seg, p1(seg0))
+        setα0!(seg, α1(seg0))
     end
 end
 
@@ -383,16 +383,16 @@ append!(p::Path, p′::Path)
 ```
 
 Given paths `p` and `p′`, path `p′` is appended to path `p`.
-The origin and initial angle of the first segment from path `p′` is
+The p0 and initial angle of the first segment from path `p′` is
 modified to match the last point and last angle of path `p`.
 """
 function append!(p::Path, p′::Path)
     isempty(p′) && return
     i = length(p)
-    lp, la = lastpoint(p), lastangle(p)
+    lp, la = p1(p), α1(p)
     append!(p.segments, p′.segments)
     append!(p.styles, p′.styles)
-    setorigin!(p.segments[i+1], lp)
+    setp0!(p.segments[i+1], lp)
     setα0!(p.segments[i+1], la)
     adjust!(p, i+1)
     nothing
@@ -429,9 +429,9 @@ straight!(p::Path, l::Real)
 Extend a path `p` straight by length `l` in the current direction.
 """
 function straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=laststyle(p))
-    origin = lastpoint(p)
-    α = lastangle(p)
-    s = Straight{T}(l, origin, α)
+    p0 = p1(p)
+    α = α1(p)
+    s = Straight{T}(l, p0, α)
     push!(p, (s,sty))
     nothing
 end
@@ -445,9 +445,9 @@ Turn a path `p` by angle `α` with a turning radius `r` in the current direction
 Positive angle turns left.
 """
 function turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=laststyle(p))
-    origin = lastpoint(p)
-    α0 = lastangle(p)
-    turn = Turn{T}(α, r, origin, α0)
+    p0 = p1(p)
+    α0 = α1(p)
+    turn = Turn{T}(α, r, p0, α0)
     push!(p, (turn,sty))
     nothing
 end
@@ -472,7 +472,7 @@ function turn!{T<:Real}(p::Path{T}, s::ASCIIString, r::Real, sty::Style=laststyl
         else
             error("Unrecognizable turn command.")
         end
-        turn = Turn{T}(α, r, lastpoint(p), lastangle(p))
+        turn = Turn{T}(α, r, p1(p), α1(p))
         push!(p, (turn,sty))
     end
     nothing
@@ -596,7 +596,7 @@ function param{T<:Real}(c::CompoundSegment{T})
         h′ = gradient(h,1.0)
         D0x, D0y = getx(g′), gety(g′)
         D1x, D1y = getx(h′), gety(h′)
-        a0,a = origin((($c).segments)[1]),lastpoint((($c).segments)[end])
+        a0,a = p0((($c).segments)[1]),p1((($c).segments)[end])
         l0,l1 = length((($c).segments)[1]), length((($c).segments)[end])
         (t >= 1.0) &&
             return a + Point(D1x*(t-1)*(L/l1), D1y*(t-1)*(L/l1))

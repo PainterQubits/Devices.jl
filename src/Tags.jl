@@ -60,8 +60,8 @@ function radialstub(r, Θ, c, name::ASCIIString; narc=197)
 
     f = p[3][1].f
     pts = map(f, linspace(0.0,1.0,narc))
-    push!(pts, Paths.lastpoint(p))
-    c != 0.0 && push!(pts, Paths.origin(p))
+    push!(pts, Paths.p1(p))
+    c != 0.0 && push!(pts, Paths.p0(p))
     poly = Polygon(pts) + Point(0.0, c) # + Point(0.0, (r-c)/2)
 
     cell = Cell(name)

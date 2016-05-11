@@ -29,12 +29,12 @@
     {docs}
     Paths.direction
     Paths.pathlength
-    Paths.origin
-    Paths.setorigin!
+    Paths.p0
+    Paths.setp0!
     Paths.α0
     Paths.setα0!
-    Paths.lastpoint
-    Paths.lastangle
+    Paths.p1
+    Paths.α1
     Paths.firststyle
     Paths.laststyle
 

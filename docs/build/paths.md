@@ -11,13 +11,13 @@
 
 ```
 type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
-    origin::Point{2,T}
+    p0::Point{2,T}
     α0::Real
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
-    Path(origin::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
-        styles::Array{Style,1}) = new(origin, α0, style0, segments, styles)
+    Path(p0::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
+        styles::Array{Style,1}) = new(p0, α0, style0, segments, styles)
     Path(style::Style) =
         new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
 end
@@ -32,7 +32,7 @@ Type for abstracting an arbitrary styled path in the plane. Iterating returns tu
 
 
 ```
-Path{T<:Real}(origin::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0))
+Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0))
 ```
 
 Convenience constructor for `Path{T}` object.
@@ -44,7 +44,7 @@ Convenience constructor for `Path{T}` object.
 
 
 ```
-Path{T<:Real}(origin::Tuple{T,T})
+Path{T<:Real}(p0::Tuple{T,T})
 ```
 
 Convenience constructor for `Path{T}` object.
@@ -56,7 +56,7 @@ Convenience constructor for `Path{T}` object.
 
 
 ```
-Path{T<:Real}(origin::Tuple{T,T}, α0::Real)
+Path{T<:Real}(p0::Tuple{T,T}, α0::Real)
 ```
 
 Convenience constructor for `Path{T}` object.
@@ -91,11 +91,11 @@ abstract Segment{T<:Real}
 Path segment in the plane. All Segment objects should have the implement the following methods:
 
   * `length`
-  * `origin`
+  * `p0`
   * `α0`
-  * `setorigin!`
+  * `setp0!`
   * `setα0!`
-  * `lastangle`
+  * `α1`
 
 <a id='Devices.Paths.Straight' href='#Devices.Paths.Straight'>#</a>
 **`Devices.Paths.Straight`** &mdash; *Type*.
@@ -106,22 +106,22 @@ Path segment in the plane. All Segment objects should have the implement the fol
 ```
 type Straight{T<:Real} <: Segment{T}
     l::T
-    origin::Point{2,T}
+    p0::Point{2,T}
     α0::Real
     f::Function
-    Straight(l, origin, α0) = begin
-        s = new(l, origin, α0)
-        s.f = t->(s.origin+Point(t*s.l*cos(s.α0),t*s.l*sin(s.α0)))
+    Straight(l, p0, α0) = begin
+        s = new(l, p0, α0)
+        s.f = t->(s.p0+Point(t*s.l*cos(s.α0),t*s.l*sin(s.α0)))
         s
     end
 end
 ```
 
-A straight line segment is parameterized by its length. It begins at a point `origin` with initial angle `α0`.
+A straight line segment is parameterized by its length. It begins at a point `p0` with initial angle `α0`.
 
 The parametric function over `t ∈ [0,1]` describing the line segment is given by:
 
-`t -> origin + Point(t*l*cos(α),t*l*sin(α))`
+`t -> p0 + Point(t*l*cos(α),t*l*sin(α))`
 
 <a id='Devices.Paths.Turn' href='#Devices.Paths.Turn'>#</a>
 **`Devices.Paths.Turn`** &mdash; *Type*.
@@ -133,13 +133,13 @@ The parametric function over `t ∈ [0,1]` describing the line segment is given 
 type Turn{T<:Real} <: Segment{T}
     α::Real
     r::T
-    origin::Point{2,T}
+    p0::Point{2,T}
     α0::Real
     f::Function
-    Turn(α, r, origin, α0) = begin
-        s = new(α, r, origin, α0)
+    Turn(α, r, p0, α0) = begin
+        s = new(α, r, p0, α0)
         s.f = t->begin
-            cen = s.origin + Point(s.r*cos(s.α0+sign(s.α)*π/2), s.r*sin(s.α0+sign(s.α)*π/2))
+            cen = s.p0 + Point(s.r*cos(s.α0+sign(s.α)*π/2), s.r*sin(s.α0+sign(s.α)*π/2))
             cen + Point(s.r*cos(s.α0-sign(α)*π/2+s.α*t), s.r*sin(s.α0-sign(α)*π/2+s.α*t))
         end
         s
@@ -147,11 +147,11 @@ type Turn{T<:Real} <: Segment{T}
 end
 ```
 
-A circular turn is parameterized by the turn angle `α` and turning radius `r`. It begins at a point `origin` with initial angle `α0`.
+A circular turn is parameterized by the turn angle `α` and turning radius `r`. It begins at a point `p0` with initial angle `α0`.
 
 The center of the circle is given by:
 
-`cen = origin + Point(r*cos(α0+sign(α)*π/2), r*sin(α0+sign(α)*π/2))`
+`cen = p0 + Point(r*cos(α0+sign(α)*π/2), r*sin(α0+sign(α)*π/2))`
 
 The parametric function over `t ∈ [0,1]` describing the turn is given by:
 
@@ -327,47 +327,47 @@ pathlength(p::Path)
 
 Physical length of a path. Note that `length` will return the number of segments in a path, not the physical length.
 
-<a id='Devices.Paths.origin' href='#Devices.Paths.origin'>#</a>
-**`Devices.Paths.origin`** &mdash; *Function*.
+<a id='Devices.Paths.p0' href='#Devices.Paths.p0'>#</a>
+**`Devices.Paths.p0`** &mdash; *Function*.
 
 ---
 
 
 ```
-origin(p::Path)
+p0(p::Path)
 ```
 
 First point of a path.
 
 ```
-origin{T}(s::Segment{T})
+p0{T}(s::Segment{T})
 ```
 
 Return the first point in a segment (calculated).
 
-<a id='Devices.Paths.setorigin!' href='#Devices.Paths.setorigin!'>#</a>
-**`Devices.Paths.setorigin!`** &mdash; *Function*.
+<a id='Devices.Paths.setp0!' href='#Devices.Paths.setp0!'>#</a>
+**`Devices.Paths.setp0!`** &mdash; *Function*.
 
 ---
 
 
 ```
-setorigin!(s::CompoundSegment, p::Point)
+setp0!(s::CompoundSegment, p::Point)
 ```
 
-Set the origin of a compound segment.
+Set the p0 of a compound segment.
 
 ```
-setorigin!(s::Turn, p::Point)
+setp0!(s::Turn, p::Point)
 ```
 
-Set the origin of a turn.
+Set the p0 of a turn.
 
 ```
-setorigin!(s::Straight, p::Point)
+setp0!(s::Straight, p::Point)
 ```
 
-Set the origin of a straight segment.
+Set the p0 of a straight segment.
 
 <a id='Devices.Paths.α0' href='#Devices.Paths.α0'>#</a>
 **`Devices.Paths.α0`** &mdash; *Function*.
@@ -411,38 +411,38 @@ setα0!(s::Straight, α0′)
 
 Set the angle of a straight segment.
 
-<a id='Devices.Paths.lastpoint' href='#Devices.Paths.lastpoint'>#</a>
-**`Devices.Paths.lastpoint`** &mdash; *Function*.
+<a id='Devices.Paths.p1' href='#Devices.Paths.p1'>#</a>
+**`Devices.Paths.p1`** &mdash; *Function*.
 
 ---
 
 
 ```
-lastpoint(p::Path)
+p1(p::Path)
 ```
 
 Last point of a path.
 
 ```
-lastpoint{T}(s::Segment{T})
+p1{T}(s::Segment{T})
 ```
 
 Return the last point in a segment (calculated).
 
-<a id='Devices.Paths.lastangle' href='#Devices.Paths.lastangle'>#</a>
-**`Devices.Paths.lastangle`** &mdash; *Function*.
+<a id='Devices.Paths.α1' href='#Devices.Paths.α1'>#</a>
+**`Devices.Paths.α1`** &mdash; *Function*.
 
 ---
 
 
 ```
-lastangle(p::Path)
+α1(p::Path)
 ```
 
 Last angle of a path.
 
 ```
-lastangle(s::Segment)
+α1(s::Segment)
 ```
 
 Return the last angle in a segment (calculated).
@@ -486,7 +486,7 @@ Style of the last segment of a path.
 append!(p::Path, p′::Path)
 ```
 
-Given paths `p` and `p′`, path `p′` is appended to path `p`. The origin and initial angle of the first segment from path `p′` is modified to match the last point and last angle of path `p`.
+Given paths `p` and `p′`, path `p′` is appended to path `p`. The p0 and initial angle of the first segment from path `p′` is modified to match the last point and last angle of path `p`.
 
 <a id='Devices.Paths.adjust!' href='#Devices.Paths.adjust!'>#</a>
 **`Devices.Paths.adjust!`** &mdash; *Function*.

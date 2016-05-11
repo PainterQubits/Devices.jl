@@ -94,8 +94,8 @@ A cell has a name and contains polygons and references to `CellArray` or
 `CellReference` objects. It also records the time of its own creation. As
 currently implemented it mirrors the notion of cells in GDS-II files.
 
-In the future, it may make sense to generalize the idea and permit [`Path`]({ref})
-objects within a Cell.
+In the future, it may make sense to generalize the idea and permit
+`Path` objects within a Cell.
 
 To add elements, push them to `elements` field;
 to add references, push them to `refs` field.
