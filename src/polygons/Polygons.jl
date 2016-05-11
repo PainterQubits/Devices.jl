@@ -57,7 +57,7 @@ Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, dict)
 Convenience constructor for a `Polygon{T}` object.
 """
 Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, dict) =
-    Polygon{T}(parr, kwargs)
+    Polygon{T}(parr, dict)
 
 """
 ```
@@ -122,7 +122,10 @@ maximum(x::Polygon) = maximum(x.p)
 function *(a::AffineTransform, x::Polygon)
     Polygon(map(x->Point(a*Array(x)), x.p), x.properties)
 end
-*{T<:Real}(a::AffineTransform, x::Rectangle{T}) = *(a, convert(Polygon{T}, x))
+
+function *(a::AffineTransform, x::Rectangle)
+    Rectangle(Point(a*Array(x.ll)),Point(a*Array(x.ur)),x.properties)
+end
 
 """
 ```
