@@ -447,26 +447,26 @@ Last angle of a path.
 
 Return the last angle in a segment (calculated).
 
-<a id='Devices.Paths.firststyle' href='#Devices.Paths.firststyle'>#</a>
-**`Devices.Paths.firststyle`** &mdash; *Function*.
+<a id='Devices.Paths.style0' href='#Devices.Paths.style0'>#</a>
+**`Devices.Paths.style0`** &mdash; *Function*.
 
 ---
 
 
 ```
-firststyle(p::Path)
+style0(p::Path)
 ```
 
 Style of the first segment of a path.
 
-<a id='Devices.Paths.laststyle' href='#Devices.Paths.laststyle'>#</a>
-**`Devices.Paths.laststyle`** &mdash; *Function*.
+<a id='Devices.Paths.style1' href='#Devices.Paths.style1'>#</a>
+**`Devices.Paths.style1`** &mdash; *Function*.
 
 ---
 
 
 ```
-laststyle(p::Path)
+style1(p::Path)
 ```
 
 Style of the last segment of a path.
@@ -585,7 +585,7 @@ Extend a path `p` straight by length `l` in the current direction.
 
 
 ```
-turn!(p::Path, s::ASCIIString, r::Real, sty::Style=laststyle(p))
+turn!(p::Path, s::ASCIIString, r::Real, sty::Style=style1(p))
 ```
 
 Turn a path `p` with direction coded by string `s`:
@@ -595,7 +595,7 @@ Turn a path `p` with direction coded by string `s`:
   * "lrlrllrrll": do those turns in that order
 
 ```
-turn!(p::Path, α::Real, r::Real, sty::Style=laststyle(p))
+turn!(p::Path, α::Real, r::Real, sty::Style=style1(p))
 ```
 
 Turn a path `p` by angle `α` with a turning radius `r` in the current direction. Positive angle turns left.

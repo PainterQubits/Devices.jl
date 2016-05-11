@@ -273,12 +273,12 @@ end
 
 """
 ```
-firststyle(p::Path)
+style0(p::Path)
 ```
 
 Style of the first segment of a path.
 """
-function firststyle(p::Path)
+function style0(p::Path)
     if isempty(p)
         p.style0
     else
@@ -288,12 +288,12 @@ end
 
 """
 ```
-laststyle(p::Path)
+style1(p::Path)
 ```
 
 Style of the last segment of a path.
 """
-function laststyle(p::Path)
+function style1(p::Path)
     if isempty(p)
         p.style0
     else
@@ -428,7 +428,7 @@ straight!(p::Path, l::Real)
 
 Extend a path `p` straight by length `l` in the current direction.
 """
-function straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=laststyle(p))
+function straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=style1(p))
     p0 = p1(p)
     α = α1(p)
     s = Straight{T}(l, p0, α)
@@ -438,13 +438,13 @@ end
 
 """
 ```
-turn!(p::Path, α::Real, r::Real, sty::Style=laststyle(p))
+turn!(p::Path, α::Real, r::Real, sty::Style=style1(p))
 ```
 
 Turn a path `p` by angle `α` with a turning radius `r` in the current direction.
 Positive angle turns left.
 """
-function turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=laststyle(p))
+function turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=style1(p))
     p0 = p1(p)
     α0 = α1(p)
     turn = Turn{T}(α, r, p0, α0)
@@ -454,7 +454,7 @@ end
 
 """
 ```
-turn!(p::Path, s::ASCIIString, r::Real, sty::Style=laststyle(p))
+turn!(p::Path, s::ASCIIString, r::Real, sty::Style=style1(p))
 ```
 
 Turn a path `p` with direction coded by string `s`:
@@ -463,7 +463,7 @@ Turn a path `p` with direction coded by string `s`:
 - "r": turn by -π/2 (right)
 - "lrlrllrrll": do those turns in that order
 """
-function turn!{T<:Real}(p::Path{T}, s::ASCIIString, r::Real, sty::Style=laststyle(p))
+function turn!{T<:Real}(p::Path{T}, s::ASCIIString, r::Real, sty::Style=style1(p))
     for ch in s
         if ch == 'l'
             α = π/2
@@ -494,7 +494,7 @@ function meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
     ratio = len/(straightlen+r*α)
     nsegs = Int(ceil(ratio))
 
-    p′ = Path{T}(laststyle(p))
+    p′ = Path{T}(style1(p))
     for pm in take(cycle([1.0,-1.0]), nsegs)
         straight!(p′, straightlen)
         turn!(p′, pm*α, r)     # alternates left and right

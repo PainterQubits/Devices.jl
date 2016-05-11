@@ -35,8 +35,8 @@
     Paths.setα0!
     Paths.p1
     Paths.α1
-    Paths.firststyle
-    Paths.laststyle
+    Paths.style0
+    Paths.style1
 
 ## Path building
 
