@@ -276,7 +276,6 @@
           <p>In this package, any polygon regardless of its concrete representation in memory should be a subtype of <a href="./#Devices.AbstractPolygon"><code>Devices.AbstractPolygon</code></a>.</p>
 <p><a id='Devices.AbstractPolygon' href='#Devices.AbstractPolygon'>#</a>
 <strong><code>Devices.AbstractPolygon</code></strong> &mdash; <em>Type</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>abstract AbstractPolygon{T}
 </pre></div>
 
@@ -286,7 +285,6 @@
 <h2 id="rectangles">Rectangles</h2>
 <p><a id='Devices.Rectangles.Rectangle' href='#Devices.Rectangles.Rectangle'>#</a>
 <strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Type</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>type Rectangle{T&lt;:Real} &lt;: AbstractPolygon{T}
     ll::Point{2,T}
     ur::Point{2,T}
@@ -300,7 +298,6 @@ end
 <p>A rectangle, defined by opposing lower-left and upper-right corner coordinates.</p>
 <p><a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}'>#</a>
 <strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">ll</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">ur</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
@@ -308,7 +305,6 @@ end
 <p>Convenience constructor for <code>Rectangle{T}</code> objects.</p>
 <p><a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Any}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Any}'>#</a>
 <strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>Rectangle{T&lt;:Real}(ll::Point{2,T}, ur::Point{2,T}, dict)
 </pre></div>
 
@@ -316,7 +312,6 @@ end
 <p>Convenience constructor for <code>Rectangle{T}</code> objects.</p>
 <p><a id='Devices.Rectangles.Rectangle-Tuple{T<:Real,T<:Real}' href='#Devices.Rectangles.Rectangle-Tuple{T<:Real,T<:Real}'>#</a>
 <strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">width</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="nt">height</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
@@ -325,7 +320,6 @@ end
 <p>The rectangle will sit with the lower-left corner at the origin. With centered rectangles we would need to divide width and height by 2 to properly position. If we wanted an object of <code>Rectangle{Int}</code> type, this would not be possible if either <code>width</code> or <code>height</code> were odd numbers. This definition ensures type stability in the constructor.</p>
 <p><a id='Devices.bounds-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.bounds-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>bounds(r::Rectangle)
 </pre></div>
 
@@ -338,7 +332,6 @@ end
 <p>Return a bounding <code>Rectangle</code> with no properties for several <code>AbstractPolygon</code> objects.</p>
 <p><a id='Devices.center-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.center-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Devices.center</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>center(r::Rectangle)
 </pre></div>
 
@@ -346,7 +339,6 @@ end
 <p>Returns a Point corresponding to the center of the rectangle.</p>
 <p><a id='Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Devices.Rectangles.height</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>height(r::Rectangle)
 </pre></div>
 
@@ -354,7 +346,6 @@ end
 <p>Return the height of a rectangle.</p>
 <p><a id='Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Devices.Rectangles.isproper</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>isproper(r::Rectangle)
 </pre></div>
 
@@ -362,7 +353,6 @@ end
 <p>Returns <code>true</code> if the rectangle has a non-zero size and if the upper-right and lower-left corner coordinates <code>ur</code> and <code>ll</code> really are at the upper-right and lower-left. Otherwise, returns <code>false</code>.</p>
 <p><a id='Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Base.minimum</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>minimum(r::Rectangle)
 </pre></div>
 
@@ -375,7 +365,6 @@ end
 <p>Returns the smallest element in a collection.</p>
 <p><a id='Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Base.maximum</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>maximum(r::Rectangle)
 </pre></div>
 
@@ -388,7 +377,6 @@ end
 <p>Returns the largest element in a collection.</p>
 <p><a id='Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Devices.Polygons.points</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>points{T&lt;:Real}(x::Rectangle{T})
 </pre></div>
 
@@ -396,7 +384,6 @@ end
 <p>Returns the array of <code>Point</code> objects defining the rectangle.</p>
 <p><a id='Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Devices.Rectangles.width</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>width(r::Rectangle)
 </pre></div>
 
@@ -404,7 +391,6 @@ end
 <p>Return the width of a rectangle.</p>
 <p><a id='Base.+-Tuple{Devices.Rectangles.Rectangle{T<:Real},FixedSizeArrays.Point{N,T}}' href='#Base.+-Tuple{Devices.Rectangles.Rectangle{T<:Real},FixedSizeArrays.Point{N,T}}'>#</a>
 <strong><code>Base.+</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>+(r::Rectangle, p::Point)
 </pre></div>
 
@@ -414,7 +400,6 @@ end
 <h2 id="polygons">Polygons</h2>
 <p><a id='Devices.Polygons.Polygon' href='#Devices.Polygons.Polygon'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Type</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>type Polygon{T&lt;:Real} &lt;: AbstractPolygon{T}
     p::Array{Point{2,T},1}
     properties::Dict{Symbol, Any}
@@ -427,7 +412,6 @@ end
 <p>Polygon defined by list of coordinates. The first point should not be repeated at the end (although this is true for the GDS format).</p>
 <p><a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">parr</span><span class="o">:</span><span class="nd">:AbstractArray</span><span class="p">{</span><span class="n">Point</span><span class="err">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span><span class="nt">1</span><span class="err">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
@@ -435,7 +419,6 @@ end
 <p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
 <p><a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1},Any}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1},Any}'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>Polygon{T&lt;:Real}(parr::AbstractArray{Point{2,T},1}, dict)
 </pre></div>
 
@@ -443,7 +426,6 @@ end
 <p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
 <p><a id='Devices.Polygons.Polygon-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Vararg{FixedSizeArrays.Point{2,T<:Real}}}' href='#Devices.Polygons.Polygon-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Vararg{FixedSizeArrays.Point{2,T<:Real}}}'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">p0</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">p1</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">p2</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span>
     <span class="nt">p3</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">...;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
@@ -452,7 +434,6 @@ end
 <p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
 <p><a id='Devices.bounds-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.bounds-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>bounds(p::Polygon)
 </pre></div>
 
@@ -465,7 +446,6 @@ end
 <p>Return a bounding <code>Rectangle</code> with no properties for several <code>AbstractPolygon</code> objects.</p>
 <p><a id='Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon{T},N}}' href='#Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon{T},N}}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>bounds{T&lt;:AbstractPolygon}(parr::AbstractArray{T})
 </pre></div>
 
@@ -473,7 +453,6 @@ end
 <p>Return a bounding <code>Rectangle</code> with no properties for an array <code>parr</code> of <code>AbstractPolygon</code> objects.</p>
 <p><a id='Devices.bounds-Tuple{Devices.AbstractPolygon{T},Vararg{Devices.AbstractPolygon{T}}}' href='#Devices.bounds-Tuple{Devices.AbstractPolygon{T},Vararg{Devices.AbstractPolygon{T}}}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>bounds(p0::AbstractPolygon, p::AbstractPolygon...)
 </pre></div>
 
@@ -481,7 +460,6 @@ end
 <p>Return a bounding <code>Rectangle</code> with no properties for several <code>AbstractPolygon</code> objects.</p>
 <p><a id='Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 <strong><code>Base.minimum</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>minimum(x::Polygon)
 </pre></div>
 
@@ -494,7 +472,6 @@ end
 <p>Returns the smallest element in a collection.</p>
 <p><a id='Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 <strong><code>Base.maximum</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>maximum(x::Polygon)
 </pre></div>
 
@@ -507,7 +484,6 @@ end
 <p>Returns the largest element in a collection.</p>
 <p><a id='Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 <strong><code>Devices.Polygons.points</code></strong> &mdash; <em>Method</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>points(x::Polygon)
 </pre></div>
 
@@ -520,7 +496,6 @@ end
 <p>For offsetting polygons we use <a href="http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm">Clipper</a>. Clipper does not seem to support triangle strips so although the clipping is probably superior we cannot use it easily for now.</p>
 <p><a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
 <strong><code>Devices.Polygons.clip</code></strong> &mdash; <em>Function</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>clip{S&lt;:Real, T&lt;:Real}(op::ClipperOp, subject::Polygon{S}, clip::Polygon{T})
 </pre></div>
 
@@ -531,7 +506,6 @@ end
 <p>Use the GPC clipping library to do polygon manipulations. Valid GPCOp include <code>GPC_DIFF</code>, <code>GPC_INT</code>, <code>GPC_XOR</code>, <code>GPC_UNION</code>.</p>
 <p><a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
 <strong><code>Devices.Polygons.offset</code></strong> &mdash; <em>Function</em>.</p>
-<hr />
 <div class="codehilite"><pre><span></span>offset{S&lt;:Real}(subject::Polygon{S}, delta::Real,
         j::ClipperJoin=JT_MITER, e::ClipperEnd=ET_CLOSEDPOLYGON)
 </pre></div>
