@@ -7,7 +7,6 @@ To interface with gdspy, we simply convert the `Point` object to a `Tuple` and l
 <a id='Devices.Points.getx' href='#Devices.Points.getx'>#</a>
 **`Devices.Points.getx`** &mdash; *Function*.
 
----
 
 
 ```
@@ -19,7 +18,6 @@ Get the x-coordinate of a point.
 <a id='Devices.Points.gety' href='#Devices.Points.gety'>#</a>
 **`Devices.Points.gety`** &mdash; *Function*.
 
----
 
 
 ```

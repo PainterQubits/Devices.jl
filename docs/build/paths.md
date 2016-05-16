@@ -6,7 +6,6 @@
 <a id='Devices.Paths.Path' href='#Devices.Paths.Path'>#</a>
 **`Devices.Paths.Path`** &mdash; *Type*.
 
----
 
 
 ```
@@ -28,7 +27,6 @@ Type for abstracting an arbitrary styled path in the plane. Iterating returns tu
 <a id='Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real},Real,Devices.Paths.Style}' href='#Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real},Real,Devices.Paths.Style}'>#</a>
 **`Devices.Paths.Path`** &mdash; *Method*.
 
----
 
 
 ```
@@ -40,7 +38,6 @@ Convenience constructor for `Path{T}` object.
 <a id='Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real}}' href='#Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real}}'>#</a>
 **`Devices.Paths.Path`** &mdash; *Method*.
 
----
 
 
 ```
@@ -52,7 +49,6 @@ Convenience constructor for `Path{T}` object.
 <a id='Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real},Real}' href='#Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real},Real}'>#</a>
 **`Devices.Paths.Path`** &mdash; *Method*.
 
----
 
 
 ```
@@ -64,7 +60,6 @@ Convenience constructor for `Path{T}` object.
 <a id='Devices.Paths.pathlength-Tuple{Devices.Paths.Path{T<:Real}}' href='#Devices.Paths.pathlength-Tuple{Devices.Paths.Path{T<:Real}}'>#</a>
 **`Devices.Paths.pathlength`** &mdash; *Method*.
 
----
 
 
 ```
@@ -81,7 +76,6 @@ Physical length of a path. Note that `length` will return the number of segments
 <a id='Devices.Paths.Segment' href='#Devices.Paths.Segment'>#</a>
 **`Devices.Paths.Segment`** &mdash; *Type*.
 
----
 
 
 ```
@@ -100,7 +94,6 @@ Path segment in the plane. All Segment objects should have the implement the fol
 <a id='Devices.Paths.Straight' href='#Devices.Paths.Straight'>#</a>
 **`Devices.Paths.Straight`** &mdash; *Type*.
 
----
 
 
 ```
@@ -126,7 +119,6 @@ The parametric function over `t ∈ [0,1]` describing the line segment is given 
 <a id='Devices.Paths.Turn' href='#Devices.Paths.Turn'>#</a>
 **`Devices.Paths.Turn`** &mdash; *Type*.
 
----
 
 
 ```
@@ -160,7 +152,6 @@ The parametric function over `t ∈ [0,1]` describing the turn is given by:
 <a id='Devices.Paths.CompoundSegment' href='#Devices.Paths.CompoundSegment'>#</a>
 **`Devices.Paths.CompoundSegment`** &mdash; *Type*.
 
----
 
 
 ```
@@ -186,7 +177,6 @@ Consider an array of segments as one contiguous segment. Useful e.g. for applyin
 <a id='Devices.Paths.Style' href='#Devices.Paths.Style'>#</a>
 **`Devices.Paths.Style`** &mdash; *Type*.
 
----
 
 
 ```
@@ -204,7 +194,6 @@ How to render a given path segment. All styles should implement the following me
 <a id='Devices.Paths.Trace' href='#Devices.Paths.Trace'>#</a>
 **`Devices.Paths.Trace`** &mdash; *Type*.
 
----
 
 
 ```
@@ -222,7 +211,6 @@ Simple, single trace.
 <a id='Devices.Paths.CPW' href='#Devices.Paths.CPW'>#</a>
 **`Devices.Paths.CPW`** &mdash; *Type*.
 
----
 
 
 ```
@@ -244,7 +232,6 @@ May need to be inverted with respect to a ground plane, depending on how the pat
 <a id='Devices.Paths.CompoundStyle' href='#Devices.Paths.CompoundStyle'>#</a>
 **`Devices.Paths.CompoundStyle`** &mdash; *Type*.
 
----
 
 
 ```
@@ -269,7 +256,6 @@ Combines styles together for use with a `CompoundSegment`.
 <a id='Devices.Paths.DecoratedStyle' href='#Devices.Paths.DecoratedStyle'>#</a>
 **`Devices.Paths.DecoratedStyle`** &mdash; *Type*.
 
----
 
 
 ```
@@ -300,7 +286,6 @@ Style with decorations, like periodic structures along the path, etc.
 <a id='Devices.Paths.direction' href='#Devices.Paths.direction'>#</a>
 **`Devices.Paths.direction`** &mdash; *Function*.
 
----
 
 
 ```
@@ -312,7 +297,6 @@ For some parameteric function `p(t)↦Point(x(t),y(t))`, returns the angle at wh
 <a id='Devices.Paths.pathlength' href='#Devices.Paths.pathlength'>#</a>
 **`Devices.Paths.pathlength`** &mdash; *Function*.
 
----
 
 
 ```
@@ -330,7 +314,6 @@ Physical length of a path. Note that `length` will return the number of segments
 <a id='Devices.Paths.p0' href='#Devices.Paths.p0'>#</a>
 **`Devices.Paths.p0`** &mdash; *Function*.
 
----
 
 
 ```
@@ -348,7 +331,6 @@ Return the first point in a segment (calculated).
 <a id='Devices.Paths.setp0!' href='#Devices.Paths.setp0!'>#</a>
 **`Devices.Paths.setp0!`** &mdash; *Function*.
 
----
 
 
 ```
@@ -372,7 +354,6 @@ Set the p0 of a straight segment.
 <a id='Devices.Paths.α0' href='#Devices.Paths.α0'>#</a>
 **`Devices.Paths.α0`** &mdash; *Function*.
 
----
 
 
 ```
@@ -390,7 +371,6 @@ Return the first angle in a segment (calculated).
 <a id='Devices.Paths.setα0!' href='#Devices.Paths.setα0!'>#</a>
 **`Devices.Paths.setα0!`** &mdash; *Function*.
 
----
 
 
 ```
@@ -414,7 +394,6 @@ Set the angle of a straight segment.
 <a id='Devices.Paths.p1' href='#Devices.Paths.p1'>#</a>
 **`Devices.Paths.p1`** &mdash; *Function*.
 
----
 
 
 ```
@@ -432,7 +411,6 @@ Return the last point in a segment (calculated).
 <a id='Devices.Paths.α1' href='#Devices.Paths.α1'>#</a>
 **`Devices.Paths.α1`** &mdash; *Function*.
 
----
 
 
 ```
@@ -450,7 +428,6 @@ Return the last angle in a segment (calculated).
 <a id='Devices.Paths.style0' href='#Devices.Paths.style0'>#</a>
 **`Devices.Paths.style0`** &mdash; *Function*.
 
----
 
 
 ```
@@ -462,7 +439,6 @@ Style of the first segment of a path.
 <a id='Devices.Paths.style1' href='#Devices.Paths.style1'>#</a>
 **`Devices.Paths.style1`** &mdash; *Function*.
 
----
 
 
 ```
@@ -479,7 +455,6 @@ Style of the last segment of a path.
 <a id='Base.append!-Tuple{Devices.Paths.Path{T<:Real},Devices.Paths.Path{T<:Real}}' href='#Base.append!-Tuple{Devices.Paths.Path{T<:Real},Devices.Paths.Path{T<:Real}}'>#</a>
 **`Base.append!`** &mdash; *Method*.
 
----
 
 
 ```
@@ -491,7 +466,6 @@ Given paths `p` and `p′`, path `p′` is appended to path `p`. The p0 and init
 <a id='Devices.Paths.adjust!' href='#Devices.Paths.adjust!'>#</a>
 **`Devices.Paths.adjust!`** &mdash; *Function*.
 
----
 
 
 ```
@@ -503,7 +477,6 @@ Adjust a path's parametric functions starting from index `n`. Used internally wh
 <a id='Devices.Paths.launch!' href='#Devices.Paths.launch!'>#</a>
 **`Devices.Paths.launch!`** &mdash; *Function*.
 
----
 
 
 ```
@@ -528,7 +501,6 @@ Returns a `Style` object suitable for continuity with the next segment. Ignore t
 <a id='Devices.Paths.meander!' href='#Devices.Paths.meander!'>#</a>
 **`Devices.Paths.meander!`** &mdash; *Function*.
 
----
 
 
 ```
@@ -542,7 +514,6 @@ The straight and turn segments are combined into a `CompoundSegment` and appende
 <a id='Devices.Paths.param' href='#Devices.Paths.param'>#</a>
 **`Devices.Paths.param`** &mdash; *Function*.
 
----
 
 
 ```
@@ -554,7 +525,6 @@ Return a parametric function over the domain [0,1] that represents the compound 
 <a id='Devices.Paths.simplify!' href='#Devices.Paths.simplify!'>#</a>
 **`Devices.Paths.simplify!`** &mdash; *Function*.
 
----
 
 
 ```
@@ -569,7 +539,6 @@ All segments of a path are turned into a `CompoundSegment` and all styles of a p
 <a id='Devices.Paths.straight!' href='#Devices.Paths.straight!'>#</a>
 **`Devices.Paths.straight!`** &mdash; *Function*.
 
----
 
 
 ```
@@ -581,7 +550,6 @@ Extend a path `p` straight by length `l` in the current direction.
 <a id='Devices.Paths.turn!' href='#Devices.Paths.turn!'>#</a>
 **`Devices.Paths.turn!`** &mdash; *Function*.
 
----
 
 
 ```
@@ -611,7 +579,6 @@ The Python package `gdspy` is used for rendering paths into polygons. Ultimately
 <a id='Devices.Paths.distance' href='#Devices.Paths.distance'>#</a>
 **`Devices.Paths.distance`** &mdash; *Function*.
 
----
 
 
 For a style `s` and parameteric argument `t`, returns the distance between the centers of parallel paths rendered by gdspy.
@@ -619,7 +586,6 @@ For a style `s` and parameteric argument `t`, returns the distance between the c
 <a id='Devices.Paths.extent' href='#Devices.Paths.extent'>#</a>
 **`Devices.Paths.extent`** &mdash; *Function*.
 
----
 
 
 For a style `s` and parameteric argument `t`, returns a distance tangential to the path specifying the lateral extent of the polygons rendered by gdspy.
@@ -627,7 +593,6 @@ For a style `s` and parameteric argument `t`, returns a distance tangential to t
 <a id='Devices.Paths.paths' href='#Devices.Paths.paths'>#</a>
 **`Devices.Paths.paths`** &mdash; *Function*.
 
----
 
 
 For a style `s` and parameteric argument `t`, returns the number of parallel paths rendered by gdspy.
@@ -635,7 +600,6 @@ For a style `s` and parameteric argument `t`, returns the number of parallel pat
 <a id='Devices.Paths.width' href='#Devices.Paths.width'>#</a>
 **`Devices.Paths.width`** &mdash; *Function*.
 
----
 
 
 For a style `s` and parameteric argument `t`, returns the width of paths rendered by gdspy.

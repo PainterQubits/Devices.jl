@@ -6,7 +6,6 @@
 <a id='Devices.render!' href='#Devices.render!'>#</a>
 **`Devices.render!`** &mdash; *Function*.
 
----
 
 
 ```
@@ -62,7 +61,6 @@ To save a pattern, make sure you are `using FileIO`.
 <a id='FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}' href='#FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}'>#</a>
 **`FileIO.save`** &mdash; *Method*.
 
----
 
 
 ```

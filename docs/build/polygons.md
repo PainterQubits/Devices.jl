@@ -4,7 +4,6 @@ In this package, any polygon regardless of its concrete representation in memory
 <a id='Devices.AbstractPolygon' href='#Devices.AbstractPolygon'>#</a>
 **`Devices.AbstractPolygon`** &mdash; *Type*.
 
----
 
 
 ```
@@ -21,7 +20,6 @@ Anything you could call a polygon regardless of the underlying representation. C
 <a id='Devices.Rectangles.Rectangle' href='#Devices.Rectangles.Rectangle'>#</a>
 **`Devices.Rectangles.Rectangle`** &mdash; *Type*.
 
----
 
 
 ```
@@ -39,7 +37,6 @@ A rectangle, defined by opposing lower-left and upper-right corner coordinates.
 <a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}'>#</a>
 **`Devices.Rectangles.Rectangle`** &mdash; *Method*.
 
----
 
 
 ```
@@ -51,7 +48,6 @@ Convenience constructor for `Rectangle{T}` objects.
 <a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Any}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Any}'>#</a>
 **`Devices.Rectangles.Rectangle`** &mdash; *Method*.
 
----
 
 
 ```
@@ -63,7 +59,6 @@ Convenience constructor for `Rectangle{T}` objects.
 <a id='Devices.Rectangles.Rectangle-Tuple{T<:Real,T<:Real}' href='#Devices.Rectangles.Rectangle-Tuple{T<:Real,T<:Real}'>#</a>
 **`Devices.Rectangles.Rectangle`** &mdash; *Method*.
 
----
 
 
 ```
@@ -77,7 +72,6 @@ The rectangle will sit with the lower-left corner at the origin. With centered r
 <a id='Devices.bounds-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.bounds-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Devices.bounds`** &mdash; *Method*.
 
----
 
 
 ```
@@ -95,7 +89,6 @@ Return a bounding `Rectangle` with no properties for several `AbstractPolygon` o
 <a id='Devices.center-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.center-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Devices.center`** &mdash; *Method*.
 
----
 
 
 ```
@@ -107,7 +100,6 @@ Returns a Point corresponding to the center of the rectangle.
 <a id='Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Devices.Rectangles.height`** &mdash; *Method*.
 
----
 
 
 ```
@@ -119,7 +111,6 @@ Return the height of a rectangle.
 <a id='Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Devices.Rectangles.isproper`** &mdash; *Method*.
 
----
 
 
 ```
@@ -131,7 +122,6 @@ Returns `true` if the rectangle has a non-zero size and if the upper-right and l
 <a id='Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Base.minimum`** &mdash; *Method*.
 
----
 
 
 ```
@@ -149,7 +139,6 @@ Returns the smallest element in a collection.
 <a id='Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Base.maximum`** &mdash; *Method*.
 
----
 
 
 ```
@@ -167,7 +156,6 @@ Returns the largest element in a collection.
 <a id='Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Devices.Polygons.points`** &mdash; *Method*.
 
----
 
 
 ```
@@ -179,7 +167,6 @@ Returns the array of `Point` objects defining the rectangle.
 <a id='Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Devices.Rectangles.width`** &mdash; *Method*.
 
----
 
 
 ```
@@ -191,7 +178,6 @@ Return the width of a rectangle.
 <a id='Base.+-Tuple{Devices.Rectangles.Rectangle{T<:Real},FixedSizeArrays.Point{N,T}}' href='#Base.+-Tuple{Devices.Rectangles.Rectangle{T<:Real},FixedSizeArrays.Point{N,T}}'>#</a>
 **`Base.+`** &mdash; *Method*.
 
----
 
 
 ```
@@ -208,7 +194,6 @@ Translate a rectangle by `p`.
 <a id='Devices.Polygons.Polygon' href='#Devices.Polygons.Polygon'>#</a>
 **`Devices.Polygons.Polygon`** &mdash; *Type*.
 
----
 
 
 ```
@@ -225,7 +210,6 @@ Polygon defined by list of coordinates. The first point should not be repeated a
 <a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}'>#</a>
 **`Devices.Polygons.Polygon`** &mdash; *Method*.
 
----
 
 
 ```
@@ -237,7 +221,6 @@ Convenience constructor for a `Polygon{T}` object.
 <a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1},Any}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1},Any}'>#</a>
 **`Devices.Polygons.Polygon`** &mdash; *Method*.
 
----
 
 
 ```
@@ -249,7 +232,6 @@ Convenience constructor for a `Polygon{T}` object.
 <a id='Devices.Polygons.Polygon-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Vararg{FixedSizeArrays.Point{2,T<:Real}}}' href='#Devices.Polygons.Polygon-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Vararg{FixedSizeArrays.Point{2,T<:Real}}}'>#</a>
 **`Devices.Polygons.Polygon`** &mdash; *Method*.
 
----
 
 
 ```
@@ -262,7 +244,6 @@ Convenience constructor for a `Polygon{T}` object.
 <a id='Devices.bounds-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.bounds-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 **`Devices.bounds`** &mdash; *Method*.
 
----
 
 
 ```
@@ -280,7 +261,6 @@ Return a bounding `Rectangle` with no properties for several `AbstractPolygon` o
 <a id='Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon{T},N}}' href='#Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon{T},N}}'>#</a>
 **`Devices.bounds`** &mdash; *Method*.
 
----
 
 
 ```
@@ -292,7 +272,6 @@ Return a bounding `Rectangle` with no properties for an array `parr` of `Abstrac
 <a id='Devices.bounds-Tuple{Devices.AbstractPolygon{T},Vararg{Devices.AbstractPolygon{T}}}' href='#Devices.bounds-Tuple{Devices.AbstractPolygon{T},Vararg{Devices.AbstractPolygon{T}}}'>#</a>
 **`Devices.bounds`** &mdash; *Method*.
 
----
 
 
 ```
@@ -304,7 +283,6 @@ Return a bounding `Rectangle` with no properties for several `AbstractPolygon` o
 <a id='Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 **`Base.minimum`** &mdash; *Method*.
 
----
 
 
 ```
@@ -322,7 +300,6 @@ Returns the smallest element in a collection.
 <a id='Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 **`Base.maximum`** &mdash; *Method*.
 
----
 
 
 ```
@@ -340,7 +317,6 @@ Returns the largest element in a collection.
 <a id='Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 **`Devices.Polygons.points`** &mdash; *Method*.
 
----
 
 
 ```
@@ -366,7 +342,6 @@ For offsetting polygons we use [Clipper](http://www.angusj.com/delphi/clipper/do
 <a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
 **`Devices.Polygons.clip`** &mdash; *Function*.
 
----
 
 
 ```
@@ -384,7 +359,6 @@ Use the GPC clipping library to do polygon manipulations. Valid GPCOp include `G
 <a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
 **`Devices.Polygons.offset`** &mdash; *Function*.
 
----
 
 
 ```
