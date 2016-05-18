@@ -1,3 +1,4 @@
 # Index
 
-    {index}
+```@index
+```

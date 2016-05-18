@@ -343,8 +343,8 @@ the top method: `save("/path/to/my.gds", cells_i_want_to_save...)`
 The `name` keyword argument is used for the internal library name of the GDS-II
 file and is probably inconsequential for modern workflows.
 
-The `verbose` keyword argument allows you to monitor the output of [`traverse!`]({ref})
-and [`order!`]({ref}) if something funny is happening while saving.
+The `verbose` keyword argument allows you to monitor the output of [`traverse!`](@ref)
+and [`order!`](@ref) if something funny is happening while saving.
 """
 function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
         name="GDSIILIB", precision=1e-9, unit=1e-6, modify=now(), acc=now(),
