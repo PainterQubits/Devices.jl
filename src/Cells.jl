@@ -309,7 +309,7 @@ end
 order!(a::AbstractArray)
 ```
 
-Given an array of tuples like that coming out of [`traverse!`]({ref}), we
+Given an array of tuples like that coming out of [`traverse!`](@ref), we
 sort by the `level`, strip the level out, and then retain unique entries.
 The aim of this function is to determine an optimal writing order when
 saving pattern data (although the GDS-II spec does not require cells to be
