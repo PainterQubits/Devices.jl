@@ -15,6 +15,7 @@ import Base:
     cycle,
     isempty,
     empty!,
+    deleteat!,
     length,
     endof,
     size,
@@ -24,7 +25,9 @@ import Base:
     pop!,
     unshift!,
     shift!,
-    append!
+    insert!,
+    append!,
+    show
 
 using ForwardDiff
 # import Plots
@@ -339,6 +342,7 @@ drop(p::Path, n::Int) = drop(zip(p.segments,p.styles), n)
 cycle(p::Path) = cycle(zip(p.segments,p.styles))
 isempty(p::Path) = isempty(p.segments)
 empty!(p::Path) = begin empty!(p.segments); empty!(p.styles) end
+deleteat!(p::Path, inds) = begin deleteat!(p.segments, inds); deleteat!(p.styles, inds) end
 endof(p::Path) = endof(zip(p.segments,p.styles))
 size(p::Path) = size(p.segments)
 getindex(p::Path, i::Integer) = (p.segments[i], p.styles[i])
@@ -377,6 +381,19 @@ end
 pop!(p::Path) = pop!(p.segments), pop!(p.styles)
 shift!(p::Path) = shift!(p.segments), shift!(p.styles)
 
+function insert!(p::Path, i::Integer, segsty::Tuple{Segment, Style})
+    insert!(p.segments, i, segsty[1])
+    insert!(p.styles, i, segsty[2])
+end
+insert!(p::Path, i::Integer, seg::Segment, sty::Style) = insert!(p, i, (seg,sty))
+function insert!(p::Path, i::Integer, segsty0::Tuple{Segment, Style},
+        segsty::Tuple{Segment,Style}...)
+    insert!(p, i, segsty0)
+    for x in segsty
+        insert!(p, i, x)
+    end
+end
+
 """
 ```
 append!(p::Path, p′::Path)
@@ -400,10 +417,10 @@ end
 
 """
 ```
-simplify!(p::Path)
+simplify!(p::Path, inds::UnitRange)
 ```
 
-All segments of a path are turned into a `CompoundSegment` and all
+At `inds`, segments of a path are turned into a `CompoundSegment` and
 styles of a path are turned into a `CompoundStyle`. The idea here is:
 
 - Indexing the path becomes more sane when you can combine several path
@@ -412,13 +429,30 @@ in a path unless you could simplify it.
 - You don't need to think hard about boundaries between straights and turns
 when you want a continuous styling of a very long path.
 """
-function simplify!(p::Path)
-    segs = copy(p.segments)
+function simplify!(p::Path, inds::UnitRange)
+    segs = copy(p.segments[inds])
     cseg = CompoundSegment(segs)
-    csty = CompoundStyle(segs, copy(p.styles))
-    empty!(p)
-    push!(p, (cseg,csty))
+    csty = CompoundStyle(segs, copy(p.styles[inds]))
+    deleteat!(p, inds)
+    insert!(p, inds[1], (cseg, csty))
     nothing
+end
+
+"""
+```
+simplify!(p::Path)
+```
+
+All segments and styles of a path are turned into a `CompoundSegment` and
+`CompoundStyle`.
+"""
+simplify!(p::Path) = simplify!(p, 1:length(p))
+
+function split{T<:Real}(s::CompoundSegment{T}, points)
+    segs = CompoundSegment{T}[]
+    
+
+    segs
 end
 
 """

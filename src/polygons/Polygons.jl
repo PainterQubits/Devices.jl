@@ -3,6 +3,7 @@ module Polygons
 using PyCall
 using ForwardDiff
 using AffineTransforms
+import Clipper
 using ..Points
 using ..Rectangles
 
@@ -11,13 +12,18 @@ import Devices
 import Devices: AbstractPolygon
 import Devices: bounds
 gdspy() = Devices._gdspy
-pyclipper() = Devices._pyclipper
+# pyclipper() = Devices._pyclipper
 
 export Polygon
 export Tristrip
 export Plain
 export points
 export clip, offset
+
+clipper() = Devices._clip
+coffset() = Devices._coffset
+
+const PCSCALE = 2^31
 
 """
 ```
@@ -192,6 +198,17 @@ end
 
 """
 ```
+convert{T<:Real}(::Type{Polygon{T}}, p::Polygon)
+```
+
+Convert between types of polygons.
+"""
+function convert{T<:Real}(::Type{Polygon{T}}, p::Polygon)
+    Polygon{T}(convert(Array{Point{2,T},1}, p.p), p.properties)
+end
+
+"""
+```
 bounds(p::Polygon)
 ```
 
@@ -230,7 +247,58 @@ abstract Style
 "Simple solid polygon."
 type Plain <: Style end
 
-include("GPC.jl")
-include("PyClipper.jl")
+# include("GPC.jl")
+# include("PyClipper.jl")
+function clip{S<:Real, T<:Real}(op::Clipper.ClipType, subject::Polygon{S}, clip::Polygon{T})
+    s = Polygon{Int64}(map(trunc, subject.p .* PCSCALE), subject.properties)
+    c = Polygon{Int64}(map(trunc, clip.p .* PCSCALE), clip.properties)
+    p = clip(op, s, c)
+    for polys in p
+        p.p ./= PCSCALE
+    end
+    p
+end
+
+function clip(op::Clipper.ClipType, subject::Polygon{Int64}, clip::Polygon{Int64})
+    c = clipper()
+    Clipper.clear!(c)
+    Clipper.add_path!(c, reinterpret(Clipper.IntPoint, subject.p),
+        Clipper.PolyTypeSubject, true)
+    Clipper.add_path!(c, reinterpret(Clipper.IntPoint, clip.p),
+        Clipper.PolyTypeClip, true)
+    result = Clipper.execute(c, op,
+        Clipper.PolyFillTypeEvenOdd, Clipper.PolyFillTypeEvenOdd)
+    result2 = map(x->Polygon{Int64}(reinterpret(Point{2,Int64}, x),
+        subject.properties), result[2])
+    result2
+end
+
+clip{S<:Real, T<:Real}(op::Clipper.ClipType, s::AbstractPolygon{S}, c::AbstractPolygon{T}) =
+    clip(op, convert(Polygon{S}, s), convert(Polygon{T}, c))
+
+
+function offset{S<:Real}(subject::Polygon{S}, delta::Real,
+    j::Clipper.JoinType=JoinTypeMiter, e::Clipper.EndType=EndTypeClosedPolygon)
+
+    s = Polygon{Int64}(map(trunc, subject.p .* PCSCALE), subject.properties)
+    p = offset(s, delta, j, e)
+end
+
+function offset(subject::Polygon{Int64}, clip)
+end
+#
+#     # get large scaled integers
+#     s = convert(Array{Point{2,Int64},1}, map(trunc, subject.p .* PCSCALE))
+#     delta *= PCSCALE
+#
+#     # offset
+#     pc[:AddPath](s, Int(j), Int(e))
+#     result = pycall(pc[:Execute], PyVector{Array{Point{2,Int64},1}}, delta)
+#
+#     result = convert(Array{Point{2,Float64}}, result[1])
+#     result ./= PCSCALE
+#     Polygon(result, subject.properties)
+# end
+# offset{T<:Real}(s::Rectangle{T}, args...) = offset(convert(Polygon{T}, s), args...)
 
 end

@@ -4,28 +4,32 @@ module Devices
 using PyCall
 using ForwardDiff
 using FileIO
+import Clipper
 import FileIO: save
 import FixedSizeArrays: Point
 import Base: cell, length, show, .+, .-
 
 # The PyNULL() and __init__() are necessary to use PyCall with precompiled modules.
 const _gdspy = PyCall.PyNULL()
-const _pyclipper = PyCall.PyNULL()
+# const _pyclipper = PyCall.PyNULL()
 const _qr = PyCall.PyNULL()
 
 function __init__()
     copy!(_gdspy, pyimport("gdspy"))
     copy!(_qr, pyimport("pyqrcode"))
-    copy!(_pyclipper, pyimport("pyclipper"))
+    global const _clip = Clipper.Clip()
+    global const _coffset = Clipper.ClipperOffset()
+    # copy!(_pyclipper, pyimport("pyclipper"))
     @osx_only push!(Libdl.DL_LOAD_PATH, joinpath(Pkg.dir("Devices"), "deps"))
 
     # The magic bytes specify GDS version 6.0.0, which probably everyone is using
     add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02, 0x02, 0x58], ".gds")
+
 end
 
 gdspy() = Devices._gdspy
 qr() = Devices._qr
-pyclipper() = Devices._pyclipper
+# pyclipper() = Devices._pyclipper
 
 const UNIT      = 1.0e-6
 const PRECISION = 1.0e-9
