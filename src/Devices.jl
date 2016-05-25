@@ -89,19 +89,11 @@ export height
 export width
 export isproper
 
-include("polygons/Polygons.jl")
-import .Polygons: Polygon, clip, offset, points,
-    CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
-    JT_SQUARE, JT_ROUND, JT_MITER,
-    ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
-    PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
+include("Polygons.jl")
+import .Polygons: Polygon, clip, offset, points
 export Polygons
 export Polygon
 export clip, offset, points
-export CT_INTERSECTION, CT_UNION, CT_DIFFERENCE, CT_XOR,
-    JT_SQUARE, JT_ROUND, JT_MITER,
-    ET_CLOSEDPOLYGON, ET_CLOSEDLINE, ET_OPENSQUARE, ET_OPENROUND, ET_OPENBUTT,
-    PFT_EVENODD, PFT_NONZERO, PFT_POSITIVE, PFT_NEGATIVE
 
 include("Cells.jl")
 import .Cells: Cell, CellArray, CellReference, traverse!, order!
