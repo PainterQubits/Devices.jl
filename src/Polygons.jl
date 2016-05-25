@@ -247,26 +247,26 @@ abstract Style
 "Simple solid polygon."
 type Plain <: Style end
 
-function clip{S<:Real, T<:Real}(op::Clipper.ClipType, subject::Polygon{S}, clip::Polygon{T})
-    s = Polygon{Int64}(map(trunc, subject.p .* PCSCALE), subject.properties)
-    c = Polygon{Int64}(map(trunc, clip.p .* PCSCALE), clip.properties)
-    polys = clip(op, s, c)
-    [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, p.properties)
-        for p in polys]
-end
-
-function clip(op::Clipper.ClipType, subject::Polygon{Int64}, clip::Polygon{Int64})
+function clip(op::Clipper.ClipType, subject::Polygon{Int64}, cl::Polygon{Int64})
     c = clipper()
     Clipper.clear!(c)
     Clipper.add_path!(c, reinterpret(Clipper.IntPoint, subject.p),
         Clipper.PolyTypeSubject, true)
-    Clipper.add_path!(c, reinterpret(Clipper.IntPoint, clip.p),
+    Clipper.add_path!(c, reinterpret(Clipper.IntPoint, cl.p),
         Clipper.PolyTypeClip, true)
     result = Clipper.execute(c, op,
         Clipper.PolyFillTypeEvenOdd, Clipper.PolyFillTypeEvenOdd)
     result2 = map(x->Polygon{Int64}(reinterpret(Point{2,Int64}, x),
         subject.properties), result[2])
     result2
+end
+
+function clip{S<:Real, T<:Real}(op::Clipper.ClipType, subject::Polygon{S}, cl::Polygon{T})
+    s = Polygon{Int64}(map(trunc, subject.p .* PCSCALE), subject.properties)::Polygon{Int64}
+    c = Polygon{Int64}(map(trunc, cl.p .* PCSCALE), cl.properties)::Polygon{Int64}
+    polys = clip(op, s, c)
+    [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, p.properties)
+        for p in polys]
 end
 
 clip{S<:Real, T<:Real}(op::Clipper.ClipType, s::AbstractPolygon{S}, c::AbstractPolygon{T}) =
