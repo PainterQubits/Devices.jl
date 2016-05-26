@@ -4,10 +4,11 @@ using PyCall
 using ForwardDiff
 using AffineTransforms
 import Clipper
+import Clipper.orientation
 using ..Points
 using ..Rectangles
 
-import Base: +, -, *, /, minimum, maximum, convert
+import Base: +, -, *, /, minimum, maximum, convert, getindex, start, next, done
 import Devices
 import Devices: AbstractPolygon
 import Devices: bounds
@@ -299,5 +300,179 @@ offset{S<:Real}(s::AbstractPolygon{S}, delta::Real,
     j::Clipper.JoinType=Clipper.JoinTypeMiter,
     e::Clipper.EndType=Clipper.EndTypeClosedPolygon) =
     offset(convert(Polygon{S}, s), delta, j, e)
+
+### cutting algorithm
+
+abstract D1
+
+ab(p0, p1) = Point(gety(p1)-gety(p0), getx(p0)-getx(p1))
+
+immutable Segment <: D1
+    p0::Point{2,Float64}
+    p1::Point{2,Float64}
+    ab::Point{2,Float64}
+end
+Segment(p0,p1) = Segment(p0, p1, ab(p0, p1))
+
+immutable Ray <: D1
+    p0::Point{2,Float64}
+    p1::Point{2,Float64}
+    ab::Point{2,Float64}
+end
+Ray(p0,p1) = Ray(p0, p1, ab(p0, p1))
+
+immutable Line <: D1
+    p0::Point{2,Float64}
+    p1::Point{2,Float64}
+    ab::Point{2,Float64}
+end
+Line(p0,p1) = Line(p0, p1, ab(p0, p1))
+
+function segments(poly::Polygon)
+    l = length(poly.p)
+    [Segment(poly.p[i], poly.p[i==l ? 1 : i+1]) for i = 1:l]
+end
+
+# Find the lower-most then left-most polygon
+function uniqueray{T<:Real}(poly::Polygon{T})
+    nopts = reinterpret(T, poly.p)
+    yarr = slice(nopts, 2:2:length(nopts))
+    miny, indy = findmin(yarr)
+    xarr = slice(nopts, find(x->x==miny, yarr))
+    minx, indx = findmin(xarr)
+    Ray(Point(minx,miny), Point(minx, miny-1))
+end
+
+orientation(p::Polygon) = orientation(reinterpret(Clipper.IntPoint, p.p))
+
+ishole(p) = orientation(p) == false
+isparallel(A::D1, B::D1) = getx(A.ab) * gety(B.ab) == getx(B.ab) * gety(A.ab)
+isdegenerate(A::D1, B::D1) = dot(A.ab, B.p0-A.p0) == dot(A.ab, B.p1-A.p0) == 0
+
+# Expected to be fast
+function intersects(A::Segment, B::Segment)
+    sb0 = sign(dot(A.ab, B.p0-A.p0))
+    sb1 = sign(dot(A.ab, B.p1-A.p0))
+    sb = sb0 == sb1
+
+    sa0 = sign(dot(B.ab, A.p0-B.p0))
+    sa1 = sign(dot(B.ab, A.p1-B.p0))
+    sa = sa0 == sa1
+
+    if sa == false && sb == false
+        return true
+    else
+        return false
+    end
+end
+
+function onray{T<:Real}(p::Point{2,T}, A::Ray)
+    return (dot(A.ab, p-A.p0) ≈ 0) &&
+        (dot(A.p1-A.p0, p-A.p0) >= 0)
+end
+
+function onsegment{T<:Real}(p::Point{2,T}, A::Segment)
+    return (dot(A.ab, p-A.p0) ≈ 0) &&
+        (dot(A.p1-A.p0, p-A.p0) >= 0) &&
+        (dot(A.p0-A.p1, p-A.p1) >= 0)
+end
+
+# Not type stable...
+function intersection(A::Ray, B::Segment)
+    if isparallel(A, B)
+        if isdegenerate(A, B)
+            # correct direction?
+            dist0 = dot(A.p1-A.p0, B.p0-A.p0)
+            dist1 = dot(A.p1-A.p0, B.p1-A.p0)
+            if dist0 >= 0
+                if dist1 >= 0
+                    # Both in correct direction
+                    return true, Point{2,Float64}(min(dist0, dist1) == dist0 ? B.p0 : B.p1)
+                else
+                    return true, Point{2,Float64}(B.p0)
+                end
+            else
+                if dist1 >= 0
+                    return true, Point{2,Float64}(B.p1)
+                else
+                    # Neither in correct direction
+                    return false, Point(0.,0.)
+                end
+            end
+        else
+            # no intersection
+            return false, Point(0.,0.)
+        end
+    else
+        tf, where = intersection(Line(A.p0,A.p1,A.ab), Line(B.p0,B.p1,B.ab), false)
+        if onray(where, A) && onsegment(where, B)
+            return true, where
+        else
+            return false, Point(0.,0.)
+        end
+    end
+end
+
+function intersection(A::Line, B::Line, checkparallel=true)
+    if checkparallel
+        # parallel checking goes here!
+    else
+        w = [getx(A.ab) gety(A.ab); getx(B.ab) gety(B.ab)] \ [dot(A.ab, A.p0), dot(B.ab, B.p0)]
+        true, Point(w)
+    end
+end
+
+function interiorcuts(polys::AbstractArray{Polygon{Int64},1})
+    # currently assumes we have first element an enclosing polygon with
+    # the rest being holes
+
+    enclosing = polys[1]
+    segs = segments(enclosing)
+
+    for (i,p) in enumerate(slice(polys, 2:length(polys)))
+        # For each hole
+        if ishole(p)
+            # Intersect the unique ray with the line segments of the polygon.
+            ray = uniqueray(p)
+
+            # Find nearest intersection of the ray with the enclosing polygon.
+            k = -1
+            bestwhere = Point(typemin(Int64),typemin(Int64))
+            for (j,s) in enumerate(segs)
+                # if intersects(ray, s)     # should be implemented later for speed
+                    tf, where = intersection(ray, s)
+                    if tf
+                        if gety(where) > gety(bestwhere)
+                            bestwhere = where
+                            k = j
+                        end
+                    end
+                # end
+            end
+            # Since the polygon was enclosing, an intersection had to happen *somewhere*.
+
+            bestwhere = Point{2,Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
+
+            # Make the cut in the enclosing polygon
+            enclosing.p = [enclosing.p[1:k];
+                bestwhere;
+                p.p;
+                p.p[1];     # need to loop back to first point of hole
+                bestwhere;
+                enclosing.p[k+1:end]]
+
+            # update the segment cache
+            segs = [segs[1:k-1];
+                Segment(enclosing.p[k], bestwhere);
+                Segment(bestwhere, p.p[1]);
+                segments(p);
+                Segment(p.p[1], bestwhere);
+                Segment(bestwhere, enclosing.p[k+1 > length(enclosing.p) ? 1 : k+1]);
+                segs[k+1:end]]
+        end
+    end
+
+    enclosing
+end
 
 end

@@ -14,6 +14,7 @@ gdspy() = Devices._gdspy
 export Rectangle
 export Plain
 export Rounded
+export Undercut
 export height
 export width
 export isproper
@@ -185,6 +186,17 @@ type Plain <: Style end
 "The corners are rounded off (bounding box of the unstyled rectangle unaffected)."
 type Rounded <: Style
     r::Float64
+end
+
+"""
+```
+type Undercut{T<:Real} <: Style
+```
+
+Uniform undercut in all directions around a rectangle.
+"""
+type Undercut{T<:Real} <: Style
+    uc::T
 end
 
 end

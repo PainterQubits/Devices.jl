@@ -170,6 +170,16 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
     render!(c, p; r.properties...)
 end
 
+function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut;
+    layer=0, uclayer=0, kwargs...)
+
+    d = Dict(kwargs)
+    r.properties = merge(r.properties, d)
+
+    ucr = offset(r, s.uc)[1]
+    clip(Clipper.ClipTypeDifference, ucr, r)[1]
+end
+
 """
 ```
 render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
