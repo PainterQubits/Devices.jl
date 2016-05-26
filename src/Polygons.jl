@@ -16,7 +16,6 @@ gdspy() = Devices._gdspy
 # pyclipper() = Devices._pyclipper
 
 export Polygon
-export Tristrip
 export Plain
 export points
 export clip, offset
@@ -136,54 +135,6 @@ end
 
 """
 ```
-type Tristrip{T<:Real}
-    p::Array{Point{2,T},1}
-    properties::Dict{Symbol,Any}
-end
-```
-
-Tristrip defined by list of coordinates. See
-[here](https://en.wikipedia.org/wiki/Triangle_strip) for further details. Currently
-only used for interfacing with GPC.
-"""
-type Tristrip{T<:Real}
-    p::Array{Point{2,T},1}
-    properties::Dict{Symbol,Any}
-end
-Tristrip{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
-    p3::Point{2,T}...; kwargs...) =
-    Tristrip{T}([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
-
-points(x::Tristrip) = x.p
-
-function +(r::Tristrip, p::Point)
-    Tristrip(r.p .+ p, r.properties)
-end
-+(p::Point, r::Tristrip) = +(r,p)
-
-"""
-```
-convert{T<:Real}(::Type{Array{Polygon{T},1}}, x::Tristrip)
-```
-
-Convert a Tristrip into an array of polygons. Until we support polygons with
-holes in them we do this ourselves, otherwise GPC could be used.
-"""
-function convert{T<:Real}(::Type{Array{Polygon{T},1}}, x::Tristrip)
-    npolys = length(x.p) - 2
-    polys = Array{Polygon{T},1}(npolys)
-    for i in 1:npolys
-        poly = Polygon{T}(Array{Point{2,T},1}(3))
-        poly.p[1] = convert(Point{2,T}, x.p[i])
-        poly.p[2] = convert(Point{2,T}, x.p[i+1])
-        poly.p[3] = convert(Point{2,T}, x.p[i+2])
-        polys[i] = poly
-    end
-    polys
-end
-
-"""
-```
 convert{T<:Real}(::Type{Polygon{T}}, s::Rectangle)
 ```
 
@@ -258,14 +209,16 @@ function clip(op::Clipper.ClipType, subject::Polygon{Int64}, cl::Polygon{Int64})
     result = Clipper.execute(c, op,
         Clipper.PolyFillTypeEvenOdd, Clipper.PolyFillTypeEvenOdd)
     result2 = map(x->Polygon{Int64}(reinterpret(Point{2,Int64}, x),
-        subject.properties), result[2])
-    result2
+        copy(subject.properties)), result[2])
+    interiorcuts(result2)
 end
 
 function clip{S<:Real, T<:Real}(op::Clipper.ClipType, subject::Polygon{S}, cl::Polygon{T})
     s = Polygon{Int64}(map(trunc, subject.p .* PCSCALE), subject.properties)::Polygon{Int64}
     c = Polygon{Int64}(map(trunc, cl.p .* PCSCALE), cl.properties)::Polygon{Int64}
     polys = clip(op, s, c)
+
+
     [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, p.properties)
         for p in polys]
 end
@@ -426,53 +379,63 @@ function interiorcuts(polys::AbstractArray{Polygon{Int64},1})
     # currently assumes we have first element an enclosing polygon with
     # the rest being holes
 
-    enclosing = polys[1]
-    segs = segments(enclosing)
+    # we also assume no hole collision
 
-    for (i,p) in enumerate(slice(polys, 2:length(polys)))
-        # For each hole
-        if ishole(p)
-            # Intersect the unique ray with the line segments of the polygon.
-            ray = uniqueray(p)
+    outpolys = Polygon{Int64}[]
 
-            # Find nearest intersection of the ray with the enclosing polygon.
-            k = -1
-            bestwhere = Point(typemin(Int64),typemin(Int64))
-            for (j,s) in enumerate(segs)
-                # if intersects(ray, s)     # should be implemented later for speed
-                    tf, where = intersection(ray, s)
-                    if tf
-                        if gety(where) > gety(bestwhere)
-                            bestwhere = where
-                            k = j
+    outer = find(x->!ishole(x), polys)
+    inner = find(x->ishole(x), polys)
+    minpt = Point(-Inf, -Inf)
+
+    for enclosing in slice(polys, outer)
+        segs = segments(enclosing)
+        for (i,p) in enumerate(slice(polys, inner))
+            # For each hole
+            if ishole(p)
+                # Intersect the unique ray with the line segments of the polygon.
+                ray = uniqueray(p)
+
+                # Find nearest intersection of the ray with the enclosing polygon.
+                k = -1
+                bestwhere = minpt
+                for (j,s) in enumerate(segs)
+                    # if intersects(ray, s)     # should be implemented later for speed
+                        tf, where = intersection(ray, s)
+                        if tf
+                            if gety(where) > gety(bestwhere)
+                                bestwhere = where
+                                k = j
+                            end
                         end
-                    end
-                # end
+                    # end
+                end
+                # Since the polygon was enclosing, an intersection had to happen *somewhere*.
+
+                if k != -1
+                    w = Point{2,Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
+
+                    # Make the cut in the enclosing polygon
+                    enclosing.p = [enclosing.p[1:k];
+                        w;
+                        p.p;
+                        p.p[1];     # need to loop back to first point of hole
+                        w;
+                        enclosing.p[k+1:end]]
+
+                    # update the segment cache
+                    segs = [segs[1:k-1];
+                        Segment(enclosing.p[k], w);
+                        Segment(w, p.p[1]);
+                        segments(p);
+                        Segment(p.p[1], w);
+                        Segment(w, enclosing.p[k+1 > length(enclosing.p) ? 1 : k+1]);
+                        segs[k+1:end]]
+                end
             end
-            # Since the polygon was enclosing, an intersection had to happen *somewhere*.
-
-            bestwhere = Point{2,Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
-
-            # Make the cut in the enclosing polygon
-            enclosing.p = [enclosing.p[1:k];
-                bestwhere;
-                p.p;
-                p.p[1];     # need to loop back to first point of hole
-                bestwhere;
-                enclosing.p[k+1:end]]
-
-            # update the segment cache
-            segs = [segs[1:k-1];
-                Segment(enclosing.p[k], bestwhere);
-                Segment(bestwhere, p.p[1]);
-                segments(p);
-                Segment(p.p[1], bestwhere);
-                Segment(bestwhere, enclosing.p[k+1 > length(enclosing.p) ? 1 : k+1]);
-                segs[k+1:end]]
         end
+        push!(outpolys, enclosing)
     end
-
-    enclosing
+    outpolys
 end
 
 end

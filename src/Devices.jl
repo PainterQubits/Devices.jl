@@ -170,14 +170,25 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
     render!(c, p; r.properties...)
 end
 
+"""
+```
+render!(c::Cell, r::Rectangle, s::Rectangles.Undercut;
+    layer=0, uclayer=0, kwargs...)
+```
+
+Render a rectangle `r` to cell `c`. Additionally, put a hollow border around the
+rectangle with layer `uclayer`. Useful for undercut structures.
+"""
 function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut;
     layer=0, uclayer=0, kwargs...)
 
-    d = Dict(kwargs)
-    r.properties = merge(r.properties, d)
-
+    r.properties = merge(r.properties, Dict(kwargs))
+    r.properties[:layer] = layer
     ucr = offset(r, s.uc)[1]
-    clip(Clipper.ClipTypeDifference, ucr, r)[1]
+    ucp = clip(Clipper.ClipTypeDifference, ucr, r)[1]
+    ucp.properties[:layer] = uclayer
+    push!(c.elements, ucp)
+    push!(c.elements, r)
 end
 
 """
