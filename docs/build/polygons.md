@@ -331,46 +331,8 @@ Returns the array of `Point` objects defining the polygon.
 ## Clipping and offsetting
 
 
-As of now this package's notion of polygons is that there are no "inner holes." Probably it would be helpful if we expanded our definition.
-
-
-For clipping polygons we use [GPC](http://www.cs.man.ac.uk/~toby/gpc/) to get triangle strips which never have holes in them. These are then rendered as polygons individually. An obvious downside is that subsequent offsetting will not work as desired.
-
-
-For offsetting polygons we use [Clipper](http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm). Clipper does not seem to support triangle strips so although the clipping is probably superior we cannot use it easily for now.
-
-<a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
-**`Devices.Polygons.clip`** &mdash; *Function*.
-
-
-
 ```
-clip{S<:Real, T<:Real}(op::ClipperOp, subject::Polygon{S}, clip::Polygon{T})
+    clip
+    offset
 ```
-
-Clip polygon `subject` by polygon `clip` using operation `op` from the [Clipper library](http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm). The [Python wrapper](https://github.com/greginvm/pyclipper) over the C++ library is used.
-
-Valid `ClipperOp` include `CT_INTERSECTION`, `CT_UNION`, `CT_DIFFERENCE`, `CT_XOR`.
-
-`clip(op::GPCOp, subject::Polygon{Cdouble}, clip::Polygon{Cdouble})`
-
-Use the GPC clipping library to do polygon manipulations. Valid GPCOp include `GPC_DIFF`, `GPC_INT`, `GPC_XOR`, `GPC_UNION`.
-
-<a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
-**`Devices.Polygons.offset`** &mdash; *Function*.
-
-
-
-```
-offset{S<:Real}(subject::Polygon{S}, delta::Real,
-        j::ClipperJoin=JT_MITER, e::ClipperEnd=ET_CLOSEDPOLYGON)
-```
-
-Offset a polygon `subject` by some amount `delta` using the [Clipper library](http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm). The [Python wrapper](https://github.com/greginvm/pyclipper) over the C++ library is used.
-
-`ClipperJoin` parameters are discussed [here](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/JoinType.htm). Valid syntax in this package is: `JT_SQUARE`, `JT_ROUND`, `JT_MITER`.
-
-`ClipperEnd` parameters are discussed [here](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/EndType.htm). Valid syntax in this package is: `ET_CLOSEDPOLYGON`, `ET_CLOSEDLINE`, `ET_OPENSQUARE`, `ET_OPENROUND`, `ET_OPENBUTT`.
-
-To do: Handle the type parameter of Polygon, which is ignored now.
 

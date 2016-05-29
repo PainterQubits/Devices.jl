@@ -528,13 +528,19 @@ Return a parametric function over the domain [0,1] that represents the compound 
 
 
 ```
-simplify!(p::Path)
+simplify!(p::Path, inds::UnitRange)
 ```
 
-All segments of a path are turned into a `CompoundSegment` and all styles of a path are turned into a `CompoundStyle`. The idea here is:
+At `inds`, segments of a path are turned into a `CompoundSegment` and styles of a path are turned into a `CompoundStyle`. The idea here is:
 
   * Indexing the path becomes more sane when you can combine several path segments into one logical element. A launcher would have several indices in a path unless you could simplify it.
   * You don't need to think hard about boundaries between straights and turns when you want a continuous styling of a very long path.
+
+```
+simplify!(p::Path)
+```
+
+All segments and styles of a path are turned into a `CompoundSegment` and `CompoundStyle`.
 
 <a id='Devices.Paths.straight!' href='#Devices.Paths.straight!'>#</a>
 **`Devices.Paths.straight!`** &mdash; *Function*.

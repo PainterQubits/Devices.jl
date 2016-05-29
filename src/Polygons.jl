@@ -9,6 +9,7 @@ using ..Points
 using ..Rectangles
 
 import Base: +, -, *, /, minimum, maximum, convert, getindex, start, next, done
+import Base: copy
 import Devices
 import Devices: AbstractPolygon
 import Devices: bounds
@@ -43,6 +44,7 @@ type Polygon{T<:Real} <: AbstractPolygon{T}
     properties::Dict{Symbol, Any}
     Polygon(x,y) = new(x,y)
     Polygon(x) = new(x, Dict{Symbol, Any}())
+    Polygon(x::AbstractPolygon) = convert(Polygon{T}, x)
 end
 
 """
@@ -77,6 +79,8 @@ Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
     p3::Point{2,T}...; kwargs...) =
         Polygon{T}([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
 
+copy(p::Polygon) = Polygon(copy(p.p), copy(p.properties))
+
 """
 ```
 points(x::Polygon)
@@ -97,13 +101,13 @@ points{T<:Real}(x::Rectangle{T}) = points(convert(Polygon{T}, x))
 
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
     @eval function ($op)(r::Polygon, p::Point)
-        Polygon(($dotop)(r.p, p), r.properties)
+        Polygon(($dotop)(r.p, p), copy(r.properties))
     end
     # @eval ($op)(p::Point, r::Polygon) = ($op)(r,p)
 end
-*(r::Polygon, a::Real) = Polygon(r.p .* a, r.properties)
+*(r::Polygon, a::Real) = Polygon(r.p .* a, copy(r.properties))
 *(a::Real, r::Polygon) = *(r,a)
-/(r::Polygon, a::Real) = Polygon(r.p ./ a, r.properties)
+/(r::Polygon, a::Real) = Polygon(r.p ./ a, copy(r.properties))
 
 """
 ```
@@ -126,11 +130,11 @@ Note that this point doesn't have to be in the polygon.
 maximum(x::Polygon) = maximum(x.p)
 
 function *(a::AffineTransform, x::Polygon)
-    Polygon(map(x->Point(a*Array(x)), x.p), x.properties)
+    Polygon(map(x->Point(a*Array(x)), x.p), copy(x.properties))
 end
 
 function *(a::AffineTransform, x::Rectangle)
-    Rectangle(Point(a*Array(x.ll)),Point(a*Array(x.ur)),x.properties)
+    Rectangle(Point(a*Array(x.ll)),Point(a*Array(x.ur)), copy(x.properties))
 end
 
 """
@@ -145,7 +149,7 @@ function convert{T<:Real}(::Type{Polygon{T}}, s::Rectangle)
     ur = convert(Point{2,T}, s.ur)
     lr = Point(T(getx(ur)), T(gety(ll)))
     ul = Point(T(getx(ll)), T(gety(ur)))
-    Polygon{T}(Point{2,T}[ll,lr,ur,ul], s.properties)
+    Polygon{T}(Point{2,T}[ll,lr,ur,ul], copy(s.properties))
 end
 
 """
@@ -156,7 +160,7 @@ convert{T<:Real}(::Type{Polygon{T}}, p::Polygon)
 Convert between types of polygons.
 """
 function convert{T<:Real}(::Type{Polygon{T}}, p::Polygon)
-    Polygon{T}(convert(Array{Point{2,T},1}, p.p), p.properties)
+    Polygon{T}(convert(Array{Point{2,T},1}, p.p), copy(p.properties))
 end
 
 """
@@ -199,44 +203,90 @@ abstract Style
 "Simple solid polygon."
 type Plain <: Style end
 
-function clip(op::Clipper.ClipType, subject::Polygon{Int64}, cl::Polygon{Int64})
+clip{S<:Integer}(op::Clipper.ClipType,
+        s::AbstractPolygon{S},
+        c::AbstractPolygon{S};
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) =
+    clip(op, Polygon{Int64}[s], Polygon{Int64}[c], pfs=pfs, pfc=pfc)
+
+clip{S<:Real}(op::Clipper.ClipType,
+        s::AbstractPolygon{S},
+        c::AbstractPolygon{S};
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) =
+    clip(op, Polygon{S}[s], Polygon{S}[c], pfs=pfs, pfc=pfc)
+
+clip{S<:Real}(op::Clipper.ClipType,
+        s::AbstractArray{AbstractPolygon{S},1},
+        c::AbstractArray{AbstractPolygon{S},1};
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) =
+    clip(op, [Polygon{S}(x) for x in s]::Array{Polygon{S},1},
+        [Polygon{S}(x) for x in c]::Array{Polygon{S},1}, pfs=pfs, pfc=pfc)
+
+function clip{S<:Integer}(op::Clipper.ClipType,
+        subject::AbstractArray{Polygon{S},1},
+        cl::AbstractArray{Polygon{S},1}=Polygon{S}[];
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
+
+    s = [Polygon{Int64}(x) for x in subject]::Array{Polygon{Int64},1}
+    c = [Polygon{Int64}(x) for x in cl]::Array{Polygon{Int64},1}
+    polys = clip(op, s, c, pfs=pfs, pfc=pfc)
+
+    [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, copy(p.properties))
+        for p in polys]::Array{Polygon{S},1}
+end
+
+function clip{S<:Real}(op::Clipper.ClipType,
+        subject::AbstractArray{Polygon{S},1},
+        cl::AbstractArray{Polygon{S},1}=Polygon{S}[];
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
+
+    s = [Polygon{Int64}(map(trunc, x.p .* PCSCALE), x.properties)
+        for x in subject]::Array{Polygon{Int64},1}
+    c = [Polygon{Int64}(map(trunc, x.p .* PCSCALE), x.properties)
+        for x in cl]::Array{Polygon{Int64},1}
+    polys = clip(op, s, c, pfs=pfs, pfc=pfc)
+
+    [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, copy(p.properties))
+        for p in polys]::Array{Polygon{S},1}
+end
+
+function clip(op::Clipper.ClipType,
+        subject::AbstractArray{Polygon{Int64},1},
+        cl::AbstractArray{Polygon{Int64},1}=Polygon{Int64}[];
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
     c = clipper()
     Clipper.clear!(c)
-    Clipper.add_path!(c, reinterpret(Clipper.IntPoint, subject.p),
-        Clipper.PolyTypeSubject, true)
-    Clipper.add_path!(c, reinterpret(Clipper.IntPoint, cl.p),
-        Clipper.PolyTypeClip, true)
-    result = Clipper.execute(c, op,
-        Clipper.PolyFillTypeEvenOdd, Clipper.PolyFillTypeEvenOdd)
+    for s0 in subject
+        Clipper.add_path!(c, reinterpret(Clipper.IntPoint, s0.p),
+            Clipper.PolyTypeSubject, true)
+    end
+    for c0 in cl
+        Clipper.add_path!(c, reinterpret(Clipper.IntPoint, c0.p),
+            Clipper.PolyTypeClip, true)
+    end
+    result = Clipper.execute(c, op, pfs, pfc)
     result2 = map(x->Polygon{Int64}(reinterpret(Point{2,Int64}, x),
-        copy(subject.properties)), result[2])
+        copy(subject[1].properties)), result[2])
     interiorcuts(result2)
 end
 
-function clip{S<:Real, T<:Real}(op::Clipper.ClipType, subject::Polygon{S}, cl::Polygon{T})
-    s = Polygon{Int64}(map(trunc, subject.p .* PCSCALE), subject.properties)::Polygon{Int64}
-    c = Polygon{Int64}(map(trunc, cl.p .* PCSCALE), cl.properties)::Polygon{Int64}
-    polys = clip(op, s, c)
-
-
-    [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, p.properties)
-        for p in polys]
-end
-
-clip{S<:Real, T<:Real}(op::Clipper.ClipType, s::AbstractPolygon{S}, c::AbstractPolygon{T}) =
-    clip(op, convert(Polygon{S}, s), convert(Polygon{T}, c))
-
-function offset{S<:Real}(subject::Polygon{S}, delta::Real,
+function offset{S<:Real}(subject::Polygon{S}, delta::Real;
     j::Clipper.JoinType=Clipper.JoinTypeMiter,
     e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
 
     s = Polygon{Int64}(map(trunc, subject.p .* PCSCALE), subject.properties)
-    polys = offset(s, delta * PCSCALE, j, e)
+    polys = offset(s, delta * PCSCALE, j=j, e=e)
     [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, p.properties)
         for p in polys]
 end
 
-function offset(subject::Polygon{Int64}, delta::Real,
+function offset(subject::Polygon{Int64}, delta::Real;
     j::Clipper.JoinType=Clipper.JoinTypeMiter,
     e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
 
@@ -245,14 +295,14 @@ function offset(subject::Polygon{Int64}, delta::Real,
     Clipper.add_path!(c, reinterpret(Clipper.IntPoint, subject.p), j, e)
     result = Clipper.execute(c, Float64(delta))
     result2 = map(x->Polygon{Int64}(reinterpret(Point{2,Int64}, x),
-        subject.properties), result)
+        copy(subject.properties)), result)
     result2
 end
 
-offset{S<:Real}(s::AbstractPolygon{S}, delta::Real,
+offset{S<:Real}(s::AbstractPolygon{S}, delta::Real;
     j::Clipper.JoinType=Clipper.JoinTypeMiter,
     e::Clipper.EndType=Clipper.EndTypeClosedPolygon) =
-    offset(convert(Polygon{S}, s), delta, j, e)
+    offset(convert(Polygon{S}, s), delta, j=j, e=e)
 
 ### cutting algorithm
 
@@ -380,6 +430,9 @@ function interiorcuts(polys::AbstractArray{Polygon{Int64},1})
     # the rest being holes
 
     # we also assume no hole collision
+
+    # the logic here is temporarily flawed; we need to associate holes
+    # with parent polygons.
 
     outpolys = Polygon{Int64}[]
 

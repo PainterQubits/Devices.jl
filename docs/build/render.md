@@ -39,6 +39,13 @@ render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...
 Render a rectangle `r` to cell `c`, defaulting to plain styling.
 
 ```
+render!(c::Cell, r::Rectangle, s::Rectangles.Undercut;
+    layer=0, uclayer=0, kwargs...)
+```
+
+Render a rectangle `r` to cell `c`. Additionally, put a hollow border around the rectangle with layer `uclayer`. Useful for undercut structures.
+
+```
 render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
 ```
 

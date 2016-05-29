@@ -20,11 +20,9 @@ function __init__()
     global const _clip = Clipper.Clip()
     global const _coffset = Clipper.ClipperOffset()
     # copy!(_pyclipper, pyimport("pyclipper"))
-    @osx_only push!(Libdl.DL_LOAD_PATH, joinpath(Pkg.dir("Devices"), "deps"))
 
     # The magic bytes specify GDS version 6.0.0, which probably everyone is using
     add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02, 0x02, 0x58], ".gds")
-
 end
 
 gdspy() = Devices._gdspy
@@ -43,7 +41,6 @@ export PRECISION
 
 export bounds
 export center
-export heal
 export render!
 
 export interdigit
@@ -184,11 +181,13 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut;
 
     r.properties = merge(r.properties, Dict(kwargs))
     r.properties[:layer] = layer
-    ucr = offset(r, s.uc)[1]
+    push!(c.elements, r)
+
+    ucr = Rectangle(r.ll-Point(s.ucl,s.ucb),
+        r.ur+Point(s.ucr,s.uct), Dict(kwargs))
     ucp = clip(Clipper.ClipTypeDifference, ucr, r)[1]
     ucp.properties[:layer] = uclayer
     push!(c.elements, ucp)
-    push!(c.elements, r)
 end
 
 """

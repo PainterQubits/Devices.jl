@@ -8,15 +8,10 @@ A [Julia](http://julialang.org) package for designing CAD files for superconduct
 for rendering paths into polygons: `pip install gdspy`. Ensure that it is accessible
 from the Python installation that PyCall.jl is using.
 
-+ Install [pyclipper](https://github.com/greginvm/pyclipper), which is used for
-polygon offsetting: `pip install pyclipper`.
-
 + Install [pyqrcode](https://github.com/mnooner256/pyqrcode), which is used for
 generating QR codes: `pip install pyqrcode`.
 
-+ Using features implemented with [GPC](http://www.cs.man.ac.uk/~toby/gpc/) require
-building shared libraries from the C code.
-
++ `Pkg.clone("https://github.com/ajkeller34/Clipper.jl.git")`
 + `Pkg.clone("https://github.com/ajkeller34/Devices.jl.git")`
 
 ## Quick start
@@ -34,3 +29,8 @@ c = Cell("main")
 render!(c, p)
 save("test.gds", c)
 ```
+
+## Troubleshooting
+
+- If you cannot save the GDS file, try deleting any file that happens to be
+at the target path.

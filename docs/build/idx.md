@@ -66,8 +66,6 @@
 - [`Devices.Polygons.Polygon`](polygons.md#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1},Any})
 - [`Devices.Polygons.Polygon`](polygons.md#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}})
 - [`Devices.Polygons.Polygon`](polygons.md#Devices.Polygons.Polygon-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Vararg{FixedSizeArrays.Point{2,T<:Real}}})
-- [`Devices.Polygons.clip`](polygons.md#Devices.Polygons.clip)
-- [`Devices.Polygons.offset`](polygons.md#Devices.Polygons.offset)
 - [`Devices.Polygons.points`](polygons.md#Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}})
 - [`Devices.Polygons.points`](polygons.md#Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}})
 - [`Devices.Rectangles.Rectangle`](polygons.md#Devices.Rectangles.Rectangle)

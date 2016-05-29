@@ -3,7 +3,7 @@ module Rectangles
 using ForwardDiff
 using ..Points
 
-import Base: +, -, *, /, minimum, maximum
+import Base: +, -, *, /, minimum, maximum, copy
 import Devices
 import Devices: AbstractPolygon
 import Devices: bounds, center, center!
@@ -76,6 +76,8 @@ stability in the constructor.
 """
 Rectangle{T<:Real}(width::T, height::T; kwargs...) =
     Rectangle{T}(Point(zero(T),zero(T)), Point(width, height), Dict{Symbol,Any}(kwargs))
+
+copy(p::Rectangle) = Rectangle(p.ll, p.ur, copy(p.properties))
 
 """
 ```
@@ -193,10 +195,14 @@ end
 type Undercut{T<:Real} <: Style
 ```
 
-Uniform undercut in all directions around a rectangle.
+Undercut in each direction around a rectangle.
 """
 type Undercut{T<:Real} <: Style
-    uc::T
+    ucl::T
+    uct::T
+    ucr::T
+    ucb::T
 end
+Undercut{T<:Real}(uc::T) = Undercut{T}(uc,uc,uc,uc)
 
 end

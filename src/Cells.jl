@@ -5,7 +5,7 @@ using ..Points
 using ..Rectangles
 using ..Polygons
 
-import Base: show, +, -
+import Base: show, +, -, copy
 import Devices: AbstractPolygon, bounds, center, center!
 export Cell, CellArray, CellReference
 export traverse!, order!
@@ -196,6 +196,9 @@ show(io::IO, c::Cell) = print(io,
     "Cell \"$(c.name)\" with $(length(c.elements)) els, $(length(c.refs)) refs")
 
 
+copy(x::CellArray) = CellArray(x.cell, x.origin, x.deltacol, x.deltarow,
+    x.col, x.row, x.xrefl, x.mag, x.rot)
+
 """
 ```
 bounds(cell::Cell; kwargs...)
@@ -309,7 +312,7 @@ end
 order!(a::AbstractArray)
 ```
 
-Given an array of tuples like that coming out of [`traverse!`]({ref}), we
+Given an array of tuples like that coming out of [`traverse!`](@ref), we
 sort by the `level`, strip the level out, and then retain unique entries.
 The aim of this function is to determine an optimal writing order when
 saving pattern data (although the GDS-II spec does not require cells to be
