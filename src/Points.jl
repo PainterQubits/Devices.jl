@@ -1,10 +1,13 @@
 module Points
 
+import Clipper: IntPoint
 import Base: convert, .+, .-
 import FixedSizeArrays: FixedVectorNoTuple, Point
 import PyCall.PyObject
 export Point
 export getx, gety, setx!, sety!
+
+convert{T<:Real}(::Type{Point{2,T}}, x::IntPoint) = Point{2,T}(x.X, x.Y)
 
 """
 ```
@@ -41,5 +44,7 @@ for dotop in [:.+, :.-]
         ($dotop)(a,p)
     end
 end
+
+
 
 end

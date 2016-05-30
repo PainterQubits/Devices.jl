@@ -270,10 +270,9 @@ function clip(op::Clipper.ClipType,
         Clipper.add_path!(c, reinterpret(Clipper.IntPoint, c0.p),
             Clipper.PolyTypeClip, true)
     end
-    result = Clipper.execute(c, op, pfs, pfc)
-    result2 = map(x->Polygon{Int64}(reinterpret(Point{2,Int64}, x),
-        copy(subject[1].properties)), result[2])
-    interiorcuts(result2)
+    result = convert(Clipper.PolyTree{Point{2,Int64}},
+        Clipper.execute_pt(c, op, pfs, pfc)[2])
+    interiorcuts(result, Polygon{Int64}[], subject[1].properties)
 end
 
 function offset{S<:Real}(subject::Polygon{S}, delta::Real;
@@ -331,14 +330,14 @@ immutable Line <: D1
 end
 Line(p0,p1) = Line(p0, p1, ab(p0, p1))
 
-function segments(poly::Polygon)
-    l = length(poly.p)
-    [Segment(poly.p[i], poly.p[i==l ? 1 : i+1]) for i = 1:l]
+function segments(vertices)
+    l = length(vertices)
+    [Segment(vertices[i], vertices[i==l ? 1 : i+1]) for i = 1:l]
 end
 
 # Find the lower-most then left-most polygon
-function uniqueray{T<:Real}(poly::Polygon{T})
-    nopts = reinterpret(T, poly.p)
+function uniqueray{T<:Real}(v::Vector{Point{2,T}})
+    nopts = reinterpret(T, v)
     yarr = slice(nopts, 2:2:length(nopts))
     miny, indy = findmin(yarr)
     xarr = slice(nopts, find(x->x==miny, yarr))
@@ -425,7 +424,7 @@ function intersection(A::Line, B::Line, checkparallel=true)
     end
 end
 
-function interiorcuts(polys::AbstractArray{Polygon{Int64},1})
+function interiorcuts(nodeortree::Union{Clipper.PolyNode, Clipper.PolyTree}, outpolys, props)
     # currently assumes we have first element an enclosing polygon with
     # the rest being holes
 
@@ -433,62 +432,53 @@ function interiorcuts(polys::AbstractArray{Polygon{Int64},1})
 
     # the logic here is temporarily flawed; we need to associate holes
     # with parent polygons.
-
-    outpolys = Polygon{Int64}[]
-
-    outer = find(x->!ishole(x), polys)
-    inner = find(x->ishole(x), polys)
     minpt = Point(-Inf, -Inf)
 
-    for enclosing in slice(polys, outer)
-        segs = segments(enclosing)
-        for (i,p) in enumerate(slice(polys, inner))
-            # For each hole
-            if ishole(p)
-                # Intersect the unique ray with the line segments of the polygon.
-                ray = uniqueray(p)
+    for enclosing in nodeortree.children
+        segs = segments(enclosing.v)
+        for hole in enclosing.children
+            # Intersect the unique ray with the line segments of the polygon.
+            ray = uniqueray(hole.v)
 
-                # Find nearest intersection of the ray with the enclosing polygon.
-                k = -1
-                bestwhere = minpt
-                for (j,s) in enumerate(segs)
-                    # if intersects(ray, s)     # should be implemented later for speed
-                        tf, where = intersection(ray, s)
-                        if tf
-                            if gety(where) > gety(bestwhere)
-                                bestwhere = where
-                                k = j
-                            end
-                        end
-                    # end
-                end
-                # Since the polygon was enclosing, an intersection had to happen *somewhere*.
-
-                if k != -1
-                    w = Point{2,Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
-
-                    # Make the cut in the enclosing polygon
-                    enclosing.p = [enclosing.p[1:k];
-                        w;
-                        p.p;
-                        p.p[1];     # need to loop back to first point of hole
-                        w;
-                        enclosing.p[k+1:end]]
-
-                    # update the segment cache
-                    segs = [segs[1:k-1];
-                        Segment(enclosing.p[k], w);
-                        Segment(w, p.p[1]);
-                        segments(p);
-                        Segment(p.p[1], w);
-                        Segment(w, enclosing.p[k+1 > length(enclosing.p) ? 1 : k+1]);
-                        segs[k+1:end]]
+            # Find nearest intersection of the ray with the enclosing polygon.
+            k = -1
+            bestwhere = minpt
+            for (j,s) in enumerate(segs)
+                tf, where = intersection(ray, s)
+                if tf
+                    if gety(where) > gety(bestwhere)
+                        bestwhere = where
+                        k = j
+                    end
                 end
             end
+
+            # Since the polygon was enclosing, an intersection had to happen *somewhere*.
+            if k != -1
+                w = Point{2,Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
+
+                # Make the cut in the enclosing polygon
+                enclosing.v = [enclosing.v[1:k];
+                    w;
+                    hole.v;
+                    hole.v[1];     # need to loop back to first point of hole
+                    w;
+                    enclosing.v[k+1:end]]
+
+                # update the segment cache
+                segs = [segs[1:k-1];
+                    Segment(enclosing.v[k], w);
+                    Segment(w, hole.v[1]);
+                    segments(hole.v);
+                    Segment(hole.v[1], w);
+                    Segment(w, enclosing.v[k+1 > length(enclosing.v) ? 1 : k+1]);
+                    segs[k+1:end]]
+            end
         end
-        push!(outpolys, enclosing)
+        push!(outpolys, Polygon(enclosing.v, props))
     end
     outpolys
 end
+
 
 end
