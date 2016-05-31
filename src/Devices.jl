@@ -93,10 +93,11 @@ export Polygon
 export clip, offset, points
 
 include("Cells.jl")
-import .Cells: Cell, CellArray, CellReference, traverse!, order!
+import .Cells: Cell, CellArray, CellReference
+import .Cells: traverse!, order!, flatten, flatten!
 export Cells
 export Cell, CellArray, CellReference
-export traverse!, order!
+export traverse!, order!, flatten, flatten!
 
 include("paths/Paths.jl")
 import .Paths: Path, adjust!, launch!, meander! #,attach!

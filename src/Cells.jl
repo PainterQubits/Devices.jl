@@ -8,7 +8,7 @@ using ..Polygons
 import Base: show, +, -, copy
 import Devices: AbstractPolygon, bounds, center, center!
 export Cell, CellArray, CellReference
-export traverse!, order!
+export traverse!, order!, flatten, flatten!
 
 abstract CellRef{S, T<:Real}
 
@@ -97,7 +97,7 @@ currently implemented it mirrors the notion of cells in GDS-II files.
 In the future, it may make sense to generalize the idea and permit
 `Path` objects within a Cell.
 
-To add elements, push them to `elements` field;
+To add elements, push them to `elements` field (or use `render!`);
 to add references, push them to `refs` field.
 """
 type Cell{T<:Real}
@@ -113,8 +113,8 @@ type Cell{T<:Real}
         end
     end
     Cell(x,y,z) = new(even(x), y, z, now())
-    Cell(x,y) = new(even(x), y, CellReference[], now())
-    Cell(x) = new(even(x), AbstractPolygon{T}[], CellReference[], now())
+    Cell(x,y) = new(even(x), y, CellRef[], now())
+    Cell(x) = new(even(x), AbstractPolygon{T}[], CellRef[], now())
 end
 
 """
@@ -289,6 +289,49 @@ function bounds(ref::CellReference; kwargs...)
          sgn*ref.mag*sind(ref.rot) ref.mag*cosd(ref.rot)], ref.origin)
     c = a * convert(Polygon{Float64}, b)
     bounds(c; kwargs...)
+end
+
+function flatten(c::Cell)
+    polys = AbstractPolygon[]
+    append!(polys, c.elements)
+    for r in c.refs
+        append!(polys, flatten(r))
+    end
+    polys
+end
+
+function flatten!(c::Cell)
+    c.elements = flatten(c)
+    empty!(c.refs)
+end
+
+function flatten(c::CellReference)
+    polys = AbstractPolygon[]
+    sgn = c.xrefl ? -1 : 1
+    a = AffineTransform(
+        [sgn*c.mag*cosd(c.rot) -c.mag*sind(c.rot);
+         sgn*c.mag*sind(c.rot) c.mag*cosd(c.rot)], c.origin)
+    append!(polys, a .* c.cell.elements)
+    for r in c.cell.refs
+        append!(polys, a .* flatten(r))
+    end
+    polys
+end
+
+function flatten(c::CellArray)
+    polys = AbstractPolygon[]
+    sgn = c.xrefl ? -1 : 1
+    a = AffineTransform(
+        [sgn*c.mag*cosd(c.rot) -c.mag*sind(c.rot);
+         sgn*c.mag*sind(c.rot) c.mag*cosd(c.rot)], c.origin)
+    for i in 1:c.row, j in 1:c.col
+        pt = (i-1) * c.deltarow + (j-1) * c.deltacol
+        append!(polys, a .* (c.cell.elements .+ pt))
+        for r in c.cell.refs
+            append!(polys, a .* (flatten(r) .+ pt))
+        end
+    end
+    polys
 end
 
 """

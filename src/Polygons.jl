@@ -8,7 +8,7 @@ import Clipper.orientation
 using ..Points
 using ..Rectangles
 
-import Base: +, -, *, /, minimum, maximum, convert, getindex, start, next, done
+import Base: +, -, *, .*, /, minimum, maximum, convert, getindex, start, next, done
 import Base: copy
 import Devices
 import Devices: AbstractPolygon
@@ -133,6 +133,9 @@ function *(a::AffineTransform, x::Polygon)
     Polygon(map(x->Point(a*Array(x)), x.p), copy(x.properties))
 end
 
+.*{T<:AbstractPolygon}(a::AffineTransform, x::AbstractArray{T,1}) =
+    [a * y for y in x]
+
 function *(a::AffineTransform, x::Rectangle)
     Rectangle(Point(a*Array(x.ll)),Point(a*Array(x.ur)), copy(x.properties))
 end
@@ -245,9 +248,9 @@ function clip{S<:Real}(op::Clipper.ClipType,
         pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
         pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
 
-    s = [Polygon{Int64}(map(trunc, x.p .* PCSCALE), x.properties)
+    s = [Polygon{Int64}(map(round, x.p .* PCSCALE), x.properties)
         for x in subject]::Array{Polygon{Int64},1}
-    c = [Polygon{Int64}(map(trunc, x.p .* PCSCALE), x.properties)
+    c = [Polygon{Int64}(map(round, x.p .* PCSCALE), x.properties)
         for x in cl]::Array{Polygon{Int64},1}
     polys = clip(op, s, c, pfs=pfs, pfc=pfc)
 
@@ -272,6 +275,7 @@ function clip(op::Clipper.ClipType,
     end
     result = convert(Clipper.PolyTree{Point{2,Int64}},
         Clipper.execute_pt(c, op, pfs, pfc)[2])
+    println(result)
     interiorcuts(result, Polygon{Int64}[], subject[1].properties)
 end
 
@@ -279,7 +283,7 @@ function offset{S<:Real}(subject::Polygon{S}, delta::Real;
     j::Clipper.JoinType=Clipper.JoinTypeMiter,
     e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
 
-    s = Polygon{Int64}(map(trunc, subject.p .* PCSCALE), subject.properties)
+    s = Polygon{Int64}(map(round, subject.p .* PCSCALE), subject.properties)
     polys = offset(s, delta * PCSCALE, j=j, e=e)
     [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, p.properties)
         for p in polys]
@@ -340,7 +344,7 @@ function uniqueray{T<:Real}(v::Vector{Point{2,T}})
     nopts = reinterpret(T, v)
     yarr = slice(nopts, 2:2:length(nopts))
     miny, indy = findmin(yarr)
-    xarr = slice(nopts, find(x->x==miny, yarr))
+    xarr = slice(nopts, (find(x->x==miny, yarr).*2).-1)
     minx, indx = findmin(xarr)
     Ray(Point(minx,miny), Point(minx, miny-1))
 end
@@ -426,12 +430,10 @@ end
 
 function interiorcuts(nodeortree::Union{Clipper.PolyNode, Clipper.PolyTree}, outpolys, props)
     # currently assumes we have first element an enclosing polygon with
-    # the rest being holes
+    # the rest being holes. We don't dig deep into the PolyTree...
 
-    # we also assume no hole collision
+    # We also assume no hole collision
 
-    # the logic here is temporarily flawed; we need to associate holes
-    # with parent polygons.
     minpt = Point(-Inf, -Inf)
 
     for enclosing in nodeortree.children
@@ -452,27 +454,31 @@ function interiorcuts(nodeortree::Union{Clipper.PolyNode, Clipper.PolyTree}, out
                     end
                 end
             end
-
+            #
+            println(bestwhere)
+            println(k)
+            println(ray)
             # Since the polygon was enclosing, an intersection had to happen *somewhere*.
             if k != -1
                 w = Point{2,Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
+                kp1 = enclosing.v[(k+1 > length(enclosing.v)) ? 1 : k+1]
 
                 # Make the cut in the enclosing polygon
                 enclosing.v = [enclosing.v[1:k];
-                    w;
+                    w;             # could actually be enclosing.v[k]... should check for this.
                     hole.v;
                     hole.v[1];     # need to loop back to first point of hole
                     w;
-                    enclosing.v[k+1:end]]
+                    enclosing.v[(k+1):end]]
 
                 # update the segment cache
-                segs = [segs[1:k-1];
+                segs = [segs[1:(k-1)];
                     Segment(enclosing.v[k], w);
                     Segment(w, hole.v[1]);
                     segments(hole.v);
                     Segment(hole.v[1], w);
-                    Segment(w, enclosing.v[k+1 > length(enclosing.v) ? 1 : k+1]);
-                    segs[k+1:end]]
+                    Segment(w, kp1);
+                    segs[(k+1):end]]
             end
         end
         push!(outpolys, Polygon(enclosing.v, props))
