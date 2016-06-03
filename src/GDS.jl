@@ -81,7 +81,13 @@ bits(x::GDS64) = bits(reinterpret(UInt64,x))
 
 Byte-swap a GDS64 number. Used implicitly by `hton`, `ntoh` for endian conversion.
 """
-bswap(x::GDS64) = Intrinsics.box(GDS64, Base.bswap_int(Intrinsics.unbox(GDS64,x)))
+function bswap(x::GDS64)
+    if VERSION > v"0.5-"
+        Core.Intrinsics.box(GDS64, Base.bswap_int(Core.Intrinsics.unbox(GDS64,x)))
+    else
+        Intrinsics.box(GDS64, Base.bswap_int(Intrinsics.unbox(GDS64,x)))
+    end
+end
 
 function convert{T<:AbstractFloat}(::Type{GDS64}, y::T)
     !isfinite(y) && error("May we suggest you consider using ",

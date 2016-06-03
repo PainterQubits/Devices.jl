@@ -12,6 +12,7 @@ from the Python installation that PyCall.jl is using.
 generating QR codes: `pip install pyqrcode`.
 
 + `Pkg.clone("https://github.com/ajkeller34/Clipper.jl.git")`
++ `Pkg.checkout("Clipper", "pointinpoly")`
 + `Pkg.clone("https://github.com/ajkeller34/Devices.jl.git")`
 
 ## Quick start

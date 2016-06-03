@@ -11,7 +11,6 @@ import Base: cell, length, show, .+, .-
 
 # The PyNULL() and __init__() are necessary to use PyCall with precompiled modules.
 const _gdspy = PyCall.PyNULL()
-# const _pyclipper = PyCall.PyNULL()
 const _qr = PyCall.PyNULL()
 
 function __init__()
