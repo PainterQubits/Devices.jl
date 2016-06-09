@@ -1,9 +1,11 @@
 module Paths
 
 using ..Points
+using ..Cells
 
 import Base:
     convert,
+    copy,
     start,
     done,
     next,
@@ -40,16 +42,21 @@ export Path
 export CPW
 export Trace
 
+export α0, α1, p0, p1, style0, style1
 export adjust!
-# export attach!
-export launch!
+export attach!
+export attachments
+export direction
 export meander!
 export param
+export pathf
 export pathlength
 # export preview
+export simplify
 export simplify!
 export straight!
 export turn!
+export undecorated
 
 """
 For a style `s` and parameteric argument `t`, returns the distance
@@ -143,6 +150,7 @@ type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
+    attachments::Array{CellReference,1}
     Path(p0::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
         styles::Array{Style,1}) = new(p0, α0, style0, segments, styles)
     Path(style::Style) =
@@ -159,41 +167,21 @@ type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
-    Path(p0::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
-        styles::Array{Style,1}) = new(p0, α0, style0, segments, styles)
-    Path(style::Style) =
-        new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
+    attachments::Array{Tuple{Float64,Int,CellReference},1}
 end
 
+attachments(p) = p.attachments
+pathf(p) = p[1][1].f
+
 """
 ```
-Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0))
+Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0))
 ```
 
 Convenience constructor for `Path{T}` object.
 """
-Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0)) =
-    Path{T}(p0, α0, style0, Segment{T}[], Style[])
-
-"""
-```
-Path{T<:Real}(p0::Tuple{T,T})
-```
-
-Convenience constructor for `Path{T}` object.
-"""
-Path{T<:Real}(p0::Tuple{T,T}) =
-    Path(Point(float(p0[1]),float(p0[2])))
-
-"""
-```
-Path{T<:Real}(p0::Tuple{T,T}, α0::Real)
-```
-
-Convenience constructor for `Path{T}` object.
-"""
-Path{T<:Real}(p0::Tuple{T,T}, α0::Real) =
-    Path(Point(float(p0[1]),float(p0[2])), α0)
+Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0)) =
+    Path{T}(p0, α0, style0, Segment{T}[], Style[], Tuple{Float64, Int, CellReference}[])
 
 """
 ```
@@ -417,7 +405,7 @@ end
 
 """
 ```
-simplify!(p::Path, inds::UnitRange)
+simplify(p::Path, inds::UnitRange)
 ```
 
 At `inds`, segments of a path are turned into a `CompoundSegment` and
@@ -429,28 +417,32 @@ in a path unless you could simplify it.
 - You don't need to think hard about boundaries between straights and turns
 when you want a continuous styling of a very long path.
 """
-function simplify!(p::Path, inds::UnitRange)
+function simplify(p::Path, inds::UnitRange)
+    p1 = copy(p)
     segs = copy(p.segments[inds])
     cseg = CompoundSegment(segs)
     csty = CompoundStyle(segs, copy(p.styles[inds]))
-    deleteat!(p, inds)
-    insert!(p, inds[1], (cseg, csty))
-    nothing
+    deleteat!(p1, inds)
+    insert!(p1, inds[1], (cseg, csty))
+    p1
 end
 
 """
 ```
-simplify!(p::Path)
+simplify(p::Path)
 ```
 
 All segments and styles of a path are turned into a `CompoundSegment` and
 `CompoundStyle`.
 """
-simplify!(p::Path) = simplify!(p, 1:length(p))
+simplify(p::Path) = simplify(p, 1:length(p))
+
+simplify!(p::Path, inds::UnitRange) = p = simplify(p, inds)
+simplify!(p::Path) = p = simplify(p)
 
 function split{T<:Real}(s::CompoundSegment{T}, points)
     segs = CompoundSegment{T}[]
-    
+
 
     segs
 end
@@ -541,59 +533,37 @@ function meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
     nothing
 end
 
-"""
-```
-launch!(p::Path; extround=5, trace0=300, trace1=5,
-        gap0=150, gap1=2.5, flatlen=250, taperlen=250)
-```
-
-Add a launcher to the path. Somewhat intelligent in that the launcher will
-reverse its orientation depending on if it is at the start or the end of a path.
-
-There are numerous keyword arguments to control the behavior:
-
-- `extround`: Rounding radius of the outermost corners; should be less than `gap0`.
-- `trace0`: Bond pad width.
-- `trace1`: Center trace width of next CPW segment.
-- `gap0`: Gap width adjacent to bond pad.
-- `gap1`: Gap width of next CPW segment.
-- `flatlen`: Bond pad length.
-- `taperlen`: Length of taper region between bond pad and next CPW segment.
-
-Returns a `Style` object suitable for continuity with the next segment.
-Ignore the returned style if you are terminating a path.
-"""
-function launch!(p::Path; extround=5, trace0=300, trace1=5,
-        gap0=150, gap1=2.5, flatlen=250, taperlen=250)
-    flip = f::Function->(isempty(p) ? f : t->f(1.0-t))
-    # if isempty(p)
-    #     flip(f::Function) = f
-    # else
-    #     flip(f::Function) = t->f(1.0-t)
-    # end
-
-    s0 = CPW(0.0, flip(t->(trace0/2+gap0-extround+
-        sqrt(extround^2-(t*extround-extround)^2))))
-    s1 = CPW(0.0, trace0/2+gap0)
-    s2 = CPW(trace0, gap0)
-    s3 = CPW(flip(t->(trace0 + t * (trace1 - trace0))),
-        flip(t->(gap0 + t * (gap1 - gap0))),1)
-
-    if isempty(p)
-        args = [extround, gap0-extround, flatlen, taperlen]
-        styles = Style[s0, s1, s2, s3]
-    else
-        args = [taperlen, flatlen, gap0-extround, extround]
-        styles = Style[s3, s2, s1, s0]
-    end
-
-    for x in zip(args,styles)
-        straight!(p, x...)
-    end
-
-    # Return a style suitable for the next segment.
-    CPW(trace1, gap1)
-end
+# function launch!(p::Path; extround=5, trace0=300, trace1=5,
+#         gap0=150, gap1=2.5, flatlen=250, taperlen=250)
+#     flip = f::Function->(isempty(p) ? f : t->f(1.0-t))
+#     # if isempty(p)
+#     #     flip(f::Function) = f
+#     # else
+#     #     flip(f::Function) = t->f(1.0-t)
+#     # end
+#
+#     s0 = CPW(0.0, flip(t->(trace0/2+gap0-extround+
+#         sqrt(extround^2-(t*extround-extround)^2))))
+#     s1 = CPW(0.0, trace0/2+gap0)
+#     s2 = CPW(trace0, gap0)
+#     s3 = CPW(flip(t->(trace0 + t * (trace1 - trace0))),
+#         flip(t->(gap0 + t * (gap1 - gap0))),1)
+#
+#     if isempty(p)
+#         args = [extround, gap0-extround, flatlen, taperlen]
+#         styles = Style[s0, s1, s2, s3]
+#     else
+#         args = [taperlen, flatlen, gap0-extround, extround]
+#         styles = Style[s3, s2, s1, s0]
+#     end
+#
+#     for x in zip(args,styles)
+#         straight!(p, x...)
+#     end
+#
+#     # Return a style suitable for the next segment.
+#     CPW(trace1, gap1)
+# end
 
 """
 ```
@@ -642,5 +612,29 @@ function param{T<:Real}(c::CompoundSegment{T})
     return eval(f)
 end
 
+function attach!(p::Path, c::CellReference, t::Real;
+        i::Integer=length(p), where::Integer=0)
+    if i==0
+        sty0 = style0(p)
+        sty = decorate(sty0,c,t,where)
+        p.style0 = sty
+    else
+        seg0,sty0 = p[i]
+        sty = decorate(sty0,c,t,where)
+        p[i] = (seg0,sty)
+    end
+end
+
+function decorate(sty0::Style, c, t, where)
+    sty = DecoratedStyle(sty0)
+    decorate(sty,c,t,where)
+end
+
+function decorate(sty::DecoratedStyle, c, t, where)
+    push!(sty.ts, t)
+    push!(sty.dirs, where)
+    push!(sty.cellrefs, c)
+    sty
+end
 
 end

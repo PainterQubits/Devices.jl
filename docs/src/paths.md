@@ -2,9 +2,7 @@
 
 ```@docs
     Paths.Path
-    Paths.Path{T<:Real}(::Point{2,T}, ::Real, ::Paths.Style)
-    Paths.Path{T<:Real}(::Tuple{T,T})
-    Paths.Path{T<:Real}(::Tuple{T,T}, ::Real)
+    Paths.Path{T<:Real}(::Point{2,T})
     Paths.pathlength(::Path)
 ```
 ## Segments
@@ -24,6 +22,7 @@
     Paths.CPW
     Paths.CompoundStyle
     Paths.DecoratedStyle
+    Paths.undecorated
 ```
 ## Path interrogation
 
@@ -44,9 +43,12 @@
 ```@docs
     append!(::Path, ::Path)
     adjust!
+    attach!
+    attachments
     launch!
     meander!
     param
+    simplify
     simplify!
     straight!
     turn!

@@ -20,6 +20,7 @@ export Polygon
 export Plain
 export points
 export clip, offset
+export layer, datatype
 
 clipper() = Devices._clip
 coffset() = Devices._coffset
@@ -78,6 +79,10 @@ Convenience constructor for a `Polygon{T}` object.
 Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
     p3::Point{2,T}...; kwargs...) =
         Polygon{T}([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
+
+
+layer(p::Polygon) = p.properties[:layer]
+datatype(p::Polygon) = p.properties[:datatype]
 
 copy(p::Polygon) = Polygon(copy(p.p), copy(p.properties))
 

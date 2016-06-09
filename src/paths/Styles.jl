@@ -18,6 +18,7 @@ type Trace <: Style
 end
 Trace(width::Function) = Trace(width, 100)
 Trace(width::Real) = Trace(x->float(width), 1)
+copy(x::Trace) = Trace(x.width, x.divs)
 divs(s::Trace) = linspace(0.0, 1.0, s.divs+1)
 
 distance(::Trace, t) = 0.0
@@ -52,6 +53,7 @@ CPW(trace::Real, gap::Real) = CPW(x->float(trace), x->float(gap), 1)
 CPW(trace::Function, gap::Function) = CPW(trace, gap, 100)
 CPW(trace::Function, gap::Real, divs::Integer=100) = CPW(trace, x->float(gap), divs)
 CPW(trace::Real, gap::Function, divs::Integer=100) = CPW(x->float(trace), gap, divs)
+copy(x::CPW) = CPW(x.trace, x.gap, x.divs)
 
 distance(s::CPW, t) = s.gap(t)+s.trace(t)
 extent(s::CPW, t) = s.trace(t)/2 + s.gap(t)
@@ -163,44 +165,40 @@ end
 
 """
 ```
-type DecoratedStyle{S<:Real} <: Style
+type DecoratedStyle <: Style
     s::Style
     ts::AbstractArray{Float64,1}
-    offsets::Array{S,1}
     dirs::Array{Int,1}
-    cells::Array{ASCIIString,1}
+    cellrefs::Array{CellReference,1}
     DecoratedStyle(s) = begin
         a = new(s)
         a.ts = Float64[]
-        a.offsets = S[]
         a.dirs = Int[]
-        a.cells = ASCIIString[]
+        a.cells = CellReference[]
     end
-    DecoratedStyle(s,t,o,r,c) = new(s,t,o,r,c)
+    DecoratedStyle(s,t,r,c) = new(s,t,r,c)
 end
 ```
 
 Style with decorations, like periodic structures along the path, etc.
 """
-type DecoratedStyle{S<:Real} <: Style
+type DecoratedStyle <: Style
     s::Style
     ts::AbstractArray{Float64,1}
-    offsets::Array{S,1}
     dirs::Array{Int,1}
-    cells::Array{ASCIIString,1}
+    cellrefs::Array{CellReference,1}
     DecoratedStyle(s) = begin
         a = new(s)
         a.ts = Float64[]
-        a.offsets = S[]
         a.dirs = Int[]
-        a.cells = ASCIIString[]
+        a.cellrefs = CellReference[]
+        a
     end
-    DecoratedStyle(s,t,o,r,c) = new(s,t,o,r,c)
+    DecoratedStyle(s,t,r,c) = new(s,t,r,c)
 end
 
-DecoratedStyle{S<:Real}(s::Style, ts::AbstractArray{Float64,1},
-    offsets::Array{S,1}, dirs::Array{Int,1}, cells::Array{ASCIIString, 1}) =
-    DecoratedStyle{S}(s, ts, offsets, dirs, cells)
+undecorated(s::Style) = s
+undecorated(s::DecoratedStyle) = s.s
 
 # distance(s::DecoratedStyle, t) = distance(s.s, t)
 extent(s::DecoratedStyle, t) = extent(s.s, t)

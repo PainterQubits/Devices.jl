@@ -11,6 +11,7 @@ import Base: cell, length, show, .+, .-
 
 # The PyNULL() and __init__() are necessary to use PyCall with precompiled modules.
 const _gdspy = PyCall.PyNULL()
+# const _pyclipper = PyCall.PyNULL()
 const _qr = PyCall.PyNULL()
 
 function __init__()
@@ -86,10 +87,10 @@ export width
 export isproper
 
 include("Polygons.jl")
-import .Polygons: Polygon, clip, offset, points
+import .Polygons: Polygon, clip, offset, points, layer, datatype
 export Polygons
 export Polygon
-export clip, offset, points
+export clip, offset, points, layer, datatype
 
 include("Cells.jl")
 import .Cells: Cell, CellArray, CellReference
@@ -99,20 +100,26 @@ export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!
 
 include("paths/Paths.jl")
-import .Paths: Path, adjust!, launch!, meander! #,attach!
-import .Paths: param, pathlength, simplify!, straight!, turn! #, preview
+import .Paths: Path, adjust!, attach!, attachments, direction, launch!, meander!
+import .Paths: param, pathf, pathlength, simplify, simplify!, straight!, turn!
+import .Paths: α0, α1, p0, p1, style0, style1, extent, undecorated
 export Paths
 export Path
+export α0, α1, p0, p1, style0, style1
 export adjust!
-# export attach!
+export attach!
+export attachments
+export direction
 export launch!
 export meander!
 export param
+export pathf
 export pathlength
-# export preview
+export simplify
 export simplify!
 export straight!
 export turn!
+export undecorated
 
 """
 ```
@@ -258,26 +265,27 @@ Render a `segment` with decorated style `s` to cell `c`.
 This method draws the decorations before the path itself is drawn.
 """
 function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)
-    for (t, offset, dir, c) in zip(s.ts, s.offsets, s.dirs, s.cells)
+    for (t, dir, cref) in zip(s.ts, s.dirs, s.cellrefs)
         (dir < -1 || dir > 1) && error("Invalid direction in $s.")
 
-        rect = bounds(c)
-        dtop = gety(maximum(rect)) - (gety(rect.ur+rect.ll)/2)       # distance from center to top
-
-        ∠0 = direction(segment.f, t)
+        # rect = bounds(cref)
+        # dtop = gety(maximum(rect)) - (gety(rect.ur+rect.ll)/2)       # distance from center to top
+        rot = direction(segment.f, t)
         if dir == 0
-            ∠ = ∠0-π/2
-            newx = offset*cos(∠)
-            newy = offset*sin(∠)
-            ref = CellReference(c, (segment.f(t) + Point(newx,newy)), rot=∠*180/π)
+            ref = CellReference(cref.cell, segment.f(t)+cref.origin;
+                xrefl=cref.xrefl, mag=cref.mag, rot=cref.rot+rot*180/π)
         else
-            ∠ = ∠0-π/2
-            offset -= dir * extent(s.s, t)
-            # offset -= dir * dtop
-            newx = offset * cos(∠)
-            newy = offset * sin(∠)
-            rot = (∠0 + (dir == 1 ? π:0)) * 180/π
-            ref = CellReference(c, (segment.f(t)+Point(newx,newy)), rot=rot)
+            if dir == -1
+                rot2 = rot + π/2
+            else
+                rot2 = rot - π/2
+            end
+
+            offset = extent(s.s, t)
+            newx = offset * cos(rot2)
+            newy = offset * sin(rot2)
+            ref = CellReference(cref.cell, segment.f(t)+Point(newx,newy)+cref.origin;
+                xrefl=cref.xrefl, mag=cref.mag, rot=cref.rot+rot*180/π)
         end
         push!(c.refs, ref)
     end
@@ -285,10 +293,12 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
 end
 
 include("Tags.jl")
-import .Tags: qrcode, radialstub
+import .Tags: qrcode, radialstub, radialcut, cpwlauncher, launch!
 export Tags
 export qrcode
-export radialstub
+export radialstub, radialcut
+export cpwlauncher
+export launch!
 
 # Operations on arrays of AbstractPolygons
 for (op, dotop) in [(:+, :.+), (:-, :.-)]

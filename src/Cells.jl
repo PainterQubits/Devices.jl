@@ -119,13 +119,14 @@ end
 
 """
 ```
-CellReference{T<:Real}(x::Cell, y::Point{2,T}; xrefl=false, mag=1.0, rot=0.0)
+CellReference{T<:Real}(x::Cell, y::Point{2,T}=Point(0.,0.);
+    xrefl=false, mag=1.0, rot=0.0)
 ```
 
 Convenience constructor for `CellReference{typeof(x), T}`.
 """
-CellReference{T<:Real}(x::Cell, origin::Point{2,T}; xrefl=false, mag=1.0, rot=0.0) =
-    CellReference{typeof(x), T}(x, origin, xrefl, mag, rot)
+CellReference{T<:Real}(x::Cell, origin::Point{2,T}=Point(0.,0.); xrefl=false,
+    mag=1.0, rot=0.0) = CellReference{typeof(x), T}(x, origin, xrefl, mag, rot)
 
 """
 ```
