@@ -2,6 +2,7 @@ __precompile__()
 module Devices
 
 using PyCall
+using AffineTransforms
 using ForwardDiff
 using FileIO
 import Clipper
@@ -100,7 +101,7 @@ export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!
 
 include("paths/Paths.jl")
-import .Paths: Path, adjust!, attach!, attachments, direction, launch!, meander!
+import .Paths: Path, adjust!, attach!, attachments, direction, meander!
 import .Paths: param, pathf, pathlength, simplify, simplify!, straight!, turn!
 import .Paths: α0, α1, p0, p1, style0, style1, extent, undecorated
 export Paths
@@ -110,7 +111,6 @@ export adjust!
 export attach!
 export attachments
 export direction
-export launch!
 export meander!
 export param
 export pathf
@@ -127,6 +127,8 @@ render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...
 ```
 
 Render a rectangle `r` to cell `c`, defaulting to plain styling.
+
+Returns an array of the AbstractPolygons added to the cell.
 """
 function render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)
     render!(c, r, s; kwargs...)
@@ -138,6 +140,8 @@ render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)
 ```
 
 Render a rectangle `r` to cell `c` with plain styling.
+
+Returns an array with the rectangle in it.
 """
 function render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)
     d = Dict(kwargs)
@@ -153,6 +157,8 @@ render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
 Render a rounded rectangle `r` to cell `c`. This is accomplished by rendering
 a path around the outside of a (smaller than requested) solid rectangle. The
 bounding box of `r` is preserved.
+
+Returns an array of the AbstractPolygons added to the cell.
 """
 function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
     d = Dict(kwargs)
@@ -162,6 +168,7 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
     ll, ur = minimum(r), maximum(r)
     gr = Rectangle(ll+Point(rad,rad),ur-Point(rad,rad), r.properties)
     push!(c.elements, gr)
+
     p = Path(ll+Point(rad,rad/2), 0.0, Paths.Trace(s.r))
     straight!(p, width(r)-2*rad)
     turn!(p, π/2, rad/2)
@@ -182,6 +189,8 @@ render!(c::Cell, r::Rectangle, s::Rectangles.Undercut;
 
 Render a rectangle `r` to cell `c`. Additionally, put a hollow border around the
 rectangle with layer `uclayer`. Useful for undercut structures.
+
+Returns an array of the AbstractPolygons added to the cell.
 """
 function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut;
     layer=0, uclayer=0, kwargs...)
@@ -203,6 +212,8 @@ render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
 ```
 
 Render a polygon `r` to cell `c`, defaulting to plain styling.
+
+Returns an array of the polygons added to the cell.
 """
 function render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
     d = Dict(kwargs)
@@ -216,6 +227,8 @@ render!(c::Cell, p::Path; kwargs...)
 ```
 
 Render a path `p` to a cell `c`.
+
+Returns an array of the polygons added to the cell.
 """
 function render!(c::Cell, p::Path; kwargs...)
     for (segment, s) in p
@@ -231,6 +244,7 @@ render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
 Render a `segment` with style `s` to cell `c`.
 """
 function render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
+    polys = AbstractPolygon[]
     f = segment.f
     g(t) = gradient(f,t)
     last = 0.0
@@ -248,12 +262,15 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
             final_distance=Paths.distance(s,t))
         for a in gp[:polygons]
             points = reinterpret(Point{2,Float64}, reshape(transpose(a), length(a)))
-            push!(c.elements, Polygon{Float64}(points, Dict{Symbol,Any}(kwargs)))
+            poly = Polygon{Float64}(points, Dict{Symbol,Any}(kwargs))
+            push!(polys, poly)
         end
         gp = gdspy()[:Path](Paths.width(s,t), Point(0.0,0.0),
             number_of_paths=Paths.paths(s,t), distance=Paths.distance(s,t))
         last = t
     end
+    append!(c.elements, polys)
+    polys
 end
 
 """
@@ -268,8 +285,6 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
     for (t, dir, cref) in zip(s.ts, s.dirs, s.cellrefs)
         (dir < -1 || dir > 1) && error("Invalid direction in $s.")
 
-        # rect = bounds(cref)
-        # dtop = gety(maximum(rect)) - (gety(rect.ur+rect.ll)/2)       # distance from center to top
         rot = direction(segment.f, t)
         if dir == 0
             ref = CellReference(cref.cell, segment.f(t)+cref.origin;
@@ -284,12 +299,13 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
             offset = extent(s.s, t)
             newx = offset * cos(rot2)
             newy = offset * sin(rot2)
-            ref = CellReference(cref.cell, segment.f(t)+Point(newx,newy)+cref.origin;
+            origin = Point(tformrotate(rot)*Array(cref.origin))
+            ref = CellReference(cref.cell, segment.f(t)+Point(newx,newy)+origin;
                 xrefl=cref.xrefl, mag=cref.mag, rot=cref.rot+rot*180/π)
         end
         push!(c.refs, ref)
     end
-    render!(c, segment, s.s; kwargs...)
+    render!(c, segment, undecorated(s); kwargs...)
 end
 
 include("Tags.jl")

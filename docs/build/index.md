@@ -19,6 +19,7 @@ A [Julia](http://julialang.org) package for designing CAD files for superconduct
 
 
   * `Pkg.clone("https://github.com/ajkeller34/Clipper.jl.git")`
+  * `Pkg.checkout("Clipper", "pointinpoly")`
   * `Pkg.clone("https://github.com/ajkeller34/Devices.jl.git")`
 
 

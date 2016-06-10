@@ -170,7 +170,16 @@ type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     attachments::Array{Tuple{Float64,Int,CellReference},1}
 end
 
-attachments(p) = p.attachments
+"""
+```
+attachments(p::Path)
+```
+
+Returns the array of attachments for a given path. These are the cell references
+tied to the path by [`attach!`](@ref).
+"""
+attachments(p::Path) = p.attachments
+
 pathf(p) = p[1][1].f
 
 """
@@ -331,7 +340,7 @@ cycle(p::Path) = cycle(zip(p.segments,p.styles))
 isempty(p::Path) = isempty(p.segments)
 empty!(p::Path) = begin empty!(p.segments); empty!(p.styles) end
 deleteat!(p::Path, inds) = begin deleteat!(p.segments, inds); deleteat!(p.styles, inds) end
-endof(p::Path) = endof(zip(p.segments,p.styles))
+endof(p::Path) = length(p.segments)
 size(p::Path) = size(p.segments)
 getindex(p::Path, i::Integer) = (p.segments[i], p.styles[i])
 function setindex!(p::Path, v::Tuple{Segment,Style}, i::Integer)
@@ -419,9 +428,8 @@ when you want a continuous styling of a very long path.
 """
 function simplify(p::Path, inds::UnitRange)
     p1 = copy(p)
-    segs = copy(p.segments[inds])
-    cseg = CompoundSegment(segs)
-    csty = CompoundStyle(segs, copy(p.styles[inds]))
+    cseg = CompoundSegment(p.segments[inds])
+    csty = CompoundStyle(cseg.segments, copy(p.styles[inds]))
     deleteat!(p1, inds)
     insert!(p1, inds[1], (cseg, csty))
     p1
@@ -436,9 +444,24 @@ All segments and styles of a path are turned into a `CompoundSegment` and
 `CompoundStyle`.
 """
 simplify(p::Path) = simplify(p, 1:length(p))
-
-simplify!(p::Path, inds::UnitRange) = p = simplify(p, inds)
-simplify!(p::Path) = p = simplify(p)
+#
+# """
+# ```
+# simplify!(p::Path, inds::UnitRange)
+# ```
+#
+# In-place version of [`simplify`](@ref).
+# """
+# simplify!(p::Path, inds::UnitRange) = p = simplify(p, inds)
+#
+# """
+# ```
+# simplify!(p::Path)
+# ```
+#
+# In-place version of [`simplify`](@ref).
+# """
+# simplify!(p::Path) = p = simplify(p)
 
 function split{T<:Real}(s::CompoundSegment{T}, points)
     segs = CompoundSegment{T}[]
@@ -612,6 +635,33 @@ function param{T<:Real}(c::CompoundSegment{T})
     return eval(f)
 end
 
+"""
+```
+attach!(p::Path, c::CellReference, t::Real; i::Integer=length(p), where::Integer=0)
+```
+
+Attach a `CellReference` along a path. By default, the attachment occurs
+at `t ∈ [0,1]` along the most recent path segment, but a different path segment
+index can be specified using `i`. The reference is oriented with zero rotation
+if the path is pointing at 0°, otherwise it is rotated with the path.
+
+The origin of the cell reference tells the method where to place
+the cell *with respect to a coordinate system that rotates with the path*.
+Suppose the path is a straight line with angle 0°. Then an origin of
+`Point(0.,10.)` will put the cell at 10 above the path, or 10 to the left of the
+path if it turns left by 90°.
+
+The `where` option is for convenience. If `where == 0`, nothing special happens.
+If `where == -1`, then the point of attachment for the reference is on the
+leftmost edge of the waveguide (the rendered polygons; the path itself has no width).
+Likewise if `where == 1`, the point of attachment is on the rightmost edge.
+This option does not automatically rotate the cell reference, apart from what is
+already done as described in the first paragraph. You can think of this option
+as setting a special origin for the coordinate system that rotates with the path.
+For instance, an origin for the cell reference of `Point(0.,10.)` together with
+`where == -1` will put the cell at 10 above the edge of a rendered (finite width)
+path with angle 0°.
+"""
 function attach!(p::Path, c::CellReference, t::Real;
         i::Integer=length(p), where::Integer=0)
     if i==0
@@ -625,11 +675,13 @@ function attach!(p::Path, c::CellReference, t::Real;
     end
 end
 
+# undocumented private methods for attach!
 function decorate(sty0::Style, c, t, where)
     sty = DecoratedStyle(sty0)
     decorate(sty,c,t,where)
 end
 
+# undocumented private methods for attach!
 function decorate(sty::DecoratedStyle, c, t, where)
     push!(sty.ts, t)
     push!(sty.dirs, where)

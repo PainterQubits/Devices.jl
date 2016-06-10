@@ -30,6 +30,7 @@ pages:
 - Paths: paths.md
 - Abstract polygons: polygons.md
 - Cells: cells.md
+- For convenience: tags.md
 - Rendering / saving: render.md
 - Index: idx.md
 - 'License': LICENSE.md

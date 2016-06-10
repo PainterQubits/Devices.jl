@@ -15,6 +15,7 @@ type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
+    attachments::Array{CellReference,1}
     Path(p0::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
         styles::Array{Style,1}) = new(p0, α0, style0, segments, styles)
     Path(style::Style) =
@@ -24,35 +25,13 @@ end
 
 Type for abstracting an arbitrary styled path in the plane. Iterating returns tuples of (`segment`, `style`).
 
-<a id='Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real},Real,Devices.Paths.Style}' href='#Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real},Real,Devices.Paths.Style}'>#</a>
+<a id='Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real}}' href='#Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real}}'>#</a>
 **`Devices.Paths.Path`** &mdash; *Method*.
 
 
 
 ```
-Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0, style0::Style=Trace(1.0))
-```
-
-Convenience constructor for `Path{T}` object.
-
-<a id='Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real}}' href='#Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real}}'>#</a>
-**`Devices.Paths.Path`** &mdash; *Method*.
-
-
-
-```
-Path{T<:Real}(p0::Tuple{T,T})
-```
-
-Convenience constructor for `Path{T}` object.
-
-<a id='Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real},Real}' href='#Devices.Paths.Path-Tuple{Tuple{T<:Real,T<:Real},Real}'>#</a>
-**`Devices.Paths.Path`** &mdash; *Method*.
-
-
-
-```
-Path{T<:Real}(p0::Tuple{T,T}, α0::Real)
+Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0))
 ```
 
 Convenience constructor for `Path{T}` object.
@@ -259,24 +238,39 @@ Combines styles together for use with a `CompoundSegment`.
 
 
 ```
-type DecoratedStyle{S<:Real} <: Style
+type DecoratedStyle <: Style
     s::Style
     ts::AbstractArray{Float64,1}
-    offsets::Array{S,1}
     dirs::Array{Int,1}
-    cells::Array{ASCIIString,1}
+    cellrefs::Array{CellReference,1}
     DecoratedStyle(s) = begin
         a = new(s)
         a.ts = Float64[]
-        a.offsets = S[]
         a.dirs = Int[]
-        a.cells = ASCIIString[]
+        a.cells = CellReference[]
     end
-    DecoratedStyle(s,t,o,r,c) = new(s,t,o,r,c)
+    DecoratedStyle(s,t,r,c) = new(s,t,r,c)
 end
 ```
 
 Style with decorations, like periodic structures along the path, etc.
+
+<a id='Devices.Paths.undecorated' href='#Devices.Paths.undecorated'>#</a>
+**`Devices.Paths.undecorated`** &mdash; *Function*.
+
+
+
+```
+undecorated(s::Style)
+```
+
+Returns `s`.
+
+```
+undecorated(s::DecoratedStyle)
+```
+
+Returns the underlying, undecorated style.
 
 
 <a id='Path-interrogation-1'></a>
@@ -474,29 +468,30 @@ adjust!(p::Path, n::Integer=1)
 
 Adjust a path's parametric functions starting from index `n`. Used internally whenever segments are inserted into the path.
 
-<a id='Devices.Paths.launch!' href='#Devices.Paths.launch!'>#</a>
-**`Devices.Paths.launch!`** &mdash; *Function*.
+<a id='Devices.Paths.attach!' href='#Devices.Paths.attach!'>#</a>
+**`Devices.Paths.attach!`** &mdash; *Function*.
 
 
 
 ```
-launch!(p::Path; extround=5, trace0=300, trace1=5,
-        gap0=150, gap1=2.5, flatlen=250, taperlen=250)
+attach!(p::Path, c::CellReference, t::Real;
+        i::Integer=length(p), where::Integer=0)
 ```
 
-Add a launcher to the path. Somewhat intelligent in that the launcher will reverse its orientation depending on if it is at the start or the end of a path.
+Attach a `CellReference` along a path. By default, the attachment occurs at `t ∈ [0,1]` along the most recent path segment, but a different path segment index can be specified using `i`. The reference is oriented with zero rotation if the path is pointing at 0°, otherwise it is rotated with the path.
 
-There are numerous keyword arguments to control the behavior:
+The `where` option is for convenience. If `where == 0`, nothing special happens. If `where == -1`, then the point of attachment for the reference is on the leftmost edge of the waveguide (the rendered polygons; the path itself has no width). Likewise if `where == 1`, the point of attachment is on the rightmost edge. This option does not automatically rotate the cell reference, apart from what is already done as described in the previous paragraph.
 
-  * `extround`: Rounding radius of the outermost corners; should be less than `gap0`.
-  * `trace0`: Bond pad width.
-  * `trace1`: Center trace width of next CPW segment.
-  * `gap0`: Gap width adjacent to bond pad.
-  * `gap1`: Gap width of next CPW segment.
-  * `flatlen`: Bond pad length.
-  * `taperlen`: Length of taper region between bond pad and next CPW segment.
+<a id='Devices.Paths.attachments' href='#Devices.Paths.attachments'>#</a>
+**`Devices.Paths.attachments`** &mdash; *Function*.
 
-Returns a `Style` object suitable for continuity with the next segment. Ignore the returned style if you are terminating a path.
+
+
+```
+attachments(p::Path)
+```
+
+Returns the array of attachments for a given path. These are the cell references tied to the path by [`attach!`](paths.md#Devices.Paths.attach!).
 
 <a id='Devices.Paths.meander!' href='#Devices.Paths.meander!'>#</a>
 **`Devices.Paths.meander!`** &mdash; *Function*.
@@ -522,6 +517,26 @@ param{T<:Real}(c::CompoundSegment{T})
 
 Return a parametric function over the domain [0,1] that represents the compound segment.
 
+<a id='Devices.Paths.simplify' href='#Devices.Paths.simplify'>#</a>
+**`Devices.Paths.simplify`** &mdash; *Function*.
+
+
+
+```
+simplify(p::Path, inds::UnitRange)
+```
+
+At `inds`, segments of a path are turned into a `CompoundSegment` and styles of a path are turned into a `CompoundStyle`. The idea here is:
+
+  * Indexing the path becomes more sane when you can combine several path segments into one logical element. A launcher would have several indices in a path unless you could simplify it.
+  * You don't need to think hard about boundaries between straights and turns when you want a continuous styling of a very long path.
+
+```
+simplify(p::Path)
+```
+
+All segments and styles of a path are turned into a `CompoundSegment` and `CompoundStyle`.
+
 <a id='Devices.Paths.simplify!' href='#Devices.Paths.simplify!'>#</a>
 **`Devices.Paths.simplify!`** &mdash; *Function*.
 
@@ -531,16 +546,13 @@ Return a parametric function over the domain [0,1] that represents the compound 
 simplify!(p::Path, inds::UnitRange)
 ```
 
-At `inds`, segments of a path are turned into a `CompoundSegment` and styles of a path are turned into a `CompoundStyle`. The idea here is:
-
-  * Indexing the path becomes more sane when you can combine several path segments into one logical element. A launcher would have several indices in a path unless you could simplify it.
-  * You don't need to think hard about boundaries between straights and turns when you want a continuous styling of a very long path.
+In-place version of [`simplify`](paths.md#Devices.Paths.simplify).
 
 ```
 simplify!(p::Path)
 ```
 
-All segments and styles of a path are turned into a `CompoundSegment` and `CompoundStyle`.
+In-place version of [`simplify`](paths.md#Devices.Paths.simplify).
 
 <a id='Devices.Paths.straight!' href='#Devices.Paths.straight!'>#</a>
 **`Devices.Paths.straight!`** &mdash; *Function*.

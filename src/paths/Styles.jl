@@ -197,11 +197,22 @@ type DecoratedStyle <: Style
     DecoratedStyle(s,t,r,c) = new(s,t,r,c)
 end
 
+"""
+```
+undecorated(s::Style)
+```
+
+Returns `s`.
+"""
 undecorated(s::Style) = s
+
+"""
+```
+undecorated(s::DecoratedStyle)
+```
+
+Returns the underlying, undecorated style.
+"""
 undecorated(s::DecoratedStyle) = s.s
 
-# distance(s::DecoratedStyle, t) = distance(s.s, t)
-extent(s::DecoratedStyle, t) = extent(s.s, t)
-# paths(s::DecoratedStyle, t...) = paths(s.s, t...)
-# width(s::DecoratedStyle, t) = width(s.s, t)
-# divs(s::DecoratedStyle) = divs(s.s)
+extent(s::DecoratedStyle, t) = extent(undecorated(s), t)

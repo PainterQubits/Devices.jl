@@ -45,7 +45,6 @@
     adjust!
     attach!
     attachments
-    launch!
     meander!
     param
     simplify
@@ -53,6 +52,7 @@
     straight!
     turn!
 ```
+
 ## Interfacing with gdspy
 
 The Python package `gdspy` is used for rendering paths into polygons. Ultimately

@@ -88,6 +88,7 @@ Straight{T<:Real}(l::T, p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0) =
 convert{T<:Real}(::Type{Straight{T}}, x::Straight) =
     Straight(T(x.l), convert(Point{2,T}, x.p0), x.α0)
 
+copy(s::Straight) = Straight(s.l,s.p0,s.α0)
 length(s::Straight) = s.l
 p0(s::Straight) = s.p0
 α0(s::Straight) = s.α0
@@ -162,6 +163,7 @@ Turn{T<:Real}(α::Real, r::T, p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0) =
     Turn{T}(α, r, p0, α0)
 convert{T<:Real}(::Type{Turn{T}}, x::Turn) =
     Turn(x.α, T(x.r), convert(Point{2,T}, x.p0), x.α0)
+copy(s::Turn) = Turn(s.α,s.r,s.p0,s.α0)
 
 length{T<:Real}(s::Turn{T}) = T(abs(s.r*s.α))
 p0(s::Turn) = s.p0
@@ -209,13 +211,14 @@ type CompoundSegment{T<:Real} <: Segment{T}
     f::Function
 
     CompoundSegment(segments) = begin
-        s = new(segments)
+        s = new(copy(segments))
         s.f = param(s)
         s
     end
 end
 CompoundSegment{T<:Real}(segments::Array{Segment{T},1}) =
     CompoundSegment{T}(segments)
+copy(s::CompoundSegment) = CompoundSegment(s.segments)
 
 """
 ```
