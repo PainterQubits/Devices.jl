@@ -314,15 +314,13 @@ function adjust!(p::Path, n::Integer=1)
     m = n
     if m == 1
         seg,sty = p[1]
-        setp0!(seg, p.p0)
-        setα0!(seg, p.α0)
+        setα0p0!(seg, p.α0, p.p0)
         m += 1
     end
     for j in m:length(p)
         seg,sty = p[j]
         seg0,sty0 = p[j-1]
-        setp0!(seg, p1(seg0))
-        setα0!(seg, α1(seg0))
+        setα0p0!(seg, α1(seg0), p1(seg0))
     end
 end
 
@@ -418,7 +416,8 @@ simplify(p::Path, inds::UnitRange)
 ```
 
 At `inds`, segments of a path are turned into a `CompoundSegment` and
-styles of a path are turned into a `CompoundStyle`. The idea here is:
+styles of a path are turned into a `CompoundStyle`. The method returns a tuple,
+`(segment, style)`.
 
 - Indexing the path becomes more sane when you can combine several path
 segments into one logical element. A launcher would have several indices
@@ -427,12 +426,12 @@ in a path unless you could simplify it.
 when you want a continuous styling of a very long path.
 """
 function simplify(p::Path, inds::UnitRange)
-    p1 = copy(p)
     cseg = CompoundSegment(p.segments[inds])
-    csty = CompoundStyle(cseg.segments, copy(p.styles[inds]))
-    deleteat!(p1, inds)
-    insert!(p1, inds[1], (cseg, csty))
-    p1
+    csty = CompoundStyle(cseg.segments, p.styles[inds])
+    (cseg, csty)
+    # deleteat!(p1, inds)
+    # insert!(p1, inds[1], (cseg, csty))
+    # p1
 end
 
 """
@@ -444,31 +443,34 @@ All segments and styles of a path are turned into a `CompoundSegment` and
 `CompoundStyle`.
 """
 simplify(p::Path) = simplify(p, 1:length(p))
-#
-# """
-# ```
-# simplify!(p::Path, inds::UnitRange)
-# ```
-#
-# In-place version of [`simplify`](@ref).
-# """
-# simplify!(p::Path, inds::UnitRange) = p = simplify(p, inds)
-#
-# """
-# ```
-# simplify!(p::Path)
-# ```
-#
-# In-place version of [`simplify`](@ref).
-# """
-# simplify!(p::Path) = p = simplify(p)
 
-function split{T<:Real}(s::CompoundSegment{T}, points)
-    segs = CompoundSegment{T}[]
+"""
+```
+simplify!(p::Path, inds::UnitRange)
+```
 
-
-    segs
+In-place version of [`simplify`](@ref).
+"""
+function simplify!(p::Path, inds::UnitRange)
+    x = simplify(p, inds)
+    deleteat!(p, inds)
+    insert!(p, inds[1], x)
+    p
 end
+
+"""
+```
+simplify!(p::Path)
+```
+
+In-place version of [`simplify`](@ref).
+"""
+simplify!(p::Path) = simplify!(p, 1:length(p))
+
+# function split{T<:Real}(s::CompoundSegment{T}, points)
+#     segs = CompoundSegment{T}[]
+#     segs
+# end
 
 """
 ```

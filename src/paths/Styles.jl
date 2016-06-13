@@ -63,54 +63,49 @@ divs(s::CPW) = linspace(0.0, 1.0, s.divs+1)
 
 """
 ```
-type CompoundStyle{T<:Real} <: Style
-    segments::Array{Segment{T},1}
+type CompoundStyle <: Style
     styles::Array{Style,1}
+    divs::Array{Float64,1}
     f::Function
-    CompoundStyle(segments, styles) = begin
-        s = new(segments, styles)
-        s.f = param(s)
-        s
-    end
 end
 ```
 
-Combines styles together for use with a `CompoundSegment`.
+Combines styles together, typically for use with a [`CompoundSegment`](@ref).
 
-- `segments`: Needed for divs function.
-- `styles`: Array of styles making up the object.
+- `styles`: Array of styles making up the object. This is shallow-copied
+by the outer constructor.
+- `divs`: An array of `t` values needed for rendering the parameteric path.
 - `f`: returns tuple of style index and the `t` to use for that
 style's parametric function.
 """
-type CompoundStyle{T<:Real} <: Style
-    segments::Array{Segment{T},1}
+type CompoundStyle <: Style
     styles::Array{Style,1}
+    divs::Array{Float64,1}
     f::Function
-    CompoundStyle(segments, styles) = begin
-        s = new(segments, styles)
-        s.f = param(s)
-        s
-    end
 end
-CompoundStyle{T<:Real}(segments::AbstractArray{Segment{T},1},
-    styles::AbstractArray{Style,1}) = CompoundStyle{T}(segments, styles)
+CompoundStyle{T<:Real}(seg::AbstractArray{Segment{T},1},
+        sty::AbstractArray{Style,1}) =
+    CompoundStyle(deepcopy(Array(sty)), makedivs(seg, sty), param(seg))
+
+divs(s::CompoundStyle) = s.divs
 
 """
-`divs{T<:Real}(c::CompoundStyle{T})`
+`makedivs{T<:Real}(segments::CompoundStyle{T}, styles::CompoundStyle)`
 
 Returns a collection with the values of `t` to use for
-rendering a `CompoundSegment` with this `CompoundStyle`.
+rendering a `CompoundSegment` with a `CompoundStyle`.
 """
-function divs{T<:Real}(c::CompoundStyle{T})
-    isempty(c.segments) && error("Cannot use divs with zero segments.")
-    length(c.segments) != length(c.styles) &&
-        error("Number of segments and styles do not match.")
+function makedivs{T<:Real}(segments::AbstractArray{Segment{T},1},
+        styles::AbstractArray{Style,1})
+    isempty(segments) && error("Cannot use divs with zero segments.")
+    length(segments) != length(styles) &&
+        error("Must have same number of segments and styles.")
 
-    L = pathlength(c.segments)
+    L = pathlength(segments)
     l0 = zero(T)
     ts = Float64[]
-    for i in 1:length(c.segments)
-        l1 = l0 + length(c.segments[i])
+    for i in 1:length(segments)
+        l1 = l0 + length(segments[i])
         # Someone who enjoys thinking about IEEE floating points,
         # please make this less awful. It seems like the loop runs
         # approximately powers-of-2 times.
@@ -124,29 +119,34 @@ function divs{T<:Real}(c::CompoundStyle{T})
             scale -= eps(scale)
         end
 
-        append!(ts, divs(c.styles[i])*scale+offset)
+        append!(ts, divs(styles[i])*scale+offset)
         l0 = l1
     end
     sort!(unique(ts))
 end
 
-function param{T<:Real}(c::CompoundStyle{T})
-    isempty(c.segments) && error("Cannot parameterize with zero segments.")
-    length(c.segments) != length(c.styles) &&
-        error("Number of segments and styles do not match.")
+"""
+`param{T<:Real}(seg::AbstractArray{Segment{T},1})`
+
+Returns the function needed for a `CompoundStyle`. The segments array is
+shallow-copied for use in the function.
+"""
+function param{T<:Real}(seg::AbstractArray{Segment{T},1})
+    segments = copy(Array(seg))
+    isempty(segments) && error("Cannot parameterize with zero segments.")
 
     # Build up our piecewise parametric function
     f = Expr(:(->), :t, Expr(:block))
     push!(f.args[2].args, quote
-        L = pathlength(($c).segments)
+        L = pathlength($segments)
         l0 = zero($T)
     end)
 
-    for i in 1:length(c.segments)
+    for i in 1:length(segments)
         push!(f.args[2].args, quote
-            l1 = l0 + length((($c).segments)[$i])
+            l1 = l0 + length(($segments)[$i])
             (l0/L <= t) &&
-                ($(i == length(c.segments) ? :(<=) : :(<))(t, l1/L)) &&
+                ($(i == length(segments) ? :(<=) : :(<))(t, l1/L)) &&
                     return $i, (t*L-l0)/(l1-l0)
             l0 = l1
         end)
@@ -215,4 +215,5 @@ Returns the underlying, undecorated style.
 """
 undecorated(s::DecoratedStyle) = s.s
 
+divs(s::DecoratedStyle) = divs(undecorated(s))
 extent(s::DecoratedStyle, t) = extent(undecorated(s), t)

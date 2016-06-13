@@ -34,6 +34,11 @@ Return the last angle in a segment (calculated).
 """
 α1(s::Segment) = direction(s.f, 1.0)
 
+function setα0p0!(s::Segment, angle, p::Point)
+    setα0!(s, angle)
+    setp0!(s, p)
+end
+
 """
 ```
 length(s::Segment)
@@ -196,7 +201,7 @@ type CompoundSegment{T<:Real} <: Segment{T}
     f::Function
 
     CompoundSegment(segments) = begin
-        s = new(segments)
+        s = new(Array(segments))
         s.f = param(s)
         s
     end
@@ -205,13 +210,15 @@ end
 
 Consider an array of segments as one contiguous segment.
 Useful e.g. for applying styles, uninterrupted over segment changes.
+The array of segments given to the constructor is deep-copied and retained
+by the compound segment.
 """
 type CompoundSegment{T<:Real} <: Segment{T}
     segments::Array{Segment{T},1}
     f::Function
 
     CompoundSegment(segments) = begin
-        s = new(copy(segments))
+        s = new(deepcopy(Array(segments)))
         s.f = param(s)
         s
     end
@@ -220,30 +227,10 @@ CompoundSegment{T<:Real}(segments::Array{Segment{T},1}) =
     CompoundSegment{T}(segments)
 copy(s::CompoundSegment) = CompoundSegment(s.segments)
 
-"""
-```
-setp0!(s::CompoundSegment, p::Point)
-```
 
-Set the p0 of a compound segment.
-"""
-function setp0!(s::CompoundSegment, p::Point)
-    setp0!(s.segments[1], p)
+function setα0p0!(s::CompoundSegment, angle, p::Point)
+    setα0p0!(s.segments[1], angle, p)
     for i in 2:length(s.segments)
-        setp0!(s.segments[i], p1(s.segments[i-1]))
-    end
-end
-
-"""
-```
-setα0!(s::CompoundSegment, α0′)
-```
-
-Set the starting angle of a compound segment.
-"""
-function setα0!(s::CompoundSegment, α0′)
-    setα0!(s.segments[1], α0′)
-    for i in 2:length(s.segments)
-        setα0!(s.segments[i], α1(s.segments[i-1]))
+        setα0p0!(s.segments[i], α1(s.segments[i-1]), p1(s.segments[i-1]))
     end
 end

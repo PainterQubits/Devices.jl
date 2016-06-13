@@ -292,8 +292,8 @@ function bounds(ref::CellReference; kwargs...)
     bounds(c; kwargs...)
 end
 
-function flatten(c::Cell)
-    polys = AbstractPolygon[]
+function flatten{T<:Real}(c::Cell{T})
+    polys = AbstractPolygon{T}[]
     append!(polys, c.elements)
     for r in c.refs
         append!(polys, flatten(r))

@@ -35,3 +35,5 @@ save("test.gds", c)
 
 - If you cannot save the GDS file, try deleting any file that happens to be
 at the target path.
+- Decorated styles should not become part of compound styles, for now. Avoid
+this by decorating / attaching cell references at the end.
