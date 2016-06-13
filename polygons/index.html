@@ -236,6 +236,15 @@
           
             
   <li>
+    <a class="" title="For convenience" href="../tags/">
+      For convenience
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
     <a class="" title="Rendering / saving" href="../render/">
       Rendering / saving
     </a>
@@ -491,30 +500,9 @@ end
 <p>Returns the array of <code>Point</code> objects defining the polygon.</p>
 <p><a id='Clipping-and-offsetting-1'></a></p>
 <h2 id="clipping-and-offsetting">Clipping and offsetting</h2>
-<p>As of now this package's notion of polygons is that there are no "inner holes." Probably it would be helpful if we expanded our definition.</p>
-<p>For clipping polygons we use <a href="http://www.cs.man.ac.uk/~toby/gpc/">GPC</a> to get triangle strips which never have holes in them. These are then rendered as polygons individually. An obvious downside is that subsequent offsetting will not work as desired.</p>
-<p>For offsetting polygons we use <a href="http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm">Clipper</a>. Clipper does not seem to support triangle strips so although the clipping is probably superior we cannot use it easily for now.</p>
-<p><a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
-<strong><code>Devices.Polygons.clip</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>clip{S&lt;:Real, T&lt;:Real}(op::ClipperOp, subject::Polygon{S}, clip::Polygon{T})
+<div class="codehilite"><pre><span></span>    clip
+    offset
 </pre></div>
-
-
-<p>Clip polygon <code>subject</code> by polygon <code>clip</code> using operation <code>op</code> from the <a href="http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm">Clipper library</a>. The <a href="https://github.com/greginvm/pyclipper">Python wrapper</a> over the C++ library is used.</p>
-<p>Valid <code>ClipperOp</code> include <code>CT_INTERSECTION</code>, <code>CT_UNION</code>, <code>CT_DIFFERENCE</code>, <code>CT_XOR</code>.</p>
-<p><code>clip(op::GPCOp, subject::Polygon{Cdouble}, clip::Polygon{Cdouble})</code></p>
-<p>Use the GPC clipping library to do polygon manipulations. Valid GPCOp include <code>GPC_DIFF</code>, <code>GPC_INT</code>, <code>GPC_XOR</code>, <code>GPC_UNION</code>.</p>
-<p><a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
-<strong><code>Devices.Polygons.offset</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>offset{S&lt;:Real}(subject::Polygon{S}, delta::Real,
-        j::ClipperJoin=JT_MITER, e::ClipperEnd=ET_CLOSEDPOLYGON)
-</pre></div>
-
-
-<p>Offset a polygon <code>subject</code> by some amount <code>delta</code> using the <a href="http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/_Body.htm">Clipper library</a>. The <a href="https://github.com/greginvm/pyclipper">Python wrapper</a> over the C++ library is used.</p>
-<p><code>ClipperJoin</code> parameters are discussed <a href="http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/JoinType.htm">here</a>. Valid syntax in this package is: <code>JT_SQUARE</code>, <code>JT_ROUND</code>, <code>JT_MITER</code>.</p>
-<p><code>ClipperEnd</code> parameters are discussed <a href="http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/EndType.htm">here</a>. Valid syntax in this package is: <code>ET_CLOSEDPOLYGON</code>, <code>ET_CLOSEDLINE</code>, <code>ET_OPENSQUARE</code>, <code>ET_OPENROUND</code>, <code>ET_OPENBUTT</code>.</p>
-<p>To do: Handle the type parameter of Polygon, which is ignored now.</p>
           <aside class="copyright" role="note">
             
             Documentation built with

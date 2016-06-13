@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1">
     
       
-        <title>Index - Devices.jl</title>
+        <title>For convenience - Devices.jl</title>
       
       
       
@@ -96,7 +96,7 @@
             
           </span>
         
-        Index
+        For convenience
       </div>
     </div>
     
@@ -211,9 +211,22 @@
           
             
   <li>
-    <a class="" title="For convenience" href="../tags/">
+    <a class="current" title="For convenience" href="./">
       For convenience
     </a>
+    
+      
+      
+        <ul>
+          
+            <li class="anchor">
+              <a title="For convenience" href="#for-convenience">
+                For convenience
+              </a>
+            </li>
+          
+        </ul>
+      
     
   </li>
 
@@ -229,14 +242,9 @@
           
             
   <li>
-    <a class="current" title="Index" href="./">
+    <a class="" title="Index" href="../idx/">
       Index
     </a>
-    
-      
-        
-      
-      
     
   </li>
 
@@ -260,60 +268,106 @@
       <article class="article">
         <div class="wrapper">
           
-          <p><a id='Index-1'></a></p>
-<h1 id="index">Index</h1>
+            <h1>For convenience</h1>
+          
+          <p><a id='For-convenience-1'></a></p>
+<h2 id="for-convenience">For convenience</h2>
+<p><a id='Devices.Tags.qrcode' href='#Devices.Tags.qrcode'>#</a>
+<strong><code>Devices.Tags.qrcode</code></strong> &mdash; <em>Function</em>.</p>
+<p><code>qrcode{T&lt;:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0; kwargs...)</code></p>
+<p>Renders a QR code of the string <code>a</code> with pixel size <code>pixel</code> to a new cell with <code>name</code>. The lower left of the QR code will be at the origin of the cell.</p>
+<p><a id='Devices.Tags.radialcut' href='#Devices.Tags.radialcut'>#</a>
+<strong><code>Devices.Tags.radialcut</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">radialcut</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">r</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="err">Θ</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">narc</span><span class="o">=</span><span class="nt">197</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Returns a polygon for a radial cut (like a radial stub with no metal). The polygon has to be subtracted from a ground plane.</p>
+<p>The parameter <code>c</code> is made available in the method signature rather than <code>a</code> because the focus of the arc (top of polygon) can easily centered in a waveguide. If it is desirable to control <code>a</code> instead, use trig: <code>a/2 = c*tan(Θ/2)</code>.</p>
+<p>Parameters as follows, where X marks the origin and nothing above the origin is part of the resulting polygon:</p>
+<div class="codehilite"><pre><span></span>                          Λ
+                         ╱│╲
+                        ╱ │ ╲
+                       ╱  |  ╲
+                 .    ╱   │Θ/2╲
+                .    ╱    │----╲
+               ╱    ╱   c │     ╲
+              ╱    ╱      │      ╲
+             ╱    ╱       │       ╲
+            r    ╱        │        ╲
+           ╱    ╱         │         ╲
+          ╱    ╱──────────X──────────╲
+         ╱    ╱ {──────── a ────────} ╲
+        .    ╱                         ╲
+       .    ╱                           ╲
+           ╱                             ╲
+          ╱                               ╲
+         ╱                                 ╲
+         ──┐                             ┌──
+           └──┐                       ┌──┘
+              └──┐                 ┌──┘
+                 └──┐           ┌──┘
+                    └───────────┘
+                    (circular arc)
+</pre></div>
+
+
+<p><a id='Devices.Tags.radialstub' href='#Devices.Tags.radialstub'>#</a>
+<strong><code>Devices.Tags.radialstub</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">radialstub</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">r</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="err">Θ</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="nt">t</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">narc</span><span class="o">=</span><span class="nt">197</span><span class="o">)</span>
+</pre></div>
+
+
+<p>See also the documentation for <code>radialcut</code>.</p>
+<p>Returns a polygon for a radial stub. The polygon has to be subtracted from a ground plane, and will leave a defect in the ground plane of uniform width <code>t</code> that outlines the (metallic) radial stub. <code>r</code> refers to the radius of the actual stub, not the radius of the circular arc bounding the ground plane defect. Likewise <code>c</code> has an analogous meaning to that in <code>radialcut</code> except it refers here to the radial stub, not the ground plane defect.</p>
+<p><a id='Devices.Tags.cpwlauncher' href='#Devices.Tags.cpwlauncher'>#</a>
+<strong><code>Devices.Tags.cpwlauncher</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>cpwlauncher{T&lt;:Real}(extround::T=5., trace0::T=300., trace1::T=5.,
+    gap0::T=150., gap1::T=2.5, flatlen::T=250., taperlen::T=250.)
+</pre></div>
+
+
+<p>Draws half of a CPW launcher inside a new cell.</p>
+<p>There are numerous keyword arguments to control the behavior:</p>
 <ul>
-<li><a href="../polygons/#Devices.AbstractPolygon"><code>Devices.AbstractPolygon</code></a></li>
-<li><a href="../cells/#Devices.Cells.Cell"><code>Devices.Cells.Cell</code></a></li>
-<li><a href="../cells/#Devices.Cells.CellArray"><code>Devices.Cells.CellArray</code></a></li>
-<li><a href="../cells/#Devices.Cells.CellReference"><code>Devices.Cells.CellReference</code></a></li>
-<li><a href="../paths/#Devices.Paths.CPW"><code>Devices.Paths.CPW</code></a></li>
-<li><a href="../paths/#Devices.Paths.CompoundSegment"><code>Devices.Paths.CompoundSegment</code></a></li>
-<li><a href="../paths/#Devices.Paths.CompoundStyle"><code>Devices.Paths.CompoundStyle</code></a></li>
-<li><a href="../paths/#Devices.Paths.DecoratedStyle"><code>Devices.Paths.DecoratedStyle</code></a></li>
-<li><a href="../paths/#Devices.Paths.Path"><code>Devices.Paths.Path</code></a></li>
-<li><a href="../paths/#Devices.Paths.Segment"><code>Devices.Paths.Segment</code></a></li>
-<li><a href="../paths/#Devices.Paths.Straight"><code>Devices.Paths.Straight</code></a></li>
-<li><a href="../paths/#Devices.Paths.Style"><code>Devices.Paths.Style</code></a></li>
-<li><a href="../paths/#Devices.Paths.Trace"><code>Devices.Paths.Trace</code></a></li>
-<li><a href="../paths/#Devices.Paths.Turn"><code>Devices.Paths.Turn</code></a></li>
-<li><a href="../polygons/#Devices.Polygons.Polygon"><code>Devices.Polygons.Polygon</code></a></li>
-<li><a href="../polygons/#Devices.Rectangles.Rectangle"><code>Devices.Rectangles.Rectangle</code></a></li>
-<li><a href="../cells/#Devices.Cells.order!"><code>Devices.Cells.order!</code></a></li>
-<li><a href="../cells/#Devices.Cells.traverse!"><code>Devices.Cells.traverse!</code></a></li>
-<li><a href="../paths/#Devices.Paths.adjust!"><code>Devices.Paths.adjust!</code></a></li>
-<li><a href="../paths/#Devices.Paths.attach!"><code>Devices.Paths.attach!</code></a></li>
-<li><a href="../paths/#Devices.Paths.attachments"><code>Devices.Paths.attachments</code></a></li>
-<li><a href="../paths/#Devices.Paths.direction"><code>Devices.Paths.direction</code></a></li>
-<li><a href="../paths/#Devices.Paths.distance"><code>Devices.Paths.distance</code></a></li>
-<li><a href="../paths/#Devices.Paths.extent"><code>Devices.Paths.extent</code></a></li>
-<li><a href="../paths/#Devices.Paths.meander!"><code>Devices.Paths.meander!</code></a></li>
-<li><a href="../paths/#Devices.Paths.p0"><code>Devices.Paths.p0</code></a></li>
-<li><a href="../paths/#Devices.Paths.p1"><code>Devices.Paths.p1</code></a></li>
-<li><a href="../paths/#Devices.Paths.param"><code>Devices.Paths.param</code></a></li>
-<li><a href="../paths/#Devices.Paths.pathlength"><code>Devices.Paths.pathlength</code></a></li>
-<li><a href="../paths/#Devices.Paths.paths"><code>Devices.Paths.paths</code></a></li>
-<li><a href="../paths/#Devices.Paths.setp0!"><code>Devices.Paths.setp0!</code></a></li>
-<li><a href="../paths/#Devices.Paths.setα0!"><code>Devices.Paths.setα0!</code></a></li>
-<li><a href="../paths/#Devices.Paths.simplify"><code>Devices.Paths.simplify</code></a></li>
-<li><a href="../paths/#Devices.Paths.simplify!"><code>Devices.Paths.simplify!</code></a></li>
-<li><a href="../paths/#Devices.Paths.straight!"><code>Devices.Paths.straight!</code></a></li>
-<li><a href="../paths/#Devices.Paths.style0"><code>Devices.Paths.style0</code></a></li>
-<li><a href="../paths/#Devices.Paths.style1"><code>Devices.Paths.style1</code></a></li>
-<li><a href="../paths/#Devices.Paths.turn!"><code>Devices.Paths.turn!</code></a></li>
-<li><a href="../paths/#Devices.Paths.undecorated"><code>Devices.Paths.undecorated</code></a></li>
-<li><a href="../paths/#Devices.Paths.width"><code>Devices.Paths.width</code></a></li>
-<li><a href="../paths/#Devices.Paths.α0"><code>Devices.Paths.α0</code></a></li>
-<li><a href="../paths/#Devices.Paths.α1"><code>Devices.Paths.α1</code></a></li>
-<li><a href="../points/#Devices.Points.getx"><code>Devices.Points.getx</code></a></li>
-<li><a href="../points/#Devices.Points.gety"><code>Devices.Points.gety</code></a></li>
-<li><a href="../tags/#Devices.Tags.cpwlauncher"><code>Devices.Tags.cpwlauncher</code></a></li>
-<li><a href="../tags/#Devices.Tags.launch!"><code>Devices.Tags.launch!</code></a></li>
-<li><a href="../tags/#Devices.Tags.qrcode"><code>Devices.Tags.qrcode</code></a></li>
-<li><a href="../tags/#Devices.Tags.radialcut"><code>Devices.Tags.radialcut</code></a></li>
-<li><a href="../tags/#Devices.Tags.radialstub"><code>Devices.Tags.radialstub</code></a></li>
-<li><a href="../render/#Devices.render!"><code>Devices.render!</code></a></li>
+<li><code>extround</code>: Rounding radius of the outermost corners; should be less than <code>gap0</code>.</li>
+<li><code>trace0</code>: Bond pad width.</li>
+<li><code>trace1</code>: Center trace width of next CPW segment.</li>
+<li><code>gap0</code>: Gap width adjacent to bond pad.</li>
+<li><code>gap1</code>: Gap width of next CPW segment.</li>
+<li><code>flatlen</code>: Bond pad length.</li>
+<li><code>taperlen</code>: Length of taper region between bond pad and next CPW segment.</li>
 </ul>
+<p>The polygons in the method definition are labeled as:</p>
+<div class="codehilite"><pre><span></span> ___________
+|p3 |  p2  |
+|___|______|   p1
+|   |        
+|p4 |        |
+|___|
+</pre></div>
+
+
+<p>Returns the new cell.</p>
+<p><a id='Devices.Tags.launch!' href='#Devices.Tags.launch!'>#</a>
+<strong><code>Devices.Tags.launch!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">launch</span><span class="o">!(</span><span class="nt">p</span><span class="o">:</span><span class="nd">:Path</span><span class="o">;</span> <span class="nt">extround</span><span class="o">=</span><span class="nt">5</span><span class="o">,</span> <span class="nt">trace0</span><span class="o">=</span><span class="nt">300</span><span class="o">,</span> <span class="nt">trace1</span><span class="o">=</span><span class="nt">5</span><span class="o">,</span>
+        <span class="nt">gap0</span><span class="o">=</span><span class="nt">150</span><span class="o">,</span> <span class="nt">gap1</span><span class="o">=</span><span class="nt">2</span><span class="nc">.5</span><span class="o">,</span> <span class="nt">flatlen</span><span class="o">=</span><span class="nt">250</span><span class="o">,</span> <span class="nt">taperlen</span><span class="o">=</span><span class="nt">250</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Add a launcher to the path. Somewhat intelligent in that the launcher will reverse its orientation depending on if it is at the start or the end of a path.</p>
+<p>There are numerous keyword arguments to control the behavior:</p>
+<ul>
+<li><code>extround</code>: Rounding radius of the outermost corners; should be less than <code>gap0</code>.</li>
+<li><code>trace0</code>: Bond pad width.</li>
+<li><code>trace1</code>: Center trace width of next CPW segment.</li>
+<li><code>gap0</code>: Gap width adjacent to bond pad.</li>
+<li><code>gap1</code>: Gap width of next CPW segment.</li>
+<li><code>flatlen</code>: Bond pad length.</li>
+<li><code>taperlen</code>: Length of taper region between bond pad and next CPW segment.</li>
+</ul>
+<p>Returns nothing.</p>
           <aside class="copyright" role="note">
             
             Documentation built with
@@ -330,7 +384,7 @@
   <nav class="pagination" aria-label="Footer">
     <div class="previous">
       
-        <a href="../render/" title="Rendering / saving">
+        <a href="../cells/" title="Cells">
           <span class="direction">
             Previous
           </span>
@@ -340,7 +394,7 @@
             </div>
             <div class="stretch">
               <div class="title">
-                Rendering / saving
+                Cells
               </div>
             </div>
           </div>
@@ -349,14 +403,14 @@
     </div>
     <div class="next">
       
-        <a href="../LICENSE/" title="License">
+        <a href="../render/" title="Rendering / saving">
           <span class="direction">
             Next
           </span>
           <div class="page">
             <div class="stretch">
               <div class="title">
-                License
+                Rendering / saving
               </div>
             </div>
             <div class="button button-next" role="button" aria-label="Next">

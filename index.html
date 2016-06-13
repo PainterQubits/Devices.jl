@@ -190,6 +190,12 @@
               </a>
             </li>
           
+            <li class="anchor">
+              <a title="Troubleshooting" href="#troubleshooting">
+                Troubleshooting
+              </a>
+            </li>
+          
         </ul>
       
     
@@ -227,6 +233,15 @@
   <li>
     <a class="" title="Cells" href="cells/">
       Cells
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="For convenience" href="tags/">
+      For convenience
     </a>
     
   </li>
@@ -279,17 +294,13 @@
 <p>Install <a href="http://gdspy.readthedocs.org">gdspy</a>, which is currently used only for rendering paths into polygons: <code>pip install gdspy</code>. Ensure that it is accessible from the Python installation that PyCall.jl is using.</p>
 </li>
 <li>
-<p>Install <a href="https://github.com/greginvm/pyclipper">pyclipper</a>, which is used for polygon offsetting: <code>pip install pyclipper</code>.</p>
-</li>
-<li>
 <p>Install <a href="https://github.com/mnooner256/pyqrcode">pyqrcode</a>, which is used for generating QR codes: <code>pip install pyqrcode</code>.</p>
 </li>
 <li>
-<p>Using features implemented with <a href="http://www.cs.man.ac.uk/~toby/gpc/">GPC</a> require building shared libraries from the C code.</p>
+<p><code>Pkg.clone("https://github.com/ajkeller34/Clipper.jl.git")</code></p>
 </li>
-<li>
-<p><code>Pkg.clone("https://github.com/ajkeller34/Devices.jl.git")</code></p>
-</li>
+<li><code>Pkg.checkout("Clipper", "pointinpoly")</code></li>
+<li><code>Pkg.clone("https://github.com/ajkeller34/Devices.jl.git")</code></li>
 </ul>
 <p><a id='Quick-start-1'></a></p>
 <h2 id="quick-start">Quick start</h2>
@@ -305,6 +316,13 @@ c = Cell(&quot;main&quot;)
 render!(c, p)
 save(&quot;test.gds&quot;, c)
 </pre></div>
+
+
+<p><a id='Troubleshooting-1'></a></p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li>If you cannot save the GDS file, try deleting any file that happens to be at the target path.</li>
+</ul>
           <aside class="copyright" role="note">
             
             Documentation built with

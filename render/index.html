@@ -211,6 +211,15 @@
           
             
   <li>
+    <a class="" title="For convenience" href="../tags/">
+      For convenience
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
     <a class="current" title="Rendering / saving" href="./">
       Rendering / saving
     </a>
@@ -296,6 +305,12 @@
 
 
 <p>Render a rectangle <code>r</code> to cell <code>c</code>, defaulting to plain styling.</p>
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Rectangle</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Rectangles</span><span class="nc">.Undercut</span><span class="o">;</span>
+    <span class="nt">layer</span><span class="o">=</span><span class="nt">0</span><span class="o">,</span> <span class="nt">uclayer</span><span class="o">=</span><span class="nt">0</span><span class="o">,</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a rectangle <code>r</code> to cell <code>c</code>. Additionally, put a hollow border around the rectangle with layer <code>uclayer</code>. Useful for undercut structures.</p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Rectangle</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Rectangles</span><span class="nc">.Rounded</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
@@ -338,7 +353,7 @@
   <nav class="pagination" aria-label="Footer">
     <div class="previous">
       
-        <a href="../cells/" title="Cells">
+        <a href="../tags/" title="For convenience">
           <span class="direction">
             Previous
           </span>
@@ -348,7 +363,7 @@
             </div>
             <div class="stretch">
               <div class="title">
-                Cells
+                For convenience
               </div>
             </div>
           </div>
