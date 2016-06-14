@@ -402,7 +402,7 @@ end
     f::Function
 
     CompoundSegment(segments) = begin
-        s = new(segments)
+        s = new(Array(segments))
         s.f = param(s)
         s
     end
@@ -410,7 +410,7 @@ end
 </pre></div>
 
 
-<p>Consider an array of segments as one contiguous segment. Useful e.g. for applying styles, uninterrupted over segment changes.</p>
+<p>Consider an array of segments as one contiguous segment. Useful e.g. for applying styles, uninterrupted over segment changes. The array of segments given to the constructor is deep-copied and retained by the compound segment.</p>
 <p><a id='Styles-1'></a></p>
 <h2 id="styles">Styles</h2>
 <p><a id='Devices.Paths.Style' href='#Devices.Paths.Style'>#</a>
@@ -460,23 +460,18 @@ end
 <p>May need to be inverted with respect to a ground plane, depending on how the pattern is written.</p>
 <p><a id='Devices.Paths.CompoundStyle' href='#Devices.Paths.CompoundStyle'>#</a>
 <strong><code>Devices.Paths.CompoundStyle</code></strong> &mdash; <em>Type</em>.</p>
-<div class="codehilite"><pre><span></span>type CompoundStyle{T&lt;:Real} &lt;: Style
-    segments::Array{Segment{T},1}
+<div class="codehilite"><pre><span></span>type CompoundStyle &lt;: Style
     styles::Array{Style,1}
+    divs::Array{Float64,1}
     f::Function
-    CompoundStyle(segments, styles) = begin
-        s = new(segments, styles)
-        s.f = param(s)
-        s
-    end
 end
 </pre></div>
 
 
-<p>Combines styles together for use with a <code>CompoundSegment</code>.</p>
+<p>Combines styles together, typically for use with a <a href="./#Devices.Paths.CompoundSegment"><code>CompoundSegment</code></a>.</p>
 <ul>
-<li><code>segments</code>: Needed for divs function.</li>
-<li><code>styles</code>: Array of styles making up the object.</li>
+<li><code>styles</code>: Array of styles making up the object. This is shallow-copied by the outer constructor.</li>
+<li><code>divs</code>: An array of <code>t</code> values needed for rendering the parameteric path.</li>
 <li><code>f</code>: returns tuple of style index and the <code>t</code> to use for that style's parametric function.</li>
 </ul>
 <p><a id='Devices.Paths.DecoratedStyle' href='#Devices.Paths.DecoratedStyle'>#</a>
@@ -545,11 +540,6 @@ end
 <p>Return the first point in a segment (calculated).</p>
 <p><a id='Devices.Paths.setp0!' href='#Devices.Paths.setp0!'>#</a>
 <strong><code>Devices.Paths.setp0!</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>setp0!(s::CompoundSegment, p::Point)
-</pre></div>
-
-
-<p>Set the p0 of a compound segment.</p>
 <div class="codehilite"><pre><span></span>setp0!(s::Turn, p::Point)
 </pre></div>
 
@@ -574,11 +564,6 @@ end
 <p>Return the first angle in a segment (calculated).</p>
 <p><a id='Devices.Paths.setα0!' href='#Devices.Paths.setα0!'>#</a>
 <strong><code>Devices.Paths.setα0!</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>setα0!(s::CompoundSegment, α0′)
-</pre></div>
-
-
-<p>Set the starting angle of a compound segment.</p>
 <div class="codehilite"><pre><span></span>setα0!(s::Turn, α0′)
 </pre></div>
 
@@ -645,13 +630,13 @@ end
 <p>Adjust a path's parametric functions starting from index <code>n</code>. Used internally whenever segments are inserted into the path.</p>
 <p><a id='Devices.Paths.attach!' href='#Devices.Paths.attach!'>#</a>
 <strong><code>Devices.Paths.attach!</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">attach</span><span class="o">!(</span><span class="nt">p</span><span class="o">:</span><span class="nd">:Path</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:CellReference</span><span class="o">,</span> <span class="nt">t</span><span class="o">:</span><span class="nd">:Real</span><span class="o">;</span>
-        <span class="nt">i</span><span class="o">:</span><span class="nd">:Integer</span><span class="o">=</span><span class="nt">length</span><span class="o">(</span><span class="nt">p</span><span class="o">),</span> <span class="nt">where</span><span class="o">:</span><span class="nd">:Integer</span><span class="o">=</span><span class="nt">0</span><span class="o">)</span>
+<div class="codehilite"><pre><span></span><span class="nt">attach</span><span class="o">!(</span><span class="nt">p</span><span class="o">:</span><span class="nd">:Path</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:CellReference</span><span class="o">,</span> <span class="nt">t</span><span class="o">:</span><span class="nd">:Real</span><span class="o">;</span> <span class="nt">i</span><span class="o">:</span><span class="nd">:Integer</span><span class="o">=</span><span class="nt">length</span><span class="o">(</span><span class="nt">p</span><span class="o">),</span> <span class="nt">where</span><span class="o">:</span><span class="nd">:Integer</span><span class="o">=</span><span class="nt">0</span><span class="o">)</span>
 </pre></div>
 
 
 <p>Attach a <code>CellReference</code> along a path. By default, the attachment occurs at <code>t ∈ [0,1]</code> along the most recent path segment, but a different path segment index can be specified using <code>i</code>. The reference is oriented with zero rotation if the path is pointing at 0°, otherwise it is rotated with the path.</p>
-<p>The <code>where</code> option is for convenience. If <code>where == 0</code>, nothing special happens. If <code>where == -1</code>, then the point of attachment for the reference is on the leftmost edge of the waveguide (the rendered polygons; the path itself has no width). Likewise if <code>where == 1</code>, the point of attachment is on the rightmost edge. This option does not automatically rotate the cell reference, apart from what is already done as described in the previous paragraph.</p>
+<p>The origin of the cell reference tells the method where to place the cell <em>with respect to a coordinate system that rotates with the path</em>. Suppose the path is a straight line with angle 0°. Then an origin of <code>Point(0.,10.)</code> will put the cell at 10 above the path, or 10 to the left of the path if it turns left by 90°.</p>
+<p>The <code>where</code> option is for convenience. If <code>where == 0</code>, nothing special happens. If <code>where == -1</code>, then the point of attachment for the reference is on the leftmost edge of the waveguide (the rendered polygons; the path itself has no width). Likewise if <code>where == 1</code>, the point of attachment is on the rightmost edge. This option does not automatically rotate the cell reference, apart from what is already done as described in the first paragraph. You can think of this option as setting a special origin for the coordinate system that rotates with the path. For instance, an origin for the cell reference of <code>Point(0.,10.)</code> together with <code>where == -1</code> will put the cell at 10 above the edge of a rendered (finite width) path with angle 0°.</p>
 <p><a id='Devices.Paths.attachments' href='#Devices.Paths.attachments'>#</a>
 <strong><code>Devices.Paths.attachments</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>attachments(p::Path)
@@ -674,13 +659,15 @@ end
 
 
 <p>Return a parametric function over the domain [0,1] that represents the compound segment.</p>
+<p><code>param{T&lt;:Real}(seg::AbstractArray{Segment{T},1})</code></p>
+<p>Returns the function needed for a <code>CompoundStyle</code>. The segments array is shallow-copied for use in the function.</p>
 <p><a id='Devices.Paths.simplify' href='#Devices.Paths.simplify'>#</a>
 <strong><code>Devices.Paths.simplify</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>simplify(p::Path, inds::UnitRange)
 </pre></div>
 
 
-<p>At <code>inds</code>, segments of a path are turned into a <code>CompoundSegment</code> and styles of a path are turned into a <code>CompoundStyle</code>. The idea here is:</p>
+<p>At <code>inds</code>, segments of a path are turned into a <code>CompoundSegment</code> and styles of a path are turned into a <code>CompoundStyle</code>. The method returns a tuple, <code>(segment, style)</code>.</p>
 <ul>
 <li>Indexing the path becomes more sane when you can combine several path segments into one logical element. A launcher would have several indices in a path unless you could simplify it.</li>
 <li>You don't need to think hard about boundaries between straights and turns when you want a continuous styling of a very long path.</li>

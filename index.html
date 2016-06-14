@@ -289,17 +289,30 @@
 <p>A <a href="http://julialang.org">Julia</a> package for designing CAD files for superconducting devices.</p>
 <p><a id='Installation-1'></a></p>
 <h2 id="installation">Installation</h2>
+<p><a id='Install-Python-packages-1'></a></p>
+<h3 id="install-python-packages">Install Python packages</h3>
 <ul>
 <li>
-<p>Install <a href="http://gdspy.readthedocs.org">gdspy</a>, which is currently used only for rendering paths into polygons: <code>pip install gdspy</code>. Ensure that it is accessible from the Python installation that PyCall.jl is using.</p>
+<p>Install <a href="http://gdspy.readthedocs.org">gdspy</a>, which is currently used only for rendering paths into polygons: <code>pip install gdspy</code>. Ensure that it is accessible from the Python installation that PyCall.jl is using. If the installation fails, it may be failing because it is trying to compile the Clipper library. We will use a Julia package for Clipper anyway. Try installing an older version of gdspy that does not have the Clipper library: <code>pip install 'gdspy==0.7.1' --force-reinstall</code>.</p>
 </li>
 <li>
 <p>Install <a href="https://github.com/mnooner256/pyqrcode">pyqrcode</a>, which is used for generating QR codes: <code>pip install pyqrcode</code>.</p>
 </li>
-<li>
-<p><code>Pkg.clone("https://github.com/ajkeller34/Clipper.jl.git")</code></p>
-</li>
+</ul>
+<p><a id='Install-Julia-packages-1'></a></p>
+<h3 id="install-julia-packages">Install Julia packages</h3>
+<p>We use a custom version of the Clipper package, which we will need for making polygons compatible with GDS files.</p>
+<ul>
+<li><code>Pkg.clone("https://github.com/ajkeller34/Clipper.jl.git")</code></li>
 <li><code>Pkg.checkout("Clipper", "pointinpoly")</code></li>
+</ul>
+<p>You will need to build the package to compile shared library / DLL files. This should just work on Mac OS X, and should also work on Windows provided you install Visual Studio and ensure that <code>vcvarsall.bat</code> and <code>cl.exe</code> are in your account's PATH variable.</p>
+<ul>
+<li><code>Pkg.build("Clipper")</code></li>
+</ul>
+<p><a id='And-finally...-1'></a></p>
+<h3 id="and-finally">And finally...</h3>
+<ul>
 <li><code>Pkg.clone("https://github.com/ajkeller34/Devices.jl.git")</code></li>
 </ul>
 <p><a id='Quick-start-1'></a></p>
@@ -322,6 +335,7 @@ save(&quot;test.gds&quot;, c)
 <h2 id="troubleshooting">Troubleshooting</h2>
 <ul>
 <li>If you cannot save the GDS file, try deleting any file that happens to be at the target path.</li>
+<li>Decorated styles should not become part of compound styles, for now. Avoid this by decorating / attaching cell references at the end.</li>
 </ul>
           <aside class="copyright" role="note">
             
