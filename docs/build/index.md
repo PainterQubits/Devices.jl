@@ -23,9 +23,9 @@ A [Julia](http://julialang.org) package for designing CAD files for superconduct
   * Install [pyqrcode](https://github.com/mnooner256/pyqrcode), which is used for generating QR codes: `pip install pyqrcode`.
 
 
-<a id='Install-required-packages-1'></a>
+<a id='Install-Julia-packages-1'></a>
 
-### Install required packages
+### Install Julia packages
 
 
 We use a custom version of the Clipper package, which we will need for making polygons compatible with GDS files.
