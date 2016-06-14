@@ -139,14 +139,14 @@ type CompoundSegment{T<:Real} <: Segment{T}
     f::Function
 
     CompoundSegment(segments) = begin
-        s = new(segments)
+        s = new(Array(segments))
         s.f = param(s)
         s
     end
 end
 ```
 
-Consider an array of segments as one contiguous segment. Useful e.g. for applying styles, uninterrupted over segment changes.
+Consider an array of segments as one contiguous segment. Useful e.g. for applying styles, uninterrupted over segment changes. The array of segments given to the constructor is deep-copied and retained by the compound segment.
 
 
 <a id='Styles-1'></a>
@@ -214,22 +214,17 @@ May need to be inverted with respect to a ground plane, depending on how the pat
 
 
 ```
-type CompoundStyle{T<:Real} <: Style
-    segments::Array{Segment{T},1}
+type CompoundStyle <: Style
     styles::Array{Style,1}
+    divs::Array{Float64,1}
     f::Function
-    CompoundStyle(segments, styles) = begin
-        s = new(segments, styles)
-        s.f = param(s)
-        s
-    end
 end
 ```
 
-Combines styles together for use with a `CompoundSegment`.
+Combines styles together, typically for use with a [`CompoundSegment`](paths.md#Devices.Paths.CompoundSegment).
 
-  * `segments`: Needed for divs function.
-  * `styles`: Array of styles making up the object.
+  * `styles`: Array of styles making up the object. This is shallow-copied by the outer constructor.
+  * `divs`: An array of `t` values needed for rendering the parameteric path.
   * `f`: returns tuple of style index and the `t` to use for that style's parametric function.
 
 <a id='Devices.Paths.DecoratedStyle' href='#Devices.Paths.DecoratedStyle'>#</a>
@@ -328,12 +323,6 @@ Return the first point in a segment (calculated).
 
 
 ```
-setp0!(s::CompoundSegment, p::Point)
-```
-
-Set the p0 of a compound segment.
-
-```
 setp0!(s::Turn, p::Point)
 ```
 
@@ -366,12 +355,6 @@ Return the first angle in a segment (calculated).
 **`Devices.Paths.setα0!`** &mdash; *Function*.
 
 
-
-```
-setα0!(s::CompoundSegment, α0′)
-```
-
-Set the starting angle of a compound segment.
 
 ```
 setα0!(s::Turn, α0′)
@@ -474,13 +457,14 @@ Adjust a path's parametric functions starting from index `n`. Used internally wh
 
 
 ```
-attach!(p::Path, c::CellReference, t::Real;
-        i::Integer=length(p), where::Integer=0)
+attach!(p::Path, c::CellReference, t::Real; i::Integer=length(p), where::Integer=0)
 ```
 
 Attach a `CellReference` along a path. By default, the attachment occurs at `t ∈ [0,1]` along the most recent path segment, but a different path segment index can be specified using `i`. The reference is oriented with zero rotation if the path is pointing at 0°, otherwise it is rotated with the path.
 
-The `where` option is for convenience. If `where == 0`, nothing special happens. If `where == -1`, then the point of attachment for the reference is on the leftmost edge of the waveguide (the rendered polygons; the path itself has no width). Likewise if `where == 1`, the point of attachment is on the rightmost edge. This option does not automatically rotate the cell reference, apart from what is already done as described in the previous paragraph.
+The origin of the cell reference tells the method where to place the cell *with respect to a coordinate system that rotates with the path*. Suppose the path is a straight line with angle 0°. Then an origin of `Point(0.,10.)` will put the cell at 10 above the path, or 10 to the left of the path if it turns left by 90°.
+
+The `where` option is for convenience. If `where == 0`, nothing special happens. If `where == -1`, then the point of attachment for the reference is on the leftmost edge of the waveguide (the rendered polygons; the path itself has no width). Likewise if `where == 1`, the point of attachment is on the rightmost edge. This option does not automatically rotate the cell reference, apart from what is already done as described in the first paragraph. You can think of this option as setting a special origin for the coordinate system that rotates with the path. For instance, an origin for the cell reference of `Point(0.,10.)` together with `where == -1` will put the cell at 10 above the edge of a rendered (finite width) path with angle 0°.
 
 <a id='Devices.Paths.attachments' href='#Devices.Paths.attachments'>#</a>
 **`Devices.Paths.attachments`** &mdash; *Function*.
@@ -517,6 +501,10 @@ param{T<:Real}(c::CompoundSegment{T})
 
 Return a parametric function over the domain [0,1] that represents the compound segment.
 
+`param{T<:Real}(seg::AbstractArray{Segment{T},1})`
+
+Returns the function needed for a `CompoundStyle`. The segments array is shallow-copied for use in the function.
+
 <a id='Devices.Paths.simplify' href='#Devices.Paths.simplify'>#</a>
 **`Devices.Paths.simplify`** &mdash; *Function*.
 
@@ -526,7 +514,7 @@ Return a parametric function over the domain [0,1] that represents the compound 
 simplify(p::Path, inds::UnitRange)
 ```
 
-At `inds`, segments of a path are turned into a `CompoundSegment` and styles of a path are turned into a `CompoundStyle`. The idea here is:
+At `inds`, segments of a path are turned into a `CompoundSegment` and styles of a path are turned into a `CompoundStyle`. The method returns a tuple, `(segment, style)`.
 
   * Indexing the path becomes more sane when you can combine several path segments into one logical element. A launcher would have several indices in a path unless you could simplify it.
   * You don't need to think hard about boundaries between straights and turns when you want a continuous styling of a very long path.

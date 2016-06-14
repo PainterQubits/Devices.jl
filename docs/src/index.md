@@ -16,7 +16,7 @@ that does not have the Clipper library: `pip install 'gdspy==0.7.1' --force-rein
 + Install [pyqrcode](https://github.com/mnooner256/pyqrcode), which is used for
 generating QR codes: `pip install pyqrcode`.
 
-### Install required packages
+### Install Julia packages
 
 We use a custom version of the Clipper package, which we will need for making polygons
 compatible with GDS files.
