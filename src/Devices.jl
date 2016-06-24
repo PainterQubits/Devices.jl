@@ -169,7 +169,7 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
     gr = Rectangle(ll+Point(rad,rad),ur-Point(rad,rad), r.properties)
     push!(c.elements, gr)
 
-    p = Path(ll+Point(rad,rad/2), 0.0, Paths.Trace(s.r))
+    p = Path(ll+Point(rad,rad/2), style0=Paths.Trace(s.r)) #0.0, Paths.Trace(s.r))
     straight!(p, width(r)-2*rad)
     turn!(p, π/2, rad/2)
     straight!(p, height(r)-2*rad)

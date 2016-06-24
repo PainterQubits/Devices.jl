@@ -5,7 +5,7 @@ import Base: convert, .+, .-
 import FixedSizeArrays: FixedVectorNoTuple, Point
 import PyCall.PyObject
 export Point
-export getx, gety, setx!, sety!
+export getx, gety
 
 convert{T<:Real}(::Type{Point{2,T}}, x::IntPoint) = Point{2,T}(x.X, x.Y)
 
@@ -26,8 +26,6 @@ gety(p::Point)
 Get the y-coordinate of a point.
 """
 @inline gety(p::Point) = p._[2]
-setx!(p::Point, r) = p = Point(r, gety(p))
-sety!(p::Point, r) = p = Point(getx(p), r)
 
 # For use with gdspy
 PyObject(p::Point) = PyObject((getx(p), gety(p)))
