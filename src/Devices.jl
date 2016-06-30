@@ -100,7 +100,7 @@ export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!
 
 include("paths/Paths.jl")
-import .Paths: Path, adjust!, attach!, attachments, direction, meander!
+import .Paths: Path, adjust!, attach!, attachments, direction, meander!, launch!
 import .Paths: param, pathf, pathlength, simplify, simplify!, straight!, turn!
 import .Paths: α0, α1, p0, p1, style0, style1, extent, undecorated
 export Paths
@@ -110,7 +110,7 @@ export adjust!
 export attach!
 export attachments
 export direction
-export meander!
+export meander!, launch!
 export param
 export pathf
 export pathlength
@@ -308,13 +308,13 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
 end
 
 include("Tags.jl")
-import .Tags: qrcode, radialstub, radialcut, cpwlauncher, launch!
+import .Tags: qrcode, radialstub, radialcut, cpwlauncher #, launch!
 import .Tags: pecbasedose, checkerboard
 export Tags
 export qrcode
 export radialstub, radialcut
 export cpwlauncher
-export launch!
+# export launch!
 export pecbasedose, checkerboard
 
 # Operations on arrays of AbstractPolygons

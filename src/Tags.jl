@@ -150,91 +150,91 @@ function radialstub{T<:Real}(r::T, Θ, c::T, t::T; narc=197)
     2*c*tan(Θ/2), poly
 end
 
-"""
-```
-cpwlauncher{T<:Real}(extround::T=5., trace0::T=300., trace1::T=5.,
-    gap0::T=150., gap1::T=2.5, flatlen::T=250., taperlen::T=250.)
-```
-
-Draws half of a CPW launcher inside a new cell.
-
-There are numerous keyword arguments to control the behavior:
-
-- `extround`: Rounding radius of the outermost corners; should be less than `gap0`.
-- `trace0`: Bond pad width.
-- `trace1`: Center trace width of next CPW segment.
-- `gap0`: Gap width adjacent to bond pad.
-- `gap1`: Gap width of next CPW segment.
-- `flatlen`: Bond pad length.
-- `taperlen`: Length of taper region between bond pad and next CPW segment.
-
-The polygons in the method definition are labeled as:
-```
- ___________
-|p3 |  p2  |\
-|___|______| \  p1
-|   |       \ \
-|p4 |        \|
-|___|
-```
-
-Returns the new cell.
-"""
-function cpwlauncher{T<:Real}(extround::T=5., trace0::T=300., trace1::T=5.,
-    gap0::T=150., gap1::T=2.5, flatlen::T=250., taperlen::T=250.)
-
-    p1 = Polygon(Point(zero(T), trace1/2),
-            Point(zero(T), trace1/2 + gap1),
-            Point(-taperlen, trace0/2 + gap0),
-            Point(-taperlen, trace0/2))
-    p2 = Rectangle(flatlen, gap0) + Point(-taperlen-flatlen, trace0/2)
-    p3 = Rectangle(gap0, gap0) + Point(-taperlen-flatlen-gap0, trace0/2)
-    p4 = Rectangle(gap0, trace0/2) + Point(-taperlen-flatlen-gap0, zero(T))
-
-    c = Cell{T}(replace("cpwlauncher"*string(gensym()),"##","_"))
-    push!(c.elements, p1,p2,p3,p4)
-    c
-end
-
-"""
-```
-launch!(p::Path; extround=5, trace0=300, trace1=5,
-        gap0=150, gap1=2.5, flatlen=250, taperlen=250)
-```
-
-Add a launcher to the path. Somewhat intelligent in that the launcher will
-reverse its orientation depending on if it is at the start or the end of a path.
-
-There are numerous keyword arguments to control the behavior:
-
-- `extround`: Rounding radius of the outermost corners; should be less than `gap0`.
-- `trace0`: Bond pad width.
-- `trace1`: Center trace width of next CPW segment.
-- `gap0`: Gap width adjacent to bond pad.
-- `gap1`: Gap width of next CPW segment.
-- `flatlen`: Bond pad length.
-- `taperlen`: Length of taper region between bond pad and next CPW segment.
-
-Returns nothing.
-"""
-function launch!(p::Path, extround=5., trace0=300., trace1=5.,
-        gap0=150., gap1=2.5, flatlen=250., taperlen=250.)
-    c = cpwlauncher(extround,
-                    trace0,
-                    trace1,
-                    gap0,
-                    gap1,
-                    flatlen,
-                    taperlen)
-    if isempty(p)
-        attach!(p, CellReference(c, Point(0.,0.)), 0.)
-        attach!(p, CellReference(c, Point(0.,0.), xrefl=true), 0.)
-    else
-        attach!(p, CellReference(c, Point(0.,0.), rot=180.), 1.)
-        attach!(p, CellReference(c, Point(0.,0.), xrefl=true, rot=180.), 1.)
-    end
-    nothing
-end
+# """
+# ```
+# cpwlauncher{T<:Real}(extround::T=5., trace0::T=300., trace1::T=5.,
+#     gap0::T=150., gap1::T=2.5, flatlen::T=250., taperlen::T=250.)
+# ```
+#
+# Draws half of a CPW launcher inside a new cell.
+#
+# There are numerous keyword arguments to control the behavior:
+#
+# - `extround`: Rounding radius of the outermost corners; should be less than `gap0`.
+# - `trace0`: Bond pad width.
+# - `trace1`: Center trace width of next CPW segment.
+# - `gap0`: Gap width adjacent to bond pad.
+# - `gap1`: Gap width of next CPW segment.
+# - `flatlen`: Bond pad length.
+# - `taperlen`: Length of taper region between bond pad and next CPW segment.
+#
+# The polygons in the method definition are labeled as:
+# ```
+#  ___________
+# |p3 |  p2  |\
+# |___|______| \  p1
+# |   |       \ \
+# |p4 |        \|
+# |___|
+# ```
+#
+# Returns the new cell.
+# """
+# function cpwlauncher{T<:Real}(extround::T=5., trace0::T=300., trace1::T=5.,
+#     gap0::T=150., gap1::T=2.5, flatlen::T=250., taperlen::T=250.)
+#
+#     p1 = Polygon(Point(zero(T), trace1/2),
+#             Point(zero(T), trace1/2 + gap1),
+#             Point(-taperlen, trace0/2 + gap0),
+#             Point(-taperlen, trace0/2))
+#     p2 = Rectangle(flatlen, gap0) + Point(-taperlen-flatlen, trace0/2)
+#     p3 = Rectangle(gap0, gap0) + Point(-taperlen-flatlen-gap0, trace0/2)
+#     p4 = Rectangle(gap0, trace0/2) + Point(-taperlen-flatlen-gap0, zero(T))
+#
+#     c = Cell{T}(replace("cpwlauncher"*string(gensym()),"##","_"))
+#     push!(c.elements, p1,p2,p3,p4)
+#     c
+# end
+#
+# """
+# ```
+# launch!(p::Path; extround=5, trace0=300, trace1=5,
+#         gap0=150, gap1=2.5, flatlen=250, taperlen=250)
+# ```
+#
+# Add a launcher to the path. Somewhat intelligent in that the launcher will
+# reverse its orientation depending on if it is at the start or the end of a path.
+#
+# There are numerous keyword arguments to control the behavior:
+#
+# - `extround`: Rounding radius of the outermost corners; should be less than `gap0`.
+# - `trace0`: Bond pad width.
+# - `trace1`: Center trace width of next CPW segment.
+# - `gap0`: Gap width adjacent to bond pad.
+# - `gap1`: Gap width of next CPW segment.
+# - `flatlen`: Bond pad length.
+# - `taperlen`: Length of taper region between bond pad and next CPW segment.
+#
+# Returns nothing.
+# """
+# function launch!(p::Path; extround=5., trace0=300., trace1=5.,
+#         gap0=150., gap1=2.5, flatlen=250., taperlen=250.)
+#     c = cpwlauncher(extround,
+#                     trace0,
+#                     trace1,
+#                     gap0,
+#                     gap1,
+#                     flatlen,
+#                     taperlen)
+#     if isempty(p)
+#         attach!(p, CellReference(c, Point(0.,0.)), 0.)
+#         attach!(p, CellReference(c, Point(0.,0.), xrefl=true), 0.)
+#     else
+#         attach!(p, CellReference(c, Point(0.,0.), rot=180.), 1.)
+#         attach!(p, CellReference(c, Point(0.,0.), xrefl=true, rot=180.), 1.)
+#     end
+#     nothing
+# end
 
 
 """

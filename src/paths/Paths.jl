@@ -47,6 +47,7 @@ export adjust!
 export attach!
 export attachments
 export direction
+export launch!
 export meander!
 export param
 export pathf
@@ -558,37 +559,37 @@ function meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
     nothing
 end
 
-# function launch!(p::Path; extround=5, trace0=300, trace1=5,
-#         gap0=150, gap1=2.5, flatlen=250, taperlen=250)
-#     flip = f::Function->(isempty(p) ? f : t->f(1.0-t))
-#     # if isempty(p)
-#     #     flip(f::Function) = f
-#     # else
-#     #     flip(f::Function) = t->f(1.0-t)
-#     # end
-#
-#     s0 = CPW(0.0, flip(t->(trace0/2+gap0-extround+
-#         sqrt(extround^2-(t*extround-extround)^2))))
-#     s1 = CPW(0.0, trace0/2+gap0)
-#     s2 = CPW(trace0, gap0)
-#     s3 = CPW(flip(t->(trace0 + t * (trace1 - trace0))),
-#         flip(t->(gap0 + t * (gap1 - gap0))),1)
-#
-#     if isempty(p)
-#         args = [extround, gap0-extround, flatlen, taperlen]
-#         styles = Style[s0, s1, s2, s3]
-#     else
-#         args = [taperlen, flatlen, gap0-extround, extround]
-#         styles = Style[s3, s2, s1, s0]
-#     end
-#
-#     for x in zip(args,styles)
-#         straight!(p, x...)
-#     end
-#
-#     # Return a style suitable for the next segment.
-#     CPW(trace1, gap1)
-# end
+function launch!(p::Path; extround=5, trace0=300, trace1=5,
+        gap0=150, gap1=2.5, flatlen=250, taperlen=250)
+    flip = f::Function->(isempty(p) ? f : t->f(1.0-t))
+    # if isempty(p)
+    #     flip(f::Function) = f
+    # else
+    #     flip(f::Function) = t->f(1.0-t)
+    # end
+
+    s0 = CPW(0.0, flip(t->(trace0/2+gap0-extround+
+        sqrt(extround^2-(t*extround-extround)^2))))
+    s1 = CPW(0.0, trace0/2+gap0)
+    s2 = CPW(trace0, gap0)
+    s3 = CPW(flip(t->(trace0 + t * (trace1 - trace0))),
+        flip(t->(gap0 + t * (gap1 - gap0))),1)
+
+    if isempty(p)
+        args = [extround, gap0-extround, flatlen, taperlen]
+        styles = Style[s0, s1, s2, s3]
+    else
+        args = [taperlen, flatlen, gap0-extround, extround]
+        styles = Style[s3, s2, s1, s0]
+    end
+
+    for x in zip(args,styles)
+        straight!(p, x...)
+    end
+
+    # Return a style suitable for the next segment.
+    CPW(trace1, gap1)
+end
 
 """
 ```
