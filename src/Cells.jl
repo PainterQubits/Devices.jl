@@ -138,8 +138,8 @@ Construct a `CellArray{typeof(x),T}` object, with `xrefl`, `mag`, and `rot` as
 keyword arguments (x-reflection, magnification factor, rotation in degrees).
 """
 CellArray{T<:Real}(x::Cell, origin::Point{2,T}, dc::Point{2,T}, dr::Point{2,T},
-    c::Integer, r::Integer; xrefl=false, mag=1.0, rot=0.0) =
-    CellArray{typeof(x),T}(x,o,dc,dr,c,r,xrefl,mag,rot)
+    c::Real, r::Real; xrefl=false, mag=1.0, rot=0.0) =
+    CellArray{typeof(x),T}(x,origin,dc,dr,c,r,xrefl,mag,rot)
 
 """
 ```

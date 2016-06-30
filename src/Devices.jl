@@ -32,11 +32,6 @@ qr() = Devices._qr
 
 const UNIT      = 1.0e-6
 const PRECISION = 1.0e-9
-
-export FEATURE_BOUNDING_LAYER
-export CHIP_BOUNDING_LAYER
-export CLIP_PLACEMENT_LAYER
-export FEATURES_LAYER
 export UNIT
 export PRECISION
 
@@ -49,9 +44,9 @@ export interdigit
 function render! end
 
 include("Points.jl")
-import .Points: Point, getx, gety, setx!, sety!
+import .Points: Point, getx, gety
 export Points
-export Point, getx, gety, setx!, sety!
+export Point, getx, gety
 
 function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, layer=FEATURES_LAYER)
     c = gdspy()[:Cell](cellname)
@@ -67,6 +62,10 @@ end
 function bounds end
 function center end
 function center! end
+
+function uniquename(str)
+    replace(str*string(gensym()),"##","_")
+end
 
 """
 ```
@@ -310,11 +309,13 @@ end
 
 include("Tags.jl")
 import .Tags: qrcode, radialstub, radialcut, cpwlauncher, launch!
+import .Tags: pecbasedose, checkerboard
 export Tags
 export qrcode
 export radialstub, radialcut
 export cpwlauncher
 export launch!
+export pecbasedose, checkerboard
 
 # Operations on arrays of AbstractPolygons
 for (op, dotop) in [(:+, :.+), (:-, :.-)]

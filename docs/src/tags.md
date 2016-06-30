@@ -6,4 +6,6 @@
     radialstub
     cpwlauncher
     launch!
+    checkerboard
+    pecbasedose
 ```

@@ -8,6 +8,8 @@ using Devices.Rectangles
 using Devices.Polygons
 using Devices.Points
 using Devices.Cells
+using Devices: uniquename
+
 qr() = Devices._qr
 gdspy() = Devices._gdspy
 
@@ -16,6 +18,8 @@ export radialcut
 export radialstub
 export cpwlauncher
 export launch!
+export checkerboard
+export pecbasedose
 
 """
 `qrcode{T<:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0; kwargs...)`
@@ -187,7 +191,7 @@ function cpwlauncher{T<:Real}(extround::T=5., trace0::T=300., trace1::T=5.,
     p3 = Rectangle(gap0, gap0) + Point(-taperlen-flatlen-gap0, trace0/2)
     p4 = Rectangle(gap0, trace0/2) + Point(-taperlen-flatlen-gap0, zero(T))
 
-    c = Cell{T}(replace("cpwlauncher"*string(gensym),"##","_"))
+    c = Cell{T}(replace("cpwlauncher"*string(gensym()),"##","_"))
     push!(c.elements, p1,p2,p3,p4)
     c
 end
@@ -215,13 +219,13 @@ Returns nothing.
 """
 function launch!(p::Path, extround=5., trace0=300., trace1=5.,
         gap0=150., gap1=2.5, flatlen=250., taperlen=250.)
-    c = cpwlauncher(extround=extround,
-                    trace0=trace0,
-                    trace1=trace1,
-                    gap0=gap0,
-                    gap1=gap1,
-                    flatlen=flatlen,
-                    taperlen=taperlen)
+    c = cpwlauncher(extround,
+                    trace0,
+                    trace1,
+                    gap0,
+                    gap1,
+                    flatlen,
+                    taperlen)
     if isempty(p)
         attach!(p, CellReference(c, Point(0.,0.)), 0.)
         attach!(p, CellReference(c, Point(0.,0.), xrefl=true), 0.)
@@ -232,5 +236,54 @@ function launch!(p::Path, extround=5., trace0=300., trace1=5.,
     nothing
 end
 
+
+"""
+```
+checkerboard{T<:Real}(pixsize::T=10.;rows=28, kwargs...)
+```
+
+Generate a checkerboard pattern suitable for contrast curve measurement, or
+getting the base dose for BEAMER PEC.
+
+Note that the tip radius of the Ambios XP-2 profilometer is 2.5μm.
+"""
+function checkerboard{T<:Real}(pixsize::T=10.;rows=28, kwargs...)
+    r = Rectangle(pixsize, pixsize; kwargs...)
+    rcell = Cell{T}(uniquename("checker"))
+    render!(rcell, r, Rectangles.Plain())
+
+    r1 = Int(ceil(rows/2))
+    r2 = Int(floor(rows/2))
+    a1 = CellArray(rcell, Point(zero(T), zero(T)),
+        Point(2*pixsize, zero(T)), Point(zero(T), 2*pixsize), r1, r1)
+    a2 = CellArray(rcell, Point(pixsize, pixsize),
+        Point(2*pixsize, zero(T)), Point(zero(T), 2*pixsize), r2, r2)
+    c = Cell{T}(uniquename("checkerboard"))
+    push!(c.refs, a1)
+    push!(c.refs, a2)
+    c
+end
+
+"""
+```
+pecbasedose(kwargs...)
+```
+
+Generate lines and spaces suitable for obtaining the base dose for BEAMER PEC
+(100 keV on Si).
+
+To do: Modify to be more flexible for other substrates, beam energies, etc.
+"""
+function pecbasedose(kwargs...)
+    r = Rectangle(0.1, 200.; kwargs...)
+    rcell = Cell(uniquename("line"))
+    render!(rcell, r, Rectangles.Plain())
+
+    a = CellArray(rcell, Point(0., 0.),
+        Point(0.2, 0.), Point(0., 0.), 1000, 1)
+    c = Cell(uniquename("pecbasedose"))
+    push!(c.refs, a)
+    c
+end
 
 end
