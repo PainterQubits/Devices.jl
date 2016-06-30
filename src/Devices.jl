@@ -308,7 +308,7 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
 end
 
 include("Tags.jl")
-import .Tags: qrcode, radialstub, radialcut, cpwlauncher #, launch!
+import .Tags: qrcode, radialstub, radialcut #, cpwlauncher #, launch!
 import .Tags: pecbasedose, checkerboard
 export Tags
 export qrcode

@@ -280,7 +280,7 @@ function clip(op::Clipper.ClipType,
     end
     result = convert(Clipper.PolyTree{Point{2,Int64}},
         Clipper.execute_pt(c, op, pfs, pfc)[2])
-    println(result)
+    # println(result)
     interiorcuts(result, Polygon{Int64}[], subject[1].properties)
 end
 
@@ -460,9 +460,9 @@ function interiorcuts(nodeortree::Union{Clipper.PolyNode, Clipper.PolyTree}, out
                 end
             end
             #
-            println(bestwhere)
-            println(k)
-            println(ray)
+            # println(bestwhere)
+            # println(k)
+            # println(ray)
             # Since the polygon was enclosing, an intersection had to happen *somewhere*.
             if k != -1
                 w = Point{2,Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
