@@ -16,7 +16,7 @@ getx(p::Point)
 
 Get the x-coordinate of a point.
 """
-@inline getx(p::Point) = p._[1]
+@inline getx(p::Point) = p.values[1]
 
 """
 ```
@@ -25,7 +25,7 @@ gety(p::Point)
 
 Get the y-coordinate of a point.
 """
-@inline gety(p::Point) = p._[2]
+@inline gety(p::Point) = p.values[2]
 
 # For use with gdspy
 PyObject(p::Point) = PyObject((getx(p), gety(p)))
