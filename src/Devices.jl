@@ -287,8 +287,8 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
 
         rot = direction(segment.f, t)
         if dir == 0
-            ref = CellReference(cref.cell, segment.f(t)+cref.origin;
-                xrefl=cref.xrefl, mag=cref.mag, rot=cref.rot+rot*180/π)
+            cref.origin += segment.f(t)
+            cref.rot += rot*180/π
         else
             if dir == -1
                 rot2 = rot + π/2
@@ -300,10 +300,10 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
             newx = offset * cos(rot2)
             newy = offset * sin(rot2)
             origin = Point(tformrotate(rot)*Array(cref.origin))
-            ref = CellReference(cref.cell, segment.f(t)+Point(newx,newy)+origin;
-                xrefl=cref.xrefl, mag=cref.mag, rot=cref.rot+rot*180/π)
+            cref.origin += (Point(newx,newy) + segment.f(t))
+            cref.rot += rot*180/π
         end
-        push!(c.refs, ref)
+        push!(c.refs, cref)
     end
     render!(c, segment, undecorated(s); kwargs...)
 end
