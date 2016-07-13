@@ -217,6 +217,15 @@ function gdsbegin(io::IO, libname::ASCIIString,
     gdswrite(io, UNITS, precision/unit, precision)
 end
 
+"""
+```
+gdswrite(io::IO, cell::Cell)
+```
+
+Write a `Cell` to an IO buffer. The creation and modification date of the cell
+are written first, followed by the cell name, the polygons in the cell,
+and finally any references or arrays.
+"""
 function gdswrite(io::IO, cell::Cell)
     namecheck(cell.name)
 
@@ -246,7 +255,16 @@ function gdswrite(io::IO, cell::Cell)
     bytes += gdswrite(io, ENDSTR)
 end
 
-# Do we want to write BOX elements for Rectangles? Probably not.
+"""
+```
+gdswrite{T}(io::IO, el::AbstractPolygon{T}; unit=1e-6, precision=1e-9)
+```
+
+Write a polygon to an IO buffer. The layer and datatype are written first,
+then the `AbstractPolygon{T}` object is converted to a `Polygon{T}`, and
+the boundary of the polygon is written in a 32-bit integer format with specified
+database unit and precision.
+"""
 function gdswrite{T}(io::IO, el::AbstractPolygon{T}; unit=1e-6, precision=1e-9)
     poly  =  convert(Polygon{T}, el)
     bytes =  gdswrite(io, BOUNDARY)
@@ -265,6 +283,15 @@ function gdswrite{T}(io::IO, el::AbstractPolygon{T}; unit=1e-6, precision=1e-9)
     bytes += gdswrite(io, ENDEL)
 end
 
+"""
+```
+gdswrite(io::IO, el::CellReference; unit=1e-6, precision=1e-9)
+```
+
+Write a cell reference to an IO buffer. The name of the referenced cell is
+written first. Reflection, magnification, and rotation info are written next.
+Finally, the origin of the cell reference is written.
+"""
 function gdswrite(io::IO, ref::CellReference; unit=1e-6, precision=1e-9)
     bytes =  gdswrite(io, SREF)
     bytes += gdswrite(io, SNAME, ref.cell.name)
@@ -277,6 +304,16 @@ function gdswrite(io::IO, ref::CellReference; unit=1e-6, precision=1e-9)
     bytes += gdswrite(io, ENDEL)
 end
 
+"""
+```
+gdswrite(io::IO, el::CellArray; unit=1e-6, precision=1e-9)
+```
+
+Write a cell array to an IO buffer. The name of the referenced cell is
+written first. Reflection, magnification, and rotation info are written next.
+After that the number of columns and rows are written. Finally, the origin,
+column vector, and row vector are written.
+"""
 function gdswrite(io::IO, a::CellArray; unit=1e-6, precision=1e-9)
     colrowcheck(a.col)
     colrowcheck(a.row)
@@ -298,6 +335,14 @@ function gdswrite(io::IO, a::CellArray; unit=1e-6, precision=1e-9)
     bytes += gdswrite(io, ENDEL)
 end
 
+"""
+```
+strans(io::IO, ref)
+```
+
+Writes bytes to the IO stream (if needed) to encode x-reflection, magnification,
+and rotation settings of a reference or array. Returns the number of bytes written.
+"""
 function strans(io::IO, ref)
     bits = 0x0000
 
@@ -314,6 +359,7 @@ function strans(io::IO, ref)
     bits & 0x0002 > 0 && (bytes += gdswrite(io, ANGLE, ref.rot))
     bytes
 end
+
 
 function colrowcheck(c)
     (0 <= c <= 32767) ||

@@ -76,30 +76,3 @@ render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
 
 Render a `segment` with style `s` to cell `c`.
 
-
-<a id='Saving-patterns-1'></a>
-
-## Saving patterns
-
-
-To save a pattern, make sure you are `using FileIO`.
-
-<a id='FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}' href='#FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}'>#</a>
-**`FileIO.save`** &mdash; *Method*.
-
-
-
-```
-save(::Union{AbstractString,IO}, cell0::Cell, cell::Cell...)
-
-save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
-name="GDSIILIB", precision=1e-9, unit=1e-6, modify=now(), acc=now(),
-verbose=false)`
-```
-
-This bottom method is implicitly called when you use the convenient syntax of the top method: `save("/path/to/my.gds", cells_i_want_to_save...)`
-
-The `name` keyword argument is used for the internal library name of the GDS-II file and is probably inconsequential for modern workflows.
-
-The `verbose` keyword argument allows you to monitor the output of [`traverse!`](cells.md#Devices.Cells.traverse!) and [`order!`](cells.md#Devices.Cells.order!) if something funny is happening while saving.
-

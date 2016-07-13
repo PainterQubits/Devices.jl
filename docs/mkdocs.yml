@@ -31,6 +31,7 @@ pages:
 - Abstract polygons: polygons.md
 - Cells: cells.md
 - For convenience: tags.md
-- Rendering / saving: render.md
+- Rendering: render.md
+- File formats: fileio.md
 - Index: idx.md
 - 'License': LICENSE.md
