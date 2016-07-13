@@ -44,7 +44,7 @@ for dotop in [:.+, :.-]
     end
 end
 
-*(a::AffineTransform, p::Point) = a * Array(p)
+*(a::AffineTransform, p::Point) = Point(a * Array(p))
 
 
 end
