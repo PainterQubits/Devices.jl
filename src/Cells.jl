@@ -1,6 +1,8 @@
 module Cells
 
 using AffineTransforms
+import AffineTransforms: transform
+
 using ..Points
 using ..Rectangles
 using ..Polygons
@@ -8,7 +10,7 @@ using ..Polygons
 import Base: show, +, -, copy
 import Devices: AbstractPolygon, bounds, center, center!
 export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!
+export traverse!, order!, flatten, flatten!, transform
 
 abstract CellRef{S, T<:Real}
 
@@ -396,6 +398,58 @@ returned result array.
 function order!(a::AbstractArray)
     a = sort!(a, lt=(x,y)->x[1]<y[1], rev=true)
     unique(map(x->x[2], a))
+end
+
+"""
+```
+transform(c::Cell, d::CellRef)
+```
+
+Given a cell `c` containing cell reference or array `d` in its tree of
+references, this function returns an `AffineTransform` object that lets you
+translate from the coordinate system of `d` to the coordinate system of `c`.
+
+If the *same exact* cell reference or array (as in, same address in memory)
+is included multiple times in the tree of references, then the resulting transform
+will be based on the first time it is encountered. The tree is traversed one level
+at a time to find the reference (optimized for shallow references).
+
+Example: You want to translate (2.0,3.0) in the coordinate system of the referenced
+cell to the coordinate system of `c`. Simply call: `transform(c,d)*Point(2.0,3.0)`.
+"""
+function transform(c::Cell, d::CellRef)
+    x,y = transform(c, d, tformeye(2))
+
+    x || error("Reference tree bears no fruit.")
+    return y
+end
+
+function transform(c::Cell, d::CellRef, a::AffineTransform)
+    # look for the reference in the top level of the reference tree.
+    for ref in c.refs
+        if ref === d
+            sgn = d.xrefl ? -1 : 1
+            return true, a * AffineTransform(
+                [sgn*d.mag*cosd(d.rot) -d.mag*sind(d.rot);
+                 sgn*d.mag*sind(d.rot) d.mag*cosd(d.rot)], d.origin)
+        end
+    end
+
+    # didn't find the reference at this level.
+    # we must go deeper...
+    for ref in c.refs
+        sgn = ref.xrefl ? -1 : 1
+        (x,y) = transform(ref.cell, d, a * AffineTransform(
+            [sgn*ref.mag*cosd(ref.rot) -ref.mag*sind(ref.rot);
+             sgn*ref.mag*sind(ref.rot) ref.mag*cosd(ref.rot)], ref.origin))
+        # were we successful?
+        if x
+            return x, y
+        end
+    end
+
+    # we should have found `d` by now. report our failure
+    return false, a
 end
 
 for op in [:+, :-]

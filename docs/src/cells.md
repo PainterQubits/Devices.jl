@@ -27,6 +27,14 @@ display complexity.
 ```
 ## Resolving references
 
+Sometimes it can be helpful to go between coordinate systems of cells and the
+cells they reference. This package provides methods to generate affine transforms
+to do this as easily as possible.
+
+```@docs
+    transform(::Cell, ::Cells.CellRef)
+```
+
 In some cases it may be desirable to resolve cell references or arrays into their
 corresponding polygons. This operation is called "flattening."
 ```@docs

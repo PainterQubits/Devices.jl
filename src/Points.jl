@@ -1,7 +1,8 @@
 module Points
 
+import AffineTransforms: AffineTransform
 import Clipper: IntPoint
-import Base: convert, .+, .-
+import Base: convert, .+, .-, *
 import FixedSizeArrays: FixedVectorNoTuple, Point
 import PyCall.PyObject
 export Point
@@ -43,6 +44,7 @@ for dotop in [:.+, :.-]
     end
 end
 
+*(a::AffineTransform, p::Point) = a * Array(p)
 
 
 end

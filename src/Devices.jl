@@ -5,6 +5,7 @@ using PyCall
 using AffineTransforms
 using ForwardDiff
 using FileIO
+import AffineTransforms: transform
 import Clipper
 import FileIO: save
 import FixedSizeArrays: Point
@@ -94,10 +95,10 @@ export clip, offset, points, layer, datatype
 
 include("Cells.jl")
 import .Cells: Cell, CellArray, CellReference
-import .Cells: traverse!, order!, flatten, flatten!
+import .Cells: traverse!, order!, flatten, flatten!, transform
 export Cells
 export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!
+export traverse!, order!, flatten, flatten!, transform
 
 include("paths/Paths.jl")
 import .Paths: Path, adjust!, attach!, attachments, direction, meander!, launch!
