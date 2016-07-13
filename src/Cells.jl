@@ -292,6 +292,13 @@ function bounds(ref::CellReference; kwargs...)
     bounds(c; kwargs...)
 end
 
+"""
+`flatten{T<:Real}(c::Cell{T})`
+
+All cell references and arrays are resolved into polygons, recursively.
+Together with the polygons already in cell `c`, an array of polygons
+(type `AbstractPolygon{T}`) is returned. The cell `c` remains unmodified.
+"""
 function flatten{T<:Real}(c::Cell{T})
     polys = AbstractPolygon{T}[]
     append!(polys, c.elements)
@@ -301,11 +308,26 @@ function flatten{T<:Real}(c::Cell{T})
     polys
 end
 
+"""
+`flatten!(c::Cell)`
+
+All cell references and arrays are turned into polygons and added to cell `c`.
+The references and arrays are then removed. This "flattening" of the cell is
+recursive: references in referenced cells are flattened too. The modified cell
+is returned.
+"""
 function flatten!(c::Cell)
     c.elements = flatten(c)
     empty!(c.refs)
+    c
 end
 
+"""
+`flatten(c::CellReference)`
+
+Cell reference `c` is resolved into polygons, recursively. An array of polygons
+(type `AbstractPolygon`) is returned. The cell reference `c` remains unmodified.
+"""
 function flatten(c::CellReference)
     polys = AbstractPolygon[]
     sgn = c.xrefl ? -1 : 1
@@ -319,6 +341,12 @@ function flatten(c::CellReference)
     polys
 end
 
+"""
+`flatten(c::CellArray)`
+
+Cell array `c` is resolved into polygons, recursively. An array of polygons
+(type `AbstractPolygon`) is returned. The cell array `c` remains unmodified.
+"""
 function flatten(c::CellArray)
     polys = AbstractPolygon[]
     sgn = c.xrefl ? -1 : 1

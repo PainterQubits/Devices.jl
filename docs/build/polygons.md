@@ -34,6 +34,29 @@ end
 
 A rectangle, defined by opposing lower-left and upper-right corner coordinates.
 
+
+```
+Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}; kwargs...)
+```
+
+Convenience constructor for `Rectangle{T}` objects.
+
+
+```
+Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}, dict)
+```
+
+Convenience constructor for `Rectangle{T}` objects.
+
+
+```
+Rectangle{T<:Real}(width::T, height::T; kwargs...)
+```
+
+Constructs `Rectangle{T}` objects by specifying the width and height rather than the lower-left and upper-right corners.
+
+The rectangle will sit with the lower-left corner at the origin. With centered rectangles we would need to divide width and height by 2 to properly position. If we wanted an object of `Rectangle{Int}` type, this would not be possible if either `width` or `height` were odd numbers. This definition ensures type stability in the constructor.
+
 <a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}'>#</a>
 **`Devices.Rectangles.Rectangle`** &mdash; *Method*.
 
@@ -80,6 +103,7 @@ bounds(r::Rectangle)
 
 No-op (just returns `r`).
 
+
 ```
 bounds(p0::AbstractPolygon, p::AbstractPolygon...)
 ```
@@ -125,16 +149,17 @@ Returns `true` if the rectangle has a non-zero size and if the upper-right and l
 
 
 ```
-minimum(r::Rectangle)
-```
-
-Returns the lower-left corner of a rectangle (Point object).
-
-```
 minimum(itr)
 ```
 
 Returns the smallest element in a collection.
+
+
+```
+minimum(r::Rectangle)
+```
+
+Returns the lower-left corner of a rectangle (Point object).
 
 <a id='Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Base.maximum`** &mdash; *Method*.
@@ -142,16 +167,17 @@ Returns the smallest element in a collection.
 
 
 ```
-maximum(r::Rectangle)
-```
-
-Returns the upper-right corner of a rectangle (Point object).
-
-```
 maximum(itr)
 ```
 
 Returns the largest element in a collection.
+
+
+```
+maximum(r::Rectangle)
+```
+
+Returns the upper-right corner of a rectangle (Point object).
 
 <a id='Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Devices.Polygons.points`** &mdash; *Method*.
@@ -207,6 +233,28 @@ end
 
 Polygon defined by list of coordinates. The first point should not be repeated at the end (although this is true for the GDS format).
 
+
+```
+Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}; kwargs...)
+```
+
+Convenience constructor for a `Polygon{T}` object.
+
+
+```
+Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, dict)
+```
+
+Convenience constructor for a `Polygon{T}` object.
+
+
+```
+Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
+    p3::Point{2,T}...; kwargs...)
+```
+
+Convenience constructor for a `Polygon{T}` object.
+
 <a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}'>#</a>
 **`Devices.Polygons.Polygon`** &mdash; *Method*.
 
@@ -252,6 +300,7 @@ bounds(p::Polygon)
 
 Return a bounding Rectangle with no properties for polygon `p`.
 
+
 ```
 bounds(p0::AbstractPolygon, p::AbstractPolygon...)
 ```
@@ -286,16 +335,17 @@ Return a bounding `Rectangle` with no properties for several `AbstractPolygon` o
 
 
 ```
-minimum(x::Polygon)
-```
-
-Return the lower-left-most corner of a rectangle bounding polygon `x`. Note that this point doesn't have to be in the polygon.
-
-```
 minimum(itr)
 ```
 
 Returns the smallest element in a collection.
+
+
+```
+minimum(x::Polygon)
+```
+
+Return the lower-left-most corner of a rectangle bounding polygon `x`. Note that this point doesn't have to be in the polygon.
 
 <a id='Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 **`Base.maximum`** &mdash; *Method*.
@@ -303,16 +353,17 @@ Returns the smallest element in a collection.
 
 
 ```
-maximum(x::Polygon)
-```
-
-Return the upper-right-most corner of a rectangle bounding polygon `x`. Note that this point doesn't have to be in the polygon.
-
-```
 maximum(itr)
 ```
 
 Returns the largest element in a collection.
+
+
+```
+maximum(x::Polygon)
+```
+
+Return the upper-right-most corner of a rectangle bounding polygon `x`. Note that this point doesn't have to be in the polygon.
 
 <a id='Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 **`Devices.Polygons.points`** &mdash; *Method*.
@@ -330,9 +381,11 @@ Returns the array of `Point` objects defining the polygon.
 
 ## Clipping and offsetting
 
+<a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
+**`Devices.Polygons.clip`** &mdash; *Function*.
 
-```
-    clip
-    offset
-```
+
+<a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
+**`Devices.Polygons.offset`** &mdash; *Function*.
+
 

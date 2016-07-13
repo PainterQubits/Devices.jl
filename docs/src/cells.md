@@ -27,10 +27,18 @@ display complexity.
 ```
 ## Resolving references
 
+In some cases it may be desirable to resolve cell references or arrays into their
+corresponding polygons. This operation is called "flattening."
+```@docs
+    flatten!
+    flatten
+```
+
+## Miscellaneous
+
 When saving cells to disk, there will be a tree of interdependencies and logically
 one would prefer to write the leaf nodes of the tree before any dependent cells.
 These functions are used to traverse the tree and then find the optimal ordering.
-
 ```@docs
     traverse!
     order!

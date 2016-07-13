@@ -25,6 +25,13 @@ end
 
 Type for abstracting an arbitrary styled path in the plane. Iterating returns tuples of (`segment`, `style`).
 
+
+```
+Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0))
+```
+
+Convenience constructor for `Path{T}` object.
+
 <a id='Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real}}' href='#Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real}}'>#</a>
 **`Devices.Paths.Path`** &mdash; *Method*.
 
@@ -256,16 +263,17 @@ Style with decorations, like periodic structures along the path, etc.
 
 
 ```
-undecorated(s::Style)
-```
-
-Returns `s`.
-
-```
 undecorated(s::DecoratedStyle)
 ```
 
 Returns the underlying, undecorated style.
+
+
+```
+undecorated(s::Style)
+```
+
+Returns `s`.
 
 
 <a id='Path-interrogation-1'></a>
@@ -289,20 +297,28 @@ For some parameteric function `p(t)↦Point(x(t),y(t))`, returns the angle at wh
 
 
 ```
-pathlength(p::AbstractArray{Segment})
-```
-
-Total physical length of segments.
-
-```
 pathlength(p::Path)
 ```
 
 Physical length of a path. Note that `length` will return the number of segments in a path, not the physical length.
 
+
+```
+pathlength(p::AbstractArray{Segment})
+```
+
+Total physical length of segments.
+
 <a id='Devices.Paths.p0' href='#Devices.Paths.p0'>#</a>
 **`Devices.Paths.p0`** &mdash; *Function*.
 
+
+
+```
+p0{T}(s::Segment{T})
+```
+
+Return the first point in a segment (calculated).
 
 
 ```
@@ -311,15 +327,16 @@ p0(p::Path)
 
 First point of a path.
 
-```
-p0{T}(s::Segment{T})
-```
-
-Return the first point in a segment (calculated).
-
 <a id='Devices.Paths.setp0!' href='#Devices.Paths.setp0!'>#</a>
 **`Devices.Paths.setp0!`** &mdash; *Function*.
 
+
+
+```
+setp0!(s::Straight, p::Point)
+```
+
+Set the p0 of a straight segment.
 
 
 ```
@@ -328,15 +345,16 @@ setp0!(s::Turn, p::Point)
 
 Set the p0 of a turn.
 
-```
-setp0!(s::Straight, p::Point)
-```
-
-Set the p0 of a straight segment.
-
 <a id='Devices.Paths.α0' href='#Devices.Paths.α0'>#</a>
 **`Devices.Paths.α0`** &mdash; *Function*.
 
+
+
+```
+α0(s::Segment)
+```
+
+Return the first angle in a segment (calculated).
 
 
 ```
@@ -345,15 +363,16 @@ Set the p0 of a straight segment.
 
 First angle of a path.
 
-```
-α0(s::Segment)
-```
-
-Return the first angle in a segment (calculated).
-
 <a id='Devices.Paths.setα0!' href='#Devices.Paths.setα0!'>#</a>
 **`Devices.Paths.setα0!`** &mdash; *Function*.
 
+
+
+```
+setα0!(s::Straight, α0′)
+```
+
+Set the angle of a straight segment.
 
 
 ```
@@ -362,15 +381,16 @@ setα0!(s::Turn, α0′)
 
 Set the starting angle of a turn.
 
-```
-setα0!(s::Straight, α0′)
-```
-
-Set the angle of a straight segment.
-
 <a id='Devices.Paths.p1' href='#Devices.Paths.p1'>#</a>
 **`Devices.Paths.p1`** &mdash; *Function*.
 
+
+
+```
+p1{T}(s::Segment{T})
+```
+
+Return the last point in a segment (calculated).
 
 
 ```
@@ -379,15 +399,16 @@ p1(p::Path)
 
 Last point of a path.
 
-```
-p1{T}(s::Segment{T})
-```
-
-Return the last point in a segment (calculated).
-
 <a id='Devices.Paths.α1' href='#Devices.Paths.α1'>#</a>
 **`Devices.Paths.α1`** &mdash; *Function*.
 
+
+
+```
+α1(s::Segment)
+```
+
+Return the last angle in a segment (calculated).
 
 
 ```
@@ -395,12 +416,6 @@ Return the last point in a segment (calculated).
 ```
 
 Last angle of a path.
-
-```
-α1(s::Segment)
-```
-
-Return the last angle in a segment (calculated).
 
 <a id='Devices.Paths.style0' href='#Devices.Paths.style0'>#</a>
 **`Devices.Paths.style0`** &mdash; *Function*.
@@ -495,19 +510,27 @@ The straight and turn segments are combined into a `CompoundSegment` and appende
 
 
 
+`param{T<:Real}(seg::AbstractArray{Segment{T},1})`
+
+Returns the function needed for a `CompoundStyle`. The segments array is shallow-copied for use in the function.
+
+
 ```
 param{T<:Real}(c::CompoundSegment{T})
 ```
 
 Return a parametric function over the domain [0,1] that represents the compound segment.
 
-`param{T<:Real}(seg::AbstractArray{Segment{T},1})`
-
-Returns the function needed for a `CompoundStyle`. The segments array is shallow-copied for use in the function.
-
 <a id='Devices.Paths.simplify' href='#Devices.Paths.simplify'>#</a>
 **`Devices.Paths.simplify`** &mdash; *Function*.
 
+
+
+```
+simplify(p::Path)
+```
+
+All segments and styles of a path are turned into a `CompoundSegment` and `CompoundStyle`.
 
 
 ```
@@ -519,25 +542,20 @@ At `inds`, segments of a path are turned into a `CompoundSegment` and styles of 
   * Indexing the path becomes more sane when you can combine several path segments into one logical element. A launcher would have several indices in a path unless you could simplify it.
   * You don't need to think hard about boundaries between straights and turns when you want a continuous styling of a very long path.
 
-```
-simplify(p::Path)
-```
-
-All segments and styles of a path are turned into a `CompoundSegment` and `CompoundStyle`.
-
 <a id='Devices.Paths.simplify!' href='#Devices.Paths.simplify!'>#</a>
 **`Devices.Paths.simplify!`** &mdash; *Function*.
 
 
 
 ```
-simplify!(p::Path, inds::UnitRange)
+simplify!(p::Path)
 ```
 
 In-place version of [`simplify`](paths.md#Devices.Paths.simplify).
 
+
 ```
-simplify!(p::Path)
+simplify!(p::Path, inds::UnitRange)
 ```
 
 In-place version of [`simplify`](paths.md#Devices.Paths.simplify).
@@ -559,6 +577,13 @@ Extend a path `p` straight by length `l` in the current direction.
 
 
 ```
+turn!(p::Path, α::Real, r::Real, sty::Style=style1(p))
+```
+
+Turn a path `p` by angle `α` with a turning radius `r` in the current direction. Positive angle turns left.
+
+
+```
 turn!(p::Path, s::ASCIIString, r::Real, sty::Style=style1(p))
 ```
 
@@ -567,12 +592,6 @@ Turn a path `p` with direction coded by string `s`:
   * "l": turn by π/2 (left)
   * "r": turn by -π/2 (right)
   * "lrlrllrrll": do those turns in that order
-
-```
-turn!(p::Path, α::Real, r::Real, sty::Style=style1(p))
-```
-
-Turn a path `p` by angle `α` with a turning radius `r` in the current direction. Positive angle turns left.
 
 
 <a id='Interfacing-with-gdspy-1'></a>
