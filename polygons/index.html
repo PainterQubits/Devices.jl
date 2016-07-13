@@ -305,6 +305,22 @@ end
 
 
 <p>A rectangle, defined by opposing lower-left and upper-right corner coordinates.</p>
+<div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">ll</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">ur</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Convenience constructor for <code>Rectangle{T}</code> objects.</p>
+<div class="codehilite"><pre><span></span>Rectangle{T&lt;:Real}(ll::Point{2,T}, ur::Point{2,T}, dict)
+</pre></div>
+
+
+<p>Convenience constructor for <code>Rectangle{T}</code> objects.</p>
+<div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">width</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="nt">height</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Constructs <code>Rectangle{T}</code> objects by specifying the width and height rather than the lower-left and upper-right corners.</p>
+<p>The rectangle will sit with the lower-left corner at the origin. With centered rectangles we would need to divide width and height by 2 to properly position. If we wanted an object of <code>Rectangle{Int}</code> type, this would not be possible if either <code>width</code> or <code>height</code> were odd numbers. This definition ensures type stability in the constructor.</p>
 <p><a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}'>#</a>
 <strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">ll</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">ur</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
@@ -362,28 +378,28 @@ end
 <p>Returns <code>true</code> if the rectangle has a non-zero size and if the upper-right and lower-left corner coordinates <code>ur</code> and <code>ll</code> really are at the upper-right and lower-left. Otherwise, returns <code>false</code>.</p>
 <p><a id='Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Base.minimum</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>minimum(r::Rectangle)
-</pre></div>
-
-
-<p>Returns the lower-left corner of a rectangle (Point object).</p>
 <div class="codehilite"><pre><span></span>minimum(itr)
 </pre></div>
 
 
 <p>Returns the smallest element in a collection.</p>
-<p><a id='Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
-<strong><code>Base.maximum</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>maximum(r::Rectangle)
+<div class="codehilite"><pre><span></span>minimum(r::Rectangle)
 </pre></div>
 
 
-<p>Returns the upper-right corner of a rectangle (Point object).</p>
+<p>Returns the lower-left corner of a rectangle (Point object).</p>
+<p><a id='Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<strong><code>Base.maximum</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>maximum(itr)
 </pre></div>
 
 
 <p>Returns the largest element in a collection.</p>
+<div class="codehilite"><pre><span></span>maximum(r::Rectangle)
+</pre></div>
+
+
+<p>Returns the upper-right corner of a rectangle (Point object).</p>
 <p><a id='Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Devices.Polygons.points</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>points{T&lt;:Real}(x::Rectangle{T})
@@ -419,6 +435,22 @@ end
 
 
 <p>Polygon defined by list of coordinates. The first point should not be repeated at the end (although this is true for the GDS format).</p>
+<div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">parr</span><span class="o">:</span><span class="nd">:AbstractArray</span><span class="p">{</span><span class="n">Point</span><span class="err">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span><span class="nt">1</span><span class="err">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
+<div class="codehilite"><pre><span></span>Polygon{T&lt;:Real}(parr::AbstractArray{Point{2,T},1}, dict)
+</pre></div>
+
+
+<p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
+<div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">p0</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">p1</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">p2</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span>
+    <span class="nt">p3</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">...;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
 <p><a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">parr</span><span class="o">:</span><span class="nd">:AbstractArray</span><span class="p">{</span><span class="n">Point</span><span class="err">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span><span class="nt">1</span><span class="err">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
@@ -469,28 +501,28 @@ end
 <p>Return a bounding <code>Rectangle</code> with no properties for several <code>AbstractPolygon</code> objects.</p>
 <p><a id='Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 <strong><code>Base.minimum</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>minimum(x::Polygon)
-</pre></div>
-
-
-<p>Return the lower-left-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
 <div class="codehilite"><pre><span></span>minimum(itr)
 </pre></div>
 
 
 <p>Returns the smallest element in a collection.</p>
-<p><a id='Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
-<strong><code>Base.maximum</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>maximum(x::Polygon)
+<div class="codehilite"><pre><span></span>minimum(x::Polygon)
 </pre></div>
 
 
-<p>Return the upper-right-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
+<p>Return the lower-left-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
+<p><a id='Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
+<strong><code>Base.maximum</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>maximum(itr)
 </pre></div>
 
 
 <p>Returns the largest element in a collection.</p>
+<div class="codehilite"><pre><span></span>maximum(x::Polygon)
+</pre></div>
+
+
+<p>Return the upper-right-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
 <p><a id='Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
 <strong><code>Devices.Polygons.points</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>points(x::Polygon)
@@ -500,9 +532,10 @@ end
 <p>Returns the array of <code>Point</code> objects defining the polygon.</p>
 <p><a id='Clipping-and-offsetting-1'></a></p>
 <h2 id="clipping-and-offsetting">Clipping and offsetting</h2>
-<div class="codehilite"><pre><span></span>    clip
-    offset
-</pre></div>
+<p><a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
+<strong><code>Devices.Polygons.clip</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
+<strong><code>Devices.Polygons.offset</code></strong> &mdash; <em>Function</em>.</p>
           <aside class="copyright" role="note">
             
             Documentation built with

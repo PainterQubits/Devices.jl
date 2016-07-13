@@ -320,6 +320,11 @@ end
 
 
 <p>Type for abstracting an arbitrary styled path in the plane. Iterating returns tuples of (<code>segment</code>, <code>style</code>).</p>
+<div class="codehilite"><pre><span></span><span class="nt">Path</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">p0</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">=</span><span class="nt">Point</span><span class="o">(</span><span class="nt">0</span><span class="nc">.0</span><span class="o">,</span><span class="nt">0</span><span class="nc">.0</span><span class="o">);</span> <span class="err">α</span><span class="nt">0</span><span class="o">:</span><span class="nd">:Real</span><span class="o">=</span><span class="nt">0</span><span class="nc">.0</span><span class="o">,</span> <span class="nt">style0</span><span class="o">:</span><span class="nd">:Style</span><span class="o">=</span><span class="nt">Trace</span><span class="o">(</span><span class="nt">1</span><span class="nc">.0</span><span class="o">))</span>
+</pre></div>
+
+
+<p>Convenience constructor for <code>Path{T}</code> object.</p>
 <p><a id='Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real}}' href='#Devices.Paths.Path-Tuple{FixedSizeArrays.Point{2,T<:Real}}'>#</a>
 <strong><code>Devices.Paths.Path</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span><span class="nt">Path</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">p0</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">=</span><span class="nt">Point</span><span class="o">(</span><span class="nt">0</span><span class="nc">.0</span><span class="o">,</span><span class="nt">0</span><span class="nc">.0</span><span class="o">);</span> <span class="err">α</span><span class="nt">0</span><span class="o">:</span><span class="nd">:Real</span><span class="o">=</span><span class="nt">0</span><span class="nc">.0</span><span class="o">,</span> <span class="nt">style0</span><span class="o">:</span><span class="nd">:Style</span><span class="o">=</span><span class="nt">Trace</span><span class="o">(</span><span class="nt">1</span><span class="nc">.0</span><span class="o">))</span>
@@ -495,16 +500,16 @@ end
 <p>Style with decorations, like periodic structures along the path, etc.</p>
 <p><a id='Devices.Paths.undecorated' href='#Devices.Paths.undecorated'>#</a>
 <strong><code>Devices.Paths.undecorated</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>undecorated(s::Style)
-</pre></div>
-
-
-<p>Returns <code>s</code>.</p>
 <div class="codehilite"><pre><span></span>undecorated(s::DecoratedStyle)
 </pre></div>
 
 
 <p>Returns the underlying, undecorated style.</p>
+<div class="codehilite"><pre><span></span>undecorated(s::Style)
+</pre></div>
+
+
+<p>Returns <code>s</code>.</p>
 <p><a id='Path-interrogation-1'></a></p>
 <h2 id="path-interrogation">Path interrogation</h2>
 <p><a id='Devices.Paths.direction' href='#Devices.Paths.direction'>#</a>
@@ -516,88 +521,88 @@ end
 <p>For some parameteric function <code>p(t)↦Point(x(t),y(t))</code>, returns the angle at which the path is pointing for a given <code>t</code>.</p>
 <p><a id='Devices.Paths.pathlength' href='#Devices.Paths.pathlength'>#</a>
 <strong><code>Devices.Paths.pathlength</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>pathlength(p::AbstractArray{Segment})
-</pre></div>
-
-
-<p>Total physical length of segments.</p>
 <div class="codehilite"><pre><span></span>pathlength(p::Path)
 </pre></div>
 
 
 <p>Physical length of a path. Note that <code>length</code> will return the number of segments in a path, not the physical length.</p>
-<p><a id='Devices.Paths.p0' href='#Devices.Paths.p0'>#</a>
-<strong><code>Devices.Paths.p0</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>p0(p::Path)
+<div class="codehilite"><pre><span></span>pathlength(p::AbstractArray{Segment})
 </pre></div>
 
 
-<p>First point of a path.</p>
+<p>Total physical length of segments.</p>
+<p><a id='Devices.Paths.p0' href='#Devices.Paths.p0'>#</a>
+<strong><code>Devices.Paths.p0</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>p0{T}(s::Segment{T})
 </pre></div>
 
 
 <p>Return the first point in a segment (calculated).</p>
-<p><a id='Devices.Paths.setp0!' href='#Devices.Paths.setp0!'>#</a>
-<strong><code>Devices.Paths.setp0!</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>setp0!(s::Turn, p::Point)
+<div class="codehilite"><pre><span></span>p0(p::Path)
 </pre></div>
 
 
-<p>Set the p0 of a turn.</p>
+<p>First point of a path.</p>
+<p><a id='Devices.Paths.setp0!' href='#Devices.Paths.setp0!'>#</a>
+<strong><code>Devices.Paths.setp0!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>setp0!(s::Straight, p::Point)
 </pre></div>
 
 
 <p>Set the p0 of a straight segment.</p>
-<p><a id='Devices.Paths.α0' href='#Devices.Paths.α0'>#</a>
-<strong><code>Devices.Paths.α0</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>α0(p::Path)
+<div class="codehilite"><pre><span></span>setp0!(s::Turn, p::Point)
 </pre></div>
 
 
-<p>First angle of a path.</p>
+<p>Set the p0 of a turn.</p>
+<p><a id='Devices.Paths.α0' href='#Devices.Paths.α0'>#</a>
+<strong><code>Devices.Paths.α0</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>α0(s::Segment)
 </pre></div>
 
 
 <p>Return the first angle in a segment (calculated).</p>
-<p><a id='Devices.Paths.setα0!' href='#Devices.Paths.setα0!'>#</a>
-<strong><code>Devices.Paths.setα0!</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>setα0!(s::Turn, α0′)
+<div class="codehilite"><pre><span></span>α0(p::Path)
 </pre></div>
 
 
-<p>Set the starting angle of a turn.</p>
+<p>First angle of a path.</p>
+<p><a id='Devices.Paths.setα0!' href='#Devices.Paths.setα0!'>#</a>
+<strong><code>Devices.Paths.setα0!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>setα0!(s::Straight, α0′)
 </pre></div>
 
 
 <p>Set the angle of a straight segment.</p>
-<p><a id='Devices.Paths.p1' href='#Devices.Paths.p1'>#</a>
-<strong><code>Devices.Paths.p1</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>p1(p::Path)
+<div class="codehilite"><pre><span></span>setα0!(s::Turn, α0′)
 </pre></div>
 
 
-<p>Last point of a path.</p>
+<p>Set the starting angle of a turn.</p>
+<p><a id='Devices.Paths.p1' href='#Devices.Paths.p1'>#</a>
+<strong><code>Devices.Paths.p1</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>p1{T}(s::Segment{T})
 </pre></div>
 
 
 <p>Return the last point in a segment (calculated).</p>
-<p><a id='Devices.Paths.α1' href='#Devices.Paths.α1'>#</a>
-<strong><code>Devices.Paths.α1</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>α1(p::Path)
+<div class="codehilite"><pre><span></span>p1(p::Path)
 </pre></div>
 
 
-<p>Last angle of a path.</p>
+<p>Last point of a path.</p>
+<p><a id='Devices.Paths.α1' href='#Devices.Paths.α1'>#</a>
+<strong><code>Devices.Paths.α1</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>α1(s::Segment)
 </pre></div>
 
 
 <p>Return the last angle in a segment (calculated).</p>
+<div class="codehilite"><pre><span></span>α1(p::Path)
+</pre></div>
+
+
+<p>Last angle of a path.</p>
 <p><a id='Devices.Paths.style0' href='#Devices.Paths.style0'>#</a>
 <strong><code>Devices.Paths.style0</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>style0(p::Path)
@@ -654,15 +659,20 @@ end
 <p>The straight and turn segments are combined into a <code>CompoundSegment</code> and appended to the path <code>p</code>.</p>
 <p><a id='Devices.Paths.param' href='#Devices.Paths.param'>#</a>
 <strong><code>Devices.Paths.param</code></strong> &mdash; <em>Function</em>.</p>
+<p><code>param{T&lt;:Real}(seg::AbstractArray{Segment{T},1})</code></p>
+<p>Returns the function needed for a <code>CompoundStyle</code>. The segments array is shallow-copied for use in the function.</p>
 <div class="codehilite"><pre><span></span>param{T&lt;:Real}(c::CompoundSegment{T})
 </pre></div>
 
 
 <p>Return a parametric function over the domain [0,1] that represents the compound segment.</p>
-<p><code>param{T&lt;:Real}(seg::AbstractArray{Segment{T},1})</code></p>
-<p>Returns the function needed for a <code>CompoundStyle</code>. The segments array is shallow-copied for use in the function.</p>
 <p><a id='Devices.Paths.simplify' href='#Devices.Paths.simplify'>#</a>
 <strong><code>Devices.Paths.simplify</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>simplify(p::Path)
+</pre></div>
+
+
+<p>All segments and styles of a path are turned into a <code>CompoundSegment</code> and <code>CompoundStyle</code>.</p>
 <div class="codehilite"><pre><span></span>simplify(p::Path, inds::UnitRange)
 </pre></div>
 
@@ -672,19 +682,14 @@ end
 <li>Indexing the path becomes more sane when you can combine several path segments into one logical element. A launcher would have several indices in a path unless you could simplify it.</li>
 <li>You don't need to think hard about boundaries between straights and turns when you want a continuous styling of a very long path.</li>
 </ul>
-<div class="codehilite"><pre><span></span>simplify(p::Path)
-</pre></div>
-
-
-<p>All segments and styles of a path are turned into a <code>CompoundSegment</code> and <code>CompoundStyle</code>.</p>
 <p><a id='Devices.Paths.simplify!' href='#Devices.Paths.simplify!'>#</a>
 <strong><code>Devices.Paths.simplify!</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>simplify!(p::Path, inds::UnitRange)
+<div class="codehilite"><pre><span></span>simplify!(p::Path)
 </pre></div>
 
 
 <p>In-place version of <a href="./#Devices.Paths.simplify"><code>simplify</code></a>.</p>
-<div class="codehilite"><pre><span></span>simplify!(p::Path)
+<div class="codehilite"><pre><span></span>simplify!(p::Path, inds::UnitRange)
 </pre></div>
 
 
@@ -698,6 +703,11 @@ end
 <p>Extend a path <code>p</code> straight by length <code>l</code> in the current direction.</p>
 <p><a id='Devices.Paths.turn!' href='#Devices.Paths.turn!'>#</a>
 <strong><code>Devices.Paths.turn!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>turn!(p::Path, α::Real, r::Real, sty::Style=style1(p))
+</pre></div>
+
+
+<p>Turn a path <code>p</code> by angle <code>α</code> with a turning radius <code>r</code> in the current direction. Positive angle turns left.</p>
 <div class="codehilite"><pre><span></span>turn!(p::Path, s::ASCIIString, r::Real, sty::Style=style1(p))
 </pre></div>
 
@@ -708,11 +718,6 @@ end
 <li>"r": turn by -π/2 (right)</li>
 <li>"lrlrllrrll": do those turns in that order</li>
 </ul>
-<div class="codehilite"><pre><span></span>turn!(p::Path, α::Real, r::Real, sty::Style=style1(p))
-</pre></div>
-
-
-<p>Turn a path <code>p</code> by angle <code>α</code> with a turning radius <code>r</code> in the current direction. Positive angle turns left.</p>
 <p><a id='Interfacing-with-gdspy-1'></a></p>
 <h2 id="interfacing-with-gdspy">Interfacing with gdspy</h2>
 <p>The Python package <code>gdspy</code> is used for rendering paths into polygons. Ultimately we intend to remove this dependency.</p>

@@ -272,102 +272,14 @@
           
           <p><a id='For-convenience-1'></a></p>
 <h2 id="for-convenience">For convenience</h2>
-<p><a id='Devices.Tags.qrcode' href='#Devices.Tags.qrcode'>#</a>
-<strong><code>Devices.Tags.qrcode</code></strong> &mdash; <em>Function</em>.</p>
-<p><code>qrcode{T&lt;:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0; kwargs...)</code></p>
-<p>Renders a QR code of the string <code>a</code> with pixel size <code>pixel</code> to a new cell with <code>name</code>. The lower left of the QR code will be at the origin of the cell.</p>
-<p><a id='Devices.Tags.radialcut' href='#Devices.Tags.radialcut'>#</a>
-<strong><code>Devices.Tags.radialcut</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">radialcut</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">r</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="err">Θ</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">narc</span><span class="o">=</span><span class="nt">197</span><span class="o">)</span>
+<div class="codehilite"><pre><span></span>    qrcode
+    radialcut
+    radialstub
+    cpwlauncher
+    launch!
+    checkerboard
+    pecbasedose
 </pre></div>
-
-
-<p>Returns a polygon for a radial cut (like a radial stub with no metal). The polygon has to be subtracted from a ground plane.</p>
-<p>The parameter <code>c</code> is made available in the method signature rather than <code>a</code> because the focus of the arc (top of polygon) can easily centered in a waveguide. If it is desirable to control <code>a</code> instead, use trig: <code>a/2 = c*tan(Θ/2)</code>.</p>
-<p>Parameters as follows, where X marks the origin and nothing above the origin is part of the resulting polygon:</p>
-<div class="codehilite"><pre><span></span>                          Λ
-                         ╱│╲
-                        ╱ │ ╲
-                       ╱  |  ╲
-                 .    ╱   │Θ/2╲
-                .    ╱    │----╲
-               ╱    ╱   c │     ╲
-              ╱    ╱      │      ╲
-             ╱    ╱       │       ╲
-            r    ╱        │        ╲
-           ╱    ╱         │         ╲
-          ╱    ╱──────────X──────────╲
-         ╱    ╱ {──────── a ────────} ╲
-        .    ╱                         ╲
-       .    ╱                           ╲
-           ╱                             ╲
-          ╱                               ╲
-         ╱                                 ╲
-         ──┐                             ┌──
-           └──┐                       ┌──┘
-              └──┐                 ┌──┘
-                 └──┐           ┌──┘
-                    └───────────┘
-                    (circular arc)
-</pre></div>
-
-
-<p><a id='Devices.Tags.radialstub' href='#Devices.Tags.radialstub'>#</a>
-<strong><code>Devices.Tags.radialstub</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">radialstub</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">r</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="err">Θ</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="nt">t</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">narc</span><span class="o">=</span><span class="nt">197</span><span class="o">)</span>
-</pre></div>
-
-
-<p>See also the documentation for <code>radialcut</code>.</p>
-<p>Returns a polygon for a radial stub. The polygon has to be subtracted from a ground plane, and will leave a defect in the ground plane of uniform width <code>t</code> that outlines the (metallic) radial stub. <code>r</code> refers to the radius of the actual stub, not the radius of the circular arc bounding the ground plane defect. Likewise <code>c</code> has an analogous meaning to that in <code>radialcut</code> except it refers here to the radial stub, not the ground plane defect.</p>
-<p><a id='Devices.Tags.cpwlauncher' href='#Devices.Tags.cpwlauncher'>#</a>
-<strong><code>Devices.Tags.cpwlauncher</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>cpwlauncher{T&lt;:Real}(extround::T=5., trace0::T=300., trace1::T=5.,
-    gap0::T=150., gap1::T=2.5, flatlen::T=250., taperlen::T=250.)
-</pre></div>
-
-
-<p>Draws half of a CPW launcher inside a new cell.</p>
-<p>There are numerous keyword arguments to control the behavior:</p>
-<ul>
-<li><code>extround</code>: Rounding radius of the outermost corners; should be less than <code>gap0</code>.</li>
-<li><code>trace0</code>: Bond pad width.</li>
-<li><code>trace1</code>: Center trace width of next CPW segment.</li>
-<li><code>gap0</code>: Gap width adjacent to bond pad.</li>
-<li><code>gap1</code>: Gap width of next CPW segment.</li>
-<li><code>flatlen</code>: Bond pad length.</li>
-<li><code>taperlen</code>: Length of taper region between bond pad and next CPW segment.</li>
-</ul>
-<p>The polygons in the method definition are labeled as:</p>
-<div class="codehilite"><pre><span></span> ___________
-|p3 |  p2  |
-|___|______|   p1
-|   |        
-|p4 |        |
-|___|
-</pre></div>
-
-
-<p>Returns the new cell.</p>
-<p><a id='Devices.Tags.launch!' href='#Devices.Tags.launch!'>#</a>
-<strong><code>Devices.Tags.launch!</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">launch</span><span class="o">!(</span><span class="nt">p</span><span class="o">:</span><span class="nd">:Path</span><span class="o">;</span> <span class="nt">extround</span><span class="o">=</span><span class="nt">5</span><span class="o">,</span> <span class="nt">trace0</span><span class="o">=</span><span class="nt">300</span><span class="o">,</span> <span class="nt">trace1</span><span class="o">=</span><span class="nt">5</span><span class="o">,</span>
-        <span class="nt">gap0</span><span class="o">=</span><span class="nt">150</span><span class="o">,</span> <span class="nt">gap1</span><span class="o">=</span><span class="nt">2</span><span class="nc">.5</span><span class="o">,</span> <span class="nt">flatlen</span><span class="o">=</span><span class="nt">250</span><span class="o">,</span> <span class="nt">taperlen</span><span class="o">=</span><span class="nt">250</span><span class="o">)</span>
-</pre></div>
-
-
-<p>Add a launcher to the path. Somewhat intelligent in that the launcher will reverse its orientation depending on if it is at the start or the end of a path.</p>
-<p>There are numerous keyword arguments to control the behavior:</p>
-<ul>
-<li><code>extround</code>: Rounding radius of the outermost corners; should be less than <code>gap0</code>.</li>
-<li><code>trace0</code>: Bond pad width.</li>
-<li><code>trace1</code>: Center trace width of next CPW segment.</li>
-<li><code>gap0</code>: Gap width adjacent to bond pad.</li>
-<li><code>gap1</code>: Gap width of next CPW segment.</li>
-<li><code>flatlen</code>: Bond pad length.</li>
-<li><code>taperlen</code>: Length of taper region between bond pad and next CPW segment.</li>
-</ul>
-<p>Returns nothing.</p>
           <aside class="copyright" role="note">
             
             Documentation built with
