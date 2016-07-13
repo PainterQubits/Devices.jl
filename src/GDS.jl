@@ -7,7 +7,7 @@ import ..Rectangles: Rectangle
 import ..Polygons: Polygon
 using ..Cells
 
-import FileIO: File, @format_str, load, save, stream, magic
+import FileIO: File, @format_str, load, save, stream, magic, skipmagic
 
 export GDS64
 export gdsbegin, gdsend, gdswrite
@@ -427,6 +427,86 @@ function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
             bytes += gdswrite(io, c)
         end
         bytes += gdsend(io)
+    end
+end
+
+"""
+```
+load(f::File{format"GDS"})
+```
+
+An array of top-level cells (`Cell` objects) found in the GDS-II file is returned.
+The other cells in the GDS-II file are retained by `CellReference` or `CellArray`
+objects held by the top-level cells.
+
+The FileIO package treats the HEADER record as "magic bytes," and therefore only
+GDS-II version 6.0.0 can be read. Warnings are thrown if the GDS-II file does not
+begin with a BGNLIB record following the HEADER record, but loading will proceed.
+
+Encountering an ENDLIB record will discard the remainder of the GDS-II file
+without warning. If no ENDLIB record is present, a warning will be thrown.
+
+The content of some records are currently discarded (mainly the more obscure
+GDS-II record types, but also BGNLIB and LIBNAME).
+"""
+function load(f::File{format"GDS"})
+
+    open(f) do s
+        # Skip over GDS-II version 6.0.0 header record
+        skipmagic(s)
+
+        # Define array of top-level cells
+        cells = Cell[]
+
+        # Record processing loop
+        first = true
+        while !eof(s)
+            bytes = ntoh(read(s, UInt16))
+            token = ntoh(read(s, UInt8))
+            datatype = ntoh(read(s, UInt8))
+
+            # Consistency check
+            if first
+                first = false
+                if token == BGNLIB
+                    warn("GDS-II file does not start with a BGNLIB record.")
+                end
+            end
+
+            # Handle records
+            # skip(s, bytes-4): 2 for byte count, 1 for token, 1 for datatype
+            if token == BGNLIB
+                skip(s, bytes-4)
+            elseif token == LIBNAME
+                skip(s, bytes-4)
+            elseif token == ENDLIB
+                seekend(s)
+            else
+                skip(s, bytes-4)
+            end
+
+            # UNITS
+            # BGNSTR
+            # STRNAME
+            # ENDSTR
+            # BOUNDARY
+            # SREF
+            # AREF
+            # LAYER
+            # DATATYPE
+            # XY
+            # ENDEL
+            # SNAME
+            # COLROW
+            # STRANS
+            # MAG
+            # ANGLE
+        end
+
+        # Consistency check
+        if token != ENDLIB
+            warn("GDS-II file did not end with an ENDLIB record.")
+        end
     end
 end
 

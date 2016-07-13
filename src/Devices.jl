@@ -7,7 +7,7 @@ using ForwardDiff
 using FileIO
 import AffineTransforms: transform
 import Clipper
-import FileIO: save
+import FileIO: save, load
 import FixedSizeArrays: Point
 import Base: cell, length, show, .+, .-
 

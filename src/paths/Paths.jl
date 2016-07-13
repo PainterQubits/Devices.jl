@@ -643,7 +643,11 @@ end
 attach!(p::Path, c::CellReference, t::Real; i::Integer=length(p), where::Integer=0)
 ```
 
-Attach a `CellReference` along a path. By default, the attachment occurs
+Attach a shallow copy of `c` along a path (the referenced cell is not copied).
+The copied `CellReference` is returned so that it can be used with the
+[`Cells.transform`](@ref) function.
+
+By default, the attachment occurs
 at `t ∈ [0,1]` along the most recent path segment, but a different path segment
 index can be specified using `i`. The reference is oriented with zero rotation
 if the path is pointing at 0°, otherwise it is rotated with the path.
@@ -667,15 +671,17 @@ path with angle 0°.
 """
 function attach!(p::Path, c::CellReference, t::Real;
         i::Integer=length(p), where::Integer=0)
+    c1 = copy(c)
     if i==0
         sty0 = style0(p)
-        sty = decorate(sty0,c,t,where)
+        sty = decorate(sty0,c1,t,where)
         p.style0 = sty
     else
         seg0,sty0 = p[i]
-        sty = decorate(sty0,c,t,where)
+        sty = decorate(sty0,c1,t,where)
         p[i] = (seg0,sty)
     end
+    c1
 end
 
 # undocumented private methods for attach!

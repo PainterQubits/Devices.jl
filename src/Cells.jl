@@ -198,7 +198,22 @@ Cell{T<:Real}(name::AbstractString, elements::AbstractArray{AbstractPolygon{T},1
 show(io::IO, c::Cell) = print(io,
     "Cell \"$(c.name)\" with $(length(c.elements)) els, $(length(c.refs)) refs")
 
+"""
+```
+copy(x::CellReference)
+```
 
+Creates a shallow copy of `x` (does not copy the referenced cell).
+"""
+copy(x::CellReference) = CellReference(x.cell, x.origin, x.xrefl, x.mag, x.rot)
+
+"""
+```
+copy(x::CellArray)
+```
+
+Creates a shallow copy of `x` (does not copy the arrayed cell).
+"""
 copy(x::CellArray) = CellArray(x.cell, x.origin, x.deltacol, x.deltarow,
     x.col, x.row, x.xrefl, x.mag, x.rot)
 
@@ -427,8 +442,10 @@ end
 function transform(c::Cell, d::CellRef, a::AffineTransform)
     # look for the reference in the top level of the reference tree.
     for ref in c.refs
+        println(ref.cell.name)
         if ref === d
             sgn = d.xrefl ? -1 : 1
+            println("Found $(ref.cell.name)")
             return true, a * AffineTransform(
                 [sgn*d.mag*cosd(d.rot) -d.mag*sind(d.rot);
                  sgn*d.mag*sind(d.rot) d.mag*cosd(d.rot)], d.origin)
@@ -437,6 +454,7 @@ function transform(c::Cell, d::CellRef, a::AffineTransform)
 
     # didn't find the reference at this level.
     # we must go deeper...
+    println("Didn't find ref, going deeper")
     for ref in c.refs
         sgn = ref.xrefl ? -1 : 1
         (x,y) = transform(ref.cell, d, a * AffineTransform(

@@ -24,6 +24,8 @@ display complexity.
     CellReference{T<:Real}(::Cell, ::Point{2,T})
     bounds{S<:Real, T<:Real}(::CellArray{Cell{S},T})
     bounds(::CellReference)
+    copy(::CellReference)
+    copy(::CellArray)
 ```
 ## Resolving references
 
