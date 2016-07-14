@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="no-js ie6"><![endif]-->
+<!--[if IE 7 ]><html class="no-js ie7"><![endif]-->
+<!--[if IE 8 ]><html class="no-js ie8"><![endif]-->
+<!--[if IE 9 ]><html class="no-js ie9"><![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1">
+    
+      
+        <title>File formats - Devices.jl</title>
+      
+      
+      
+      
+        <meta name="author" content="Andrew Keller">
+      
+    
+    <meta property="og:url" content="None">
+    <meta property="og:title" content="Devices.jl">
+    <meta property="og:image" content="None/../">
+    <meta name="apple-mobile-web-app-title" content="Devices.jl">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../None">
+    <link rel="icon" type="image/x-icon" href="../None">
+    <style>
+      @font-face {
+      	font-family: 'Icon';
+      	src: url('../assets/fonts/icon.eot?52m981');
+      	src: url('../assets/fonts/icon.eot?#iefix52m981')
+               format('embedded-opentype'),
+      		   url('../assets/fonts/icon.woff?52m981')
+               format('woff'),
+      		   url('../assets/fonts/icon.ttf?52m981')
+               format('truetype'),
+      		   url('../assets/fonts/icon.svg?52m981#icon')
+               format('svg');
+      	font-weight: normal;
+      	font-style: normal;
+      }
+    </style>
+    <link rel="stylesheet" href="../assets/stylesheets/application-54f87043f3.css">
+    
+      <link rel="stylesheet" href="../assets/stylesheets/palettes-05ab2406df.css">
+    
+    
+      
+      
+      
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Ubuntu:400,700|Ubuntu+Mono">
+      <style>
+        body, input {
+          font-family: 'Ubuntu', Helvetica, Arial, sans-serif;
+        }
+        pre, code {
+          font-family: 'Ubuntu Mono', 'Courier New', 'Courier', monospace;
+        }
+      </style>
+    
+    
+      <link rel="stylesheet" href="../assets/Documenter.css">
+    
+    <script src="../assets/javascripts/modernizr-4ab42b99fd.js"></script>
+    
+  </head>
+  
+  
+  
+  <body class="palette-primary-indigo palette-accent-blue">
+    
+      
+      
+    
+    <div class="backdrop">
+      <div class="backdrop-paper"></div>
+    </div>
+    <input class="toggle" type="checkbox" id="toggle-drawer">
+    <input class="toggle" type="checkbox" id="toggle-search">
+    <label class="toggle-button overlay" for="toggle-drawer"></label>
+    <header class="header">
+      <nav aria-label="Header">
+  <div class="bar default">
+    <div class="button button-menu" role="button" aria-label="Menu">
+      <label class="toggle-button icon icon-menu" for="toggle-drawer">
+        <span></span>
+      </label>
+    </div>
+    <div class="stretch">
+      <div class="title">
+        
+          <span class="path">
+            
+          </span>
+        
+        File formats
+      </div>
+    </div>
+    
+    
+    <div class="button button-search" role="button" aria-label="Search">
+      <label class="toggle-button icon icon-search" title="Search" for="toggle-search"></label>
+    </div>
+  </div>
+  <div class="bar search">
+    <div class="button button-close" role="button" aria-label="Close">
+      <label class="toggle-button icon icon-back" for="toggle-search"></label>
+    </div>
+    <div class="stretch">
+      <div class="field">
+        <input class="query" type="text" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck>
+      </div>
+    </div>
+    <div class="button button-reset" role="button" aria-label="Search">
+      <button class="toggle-button icon icon-close" id="reset-search"></button>
+    </div>
+  </div>
+</nav>
+    </header>
+    <main class="main">
+      
+      <div class="drawer">
+        <nav aria-label="Navigation">
+  
+  <a href="https://github.com/ajkeller34/Devices.jl" class="project">
+    <div class="banner">
+      
+      <div class="name">
+        <strong>
+          Devices.jl
+          <span class="version">
+            
+          </span>
+        </strong>
+        
+          <br>
+          ajkeller34/Devices.jl
+        
+      </div>
+    </div>
+  </a>
+  <div class="scrollable">
+    <div class="wrapper">
+      
+        <ul class="repo">
+          <li class="repo-download">
+            
+            <a href="https://github.com/ajkeller34/Devices.jl/archive/master.zip" target="_blank" title="Download" data-action="download">
+              <i class="icon icon-download"></i> Download
+            </a>
+          </li>
+          <li class="repo-stars">
+            <a href="https://github.com/ajkeller34/Devices.jl/stargazers" target="_blank" title="Stargazers" data-action="star">
+              <i class="icon icon-star"></i> Stars
+              <span class="count">&ndash;</span>
+            </a>
+          </li>
+        </ul>
+        <hr>
+      
+      <div class="toc">
+        <ul>
+          
+            
+  <li>
+    <a class="" title="Home" href="..">
+      Home
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Points" href="../points/">
+      Points
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Paths" href="../paths/">
+      Paths
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Abstract polygons" href="../polygons/">
+      Abstract polygons
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Cells" href="../cells/">
+      Cells
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="For convenience" href="../tags/">
+      For convenience
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Rendering" href="../render/">
+      Rendering
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="current" title="File formats" href="./">
+      File formats
+    </a>
+    
+      
+      
+        <ul>
+          
+            <li class="anchor">
+              <a title="Loading patterns" href="#loading-patterns">
+                Loading patterns
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Saving patterns" href="#saving-patterns">
+                Saving patterns
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Internals" href="#internals">
+                Internals
+              </a>
+            </li>
+          
+        </ul>
+      
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Index" href="../idx/">
+      Index
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="License" href="../LICENSE/">
+      License
+    </a>
+    
+  </li>
+
+          
+        </ul>
+        
+      </div>
+    </div>
+  </div>
+</nav>
+      </div>
+      <article class="article">
+        <div class="wrapper">
+          
+            <h1>File formats</h1>
+          
+          <p>This package can load/save patterns in the GDS-II format only. In the future it may be useful to implement machine-specific pattern formats to force fracturing or dosing in an explicit manner.</p>
+<p><a id='Loading-patterns-1'></a></p>
+<h2 id="loading-patterns">Loading patterns</h2>
+<p>To load a pattern, make sure you are <code>using FileIO</code>.</p>
+<p><a id='FileIO.load-Tuple{FileIO.File{FileIO.DataFormat{:GDS}}}' href='#FileIO.load-Tuple{FileIO.File{FileIO.DataFormat{:GDS}}}'>#</a>
+<strong><code>FileIO.load</code></strong> &mdash; <em>Method</em>.</p>
+<div class="codehilite"><pre><span></span>load(f::File{format&quot;GDS&quot;})
+</pre></div>
+
+
+<p>An array of top-level cells (<code>Cell</code> objects) found in the GDS-II file is returned. The other cells in the GDS-II file are retained by <code>CellReference</code> or <code>CellArray</code> objects held by the top-level cells.</p>
+<p>The FileIO package treats the HEADER record as "magic bytes," and therefore only GDS-II version 6.0.0 can be read. Warnings are thrown if the GDS-II file does not begin with a BGNLIB record following the HEADER record, but loading will proceed.</p>
+<p>Encountering an ENDLIB record will discard the remainder of the GDS-II file without warning. If no ENDLIB record is present, a warning will be thrown.</p>
+<p>The content of some records are currently discarded (mainly the more obscure GDS-II record types, but also BGNLIB and LIBNAME).</p>
+<p><a id='Saving-patterns-1'></a></p>
+<h2 id="saving-patterns">Saving patterns</h2>
+<p>To save a pattern, make sure you are <code>using FileIO</code>.</p>
+<p><a id='FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}' href='#FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}'>#</a>
+<strong><code>FileIO.save</code></strong> &mdash; <em>Method</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">save</span><span class="o">(:</span><span class="nd">:Union</span><span class="p">{</span><span class="n">AbstractString</span><span class="o">,</span><span class="n">IO</span><span class="p">}</span><span class="o">,</span> <span class="nt">cell0</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">cell</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">...)</span>
+
+<span class="nt">save</span><span class="o">(</span><span class="nt">f</span><span class="o">:</span><span class="nd">:File</span><span class="p">{</span><span class="n">format</span><span class="s2">&quot;GDS&quot;</span><span class="p">}</span><span class="o">,</span> <span class="nt">cell0</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">cell</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">...;</span>
+<span class="nt">name</span><span class="o">=</span><span class="s2">&quot;GDSIILIB&quot;</span><span class="o">,</span> <span class="nt">precision</span><span class="o">=</span><span class="nt">1e-9</span><span class="o">,</span> <span class="nt">unit</span><span class="o">=</span><span class="nt">1e-6</span><span class="o">,</span> <span class="nt">modify</span><span class="o">=</span><span class="nt">now</span><span class="o">(),</span> <span class="nt">acc</span><span class="o">=</span><span class="nt">now</span><span class="o">(),</span>
+<span class="nt">verbose</span><span class="o">=</span><span class="nt">false</span><span class="o">)</span><span class="err">`</span>
+</pre></div>
+
+
+<p>This bottom method is implicitly called when you use the convenient syntax of the top method: <code>save("/path/to/my.gds", cells_i_want_to_save...)</code></p>
+<p>The <code>name</code> keyword argument is used for the internal library name of the GDS-II file and is probably inconsequential for modern workflows.</p>
+<p>The <code>verbose</code> keyword argument allows you to monitor the output of <a href="../cells/#Devices.Cells.traverse!"><code>traverse!</code></a> and <a href="../cells/#Devices.Cells.order!"><code>order!</code></a> if something funny is happening while saving.</p>
+<p><a id='Internals-1'></a></p>
+<h2 id="internals">Internals</h2>
+<p><a id='Devices.GDS.GDSFloat' href='#Devices.GDS.GDSFloat'>#</a>
+<strong><code>Devices.GDS.GDSFloat</code></strong> &mdash; <em>Type</em>.</p>
+<p><code>abstract GDSFloat &lt;: Real</code></p>
+<p>Floating-point formats found in GDS-II files.</p>
+<p><a id='Devices.GDS.GDS64' href='#Devices.GDS.GDS64'>#</a>
+<strong><code>Devices.GDS.GDS64</code></strong> &mdash; <em>Type</em>.</p>
+<p><code>bitstype 64 GDS64 &lt;: GDSFloat</code></p>
+<p>"8-byte (64-bit) real" format found in GDS-II files.</p>
+<p><a id='Base.bits-Tuple{Devices.GDS.GDS64}' href='#Base.bits-Tuple{Devices.GDS.GDS64}'>#</a>
+<strong><code>Base.bits</code></strong> &mdash; <em>Method</em>.</p>
+<p><code>bits(x::GDS64)</code></p>
+<p>A string giving the literal bit representation of a GDS64 number.</p>
+<p><a id='Base.bswap-Tuple{Devices.GDS.GDS64}' href='#Base.bswap-Tuple{Devices.GDS.GDS64}'>#</a>
+<strong><code>Base.bswap</code></strong> &mdash; <em>Method</em>.</p>
+<p><code>bswap(x::GDS64)</code></p>
+<p>Byte-swap a GDS64 number. Used implicitly by <code>hton</code>, <code>ntoh</code> for endian conversion.</p>
+<p><a id='Devices.GDS.gdswrite' href='#Devices.GDS.gdswrite'>#</a>
+<strong><code>Devices.GDS.gdswrite</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>gdswrite(io::IO, cell::Cell)
+</pre></div>
+
+
+<p>Write a <code>Cell</code> to an IO buffer. The creation and modification date of the cell are written first, followed by the cell name, the polygons in the cell, and finally any references or arrays.</p>
+<div class="codehilite"><pre><span></span><span class="nt">gdswrite</span><span class="p">{</span><span class="n">T</span><span class="p">}</span><span class="o">(</span><span class="nt">io</span><span class="o">:</span><span class="nd">:IO</span><span class="o">,</span> <span class="nt">el</span><span class="o">:</span><span class="nd">:AbstractPolygon</span><span class="p">{</span><span class="n">T</span><span class="p">}</span><span class="o">;</span> <span class="nt">unit</span><span class="o">=</span><span class="nt">1e-6</span><span class="o">,</span> <span class="nt">precision</span><span class="o">=</span><span class="nt">1e-9</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Write a polygon to an IO buffer. The layer and datatype are written first, then the <code>AbstractPolygon{T}</code> object is converted to a <code>Polygon{T}</code>, and the boundary of the polygon is written in a 32-bit integer format with specified database unit and precision.</p>
+<div class="codehilite"><pre><span></span><span class="nt">gdswrite</span><span class="o">(</span><span class="nt">io</span><span class="o">:</span><span class="nd">:IO</span><span class="o">,</span> <span class="nt">el</span><span class="o">:</span><span class="nd">:CellReference</span><span class="o">;</span> <span class="nt">unit</span><span class="o">=</span><span class="nt">1e-6</span><span class="o">,</span> <span class="nt">precision</span><span class="o">=</span><span class="nt">1e-9</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Write a cell reference to an IO buffer. The name of the referenced cell is written first. Reflection, magnification, and rotation info are written next. Finally, the origin of the cell reference is written.</p>
+<div class="codehilite"><pre><span></span><span class="nt">gdswrite</span><span class="o">(</span><span class="nt">io</span><span class="o">:</span><span class="nd">:IO</span><span class="o">,</span> <span class="nt">el</span><span class="o">:</span><span class="nd">:CellArray</span><span class="o">;</span> <span class="nt">unit</span><span class="o">=</span><span class="nt">1e-6</span><span class="o">,</span> <span class="nt">precision</span><span class="o">=</span><span class="nt">1e-9</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Write a cell array to an IO buffer. The name of the referenced cell is written first. Reflection, magnification, and rotation info are written next. After that the number of columns and rows are written. Finally, the origin, column vector, and row vector are written.</p>
+<p><a id='Devices.GDS.strans' href='#Devices.GDS.strans'>#</a>
+<strong><code>Devices.GDS.strans</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>strans(io::IO, ref)
+</pre></div>
+
+
+<p>Writes bytes to the IO stream (if needed) to encode x-reflection, magnification, and rotation settings of a reference or array. Returns the number of bytes written.</p>
+<p><a id='Base.write-Tuple{IO,Devices.GDS.GDS64}' href='#Base.write-Tuple{IO,Devices.GDS.GDS64}'>#</a>
+<strong><code>Base.write</code></strong> &mdash; <em>Method</em>.</p>
+<p><code>write(s::IO, x::GDS64)</code></p>
+<p>Write a GDS64 number to an IO stream.</p>
+          <aside class="copyright" role="note">
+            
+            Documentation built with
+            <a href="http://www.mkdocs.org" target="_blank">MkDocs</a>
+            using the
+            <a href="http://squidfunk.github.io/mkdocs-material/" target="_blank">
+              Material
+            </a>
+            theme.
+          </aside>
+          
+            <footer class="footer">
+              
+  <nav class="pagination" aria-label="Footer">
+    <div class="previous">
+      
+        <a href="../render/" title="Rendering">
+          <span class="direction">
+            Previous
+          </span>
+          <div class="page">
+            <div class="button button-previous" role="button" aria-label="Previous">
+              <i class="icon icon-back"></i>
+            </div>
+            <div class="stretch">
+              <div class="title">
+                Rendering
+              </div>
+            </div>
+          </div>
+        </a>
+      
+    </div>
+    <div class="next">
+      
+        <a href="../idx/" title="Index">
+          <span class="direction">
+            Next
+          </span>
+          <div class="page">
+            <div class="stretch">
+              <div class="title">
+                Index
+              </div>
+            </div>
+            <div class="button button-next" role="button" aria-label="Next">
+              <i class="icon icon-forward"></i>
+            </div>
+          </div>
+        </a>
+      
+    </div>
+  </nav>
+
+            </footer>
+          
+        </div>
+      </article>
+      <div class="results" role="status" aria-live="polite">
+        <div class="scrollable">
+          <div class="wrapper">
+            <div class="meta"></div>
+            <div class="list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      var base_url = '..';
+      var repo_id  = 'ajkeller34/Devices.jl';
+    </script>
+    <script src="../assets/javascripts/application-997097ee0c.js"></script>
+    
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    
+      <script src="../assets/mathjaxhelper.js"></script>
+    
+    
+  </body>
+</html>
