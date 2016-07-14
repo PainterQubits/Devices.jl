@@ -475,7 +475,9 @@ Adjust a path's parametric functions starting from index `n`. Used internally wh
 attach!(p::Path, c::CellReference, t::Real; i::Integer=length(p), where::Integer=0)
 ```
 
-Attach a `CellReference` along a path. By default, the attachment occurs at `t ∈ [0,1]` along the most recent path segment, but a different path segment index can be specified using `i`. The reference is oriented with zero rotation if the path is pointing at 0°, otherwise it is rotated with the path.
+Attach a shallow copy of `c` along a path (the referenced cell is not copied). The copied `CellReference` is returned so that it can be used with the [`Cells.transform(::Cell, ::Cells.CellRef)`](cells.md#AffineTransforms.transform-Tuple{Devices.Cells.Cell{T<:Real},Devices.Cells.CellRef{S,T<:Real}}) function.
+
+By default, the attachment occurs at `t ∈ [0,1]` along the most recent path segment, but a different path segment index can be specified using `i`. The reference is oriented with zero rotation if the path is pointing at 0°, otherwise it is rotated with the path.
 
 The origin of the cell reference tells the method where to place the cell *with respect to a coordinate system that rotates with the path*. Suppose the path is a straight line with angle 0°. Then an origin of `Point(0.,10.)` will put the cell at 10 above the path, or 10 to the left of the path if it turns left by 90°.
 

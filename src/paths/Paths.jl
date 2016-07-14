@@ -645,7 +645,7 @@ attach!(p::Path, c::CellReference, t::Real; i::Integer=length(p), where::Integer
 
 Attach a shallow copy of `c` along a path (the referenced cell is not copied).
 The copied `CellReference` is returned so that it can be used with the
-[`Cells.transform`](@ref) function.
+[`Cells.transform(::Cell, ::Cells.CellRef)`](@ref) function.
 
 By default, the attachment occurs
 at `t ∈ [0,1]` along the most recent path segment, but a different path segment

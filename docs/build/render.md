@@ -67,7 +67,9 @@ Returns an array of the polygons added to the cell.
 render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)
 ```
 
-Render a `segment` with decorated style `s` to cell `c`. This method draws the decorations before the path itself is drawn.
+Render a `segment` with decorated style `s` to cell `c`. Cell references held by the decorated style will have their fields modified by this method, which is why they are shallow copied in the [`Paths.attach!`](paths.md#Devices.Paths.attach!) function.
+
+This method draws the decorations before the path itself is drawn.
 
 
 ```
