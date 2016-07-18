@@ -15,12 +15,14 @@ To load a pattern, make sure you are `using FileIO`.
 
 
 ```
-load(f::File{format"GDS"})
+load(f::File{format"GDS"}; verbose=false)
 ```
 
-An array of top-level cells (`Cell` objects) found in the GDS-II file is returned. The other cells in the GDS-II file are retained by `CellReference` or `CellArray` objects held by the top-level cells.
+A dictionary of top-level cells (`Cell` objects) found in the GDS-II file is returned. The dictionary keys are the cell names. The other cells in the GDS-II file are retained by `CellReference` or `CellArray` objects held by the top-level cells. Currently, cell references and arrays are not implemented, and we do not handle the scale properly, as this is a work in progress.
 
-The FileIO package treats the HEADER record as "magic bytes," and therefore only GDS-II version 6.0.0 can be read. Warnings are thrown if the GDS-II file does not begin with a BGNLIB record following the HEADER record, but loading will proceed.
+The FileIO package treats the HEADER record as "magic bytes," and therefore only GDS-II version 6.0.0 can be read. LayoutEditor appears to save version 7, which as far as I can tell is unofficial, and probably just permits more layers than 64, or extra characters in cell names, etc. We will add support for this.
+
+Warnings are thrown if the GDS-II file does not begin with a BGNLIB record following the HEADER record, but loading will proceed.
 
 Encountering an ENDLIB record will discard the remainder of the GDS-II file without warning. If no ENDLIB record is present, a warning will be thrown.
 
@@ -142,7 +144,27 @@ Writes bytes to the IO stream (if needed) to encode x-reflection, magnification,
 
 
 
-`write(s::IO, x::GDS64)`
+```
+write(s::IO, x::GDS64)
+```
 
 Write a GDS64 number to an IO stream.
+
+<a id='Base.read-Tuple{IO,Type{Devices.GDS.GDS64}}' href='#Base.read-Tuple{IO,Type{Devices.GDS.GDS64}}'>#</a>
+**`Base.read`** &mdash; *Method*.
+
+
+
+```
+read(stream, type)
+```
+
+Read a value of the given type from a stream, in canonical binary representation.
+
+
+```
+read(s::IO, ::Type{GDS64})
+```
+
+Read a GDS64 number from an IO stream.
 

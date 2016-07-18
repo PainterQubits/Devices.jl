@@ -7,10 +7,10 @@ using ..Points
 using ..Rectangles
 using ..Polygons
 
-import Base: show, +, -, copy
+import Base: show, +, -, copy, getindex
 import Devices: AbstractPolygon, bounds, center, center!
 export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!, transform
+export traverse!, order!, flatten, flatten!, transform, name
 
 abstract CellRef{S, T<:Real}
 
@@ -79,16 +79,16 @@ type Cell{T<:Real}
     elements::Array{AbstractPolygon{T},1}
     refs::Array{CellRef,1}
     create::DateTime
-    function even(str)
-        if mod(length(str),2) == 1
-            str*"\0"
-        else
-            str
-        end
+    Cell(x,y,z) = new(x, y, z, now())
+    Cell(x,y) = new(x, y, CellRef[], now())
+    Cell(x) = new(x, AbstractPolygon{T}[], CellRef[], now())
+    Cell() = begin
+        c = new()
+        c.elements = AbstractPolygon{T}[]
+        c.refs = CellRef[]
+        c.create = now()
+        c
     end
-    Cell(x,y,z) = new(even(x), y, z, now())
-    Cell(x,y) = new(even(x), y, CellReference[], now())
-    Cell(x) = new(even(x), AbstractPolygon{T}[], CellReference[], now())
 end
 ```
 
@@ -107,16 +107,16 @@ type Cell{T<:Real}
     elements::Array{AbstractPolygon{T},1}
     refs::Array{CellRef,1}
     create::DateTime
-    function even(str)
-        if mod(length(str),2) == 1
-            str*"\0"
-        else
-            str
-        end
+    Cell(x,y,z) = new(x, y, z, now())
+    Cell(x,y) = new(x, y, CellRef[], now())
+    Cell(x) = new(x, AbstractPolygon{T}[], CellRef[], now())
+    Cell() = begin
+        c = new()
+        c.elements = AbstractPolygon{T}[]
+        c.refs = CellRef[]
+        c.create = now()
+        c
     end
-    Cell(x,y,z) = new(even(x), y, z, now())
-    Cell(x,y) = new(even(x), y, CellRef[], now())
-    Cell(x) = new(even(x), AbstractPolygon{T}[], CellRef[], now())
 end
 
 """
@@ -127,7 +127,7 @@ CellReference{T<:Real}(x::Cell, y::Point{2,T}=Point(0.,0.);
 
 Convenience constructor for `CellReference{typeof(x), T}`.
 """
-CellReference{T<:Real}(x::Cell, origin::Point{2,T}=Point(0.,0.); xrefl=false,
+CellReference{T<:Real}(x, origin::Point{2,T}=Point(0.,0.); xrefl=false,
     mag=1.0, rot=0.0) = CellReference{typeof(x), T}(x, origin, xrefl, mag, rot)
 
 """
@@ -205,7 +205,8 @@ copy(x::CellReference)
 
 Creates a shallow copy of `x` (does not copy the referenced cell).
 """
-copy(x::CellReference) = CellReference(x.cell, x.origin, x.xrefl, x.mag, x.rot)
+copy(x::CellReference) = CellReference(x.cell, x.origin,
+    xrefl=x.xrefl, mag=x.mag, rot=x.rot)
 
 """
 ```
@@ -216,6 +217,43 @@ Creates a shallow copy of `x` (does not copy the arrayed cell).
 """
 copy(x::CellArray) = CellArray(x.cell, x.origin, x.deltacol, x.deltarow,
     x.col, x.row, x.xrefl, x.mag, x.rot)
+
+"""
+```
+getindex(c::Cell, nom::AbstractString, index::Integer=1)
+```
+
+If `c` references a cell with name `nom`, this method will return the
+corresponding `CellReference`. If there are several references to that cell,
+then `index` specifies which one is returned (in the order they are found in
+`c.refs`). e.g. to specify an index of 2: `mycell["myreferencedcell",2]`.
+"""
+function getindex(c::Cell, nom::AbstractString, index::Integer=1)
+    inds = find(x->name(x)==nom, c.refs)
+    c.refs[inds[index]]
+end
+
+"""
+```
+getindex(c::CellRef, nom::AbstractString, index::Integer=1)
+```
+
+If the cell referenced by `c` references a cell with name `nom`, this method
+will return the corresponding `CellReference`. If there are several references
+to that cell, then `index` specifies which one is returned (in the order they
+are found in `c.refs`).
+
+This method is typically used so that we can type the first line instead of the
+second line in the following:
+```
+mycell["myreferencedcell"]["onedeeper"]
+mycell["myreferencedcell"].cell["onedeeper"]
+```
+"""
+function getindex(c::CellRef, nom::AbstractString, index::Integer=1)
+    inds = find(x->name(x)==nom, c.cell.refs)
+    c.cell.refs[inds[index]]
+end
 
 """
 ```
@@ -382,6 +420,33 @@ end
 
 """
 ```
+name(x::Cell)
+```
+
+Returns the name of the cell.
+"""
+name(x::Cell) = x.name
+
+"""
+```
+name(x::CellArray)
+```
+
+Returns the name of the arrayed cell.
+"""
+name(x::CellArray) = name(x.cell)
+
+"""
+```
+name(x::CellReference)
+```
+
+Returns the name of the referenced cell.
+"""
+name(x::CellReference) = name(x.cell)
+
+"""
+```
 traverse!(a::AbstractArray, c::Cell, level=1)
 ```
 
@@ -486,7 +551,8 @@ for op in [:+, :-]
             r.col, r.row, r.xrefl, r.mag, r.rot)
     end
     @eval function ($op){S,T<:Real}(r::CellReference{S,T}, p::Point)
-        CellReference(r.cell, ($op)(r.origin,p), r.xrefl, r.mag, r.rot)
+        CellReference(r.cell, ($op)(r.origin,p),
+            xrefl=r.xrefl, mag=r.mag, rot=r.rot)
     end
 end
 

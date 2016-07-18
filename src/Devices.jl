@@ -11,6 +11,8 @@ import FileIO: save, load
 import FixedSizeArrays: Point
 import Base: cell, length, show, .+, .-
 
+render_counter = UInt64(0)
+
 # The PyNULL() and __init__() are necessary to use PyCall with precompiled modules.
 const _gdspy = PyCall.PyNULL()
 const _qr = PyCall.PyNULL()
@@ -92,13 +94,13 @@ export clip, offset, points, layer, datatype
 
 include("Cells.jl")
 import .Cells: Cell, CellArray, CellReference
-import .Cells: traverse!, order!, flatten, flatten!, transform
+import .Cells: traverse!, order!, flatten, flatten!, transform, name
 export Cells
 export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!, transform
+export traverse!, order!, flatten, flatten!, transform, name
 
 include("paths/Paths.jl")
-import .Paths: Path, adjust!, attach!, attachments, direction, meander!, launch!
+import .Paths: Path, adjust!, attach!, direction, meander!, launch!
 import .Paths: param, pathf, pathlength, simplify, simplify!, straight!, turn!
 import .Paths: α0, α1, p0, p1, style0, style1, extent, undecorated
 export Paths
@@ -106,7 +108,6 @@ export Path
 export α0, α1, p0, p1, style0, style1
 export adjust!
 export attach!
-export attachments
 export direction
 export meander!, launch!
 export param
@@ -210,7 +211,6 @@ render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
 
 Render a polygon `r` to cell `c`, defaulting to plain styling.
 
-Returns an array of the polygons added to the cell.
 """
 function render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
     d = Dict(kwargs)
@@ -224,8 +224,6 @@ render!(c::Cell, p::Path; kwargs...)
 ```
 
 Render a path `p` to a cell `c`.
-
-Returns an array of the polygons added to the cell.
 """
 function render!(c::Cell, p::Path; kwargs...)
     for (segment, s) in p
@@ -283,13 +281,15 @@ by this method, which is why they are shallow copied in the
 This method draws the decorations before the path itself is drawn.
 """
 function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)
-    for (t, dir, cref) in zip(s.ts, s.dirs, s.cellrefs)
+    for (t, dir, cref) in zip(s.ts, s.dirs, s.refs)
         (dir < -1 || dir > 1) && error("Invalid direction in $s.")
+
+        ref = copy(cref)
 
         rot = direction(segment.f, t)
         if dir == 0
-            cref.origin += segment.f(t)
-            cref.rot += rot*180/π
+            ref.origin += segment.f(t)
+            ref.rot += rot*180/π
         else
             if dir == -1
                 rot2 = rot + π/2
@@ -300,11 +300,11 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
             offset = extent(s.s, t)
             newx = offset * cos(rot2)
             newy = offset * sin(rot2)
-            origin = Point(tformrotate(rot)*Array(cref.origin))
-            cref.origin += (Point(newx,newy) + segment.f(t))
-            cref.rot += rot*180/π
+            origin = Point(tformrotate(rot)*Array(ref.origin))
+            ref.origin += (Point(newx,newy) + segment.f(t))
+            ref.rot += rot*180/π
         end
-        push!(c.refs, cref)
+        push!(c.refs, ref)
     end
     render!(c, segment, undecorated(s); kwargs...)
 end

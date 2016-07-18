@@ -45,7 +45,6 @@ export Trace
 export α0, α1, p0, p1, style0, style1
 export adjust!
 export attach!
-export attachments
 export direction
 export launch!
 export meander!
@@ -151,11 +150,6 @@ type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
-    attachments::Array{CellReference,1}
-    Path(p0::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
-        styles::Array{Style,1}) = new(p0, α0, style0, segments, styles)
-    Path(style::Style) =
-        new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
 end
 ```
 
@@ -168,18 +162,7 @@ type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
-    attachments::Array{Tuple{Float64,Int,CellReference},1}
 end
-
-"""
-```
-attachments(p::Path)
-```
-
-Returns the array of attachments for a given path. These are the cell references
-tied to the path by [`attach!`](@ref).
-"""
-attachments(p::Path) = p.attachments
 
 pathf(p) = p[1][1].f
 
@@ -191,7 +174,7 @@ Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(
 Convenience constructor for `Path{T}` object.
 """
 Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0)) =
-    Path{T}(p0, α0, style0, Segment{T}[], Style[], Tuple{Float64, Int, CellReference}[])
+    Path{T}(p0, α0, style0, Segment{T}[], Style[])
 
 """
 ```
@@ -643,45 +626,41 @@ end
 attach!(p::Path, c::CellReference, t::Real; i::Integer=length(p), where::Integer=0)
 ```
 
-Attach a shallow copy of `c` along a path (the referenced cell is not copied).
-The copied `CellReference` is returned so that it can be used with the
-[`Cells.transform(::Cell, ::Cells.CellRef)`](@ref) function.
+Attach `c` along a path.
 
-By default, the attachment occurs
-at `t ∈ [0,1]` along the most recent path segment, but a different path segment
-index can be specified using `i`. The reference is oriented with zero rotation
-if the path is pointing at 0°, otherwise it is rotated with the path.
+By default, the attachment occurs at `t ∈ [0,1]` along the most recent path
+segment, but a different path segment index can be specified using `i`. The
+reference is oriented with zero rotation if the path is pointing at 0°,
+otherwise it is rotated with the path.
 
-The origin of the cell reference tells the method where to place
-the cell *with respect to a coordinate system that rotates with the path*.
-Suppose the path is a straight line with angle 0°. Then an origin of
-`Point(0.,10.)` will put the cell at 10 above the path, or 10 to the left of the
-path if it turns left by 90°.
+The origin of the cell reference tells the method where to place the cell *with
+respect to a coordinate system that rotates with the path*. Suppose the path is
+a straight line with angle 0°. Then an origin of `Point(0.,10.)` will put the
+cell at 10 above the path, or 10 to the left of the path if it turns left by
+90°.
 
 The `where` option is for convenience. If `where == 0`, nothing special happens.
 If `where == -1`, then the point of attachment for the reference is on the
-leftmost edge of the waveguide (the rendered polygons; the path itself has no width).
-Likewise if `where == 1`, the point of attachment is on the rightmost edge.
-This option does not automatically rotate the cell reference, apart from what is
-already done as described in the first paragraph. You can think of this option
-as setting a special origin for the coordinate system that rotates with the path.
-For instance, an origin for the cell reference of `Point(0.,10.)` together with
-`where == -1` will put the cell at 10 above the edge of a rendered (finite width)
-path with angle 0°.
+leftmost edge of the waveguide (the rendered polygons; the path itself has no
+width). Likewise if `where == 1`, the point of attachment is on the rightmost
+edge. This option does not automatically rotate the cell reference, apart from
+what is already done as described in the first paragraph. You can think of this
+option as setting a special origin for the coordinate system that rotates with
+the path. For instance, an origin for the cell reference of `Point(0.,10.)`
+together with `where == -1` will put the cell at 10 above the edge of a
+rendered (finite width) path with angle 0°.
 """
 function attach!(p::Path, c::CellReference, t::Real;
         i::Integer=length(p), where::Integer=0)
-    c1 = copy(c)
     if i==0
         sty0 = style0(p)
-        sty = decorate(sty0,c1,t,where)
+        sty = decorate(sty0,c,t,where)
         p.style0 = sty
     else
         seg0,sty0 = p[i]
-        sty = decorate(sty0,c1,t,where)
+        sty = decorate(sty0,c,t,where)
         p[i] = (seg0,sty)
     end
-    c1
 end
 
 # undocumented private methods for attach!
@@ -694,7 +673,7 @@ end
 function decorate(sty::DecoratedStyle, c, t, where)
     push!(sty.ts, t)
     push!(sty.dirs, where)
-    push!(sty.cellrefs, c)
+    push!(sty.refs, c)
     sty
 end
 

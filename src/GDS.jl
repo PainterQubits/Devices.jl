@@ -1,6 +1,6 @@
 module GDS
 
-import Base: bswap, bits, convert, write
+import Base: bswap, bits, convert, write, read
 import Devices: AbstractPolygon
 using ..Points
 import ..Rectangles: Rectangle
@@ -54,6 +54,9 @@ const EFLAGS       = 0x2601
 const NODETYPE     = 0x2A02
 const PROPATTR     = 0x2B02
 const PROPVALUE    = 0x2C06
+const BOX          = 0x2D00
+const BOXTYPE      = 0x2E02
+const PLEX         = 0x2F03
 
 """
 `abstract GDSFloat <: Real`
@@ -86,6 +89,19 @@ function bswap(x::GDS64)
         Core.Intrinsics.box(GDS64, Base.bswap_int(Core.Intrinsics.unbox(GDS64,x)))
     else
         Intrinsics.box(GDS64, Base.bswap_int(Intrinsics.unbox(GDS64,x)))
+    end
+end
+
+"""
+`even(str)`
+
+Pads a string with `\0` if necessary to make it have an even length.
+"""
+function even(str)
+    if mod(length(str),2) == 1
+        str*"\0"
+    else
+        str
     end
 end
 
@@ -142,11 +158,22 @@ end
 gdswerr(x) = error("Wrong data type for token 0x$(hex(x,4)).")
 
 """
-`write(s::IO, x::GDS64)`
+```
+write(s::IO, x::GDS64)
+```
 
 Write a GDS64 number to an IO stream.
 """
 write(s::IO, x::GDS64) = write(s, reinterpret(UInt64, x))    # check for v0.5
+
+"""
+```
+read(s::IO, ::Type{GDS64})
+```
+
+Read a GDS64 number from an IO stream.
+"""
+read(s::IO, ::Type{GDS64}) = reinterpret(GDS64, read(s, UInt64))
 
 function gdswrite(io::IO, x::UInt16)
     (x & 0x00ff != 0x0000) && gdswerr(x)
@@ -227,7 +254,8 @@ are written first, followed by the cell name, the polygons in the cell,
 and finally any references or arrays.
 """
 function gdswrite(io::IO, cell::Cell)
-    namecheck(cell.name)
+    name = even(cell.name)
+    namecheck(name)
 
     y    = UInt16(Dates.Year(cell.create))
     mo   = UInt16(Dates.Month(cell.create))
@@ -245,7 +273,7 @@ function gdswrite(io::IO, cell::Cell)
     s1   = UInt16(Dates.Second(modify))
 
     bytes = gdswrite(io, BGNSTR, y,mo,d,h,min,s, y1,mo1,d1,h1,min1,s1)
-    bytes += gdswrite(io, STRNAME, cell.name)
+    bytes += gdswrite(io, STRNAME, name)
     for x in cell.elements
         bytes += gdswrite(io, x)
     end
@@ -294,7 +322,7 @@ Finally, the origin of the cell reference is written.
 """
 function gdswrite(io::IO, ref::CellReference; unit=1e-6, precision=1e-9)
     bytes =  gdswrite(io, SREF)
-    bytes += gdswrite(io, SNAME, ref.cell.name)
+    bytes += gdswrite(io, SNAME, even(ref.cell.name))
 
     bytes += strans(io, ref)
 
@@ -319,7 +347,7 @@ function gdswrite(io::IO, a::CellArray; unit=1e-6, precision=1e-9)
     colrowcheck(a.row)
 
     bytes =  gdswrite(io, AREF)
-    bytes += gdswrite(io, SNAME, a.cell.name)
+    bytes += gdswrite(io, SNAME, even(a.cell.name))
 
     bytes += strans(io, a)
 
@@ -432,16 +460,22 @@ end
 
 """
 ```
-load(f::File{format"GDS"})
+load(f::File{format"GDS"}; verbose=false)
 ```
 
-An array of top-level cells (`Cell` objects) found in the GDS-II file is returned.
-The other cells in the GDS-II file are retained by `CellReference` or `CellArray`
-objects held by the top-level cells.
+A dictionary of top-level cells (`Cell` objects) found in the GDS-II file is
+returned. The dictionary keys are the cell names. The other cells in the GDS-II
+file are retained by `CellReference` or `CellArray` objects held by the
+top-level cells. Currently, cell references and arrays are not implemented, and
+we do not handle the scale properly, as this is a work in progress.
 
 The FileIO package treats the HEADER record as "magic bytes," and therefore only
-GDS-II version 6.0.0 can be read. Warnings are thrown if the GDS-II file does not
-begin with a BGNLIB record following the HEADER record, but loading will proceed.
+GDS-II version 6.0.0 can be read. LayoutEditor appears to save version 7, which
+as far as I can tell is unofficial, and probably just permits more layers than
+64, or extra characters in cell names, etc. We will add support for this.
+
+Warnings are thrown if the GDS-II file does not begin with a BGNLIB record
+following the HEADER record, but loading will proceed.
 
 Encountering an ENDLIB record will discard the remainder of the GDS-II file
 without warning. If no ENDLIB record is present, a warning will be thrown.
@@ -449,65 +483,296 @@ without warning. If no ENDLIB record is present, a warning will be thrown.
 The content of some records are currently discarded (mainly the more obscure
 GDS-II record types, but also BGNLIB and LIBNAME).
 """
-function load(f::File{format"GDS"})
-
+function load(f::File{format"GDS"}; verbose=false)
+    cells = Dict{ASCIIString, Cell}()
     open(f) do s
         # Skip over GDS-II version 6.0.0 header record
         skipmagic(s)
 
-        # Define array of top-level cells
-        cells = Cell[]
-
         # Record processing loop
         first = true
+        token = UInt8(0)
+
         while !eof(s)
-            bytes = ntoh(read(s, UInt16))
-            token = ntoh(read(s, UInt8))
-            datatype = ntoh(read(s, UInt8))
+            bytes = ntoh(read(s, Int16)) - 4 # 2 for byte count, 2 for token
+            token = ntoh(read(s, UInt16))
+            verbose && info("Bytes: $bytes; Token: $token")
 
             # Consistency check
             if first
                 first = false
-                if token == BGNLIB
-                    warn("GDS-II file does not start with a BGNLIB record.")
+                if token != BGNLIB
+                    warn("GDS-II file did not start with a BGNLIB record.")
                 end
             end
 
             # Handle records
-            # skip(s, bytes-4): 2 for byte count, 1 for token, 1 for datatype
             if token == BGNLIB
-                skip(s, bytes-4)
+                verbose && info("BGNLIB")
+                # ignore modification time, last access time
+                skip(s, bytes)
             elseif token == LIBNAME
-                skip(s, bytes-4)
+                verbose && info("LIBNAME")
+                # ignore library name
+                skip(s, bytes)
+            elseif token == UNITS
+                verbose && info("UNITS")
+                db_in_user = convert(Float64, read(s, GDS64))
+                db_in_m = convert(Float64, read(s, GDS64))
+            elseif token == BGNSTR
+                verbose && info("BGNSTR")
+                # ignore creation time, modification time of structure
+                skip(s, bytes)
+                c = cell(s,verbose)
+                cells[c.name] = c
             elseif token == ENDLIB
+                verbose && info("ENDLIB")
+                # ********** HANDLE END **********
                 seekend(s)
             else
-                skip(s, bytes-4)
+                warn("Record type not implemented: $(token)")
+                skip(s, bytes)
             end
-
-            # UNITS
-            # BGNSTR
-            # STRNAME
-            # ENDSTR
-            # BOUNDARY
-            # SREF
-            # AREF
-            # LAYER
-            # DATATYPE
-            # XY
-            # ENDEL
-            # SNAME
-            # COLROW
-            # STRANS
-            # MAG
-            # ANGLE
         end
 
         # Consistency check
         if token != ENDLIB
             warn("GDS-II file did not end with an ENDLIB record.")
         end
+
+        # Destringify CellReferences and CellArrays
+
     end
+    cells
+end
+
+function cell(s, verbose)
+    c = Cell{Int32}()
+    while true
+        bytes = ntoh(read(s, Int16)) - 4 # 2 for byte count, 2 for token
+        token = ntoh(read(s, UInt16))
+        verbose && info("Bytes: $bytes; Token: $token")
+
+        if token == STRNAME
+            c.name = sname(s,bytes)
+            verbose && info("STRNAME: $(c.name)")
+        elseif token == BOUNDARY
+            verbose && info("BOUNDARY")
+            push!(c.elements, boundary(s, verbose))
+        elseif token == SREF
+            verbose && info("SREF")
+            push!(c.refs, sref(s))
+        elseif token == AREF
+            verbose && info("AREF")
+            push!(c.refs, aref(s))
+        elseif token == ENDSTR
+            verbose && info("ENDSTR")
+            break
+        else
+            error("Unexpected token $(token) in BGNSTR tag.")
+        end
+    end
+    c
+end
+
+function boundary(s, verbose)
+    haseflags, hasplex, haslayer, hasdt, hasxy = false, false, false, false, false
+    layer, dt = 0, 0
+    xy = Array{Point{2,Int32}}(0)
+    while true
+        bytes = ntoh(read(s, UInt16)) - 4
+        token = ntoh(read(s, UInt16))
+
+        if token == EFLAGS
+            verbose && info("EFLAGS")
+            haseflags && error("Already read EFLAGS tag for this BOUNDARY tag.")
+            warn("Not implemented: EFLAGS")
+            haseflags = true
+            skip(s, bytes)
+        elseif token == PLEX
+            verbose && info("PLEX")
+            hasplex && error("Already read PLEX tag for this BOUNDARY tag.")
+            warn("Not implemented: PLEX")
+            hasplex = true
+            skip(s, bytes)
+        elseif token == LAYER
+            verbose && info("LAYER")
+            haslayer && error("Already read LAYER tag for this BOUNDARY tag.")
+            layer = Int(ntoh(read(s, Int16)))
+            haslayer = true
+        elseif token == DATATYPE
+            verbose && info("DATATYPE")
+            hasdt && error("Already read DATATYPE tag for this BOUNDARY tag.")
+            dt = Int(ntoh(read(s, Int16)))
+            hasdt = true
+        elseif token == XY
+            verbose && info("XY: $(bytes) bytes")
+            hasxy && error("Already read XY tag for this BOUNDARY tag.")
+            xy = Array{Point{2,Int32}}(Int(floor(bytes / 8)))
+            i = 1
+            while i <= length(xy)
+                xy[i] = Point(ntoh(read(s, Int32)), ntoh(read(s, Int32)))
+                i += 1
+            end
+        elseif token == ENDEL
+            verbose && info("ENDEL")
+            break
+        else
+            error("Unexpected token $(token) in BOUNDARY tag.")
+        end
+    end
+
+    # read in Rectangles as Rectangles?
+    Polygon(xy; layer = layer, datatype = dt)
+end
+
+function sref(s)
+    # SREF [EFLAGS] [PLEX] SNAME [<STRANS>] XY
+    haseflags, hasplex, hassname, hasstrans, hasmag, hasangle, hasxy =
+        false, false, false, false, false, false, false
+
+    while true
+        bytes = ntoh(read(s, UInt16)) - 4
+        token = ntoh(read(s, UInt16))
+
+        if token == EFLAGS
+            haseflags && error("Already read EFLAGS tag for this SREF tag.")
+            warn("Not implemented: EFLAGS")
+            haseflags = true
+            skip(s, bytes)
+        elseif token == PLEX
+            hasplex && error("Already read PLEX tag for this SREF tag.")
+            warn("Not implemented: PLEX")
+            hasplex = true
+            skip(s, bytes)
+        elseif token == SNAME
+            hassname && error("Already read SNAME tag for this SREF tag.")
+            hassname = true
+            str = sname(s,bytes)
+        elseif token == STRANS
+            hasstrans && error("Already read STRANS tag for this SREF tag.")
+            hasstrans = true
+            xrefl, magflag, angleflag = strans(s)
+        elseif token == MAG
+            hasmag && error("Already read MAG tag for this SREF tag.")
+            hasmag = true
+            mag = convert(Float64, read(s, GDS64))
+        elseif token == ANGLE
+            hasangle && error("Already read ANGLE tag for this SREF tag.")
+            hasangle = true
+            angle = convert(Float64, read(s, GDS64))
+        elseif token == XY
+            hasxy && error("Already read XY tag for this SREF tag.")
+            hasxy = true
+            xy = Point(ntoh(read(s, Int32)), ntoh(read(s, Int32)))
+        elseif token == ENDEL
+            skip(s, bytes)
+            break
+        else
+            error("Unexpected token $(token) for this SREF tag.")
+        end
+    end
+
+    # now validate what was read
+    if hasstrans
+        if magflag
+            hasmag || error("Missing MAG tag.")
+        end
+        if angleflag
+            hasangle || error("Missing ANGLE tag.")
+        end
+    end
+    hassname || error("Missing SNAME tag.")
+    hasxy || error("Missing XY tag.")
+
+    CellReference(sname, xy; xrefl=xrefl, mag=mag, angle=angle)
+end
+
+function aref(s)
+    # AREF [EFLAGS] [PLEX] SNAME [<STRANS>] COLROW XY
+    haseflags, hasplex, hassname, hasstrans, hasmag, hasangle, hascolrow, hasxy =
+        false, false, false, false, false, false, false, false
+
+    while true
+        bytes = ntoh(read(s, UInt16)) - 4
+        token = ntoh(read(s, UInt16))
+
+        if token == EFLAGS
+            haseflags && error("Already read EFLAGS tag for this AREF tag.")
+            warn("Not implemented: EFLAGS")
+            haseflags = true
+            skip(s, bytes)
+        elseif token == PLEX
+            hasplex && error("Already read PLEX tag for this AREF tag.")
+            warn("Not implemented: PLEX")
+            hasplex = true
+            skip(s, bytes)
+        elseif token == SNAME
+            hassname && error("Already read SNAME tag for this AREF tag.")
+            hassname = true
+            str = sname(s,bytes)
+        elseif token == STRANS
+            hasstrans && error("Already read STRANS tag for this AREF tag.")
+            hasstrans = true
+            xrefl, magflag, angleflag = strans(s)
+        elseif token == MAG
+            hasmag && error("Already read MAG tag for this AREF tag.")
+            hasmag = true
+            mag = convert(Float64, read(s, GDS64))
+        elseif token == ANGLE
+            hasangle && error("Already read ANGLE tag for this AREF tag.")
+            hasangle = true
+            angle = convert(Float64, read(s, GDS64))
+        elseif token == COLROW
+            hascolrow && error("Already read COLROW tag for this AREF tag.")
+            hascolrow = true
+            col = Int(ntoh(read(s, Int16)))
+            row = Int(ntoh(read(s, Int16)))
+        elseif token == XY
+            hasxy && error("Already read XY tag for this AREF tag.")
+            hasxy = true
+            o = Point(ntoh(read(s, Int32)), ntoh(read(s, Int32)))
+            ec = Point(ntoh(read(s, Int32)), ntoh(read(s, Int32)))
+            er = Point(ntoh(read(s, Int32)), ntoh(read(s, Int32)))
+        elseif token == ENDEL
+            skip(s, bytes)
+            break
+        else
+            error("Unexpected token $(token) for this AREF tag.")
+        end
+    end
+
+    # now validate what was read
+    if hasstrans
+        if magflag
+            hasmag || error("Missing MAG tag.")
+        end
+        if angleflag
+            hasangle || error("Missing ANGLE tag.")
+        end
+    end
+    hassname || error("Missing SNAME tag.")
+    hascolrow || error("Missing COLROW tag.")
+    hasxy || error("Missing XY tag.")
+
+    # CellArray(sname, o; xrefl=xrefl, mag=mag, angle=angle)
+end
+
+function sname(s, bytes)
+    by = readbytes(s, bytes)
+    str = convert(ASCIIString, by)
+    if str[end] == '\0'
+        str = str[1:(end-1)]
+    end
+    str
+end
+
+function strans(s)
+    bits = read(s, UInt16)
+    xrefl = (bits & 0x8000) != 0
+    magflag = (bits & 0x0004) != 0
+    angleflag = (bits & 0x0002) != 0
+    xrefl, magflag, angleflag
 end
 
 end

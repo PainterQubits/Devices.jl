@@ -167,34 +167,35 @@ end
 ```
 type DecoratedStyle <: Style
     s::Style
-    ts::AbstractArray{Float64,1}
+    ts::Array{Float64,1}
     dirs::Array{Int,1}
-    cellrefs::Array{CellReference,1}
+    refs::Array{CellReference,1}
     DecoratedStyle(s) = begin
         a = new(s)
         a.ts = Float64[]
         a.dirs = Int[]
-        a.cells = CellReference[]
+        a.refs = CellReference[]
+        a
     end
-    DecoratedStyle(s,t,r,c) = new(s,t,r,c)
+    DecoratedStyle(s,t,d,r) = new(s,t,d,r)
 end
 ```
 
-Style with decorations, like periodic structures along the path, etc.
+Style with decorations, like structures periodically repeated along the path, etc.
 """
 type DecoratedStyle <: Style
     s::Style
-    ts::AbstractArray{Float64,1}
+    ts::Array{Float64,1}
     dirs::Array{Int,1}
-    cellrefs::Array{CellReference,1}
+    refs::Array{CellReference,1}
     DecoratedStyle(s) = begin
         a = new(s)
         a.ts = Float64[]
         a.dirs = Int[]
-        a.cellrefs = CellReference[]
+        a.refs = CellReference[]
         a
     end
-    DecoratedStyle(s,t,r,c) = new(s,t,r,c)
+    DecoratedStyle(s,t,d,r) = new(s,t,d,r)
 end
 
 """

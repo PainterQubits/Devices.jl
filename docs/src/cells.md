@@ -9,6 +9,7 @@ into a single entity.
         ::AbstractArray{CellReference,1})
     bounds(::Cell)
     center(::Cell)
+    name(::Cell)
 ```
 ## Referenced and arrayed cells
 
@@ -26,6 +27,8 @@ display complexity.
     bounds(::CellReference)
     copy(::CellReference)
     copy(::CellArray)
+    name(::CellReference)
+    name(::CellArray)
 ```
 ## Resolving references
 

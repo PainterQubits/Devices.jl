@@ -28,4 +28,5 @@ To save a pattern, make sure you are `using FileIO`.
     GDS.gdswrite
     GDS.strans
     write(::IO, ::GDS64)
+    read(::IO, ::Type{GDS64})
 ```

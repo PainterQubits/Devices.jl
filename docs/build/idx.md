@@ -29,7 +29,6 @@
 - [`Devices.GDS.strans`](fileio.md#Devices.GDS.strans)
 - [`Devices.Paths.adjust!`](paths.md#Devices.Paths.adjust!)
 - [`Devices.Paths.attach!`](paths.md#Devices.Paths.attach!)
-- [`Devices.Paths.attachments`](paths.md#Devices.Paths.attachments)
 - [`Devices.Paths.direction`](paths.md#Devices.Paths.direction)
 - [`Devices.Paths.distance`](paths.md#Devices.Paths.distance)
 - [`Devices.Paths.extent`](paths.md#Devices.Paths.extent)

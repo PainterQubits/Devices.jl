@@ -51,16 +51,12 @@ render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
 
 Render a polygon `r` to cell `c`, defaulting to plain styling.
 
-Returns an array of the polygons added to the cell.
-
 
 ```
 render!(c::Cell, p::Path; kwargs...)
 ```
 
 Render a path `p` to a cell `c`.
-
-Returns an array of the polygons added to the cell.
 
 
 ```
