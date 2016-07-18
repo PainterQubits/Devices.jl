@@ -223,6 +223,12 @@
             </li>
           
             <li class="anchor">
+              <a title="Attachments" href="#attachments">
+                Attachments
+              </a>
+            </li>
+          
+            <li class="anchor">
               <a title="Interfacing with gdspy" href="#interfacing-with-gdspy">
                 Interfacing with gdspy
               </a>
@@ -319,11 +325,6 @@
     style0::Style
     segments::Array{Segment{T},1}
     styles::Array{Style,1}
-    attachments::Array{CellReference,1}
-    Path(p0::Point{2,T}, α0::Real, style0::Style, segments::Array{Segment{T},1},
-        styles::Array{Style,1}) = new(p0, α0, style0, segments, styles)
-    Path(style::Style) =
-        new(Point(zero(T),zero(T)), 0.0, style, Segment{T}[], Style[])
 end
 </pre></div>
 
@@ -492,21 +493,22 @@ end
 <strong><code>Devices.Paths.DecoratedStyle</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type DecoratedStyle &lt;: Style
     s::Style
-    ts::AbstractArray{Float64,1}
+    ts::Array{Float64,1}
     dirs::Array{Int,1}
-    cellrefs::Array{CellReference,1}
+    refs::Array{CellReference,1}
     DecoratedStyle(s) = begin
         a = new(s)
         a.ts = Float64[]
         a.dirs = Int[]
-        a.cells = CellReference[]
+        a.refs = CellReference[]
+        a
     end
-    DecoratedStyle(s,t,r,c) = new(s,t,r,c)
+    DecoratedStyle(s,t,d,r) = new(s,t,d,r)
 end
 </pre></div>
 
 
-<p>Style with decorations, like periodic structures along the path, etc.</p>
+<p>Style with decorations, like structures periodically repeated along the path, etc.</p>
 <p><a id='Devices.Paths.undecorated' href='#Devices.Paths.undecorated'>#</a>
 <strong><code>Devices.Paths.undecorated</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>undecorated(s::DecoratedStyle)
@@ -648,17 +650,10 @@ end
 </pre></div>
 
 
-<p>Attach a shallow copy of <code>c</code> along a path (the referenced cell is not copied). The copied <code>CellReference</code> is returned so that it can be used with the <a href="../cells/#AffineTransforms.transform-Tuple{Devices.Cells.Cell{T&lt;:Real},Devices.Cells.CellRef{S,T&lt;:Real}}"><code>Cells.transform(::Cell, ::Cells.CellRef)</code></a> function.</p>
+<p>Attach <code>c</code> along a path.</p>
 <p>By default, the attachment occurs at <code>t ∈ [0,1]</code> along the most recent path segment, but a different path segment index can be specified using <code>i</code>. The reference is oriented with zero rotation if the path is pointing at 0°, otherwise it is rotated with the path.</p>
 <p>The origin of the cell reference tells the method where to place the cell <em>with respect to a coordinate system that rotates with the path</em>. Suppose the path is a straight line with angle 0°. Then an origin of <code>Point(0.,10.)</code> will put the cell at 10 above the path, or 10 to the left of the path if it turns left by 90°.</p>
 <p>The <code>where</code> option is for convenience. If <code>where == 0</code>, nothing special happens. If <code>where == -1</code>, then the point of attachment for the reference is on the leftmost edge of the waveguide (the rendered polygons; the path itself has no width). Likewise if <code>where == 1</code>, the point of attachment is on the rightmost edge. This option does not automatically rotate the cell reference, apart from what is already done as described in the first paragraph. You can think of this option as setting a special origin for the coordinate system that rotates with the path. For instance, an origin for the cell reference of <code>Point(0.,10.)</code> together with <code>where == -1</code> will put the cell at 10 above the edge of a rendered (finite width) path with angle 0°.</p>
-<p><a id='Devices.Paths.attachments' href='#Devices.Paths.attachments'>#</a>
-<strong><code>Devices.Paths.attachments</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>attachments(p::Path)
-</pre></div>
-
-
-<p>Returns the array of attachments for a given path. These are the cell references tied to the path by <a href="./#Devices.Paths.attach!"><code>attach!</code></a>.</p>
 <p><a id='Devices.Paths.meander!' href='#Devices.Paths.meander!'>#</a>
 <strong><code>Devices.Paths.meander!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>meander!{T&lt;:Real}(p::Path{T}, len, r, straightlen, α::Real)
@@ -728,6 +723,14 @@ end
 <li>"r": turn by -π/2 (right)</li>
 <li>"lrlrllrrll": do those turns in that order</li>
 </ul>
+<p><a id='Attachments-1'></a></p>
+<h2 id="attachments">Attachments</h2>
+<p>When you call <a href="./#Devices.Paths.attach!"><code>attach!</code></a>, you are defining a coordinate system local to somewhere along the target <code>Path</code>, saying that a <code>CellReference</code> should be placed at the origin of that coordinate system (or slightly away from it if you want the cell to be one one side of the path or the other). The local coordinate system will rotate as the path changes orientations. The origin of the <code>CellReference</code> corresponds how the referenced cell should be displaced with respect to the origin of the local coordinate system. This differs from the usual meaning of the origin of a <code>CellReference</code>, which is how the referenced cell should be displaced with respect to the origin of a containing <code>Cell</code>.</p>
+<p>The same <code>CellReference</code> can be attached to multiple points along multiple paths. If the cell reference is modified (e.g. rotation, origin, magnification) before rendering, the changes should be reflected at all attachment points. The attachment of the cell reference is in some sense an abstraction: a <code>CellReference</code> must ultimately live inside a <code>Cell</code>, but an unrendered <code>Path</code> does not live inside any cell. If the path is modified further before rendering, the attachment points should follow the path modifications, moving the origins of the local coordinate systems. The origin fields of the cell references do not change as the path is modified.</p>
+<p>Attachments are implemented by introducing a <a href="./#Devices.Paths.DecoratedStyle"><code>Paths.DecoratedStyle</code></a>, which is kind of a meta-<code>Style</code>: it remembers where to attach <code>CellReferences</code>, but how the path itself is actually drawn is deferred to a different <code>Style</code> object that it retains a reference to. One can repeat a <code>DecoratedStyle</code> with one attachment to achieve a periodic placement of <code>CellReferences</code> (like a <code>CellArray</code>, but along the path). Or, one long segment with a <code>DecoratedStyle</code> could have several attachments to achieve a similar effect.</p>
+<p>When a <code>Path</code> is rendered, it is turned into <code>Polygons</code> living in some <code>Cell</code>. The attachments remain <code>CellReferences</code>, now living inside of a <code>Cell</code> and not tied to an abstract path. The notion of local coordinate systems along the path no longer makes sense because the abstract path has been made concrete, and the polygons are living in the coordinate system of the containing cell. Each attachment to the former path now must have its origin referenced to the origin of the containing cell, not to local path coordinate systems. Additionally, the references may need to rotate according to how the path was locally oriented. As a result, even if the same <code>CellReference</code> was attached multiple times to a path, now we need distinct <code>CellReference</code> objects for each attachment, as well as for each time a corresponding <code>DecoratedStyle</code> is rendered.</p>
+<p>Suppose we want the ability to transform between coordinate systems, especially between the coordinate system of a referenced cell and the coordinate system of a parent cell. At first glance it would seem like we could simply define a transform function, taking the parent cell and the cell reference we are interested in. But how would we actually identify the particular cell reference we want? Looking in the tree of references for an attached <code>CellReference</code> will not work: distinct <code>CellReferences</code> needed to be made after the path was rendered, and so the particular <code>CellReference</code> object initially attached is not actually in the <code>Cell</code> containing the rendered path.</p>
+<p>To overcome this problem, we make searching for the appropriate <code>CellReference</code> easier. Suppose a path with attachments has been rendered to a <code>Cell</code>, which is bound to symbol <code>aaa</code>. A <code>CellReference</code> referring to a cell named "bbb" was attached twice. To recall the second attachment: <code>aaa["bbb",2]</code> (the index defaults to 1 if unspecified). We can go deeper if we want to refer to references inside that attachment: <code>aaa["bbb",2]["ccc"]</code>. In this manner, it is easy to find the right <code>CellReference</code> to use with <a href="../cells/#AffineTransforms.transform-Tuple{Devices.Cells.Cell{T&lt;:Real},Devices.Cells.CellRef{S,T&lt;:Real}}"><code>Cells.transform(::Cell, ::Cells.CellRef)</code></a>.</p>
 <p><a id='Interfacing-with-gdspy-1'></a></p>
 <h2 id="interfacing-with-gdspy">Interfacing with gdspy</h2>
 <p>The Python package <code>gdspy</code> is used for rendering paths into polygons. Ultimately we intend to remove this dependency.</p>
