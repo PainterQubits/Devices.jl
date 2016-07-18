@@ -7,4 +7,5 @@
     launch!
     checkerboard
     pecbasedose
+    surf1d
 ```

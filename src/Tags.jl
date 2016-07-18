@@ -1,6 +1,7 @@
 module Tags
 import Clipper
 import AffineTransforms: AffineTransform
+import ForwardDiff
 import Devices
 import Devices: render!
 using Devices.Paths
@@ -9,6 +10,7 @@ using Devices.Polygons
 using Devices.Points
 using Devices.Cells
 using Devices: uniquename
+import Devices.Polygons.AbstractPolygon
 
 qr() = Devices._qr
 gdspy() = Devices._gdspy
@@ -20,7 +22,7 @@ export cpwlauncher
 export launch!
 export checkerboard
 export pecbasedose
-
+export surf1d
 """
 `qrcode{T<:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0; kwargs...)`
 
@@ -284,6 +286,95 @@ function pecbasedose(kwargs...)
     c = Cell(uniquename("pecbasedose"))
     push!(c.refs, a)
     c
+end
+
+# function mesh1d(length, width, contour_fn; zbins=10, max_seg_len=1., layer=0)
+#
+#     polys = AbstractPolygon[]
+#     heights = Float64[]
+#
+#     l = 0.
+#     while l <= length
+#         m = abs(ForwardDiff.derivative(contour_fn, l))
+#         h = contour_fn(l)
+#         dim = min(max_seg_len/m, max_seg_len)
+#         push!(polys, Rectangle(width, dim, layer=layer) + Point(0.,l))
+#         push!(heights, contour_fn(l + dim/2))
+#         l += dim
+#     end
+#
+#     # Total length adjustment
+#     totlen = gety(polys[end].ur)
+#     for p in polys
+#         p.ll = Point(getx(p.ll), gety(p.ll) * length/totlen)
+#         p.ur = Point(getx(p.ur), gety(p.ur) * length/totlen)
+#     end
+#
+#     # Layer assignment (in principle this could be improved by clustering, etc.)
+#     lin = linspace(minimum(heights), maximum(heights), zbins)
+#     # slow / dumb
+#     for (i,h) in enumerate(heights)
+#         j=zbins
+#         println(h)
+#         println(lin[j])
+#         while h < lin[j]
+#             j-=1
+#         end
+#         polys[i].properties[:layer] = j
+#     end
+#     polys
+# end
+
+
+"""
+```
+surf1d(length, width, contour_fn; zbins=20, step=1., max_seg_len=1.)
+```
+
+Given `length` and `width` of a rectangular patch, this generates a mesh for
+3D surface PEC according to a particular contour function `contour_fn`. The
+meshing is done in the length direction (+y). The number of bins (layers)
+can be controlled with `zbins`, the maximum step change in the resist height
+is given by `step`, and the `max_seg_len` is the maximum segment length in
+the mesh.
+"""
+function surf1d(length, width, contour_fn; zbins=20, step=1., max_seg_len=1.)
+
+    polys = AbstractPolygon[]
+    heights = Float64[]
+
+    l = 0.
+    while l <= length
+        m = abs(ForwardDiff.derivative(contour_fn, l))
+        h = contour_fn(l)
+        dim = min(step/m, max_seg_len)
+        push!(polys, Rectangle(width, dim, layer=layer) + Point(0.,l))
+        push!(heights, contour_fn(l + dim/2))
+        l += dim
+    end
+
+    # Total length adjustment
+    totlen = gety(polys[end].ur)
+    for p in polys
+        p.ll = Point(getx(p.ll), gety(p.ll) * length/totlen)
+        p.ur = Point(getx(p.ur), gety(p.ur) * length/totlen)
+    end
+
+    # Layer assignment (in principle this could be improved by clustering, etc.)
+    lin = linspace(minimum(heights), maximum(heights), zbins)
+
+    # Kind of dumb, maximum will only appear once
+    for (i,h) in enumerate(heights)
+        j=zbins
+        println(h)
+        println(lin[j])
+        while h < lin[j]
+            j == 1 && break
+            j-=1
+        end
+        polys[i].properties[:layer] = j
+    end
+    polys
 end
 
 end

@@ -311,11 +311,11 @@ end
 
 include("Tags.jl")
 import .Tags: qrcode, radialstub, radialcut #, cpwlauncher #, launch!
-import .Tags: pecbasedose, checkerboard
+import .Tags: pecbasedose, checkerboard, surf1d
 export Tags
 export qrcode
 export radialstub, radialcut
-export cpwlauncher
+export cpwlauncher, surf1d
 # export launch!
 export pecbasedose, checkerboard
 
