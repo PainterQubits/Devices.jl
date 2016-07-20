@@ -97,3 +97,14 @@ Generate lines and spaces suitable for obtaining the base dose for BEAMER PEC (1
 
 To do: Modify to be more flexible for other substrates, beam energies, etc.
 
+<a id='Devices.Tags.surf1d' href='#Devices.Tags.surf1d'>#</a>
+**`Devices.Tags.surf1d`** &mdash; *Function*.
+
+
+
+```
+surf1d(length, width, contour_fn; zbins=20, step=1., max_seg_len=1.)
+```
+
+Given `length` and `width` of a rectangular patch, this generates a mesh for 3D surface PEC according to a particular contour function `contour_fn`. The meshing is done in the length direction (+y). The number of bins (layers) can be controlled with `zbins`, the maximum step change in the resist height is given by `step`, and the `max_seg_len` is the maximum segment length in the mesh.
+

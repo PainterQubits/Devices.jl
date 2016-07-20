@@ -514,14 +514,7 @@ Return a parametric function over the domain [0,1] that represents the compound 
 
 
 ```
-simplify(p::Path)
-```
-
-All segments and styles of a path are turned into a `CompoundSegment` and `CompoundStyle`.
-
-
-```
-simplify(p::Path, inds::UnitRange)
+simplify(p::Path, inds::UnitRange=1:length(p))
 ```
 
 At `inds`, segments of a path are turned into a `CompoundSegment` and styles of a path are turned into a `CompoundStyle`. The method returns a tuple, `(segment, style)`.
@@ -535,14 +528,7 @@ At `inds`, segments of a path are turned into a `CompoundSegment` and styles of 
 
 
 ```
-simplify!(p::Path)
-```
-
-In-place version of [`simplify`](paths.md#Devices.Paths.simplify).
-
-
-```
-simplify!(p::Path, inds::UnitRange)
+simplify!(p::Path, inds::UnitRange=1:length(p))
 ```
 
 In-place version of [`simplify`](paths.md#Devices.Paths.simplify).

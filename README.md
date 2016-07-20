@@ -2,4 +2,4 @@
 
 For simplified generation of device CAD files.
 
-Documentation available [here](https://ajkeller34.github.io/Devices.jl/).
+Documentation available [here](https://painterqubits.github.io/Devices.jl/).

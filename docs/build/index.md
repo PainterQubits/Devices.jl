@@ -31,7 +31,7 @@ A [Julia](http://julialang.org) package for designing CAD files for superconduct
 We use a custom version of the Clipper package, which we will need for making polygons compatible with GDS files.
 
 
-  * `Pkg.clone("https://github.com/ajkeller34/Clipper.jl.git")`
+  * `Pkg.clone("https://github.com/PainterQubits/Clipper.jl.git")`
   * `Pkg.checkout("Clipper", "pointinpoly")`
 
 
@@ -46,7 +46,7 @@ You will need to build the package to compile shared library / DLL files. This s
 ### And finally...
 
 
-  * `Pkg.clone("https://github.com/ajkeller34/Devices.jl.git")`
+  * `Pkg.clone("https://github.com/PainterQubits/Devices.jl.git")`
 
 
 <a id='Quick-start-1'></a>

@@ -60,5 +60,6 @@
 - [`Devices.Tags.qrcode`](tags.md#Devices.Tags.qrcode)
 - [`Devices.Tags.radialcut`](tags.md#Devices.Tags.radialcut)
 - [`Devices.Tags.radialstub`](tags.md#Devices.Tags.radialstub)
+- [`Devices.Tags.surf1d`](tags.md#Devices.Tags.surf1d)
 - [`Devices.render!`](render.md#Devices.render!)
 

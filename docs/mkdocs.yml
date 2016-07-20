@@ -1,5 +1,5 @@
 site_name:        Devices.jl
-repo_url:         https://github.com/ajkeller34/Devices.jl
+repo_url:         https://github.com/PainterQubits/Devices.jl
 site_description: Package for designing CAD files for superconducting devices.
 site_author:      Andrew Keller
 
