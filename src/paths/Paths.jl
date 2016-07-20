@@ -91,7 +91,7 @@ For some parameteric function `p(t)↦Point(x(t),y(t))`, returns the angle at
 which the path is pointing for a given `t`.
 """
 function direction(p::Function, t)
-    f′ = gradient(p, t)
+    f′ = ForwardDiff.gradient(p, t)
     fx′,fy′ = getx(f′),gety(f′)
     if !(fx′ ≈ 0)
         atan(fy′/fx′)
@@ -396,7 +396,7 @@ end
 
 """
 ```
-simplify(p::Path, inds::UnitRange)
+simplify(p::Path, inds::UnitRange=1:length(p))
 ```
 
 At `inds`, segments of a path are turned into a `CompoundSegment` and
@@ -409,8 +409,9 @@ in a path unless you could simplify it.
 - You don't need to think hard about boundaries between straights and turns
 when you want a continuous styling of a very long path.
 """
-function simplify(p::Path, inds::UnitRange)
+function simplify(p::Path, inds::UnitRange=1:length(p))
     cseg = CompoundSegment(p.segments[inds])
+    println("Hi")
     csty = CompoundStyle(cseg.segments, p.styles[inds])
     (cseg, csty)
     # deleteat!(p1, inds)
@@ -420,36 +421,17 @@ end
 
 """
 ```
-simplify(p::Path)
-```
-
-All segments and styles of a path are turned into a `CompoundSegment` and
-`CompoundStyle`.
-"""
-simplify(p::Path) = simplify(p, 1:length(p))
-
-"""
-```
-simplify!(p::Path, inds::UnitRange)
+simplify!(p::Path, inds::UnitRange=1:length(p))
 ```
 
 In-place version of [`simplify`](@ref).
 """
-function simplify!(p::Path, inds::UnitRange)
+function simplify!(p::Path, inds::UnitRange=1:length(p))
     x = simplify(p, inds)
     deleteat!(p, inds)
     insert!(p, inds[1], x)
     p
 end
-
-"""
-```
-simplify!(p::Path)
-```
-
-In-place version of [`simplify`](@ref).
-"""
-simplify!(p::Path) = simplify!(p, 1:length(p))
 
 # function split{T<:Real}(s::CompoundSegment{T}, points)
 #     segs = CompoundSegment{T}[]
@@ -605,8 +587,8 @@ function param{T<:Real}(c::CompoundSegment{T})
     push!(f.args[2].args, quote
         g = (($c).segments)[1].f
         h = (($c).segments)[end].f
-        g′ = gradient(g,0.0)
-        h′ = gradient(h,1.0)
+        g′ = ForwardDiff.gradient(g,0.0)
+        h′ = ForwardDiff.gradient(h,1.0)
         D0x, D0y = getx(g′), gety(g′)
         D1x, D1y = getx(h′), gety(h′)
         a0,a = p0((($c).segments)[1]),p1((($c).segments)[end])

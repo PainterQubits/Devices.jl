@@ -41,17 +41,17 @@ end
 
 """
 ```
-length(s::Segment)
+length(s::Segment, verbose::Bool=false)
 ```
 
 Return the length of a segment (calculated).
 """
-function length(s::Segment, diag::Bool=false)
+function length(s::Segment, verbose::Bool=false)
     path = s.f
-    ds(t) = sqrt(dot(gradient(s.f, t), gradient(s.f, t)))
+    ds(t) = sqrt(dot(ForwardDiff.gradient(s.f, t), ForwardDiff.gradient(s.f, t)))
     val, err = quadgk(ds, 0.0, 1.0)
-    diag && info("Integration estimate: $val")
-    diag && info("Error upper bound estimate: $err")
+    verbose && info("Integration estimate: $val")
+    verbose && info("Error upper bound estimate: $err")
     val
 end
 
