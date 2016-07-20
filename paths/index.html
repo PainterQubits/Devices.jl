@@ -125,7 +125,7 @@
       <div class="drawer">
         <nav aria-label="Navigation">
   
-  <a href="https://github.com/ajkeller34/Devices.jl" class="project">
+  <a href="https://github.com/PainterQubits/Devices.jl" class="project">
     <div class="banner">
       
       <div class="name">
@@ -137,7 +137,7 @@
         </strong>
         
           <br>
-          ajkeller34/Devices.jl
+          PainterQubits/Devices.jl
         
       </div>
     </div>
@@ -148,12 +148,12 @@
         <ul class="repo">
           <li class="repo-download">
             
-            <a href="https://github.com/ajkeller34/Devices.jl/archive/master.zip" target="_blank" title="Download" data-action="download">
+            <a href="https://github.com/PainterQubits/Devices.jl/archive/master.zip" target="_blank" title="Download" data-action="download">
               <i class="icon icon-download"></i> Download
             </a>
           </li>
           <li class="repo-stars">
-            <a href="https://github.com/ajkeller34/Devices.jl/stargazers" target="_blank" title="Stargazers" data-action="star">
+            <a href="https://github.com/PainterQubits/Devices.jl/stargazers" target="_blank" title="Stargazers" data-action="star">
               <i class="icon icon-star"></i> Stars
               <span class="count">&ndash;</span>
             </a>
@@ -673,12 +673,7 @@ end
 <p>Return a parametric function over the domain [0,1] that represents the compound segment.</p>
 <p><a id='Devices.Paths.simplify' href='#Devices.Paths.simplify'>#</a>
 <strong><code>Devices.Paths.simplify</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>simplify(p::Path)
-</pre></div>
-
-
-<p>All segments and styles of a path are turned into a <code>CompoundSegment</code> and <code>CompoundStyle</code>.</p>
-<div class="codehilite"><pre><span></span>simplify(p::Path, inds::UnitRange)
+<div class="codehilite"><pre><span></span>simplify(p::Path, inds::UnitRange=1:length(p))
 </pre></div>
 
 
@@ -689,12 +684,7 @@ end
 </ul>
 <p><a id='Devices.Paths.simplify!' href='#Devices.Paths.simplify!'>#</a>
 <strong><code>Devices.Paths.simplify!</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>simplify!(p::Path)
-</pre></div>
-
-
-<p>In-place version of <a href="./#Devices.Paths.simplify"><code>simplify</code></a>.</p>
-<div class="codehilite"><pre><span></span>simplify!(p::Path, inds::UnitRange)
+<div class="codehilite"><pre><span></span>simplify!(p::Path, inds::UnitRange=1:length(p))
 </pre></div>
 
 
@@ -815,7 +805,7 @@ end
     </main>
     <script>
       var base_url = '..';
-      var repo_id  = 'ajkeller34/Devices.jl';
+      var repo_id  = 'PainterQubits/Devices.jl';
     </script>
     <script src="../assets/javascripts/application-997097ee0c.js"></script>
     
