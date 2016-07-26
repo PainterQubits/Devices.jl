@@ -29,7 +29,9 @@ import Base:
     shift!,
     insert!,
     append!,
-    show
+    show,
+    summary,
+    dims2string
 
 using ForwardDiff
 # import Plots
@@ -91,7 +93,7 @@ For some parameteric function `p(t)↦Point(x(t),y(t))`, returns the angle at
 which the path is pointing for a given `t`.
 """
 function direction(p::Function, t)
-    f′ = ForwardDiff.gradient(p, t)
+    f′ = ForwardDiff.derivative(p, t)
     fx′,fy′ = getx(f′),gety(f′)
     if !(fx′ ≈ 0)
         atan(fy′/fx′)
@@ -164,7 +166,18 @@ type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
     styles::Array{Style,1}
 end
 
+dims2string(p::Path) = isempty(p) ? "0-dimensional" :
+                 length(p) == 1 ? "$(d[1])-segment" :
+                 join(map(string,d), '×')
+
+summary(p::Path) = string(dims2string(size(p)), " ", typeof(p)) *
+    " from $(p.p0) with ∠$(p.α0)"
+
 pathf(p) = p[1][1].f
+
+function show(io::IO, x::Tuple{Segment, Style})
+    print(io, "$(x[1]) styled as $(x[2])")
+end
 
 """
 ```
@@ -411,7 +424,7 @@ when you want a continuous styling of a very long path.
 """
 function simplify(p::Path, inds::UnitRange=1:length(p))
     cseg = CompoundSegment(p.segments[inds])
-    println("Hi")
+    # println("Hi")
     csty = CompoundStyle(cseg.segments, p.styles[inds])
     (cseg, csty)
     # deleteat!(p1, inds)
@@ -587,8 +600,8 @@ function param{T<:Real}(c::CompoundSegment{T})
     push!(f.args[2].args, quote
         g = (($c).segments)[1].f
         h = (($c).segments)[end].f
-        g′ = ForwardDiff.gradient(g,0.0)
-        h′ = ForwardDiff.gradient(h,1.0)
+        g′ = ForwardDiff.derivative(g,0.0)
+        h′ = ForwardDiff.derivative(h,1.0)
         D0x, D0y = getx(g′), gety(g′)
         D1x, D1y = getx(h′), gety(h′)
         a0,a = p0((($c).segments)[1]),p1((($c).segments)[end])

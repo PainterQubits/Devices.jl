@@ -1,4 +1,3 @@
-
 """
 ```
 type Trace <: Style

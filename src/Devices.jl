@@ -241,7 +241,7 @@ Render a `segment` with style `s` to cell `c`.
 function render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
     polys = AbstractPolygon[]
     f = segment.f
-    g(t) = ForwardDiff.gradient(f,t)
+    g(t) = ForwardDiff.derivative(f,t)
     last = 0.0
     first = true
     gp = gdspy()[:Path](Paths.width(s, 0.0), Point(0.0,0.0),
@@ -300,7 +300,7 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
             offset = extent(s.s, t)
             newx = offset * cos(rot2)
             newy = offset * sin(rot2)
-            origin = Point(tformrotate(rot)*Array(ref.origin))
+            ref.origin = Point(tformrotate(rot)*Array(ref.origin))
             ref.origin += (Point(newx,newy) + segment.f(t))
             ref.rot += rot*180/π
         end

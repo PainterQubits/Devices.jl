@@ -48,12 +48,15 @@ Return the length of a segment (calculated).
 """
 function length(s::Segment, verbose::Bool=false)
     path = s.f
-    ds(t) = sqrt(dot(ForwardDiff.gradient(s.f, t), ForwardDiff.gradient(s.f, t)))
+    ds(t) = sqrt(dot(ForwardDiff.derivative(s.f, t), ForwardDiff.derivative(s.f, t)))
     val, err = quadgk(ds, 0.0, 1.0)
     verbose && info("Integration estimate: $val")
     verbose && info("Error upper bound estimate: $err")
     val
 end
+
+show(io::IO, s::Segment) =
+    print(io, summary(s))
 
 """
 ```
@@ -97,6 +100,7 @@ copy(s::Straight) = Straight(s.l,s.p0,s.α0)
 length(s::Straight) = s.l
 p0(s::Straight) = s.p0
 α0(s::Straight) = s.α0
+summary(s::Straight) = "Straight by $(s.l)"
 
 """
 ```
@@ -173,6 +177,7 @@ copy(s::Turn) = Turn(s.α,s.r,s.p0,s.α0)
 length{T<:Real}(s::Turn{T}) = T(abs(s.r*s.α))
 p0(s::Turn) = s.p0
 α0(s::Turn) = s.α0
+summary(s::Turn) = "Turn by "*(@sprintf "%0.3f" s.α)*" with radius $(s.r)"
 
 """
 ```

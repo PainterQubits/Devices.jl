@@ -2,8 +2,9 @@ module Points
 
 import AffineTransforms: AffineTransform
 import Clipper: IntPoint
-import Base: convert, .+, .-, *
+import Base: convert, .+, .-, *, summary
 import FixedSizeArrays: FixedVectorNoTuple, Point
+import ForwardDiff: ForwardDiff, extract_derivative
 import PyCall.PyObject
 export Point
 export getx, gety
@@ -45,6 +46,12 @@ for dotop in [:.+, :.-]
 end
 
 *(a::AffineTransform, p::Point) = Point(a * Array(p))
+
+show(io::IO, p::Point) = print(io, summary(p))
+summary(p::Point) = "("*string(getx(p))*","*string(gety(p))*")"
+
+extract_derivative{T<:Real}(x::Point{2,T}) =
+    Point(ForwardDiff.partials(getx(x),1),ForwardDiff.partials(gety(x),1))
 
 
 end
