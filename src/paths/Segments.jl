@@ -55,8 +55,16 @@ function length(s::Segment, verbose::Bool=false)
     val
 end
 
-show(io::IO, s::Segment) =
-    print(io, summary(s))
+show(io::IO, s::Segment) = print(io, summary(s))
+
+function deepcopy_internal(x::Segment, stackdict::ObjectIdDict)
+    if haskey(stackdict, x)
+        return stackdict[x]
+    end
+    y = copy(x)
+    stackdict[x] = y
+    return y
+end
 
 """
 ```
@@ -215,7 +223,7 @@ end
 
 Consider an array of segments as one contiguous segment.
 Useful e.g. for applying styles, uninterrupted over segment changes.
-The array of segments given to the constructor is deep-copied and retained
+The array of segments given to the constructor is copied and retained
 by the compound segment.
 """
 type CompoundSegment{T<:Real} <: Segment{T}

@@ -35,7 +35,7 @@ We use a custom version of the Clipper package, which we will need for making po
   * `Pkg.checkout("Clipper", "pointinpoly")`
 
 
-You will need to build the package to compile shared library / DLL files. This should just work on Mac OS X, and should also work on Windows provided you install Visual Studio and ensure that `vcvarsall.bat` and `cl.exe` are in your account's PATH variable.
+You will need to build the package to compile shared library / DLL files. This should just work on Mac OS X, and should also work on Windows provided you install [Visual Studio](https://www.visualstudio.com/en-us/visual-studio-homepage-vs.aspx) and ensure that `vcvarsall.bat` and `cl.exe` are in your account's PATH variable. Probably these are located in: `C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC` and `C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin`, respectively.
 
 
   * `Pkg.build("Clipper")`

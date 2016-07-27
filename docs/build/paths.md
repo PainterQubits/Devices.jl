@@ -148,7 +148,7 @@ type CompoundSegment{T<:Real} <: Segment{T}
 end
 ```
 
-Consider an array of segments as one contiguous segment. Useful e.g. for applying styles, uninterrupted over segment changes. The array of segments given to the constructor is deep-copied and retained by the compound segment.
+Consider an array of segments as one contiguous segment. Useful e.g. for applying styles, uninterrupted over segment changes. The array of segments given to the constructor is copied and retained by the compound segment.
 
 
 <a id='Styles-1'></a>

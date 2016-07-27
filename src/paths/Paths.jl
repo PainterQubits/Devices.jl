@@ -6,6 +6,7 @@ using ..Cells
 import Base:
     convert,
     copy,
+    deepcopy_internal,
     start,
     done,
     next,

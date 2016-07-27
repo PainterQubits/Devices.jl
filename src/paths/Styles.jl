@@ -1,3 +1,11 @@
+function deepcopy_internal(x::Style, stackdict::ObjectIdDict)
+    if haskey(stackdict, x)
+        return stackdict[x]
+    end
+    y = copy(x)
+    stackdict[x] = y
+    return y
+end
 """
 ```
 type Trace <: Style
@@ -131,7 +139,7 @@ Returns the function needed for a `CompoundStyle`. The segments array is
 shallow-copied for use in the function.
 """
 function param{T<:Real}(seg::AbstractArray{Segment{T},1})
-    segments = copy(Array(seg))
+    segments = deepcopy(Array(seg))
     isempty(segments) && error("Cannot parameterize with zero segments.")
 
     # Build up our piecewise parametric function
