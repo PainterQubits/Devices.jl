@@ -226,6 +226,7 @@ render!(c::Cell, p::Path; kwargs...)
 Render a path `p` to a cell `c`.
 """
 function render!(c::Cell, p::Path; kwargs...)
+    adjust!(p)
     for (segment, s) in p
         render!(c, segment, s; kwargs...)
     end

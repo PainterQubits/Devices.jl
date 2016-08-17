@@ -509,6 +509,14 @@ function turn!{T<:Real}(p::Path{T}, s::ASCIIString, r::Real, sty::Style=style1(p
     nothing
 end
 
+function corner!{T<:Real}(p::Path{T}, α::Real, sty::Style=style1(p))
+    p0 = p1(p)
+    α0 = α1(p)
+    corn = Corner{T}(p0, α0, α, extent(style1(p)), 1.)
+    push!(p, (corn,sty))
+    nothing
+end
+
 """
 ```
 meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
@@ -572,26 +580,26 @@ end
 
 """
 ```
-param{T<:Real}(c::CompoundSegment{T})
+param{T<:Real}(c::AbstractArray{Segment{T}})
 ```
 
 Return a parametric function over the domain [0,1] that represents the
-compound segment.
+compound segments.
 """
-function param{T<:Real}(c::CompoundSegment{T})
-    isempty(c.segments) && error("Cannot parameterize with zero segments.")
+function param{T<:Real}(c::AbstractArray{Segment{T},1})
+    isempty(c) && error("Cannot parameterize with zero segments.")
 
     # Build up our piecewise parametric function
     f = Expr(:(->), :t, Expr(:block))
     push!(f.args[2].args, quote
-        L = pathlength(($c).segments)
+        L = pathlength(($c))
         l0 = zero($T)
     end)
 
-    for i in 1:length(c.segments)
+    for i in 1:length(c)
         push!(f.args[2].args, quote
-            fn = (($c).segments)[$i].f
-            l1 = l0 + length((($c).segments)[$i])
+            fn = (($c))[$i].f
+            l1 = l0 + length((($c))[$i])
             (l0/L <= t < l1/L) && return (fn)((t*L-l0)/(l1-l0))
             l0 = l1
         end)
@@ -599,14 +607,14 @@ function param{T<:Real}(c::CompoundSegment{T})
 
     # For continuity of the derivative
     push!(f.args[2].args, quote
-        g = (($c).segments)[1].f
-        h = (($c).segments)[end].f
+        g = (($c))[1].f
+        h = (($c))[end].f
         g′ = ForwardDiff.derivative(g,0.0)
         h′ = ForwardDiff.derivative(h,1.0)
         D0x, D0y = getx(g′), gety(g′)
         D1x, D1y = getx(h′), gety(h′)
-        a0,a = p0((($c).segments)[1]),p1((($c).segments)[end])
-        l0,l1 = length((($c).segments)[1]), length((($c).segments)[end])
+        a0,a = p0((($c))[1]),p1((($c))[end])
+        l0,l1 = length((($c))[1]), length((($c))[end])
         (t >= 1.0) &&
             return a + Point(D1x*(t-1)*(L/l1), D1y*(t-1)*(L/l1))
         (t < 0.0) &&

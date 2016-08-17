@@ -92,7 +92,7 @@ type CompoundStyle <: Style
 end
 CompoundStyle{T<:Real}(seg::AbstractArray{Segment{T},1},
         sty::AbstractArray{Style,1}) =
-    CompoundStyle(deepcopy(Array(sty)), makedivs(seg, sty), param(seg))
+    CompoundStyle(deepcopy(Array(sty)), makedivs(seg, sty), cstylef(seg))
 
 divs(s::CompoundStyle) = s.divs
 
@@ -133,12 +133,12 @@ function makedivs{T<:Real}(segments::AbstractArray{Segment{T},1},
 end
 
 """
-`param{T<:Real}(seg::AbstractArray{Segment{T},1})`
+`cstylef{T<:Real}(seg::AbstractArray{Segment{T},1})`
 
 Returns the function needed for a `CompoundStyle`. The segments array is
 shallow-copied for use in the function.
 """
-function param{T<:Real}(seg::AbstractArray{Segment{T},1})
+function cstylef{T<:Real}(seg::AbstractArray{Segment{T},1})
     segments = deepcopy(Array(seg))
     isempty(segments) && error("Cannot parameterize with zero segments.")
 

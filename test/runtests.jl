@@ -16,7 +16,6 @@ import Clipper
         @test Point(3,3)/3 == Point(1,1)
         @test Point(1,1)*3 == Point(3,3)
         @test 3*Point(1,1) == Point(3,3)
-        @test_throws InexactError Point(2,3)/3
     end
 
     @testset "Point array arithmetic" begin

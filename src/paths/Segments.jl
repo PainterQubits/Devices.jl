@@ -207,6 +207,26 @@ setα0!(s::Turn, α0′) = s.α0 = α0′
 
 α1(s::Turn) = s.α0 + s.α
 
+type Corner{T<:Real} <: Segment{T}
+    p0::Point{2,T}
+    α0::Real
+    α::Real
+    extent::Real
+end
+
+length(::Corner) = 0
+p0(s::Corner) = s.p0
+function p1(s::Corner)
+    inc = ifelse(s.α >= 0, 1, -1)*π/2
+    v = s.extent*Point(cos(s.α0+inc),sin(s.α0+inc))
+    s.p0+v+s.extent*Point(sin(s.α),-cos(s.α))
+end
+α0(s::Corner) = s.α0
+α1(s::Corner) = s.α0 + s.α
+setp0!(s::Corner, p::Point) = s.p0 = p
+setα0!(s::Corner, α0′) = s.α0 = α0′
+summary(s::Corner) = "Corner by "*(@sprintf "%0.3f" s.α)
+
 """
 ```
 type CompoundSegment{T<:Real} <: Segment{T}
@@ -215,7 +235,7 @@ type CompoundSegment{T<:Real} <: Segment{T}
 
     CompoundSegment(segments) = begin
         s = new(Array(segments))
-        s.f = param(s)
+        s.f = param(s.segments)
         s
     end
 end
@@ -232,7 +252,7 @@ type CompoundSegment{T<:Real} <: Segment{T}
 
     CompoundSegment(segments) = begin
         s = new(deepcopy(Array(segments)))
-        s.f = param(s)
+        s.f = param(s.segments)
         s
     end
 end
