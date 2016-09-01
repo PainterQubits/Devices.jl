@@ -4,3 +4,4 @@ ForwardDiff
 FixedSizeArrays
 AffineTransforms
 FileIO
+Compat

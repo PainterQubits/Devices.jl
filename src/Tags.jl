@@ -1,5 +1,6 @@
 module Tags
 import Clipper
+import Compat.String
 import AffineTransforms: AffineTransform
 import ForwardDiff
 import Devices
@@ -24,12 +25,12 @@ export checkerboard
 export pecbasedose
 export surf1d
 """
-`qrcode{T<:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0; kwargs...)`
+`qrcode{T<:Real}(a::AbstractString, name::String, pixel::T=1.0; kwargs...)`
 
 Renders a QR code of the string `a` with pixel size `pixel` to a new cell with `name`.
 The lower left of the QR code will be at the origin of the cell.
 """
-function qrcode{T<:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0, center::Bool=false; kwargs...)
+function qrcode{T<:Real}(a::AbstractString, name::String, pixel::T=1.0, center::Bool=false; kwargs...)
     c = Cell{T}(name)
     qrcode(a, c, pixel, center; kwargs...)
     c

@@ -1,5 +1,5 @@
 module GDS
-
+import Compat.String
 import Base: bswap, bits, convert, write, read
 import Devices: AbstractPolygon
 using ..Points
@@ -196,7 +196,7 @@ function gdswrite{T<:Real}(io::IO, x::UInt16, y::AbstractArray{T,1})
     write(io, map(hton, y))
 end
 
-function gdswrite(io::IO, x::UInt16, y::ASCIIString)
+function gdswrite(io::IO, x::UInt16, y::String)
     (x & 0x00ff != 0x0006) && gdswerr(x)
     z = y
     mod(length(z),2) == 1 && (z*="\0")
@@ -222,7 +222,7 @@ function gdswrite(io::IO, x::UInt16, y::Int...)
     end
 end
 
-function gdsbegin(io::IO, libname::ASCIIString,
+function gdsbegin(io::IO, libname::String,
         precision, unit, modify::DateTime, acc::DateTime)
     y    = UInt16(Dates.Year(modify))
     mo   = UInt16(Dates.Month(modify))
@@ -394,7 +394,7 @@ function colrowcheck(c)
         warn("The GDS-II spec only permits 0 to 32767 rows or columns.")
 end
 
-function namecheck(a::ASCIIString)
+function namecheck(a::String)
     invalid = r"[^A-Za-z0-9_\?\0\$]+"
     (length(a) > 32 || ismatch(invalid, a)) && warn(
         "The GDS-II spec says that cell names must only have characters A-Z, a-z, ",
@@ -484,7 +484,7 @@ The content of some records are currently discarded (mainly the more obscure
 GDS-II record types, but also BGNLIB and LIBNAME).
 """
 function load(f::File{format"GDS"}; verbose=false)
-    cells = Dict{ASCIIString, Cell}()
+    cells = Dict{String, Cell}()
     open(f) do s
         # Skip over GDS-II version 6.0.0 header record
         skipmagic(s)
@@ -760,7 +760,7 @@ end
 
 function sname(s, bytes)
     by = readbytes(s, bytes)
-    str = convert(ASCIIString, by)
+    str = convert(String, by)
     if str[end] == '\0'
         str = str[1:(end-1)]
     end

@@ -41,12 +41,12 @@ end
 
 """
 ```
-length(s::Segment, verbose::Bool=false)
+pathlength(s::Segment, verbose::Bool=false)
 ```
 
 Return the length of a segment (calculated).
 """
-function length(s::Segment, verbose::Bool=false)
+function pathlength(s::Segment, verbose::Bool=false)
     path = s.f
     ds(t) = sqrt(dot(ForwardDiff.derivative(s.f, t), ForwardDiff.derivative(s.f, t)))
     val, err = quadgk(ds, 0.0, 1.0)
@@ -99,13 +99,21 @@ type Straight{T<:Real} <: Segment{T}
         s
     end
 end
+
+"""
+```
+Straight{T<:Real}(l::T, p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0)
+```
+
+Outer constructor for `Straight` segments.
+"""
 Straight{T<:Real}(l::T, p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0) =
     Straight{T}(l, p0, α0)
 convert{T<:Real}(::Type{Straight{T}}, x::Straight) =
     Straight(T(x.l), convert(Point{2,T}, x.p0), x.α0)
 
 copy(s::Straight) = Straight(s.l,s.p0,s.α0)
-length(s::Straight) = s.l
+pathlength(s::Straight) = s.l
 p0(s::Straight) = s.p0
 α0(s::Straight) = s.α0
 summary(s::Straight) = "Straight by $(s.l)"
@@ -176,13 +184,21 @@ type Turn{T<:Real} <: Segment{T}
         s
     end
 end
-Turn{T<:Real}(α::Real, r::T, p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0) =
+
+"""
+```
+Turn{T<:Real}(α::Real, r::T, p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0)
+```
+
+Outer constructor for `Turn` segments.
+"""
+Turn{T<:Real}(α, r::T, p0::Point{2,T}=Point(zero(T),zero(T)), α0=0.0) =
     Turn{T}(α, r, p0, α0)
 convert{T<:Real}(::Type{Turn{T}}, x::Turn) =
     Turn(x.α, T(x.r), convert(Point{2,T}, x.p0), x.α0)
 copy(s::Turn) = Turn(s.α,s.r,s.p0,s.α0)
 
-length{T<:Real}(s::Turn{T}) = T(abs(s.r*s.α))
+pathlength{T<:Real}(s::Turn{T}) = T(abs(s.r*s.α))
 p0(s::Turn) = s.p0
 α0(s::Turn) = s.α0
 summary(s::Turn) = "Turn by "*(@sprintf "%0.3f" s.α)*" with radius $(s.r)"
@@ -208,18 +224,24 @@ setα0!(s::Turn, α0′) = s.α0 = α0′
 α1(s::Turn) = s.α0 + s.α
 
 type Corner{T<:Real} <: Segment{T}
+    α::Real
     p0::Point{2,T}
     α0::Real
-    α::Real
     extent::Real
+    Corner(a) = new(a,Point(0.,0.),0.,0.)
+    Corner(a,b,c,d) = new(a,b,c,d)
 end
+Corner(α) = Corner{Float64}(α, Point(0.,0.), 0., 0.)
+copy{T}(x::Corner{T}) = Corner{T}(x.α, x.p0, x.α0, x.extent)
 
-length(::Corner) = 0
+pathlength(::Corner) = 0
 p0(s::Corner) = s.p0
 function p1(s::Corner)
-    inc = ifelse(s.α >= 0, 1, -1)*π/2
-    v = s.extent*Point(cos(s.α0+inc),sin(s.α0+inc))
-    s.p0+v+s.extent*Point(sin(s.α),-cos(s.α))
+    sgn = ifelse(s.α >= 0, 1, -1)
+    ∠A = s.α0+sgn*π/2
+    v = s.extent*Point(cos(∠A),sin(∠A))
+    ∠B = -∠A + s.α
+    s.p0+v+s.extent*Point(cos(∠B),sin(∠B))
 end
 α0(s::Corner) = s.α0
 α1(s::Corner) = s.α0 + s.α
@@ -251,15 +273,20 @@ type CompoundSegment{T<:Real} <: Segment{T}
     f::Function
 
     CompoundSegment(segments) = begin
-        s = new(deepcopy(Array(segments)))
-        s.f = param(s.segments)
-        s
+        if mapreduce(x->isa(x,Corner),|,false,segments)
+            error("Cannot have corners in a `CompoundSegment`. You may have ",
+                "tried to simplify a path containing `Corner` objects.")
+        else
+            s = new(deepcopy(Array(segments)))
+            s.f = param(s.segments)
+            s
+        end
     end
 end
-CompoundSegment{T<:Real}(segments::Array{Segment{T},1}) =
-    CompoundSegment{T}(segments)
-copy(s::CompoundSegment) = CompoundSegment(s.segments)
+CompoundSegment(nodes::AbstractArray{Node,1}) =
+    CompoundSegment(map(segment, nodes))
 
+copy(s::CompoundSegment) = CompoundSegment(s.segments)
 
 function setα0p0!(s::CompoundSegment, angle, p::Point)
     setα0p0!(s.segments[1], angle, p)

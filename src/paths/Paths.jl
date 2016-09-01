@@ -10,7 +10,6 @@ import Base:
     start,
     done,
     next,
-    zip,
     enumerate,
     rest,
     take,
@@ -34,8 +33,8 @@ import Base:
     summary,
     dims2string
 
+import Compat.String
 using ForwardDiff
-# import Plots
 import Devices
 import Devices: bounds, cell
 gdspy() = Devices._gdspy
@@ -48,13 +47,13 @@ export Trace
 export α0, α1, p0, p1, style0, style1
 export adjust!
 export attach!
+export corner!
 export direction
 export launch!
 export meander!
 export param
 export pathf
 export pathlength
-# export preview
 export simplify
 export simplify!
 export straight!
@@ -127,45 +126,70 @@ abstract Style
 
 """
 ```
-abstract Segment{T<:Real}
+abstract Segment{T<:Number}
 ```
 
 Path segment in the plane. All Segment objects should have the implement
 the following methods:
 
-- `length`
+- `pathlength`
 - `p0`
 - `α0`
 - `setp0!`
 - `setα0!`
 - `α1`
 """
-abstract Segment{T<:Real}
+abstract Segment{T<:Number}
+
+# doubly linked-list behavior
+type Node
+    seg::Segment
+    sty::Style
+    prev::Node
+    next::Node
+
+    Node(a,b) = begin
+        n = new(a,b)
+        n.prev = n
+        n.next = n
+    end
+    Node(a,b,c,d) = new(a,b,c,d)
+end
+# Node(seg::Segment, sty::Style) = Node(seg, sty)
+# Node(seg::Segment, sty::Style, p, n) = Node(seg, sty, p, n)
+
+previous(x::Node) = x.prev
+next(x::Node) = x.next
+
+segment(x::Node) = x.seg
+style(x::Node) = x.sty
+setsegment!(x::Node, s::Segment) = x.seg = s
+setstyle!(x::Node, s::Style) = x.sty = s
 
 include("Styles.jl")
 include("Segments.jl")
 
 """
 ```
-type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
+type Path{T<:Real} <: AbstractArray{Node,1}
     p0::Point{2,T}
     α0::Real
     style0::Style
-    segments::Array{Segment{T},1}
-    styles::Array{Style,1}
+    nodes::Array{Node,1}
 end
 ```
 
 Type for abstracting an arbitrary styled path in the plane. Iterating returns
 tuples of (`segment`, `style`).
 """
-type Path{T<:Real} <: AbstractArray{Tuple{Segment{T},Style},1}
+type Path{T<:Number} <: AbstractArray{Node,1}
     p0::Point{2,T}
     α0::Real
     style0::Style
-    segments::Array{Segment{T},1}
-    styles::Array{Style,1}
+    nodes::Array{Node,1}
 end
+
+nodes(p::Path) = p.nodes
 
 dims2string(p::Path) = isempty(p) ? "0-dimensional" :
                  length(p) == 1 ? "$(d[1])-segment" :
@@ -174,10 +198,10 @@ dims2string(p::Path) = isempty(p) ? "0-dimensional" :
 summary(p::Path) = string(dims2string(size(p)), " ", typeof(p)) *
     " from $(p.p0) with ∠$(p.α0)"
 
-pathf(p) = p[1][1].f
+pathf(p) = segment(p[1]).f
 
-function show(io::IO, x::Tuple{Segment, Style})
-    print(io, "$(x[1]) styled as $(x[2])")
+function show(io::IO, x::Node)
+    print(io, "$(segment(x)) styled as $(style(x))")
 end
 
 """
@@ -188,7 +212,7 @@ Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(
 Convenience constructor for `Path{T}` object.
 """
 Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0)) =
-    Path{T}(p0, α0, style0, Segment{T}[], Style[])
+    Path{T}(p0, α0, style0, Node[])
 
 """
 ```
@@ -198,16 +222,17 @@ pathlength(p::Path)
 Physical length of a path. Note that `length` will return the number of
 segments in a path, not the physical length.
 """
-pathlength(p::Path) = pathlength(p.segments)
+pathlength(p::Path) = pathlength(nodes(p))
 
 """
 ```
-pathlength(p::AbstractArray{Segment})
+pathlength(p::AbstractArray)
 ```
 
 Total physical length of segments.
 """
-pathlength{T<:Real}(parr::AbstractArray{Segment{T},1}) = mapreduce(length, +, parr)
+pathlength(array::AbstractArray) = mapreduce(pathlength, +, array)
+pathlength(node::Node) = pathlength(segment(node))
 
 """
 ```
@@ -220,7 +245,7 @@ function α0(p::Path)
     if isempty(p)
         p.α0
     else
-        α0(p.segments[1])
+        α0(segment(nodes(p)[1]))
     end
 end
 
@@ -235,7 +260,7 @@ function α1(p::Path)
     if isempty(p)
         p.α0
     else
-        α1(p.segments[end])
+        α1(segment(nodes(p)[end]))
     end
 end
 
@@ -250,7 +275,7 @@ function p0(p::Path)
     if isempty(p)
         p.p0
     else
-        p0(p.segments[1])
+        p0(segment(nodes(p)[1]))
     end
 end
 
@@ -265,7 +290,7 @@ function p1(p::Path)
     if isempty(p)
         p.p0
     else
-        p1(p.segments[end])
+        p1(segment(nodes(p)[end]))
     end
 end
 
@@ -280,7 +305,7 @@ function style0(p::Path)
     if isempty(p)
         p.style0
     else
-        p.styles[1]
+        style(nodes(p)[1])
     end
 end
 
@@ -295,7 +320,7 @@ function style1(p::Path)
     if isempty(p)
         p.style0
     else
-        p.styles[end]
+        style(nodes(p)[end])
     end
 end
 
@@ -309,61 +334,96 @@ Used internally whenever segments are inserted into the path.
 """
 function adjust!(p::Path, n::Integer=1)
     isempty(p) && return
-    m = n
-    if m == 1
-        seg,sty = p[1]
-        setα0p0!(seg, p.α0, p.p0)
-        m += 1
+
+    function updatell!(p::Path, m::Integer)
+        if m == 1
+            seg = segment(nodes(p)[1])
+            nodes(p)[1].prev = nodes(p)[1]
+            if length(p) == 1
+                nodes(p)[1].next = nodes(p)[1]
+            end
+        else
+            nodes(p)[m-1].next = nodes(p)[m]
+            nodes(p)[m].prev = nodes(p)[m-1]
+            if m == length(p)
+                nodes(p)[m].next = nodes(p)[m]
+            end
+        end
     end
-    for j in m:length(p)
-        seg,sty = p[j]
-        seg0,sty0 = p[j-1]
-        setα0p0!(seg, α1(seg0), p1(seg0))
+
+    function updatefields!(n::Node)
+        seg = segment(n)
+        if isa(seg, Corner)
+            seg.extent = extent(style(previous(n)), 1.0)
+        end
+    end
+
+    function updateα0p0!(n::Node; α0=0, p0=Point(0,0))
+        if previous(n) == n # first node
+            setα0p0!(segment(n), α0, p0)
+        else
+            seg = segment(n)
+            seg0 = segment(previous(n))
+            setα0p0!(seg, α1(seg0), p1(seg0))
+        end
+    end
+
+    for j in 1:length(p)
+        updatell!(p,j)
+        updatefields!(p[j])
+        updateα0p0!(p[j]; α0=p.α0, p0=p.p0)
     end
 end
 
 # Methods for Path as AbstractArray
-length(p::Path) = length(p.segments)
-start(p::Path) = start(zip(p.segments,p.styles))
-done(p::Path, state) = done(zip(p.segments,p.styles), state)
-next(p::Path, state) = next(zip(p.segments,p.styles), state)
-zip(paths::Path...) = zip(map(x->zip(p.segments,p.styles), paths)) # is correct?
-enumerate(p::Path) = enumerate(zip(p.segments,p.styles))
-rest(p::Path, state) = rest(zip(p.segments,p.styles), state)
-take(p::Path, n::Int) = take(zip(p.segments,p.styles), n)
-drop(p::Path, n::Int) = drop(zip(p.segments,p.styles), n)
-cycle(p::Path) = cycle(zip(p.segments,p.styles))
-isempty(p::Path) = isempty(p.segments)
-empty!(p::Path) = begin empty!(p.segments); empty!(p.styles) end
-deleteat!(p::Path, inds) = begin deleteat!(p.segments, inds); deleteat!(p.styles, inds) end
-endof(p::Path) = length(p.segments)
-size(p::Path) = size(p.segments)
-getindex(p::Path, i::Integer) = (p.segments[i], p.styles[i])
-function setindex!(p::Path, v::Tuple{Segment,Style}, i::Integer)
-    p.segments[i] = v[1]
-    p.styles[i] = v[2]
+length(p::Path) = length(nodes(p))
+start(p::Path) = start(nodes(p))
+done(p::Path, state) = done(nodes(p), state)
+next(p::Path, state) = next(nodes(p), state)
+enumerate(p::Path) = enumerate(nodes(p))
+rest(p::Path, state) = rest(nodes(p), state)
+take(p::Path, n::Int) = take(nodes(p), n)
+drop(p::Path, n::Int) = drop(nodes(p), n)
+cycle(p::Path) = cycle(nodes(p))
+isempty(p::Path) = isempty(nodes(p))
+empty!(p::Path) = empty!(nodes(p))
+function deleteat!(p::Path, inds)
+    deleteat!(nodes(p), inds)
+    adjust!(p, first(inds))
+end
+endof(p::Path) = length(nodes(p))
+size(p::Path) = size(nodes(p))
+getindex(p::Path, i::Integer) = nodes(p)[i]
+function setindex!(p::Path, v::Node, i::Integer)
+    nodes(p)[i] = v
     adjust!(p, i)
 end
 
 function setindex!(p::Path, v::Segment, i::Integer)
-    p.segments[i] = v
+    setsegment!(nodes(p)[i],v)
     adjust!(p, i)
 end
 
 function setindex!(p::Path, v::Style, i::Integer)
-    p.styles[i] = v
+    setstyle!(nodes(p)[i],v)
+    adjust!(p, i)
 end
 
-for x in [:push!, :unshift!]
-    @eval function ($x)(p::Path, segsty::Tuple{Segment, Style})
-        ($x)(p.segments, segsty[1])
-        ($x)(p.styles, segsty[2])
-    end
+function push!(p::Path, node::Node)
+    push!(nodes(p), node)
+    adjust!(p, length(p))
+end
+
+function unshift!(p::Path, node::Node)
+    unshift!(nodes(p), node)
+    adjust!(p)
+end
+
+for x in (:push!, :unshift!)
     @eval function ($x)(p::Path, seg::Segment, sty::Style)
-        ($x)(p, (seg,sty))
+        ($x)(p, Node(seg,sty))
     end
-    @eval function ($x)(p::Path, segsty0::Tuple{Segment, Style},
-        segsty::Tuple{Segment,Style}...)
+    @eval function ($x)(p::Path, segsty0::Node, segsty::Node...)
         ($x)(p, segsty0)
         for x in segsty
             ($x)(p, x)
@@ -371,16 +431,36 @@ for x in [:push!, :unshift!]
     end
 end
 
-pop!(p::Path) = pop!(p.segments), pop!(p.styles)
-shift!(p::Path) = shift!(p.segments), shift!(p.styles)
-
-function insert!(p::Path, i::Integer, segsty::Tuple{Segment, Style})
-    insert!(p.segments, i, segsty[1])
-    insert!(p.styles, i, segsty[2])
+function pop!(p::Path)
+    x = pop!(nodes(p))
+    adjust!(p, length(p))
+    x
 end
-insert!(p::Path, i::Integer, seg::Segment, sty::Style) = insert!(p, i, (seg,sty))
-function insert!(p::Path, i::Integer, segsty0::Tuple{Segment, Style},
-        segsty::Tuple{Segment,Style}...)
+
+function shift!(p::Path)
+    x = shift!(nodes(p))
+    adjust!(p)
+    x
+end
+
+function insert!(p::Path, i::Integer, segsty::Node)
+    insert!(nodes(p), i, segsty)
+    adjust!(p, i)
+end
+
+insert!(p::Path, i::Integer, seg::Segment, sty::Style) =
+    insert!(p, i, Node(seg,sty))
+
+function insert!(p::Path, i::Integer, seg::Segment)
+    if i == 1
+        sty = style0(p)
+    else
+        sty = style(nodes(p)[i-1])
+    end
+    insert!(p, i, Node(seg,sty))
+end
+
+function insert!(p::Path, i::Integer, segsty0::Node, segsty::Node...)
     insert!(p, i, segsty0)
     for x in segsty
         insert!(p, i, x)
@@ -400,10 +480,7 @@ function append!(p::Path, p′::Path)
     isempty(p′) && return
     i = length(p)
     lp, la = p1(p), α1(p)
-    append!(p.segments, p′.segments)
-    append!(p.styles, p′.styles)
-    setp0!(p.segments[i+1], lp)
-    setα0!(p.segments[i+1], la)
+    append!(nodes(p), nodes(p′))
     adjust!(p, i+1)
     nothing
 end
@@ -424,13 +501,9 @@ in a path unless you could simplify it.
 when you want a continuous styling of a very long path.
 """
 function simplify(p::Path, inds::UnitRange=1:length(p))
-    cseg = CompoundSegment(p.segments[inds])
-    # println("Hi")
-    csty = CompoundStyle(cseg.segments, p.styles[inds])
-    (cseg, csty)
-    # deleteat!(p1, inds)
-    # insert!(p1, inds[1], (cseg, csty))
-    # p1
+    cseg = CompoundSegment(nodes(p)[inds])
+    csty = CompoundStyle(cseg.segments, map(style, nodes(p)[inds]))
+    Node(cseg, csty)
 end
 
 """
@@ -447,14 +520,14 @@ function simplify!(p::Path, inds::UnitRange=1:length(p))
     p
 end
 
-# function split{T<:Real}(s::CompoundSegment{T}, points)
+# function split{T<:Real}(s::CompoundSegment{T}, points) # WIP
 #     segs = CompoundSegment{T}[]
 #     segs
 # end
 
 """
 ```
-straight!(p::Path, l::Real)
+straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=style1(p))
 ```
 
 Extend a path `p` straight by length `l` in the current direction.
@@ -463,13 +536,13 @@ function straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=style1(p))
     p0 = p1(p)
     α = α1(p)
     s = Straight{T}(l, p0, α)
-    push!(p, (s,sty))
+    push!(p, Node(s,sty))
     nothing
 end
 
 """
 ```
-turn!(p::Path, α::Real, r::Real, sty::Style=style1(p))
+turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=style1(p))
 ```
 
 Turn a path `p` by angle `α` with a turning radius `r` in the current direction.
@@ -479,13 +552,13 @@ function turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=style1(p))
     p0 = p1(p)
     α0 = α1(p)
     turn = Turn{T}(α, r, p0, α0)
-    push!(p, (turn,sty))
+    push!(p, Node(turn,sty))
     nothing
 end
 
 """
 ```
-turn!(p::Path, s::ASCIIString, r::Real, sty::Style=style1(p))
+turn!{T<:Real}(p::Path{T}, s::String, r::Real, sty::Style=style1(p))
 ```
 
 Turn a path `p` with direction coded by string `s`:
@@ -494,7 +567,7 @@ Turn a path `p` with direction coded by string `s`:
 - "r": turn by -π/2 (right)
 - "lrlrllrrll": do those turns in that order
 """
-function turn!{T<:Real}(p::Path{T}, s::ASCIIString, r::Real, sty::Style=style1(p))
+function turn!{T<:Real}(p::Path{T}, s::String, r::Real, sty::Style=style1(p))
     for ch in s
         if ch == 'l'
             α = π/2
@@ -504,16 +577,14 @@ function turn!{T<:Real}(p::Path{T}, s::ASCIIString, r::Real, sty::Style=style1(p
             error("Unrecognizable turn command.")
         end
         turn = Turn{T}(α, r, p1(p), α1(p))
-        push!(p, (turn,sty))
+        push!(p, Node(turn,sty))
     end
     nothing
 end
 
 function corner!{T<:Real}(p::Path{T}, α::Real, sty::Style=style1(p))
-    p0 = p1(p)
-    α0 = α1(p)
-    corn = Corner{T}(p0, α0, α, extent(style1(p)), 1.)
-    push!(p, (corn,sty))
+    corn = Corner{T}(α)
+    push!(p, Node(corn,sty))
     nothing
 end
 
@@ -599,7 +670,7 @@ function param{T<:Real}(c::AbstractArray{Segment{T},1})
     for i in 1:length(c)
         push!(f.args[2].args, quote
             fn = (($c))[$i].f
-            l1 = l0 + length((($c))[$i])
+            l1 = l0 + pathlength((($c))[$i])
             (l0/L <= t < l1/L) && return (fn)((t*L-l0)/(l1-l0))
             l0 = l1
         end)
@@ -614,7 +685,7 @@ function param{T<:Real}(c::AbstractArray{Segment{T},1})
         D0x, D0y = getx(g′), gety(g′)
         D1x, D1y = getx(h′), gety(h′)
         a0,a = p0((($c))[1]),p1((($c))[end])
-        l0,l1 = length((($c))[1]), length((($c))[end])
+        l0,l1 = pathlength((($c))[1]), pathlength((($c))[end])
         (t >= 1.0) &&
             return a + Point(D1x*(t-1)*(L/l1), D1y*(t-1)*(L/l1))
         (t < 0.0) &&
@@ -661,9 +732,10 @@ function attach!(p::Path, c::CellReference, t::Real;
         sty = decorate(sty0,c,t,where)
         p.style0 = sty
     else
-        seg0,sty0 = p[i]
+        node = p[i]
+        seg0,sty0 = segment(node), style(node)
         sty = decorate(sty0,c,t,where)
-        p[i] = (seg0,sty)
+        p[i] = Node(seg0,sty)
     end
 end
 

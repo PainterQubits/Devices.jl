@@ -1,5 +1,7 @@
 module Cells
 
+import Compat.String
+
 using AffineTransforms
 import AffineTransforms: transform
 
@@ -75,7 +77,7 @@ end
 """
 ```
 type Cell{T<:Real}
-    name::ASCIIString
+    name::String
     elements::Array{AbstractPolygon{T},1}
     refs::Array{CellRef,1}
     create::DateTime
@@ -103,7 +105,7 @@ To add elements, push them to `elements` field (or use `render!`);
 to add references, push them to `refs` field.
 """
 type Cell{T<:Real}
-    name::ASCIIString
+    name::String
     elements::Array{AbstractPolygon{T},1}
     refs::Array{CellRef,1}
     create::DateTime

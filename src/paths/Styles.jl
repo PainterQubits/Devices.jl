@@ -90,8 +90,8 @@ type CompoundStyle <: Style
     divs::Array{Float64,1}
     f::Function
 end
-CompoundStyle{T<:Real}(seg::AbstractArray{Segment{T},1},
-        sty::AbstractArray{Style,1}) =
+CompoundStyle{S<:Segment,T<:Style}(seg::AbstractArray{S,1},
+        sty::AbstractArray{T,1}) =
     CompoundStyle(deepcopy(Array(sty)), makedivs(seg, sty), cstylef(seg))
 
 divs(s::CompoundStyle) = s.divs
@@ -102,8 +102,7 @@ divs(s::CompoundStyle) = s.divs
 Returns a collection with the values of `t` to use for
 rendering a `CompoundSegment` with a `CompoundStyle`.
 """
-function makedivs{T<:Real}(segments::AbstractArray{Segment{T},1},
-        styles::AbstractArray{Style,1})
+function makedivs{T<:Number}(segments::AbstractArray{Segment{T},1}, styles)
     isempty(segments) && error("Cannot use divs with zero segments.")
     length(segments) != length(styles) &&
         error("Must have same number of segments and styles.")
@@ -112,7 +111,7 @@ function makedivs{T<:Real}(segments::AbstractArray{Segment{T},1},
     l0 = zero(T)
     ts = Float64[]
     for i in 1:length(segments)
-        l1 = l0 + length(segments[i])
+        l1 = l0 + pathlength(segments[i])
         # Someone who enjoys thinking about IEEE floating points,
         # please make this less awful. It seems like the loop runs
         # approximately powers-of-2 times.
@@ -151,7 +150,7 @@ function cstylef{T<:Real}(seg::AbstractArray{Segment{T},1})
 
     for i in 1:length(segments)
         push!(f.args[2].args, quote
-            l1 = l0 + length(($segments)[$i])
+            l1 = l0 + pathlength(($segments)[$i])
             (l0/L <= t) &&
                 ($(i == length(segments) ? :(<=) : :(<))(t, l1/L)) &&
                     return $i, (t*L-l0)/(l1-l0)

@@ -100,14 +100,16 @@ export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!, transform, name
 
 include("paths/Paths.jl")
-import .Paths: Path, adjust!, attach!, direction, meander!, launch!
+import .Paths: Path, adjust!, attach!, direction, meander!, launch!, corner!
 import .Paths: param, pathf, pathlength, simplify, simplify!, straight!, turn!
 import .Paths: α0, α1, p0, p1, style0, style1, extent, undecorated
+import .Paths: segment, style
 export Paths
 export Path
-export α0, α1, p0, p1, style0, style1
+export α0, α1, p0, p1, style0, style1, segment, style
 export adjust!
 export attach!
+export corner!
 export direction
 export meander!, launch!
 export param
@@ -227,9 +229,22 @@ Render a path `p` to a cell `c`.
 """
 function render!(c::Cell, p::Path; kwargs...)
     adjust!(p)
-    for (segment, s) in p
-        render!(c, segment, s; kwargs...)
+    for node in p
+        render!(c, segment(node), style(node); kwargs...)
     end
+end
+
+function render!(c::Cell, seg::Paths.Corner, sty::Paths.Style; kwargs...)
+    sgn = ifelse(seg.α >= 0, 1, -1)
+    ∠A = seg.α0+sgn*π/2
+    p = Point(cos(∠A),sin(∠A))
+    p1 = seg.extent*p + seg.p0
+    p2 = -seg.extent*p + seg.p0
+    ex = 2*seg.extent*tan(sgn*seg.α/2)
+    p3 = p2 + ex*Point(cos(seg.α0),sin(seg.α0))
+    p4 = p3 + ex*Point(cos(seg.α0+seg.α), sin(seg.α0+seg.α))
+
+    push!(c.elements, Polygon{Float64}([p1,p2,p3,p4], Dict{Symbol,Any}(kwargs)))
 end
 
 """
