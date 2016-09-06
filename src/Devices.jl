@@ -8,7 +8,6 @@ using FileIO
 import AffineTransforms: transform
 import Clipper
 import FileIO: save, load
-import FixedSizeArrays: Point
 import Base: cell, length, show, .+, .-
 
 render_counter = UInt64(0)
@@ -272,7 +271,7 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
             final_width=Paths.width(s,t),
             final_distance=Paths.distance(s,t))
         for a in gp[:polygons]
-            points = reinterpret(Point{2,Float64}, reshape(transpose(a), length(a)))
+            points = reinterpret(Point{Float64}, reshape(transpose(a), length(a)))
             poly = Polygon{Float64}(points, Dict{Symbol,Any}(kwargs))
             push!(polys, poly)
         end
@@ -337,7 +336,7 @@ export pecbasedose, checkerboard
 
 # Operations on arrays of AbstractPolygons
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
-    @eval function ($dotop){S<:Real, T<:Real}(a::AbstractArray{AbstractPolygon{S},1}, p::Point{2,T})
+    @eval function ($dotop){S<:Real, T<:Real}(a::AbstractArray{AbstractPolygon{S},1}, p::Point{T})
         b = similar(a)
         for (ia, ib) in zip(eachindex(a), eachindex(b))
             @inbounds b[ib] = ($op)(a[ia], p)

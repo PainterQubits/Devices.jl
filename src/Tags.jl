@@ -47,7 +47,7 @@ function qrcode{T<:Real}(a::AbstractString, c::Cell, pixel::T=1.0, center::Bool=
         where = findin(ones0s, '1')
         for i in where
             r = Rectangle(Point(zero(pixel),-pixel), Point(pixel,zero(pixel)); kwargs...)
-            r += Point{2,T}((i-1)*pixel, y)
+            r += Point{T}((i-1)*pixel, y)
             push!(rects, r)
         end
         y -= pixel

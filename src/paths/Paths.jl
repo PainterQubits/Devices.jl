@@ -172,7 +172,7 @@ include("Segments.jl")
 """
 ```
 type Path{T<:Real} <: AbstractArray{Node,1}
-    p0::Point{2,T}
+    p0::Point{T}
     α0::Real
     style0::Style
     nodes::Array{Node,1}
@@ -183,7 +183,7 @@ Type for abstracting an arbitrary styled path in the plane. Iterating returns
 tuples of (`segment`, `style`).
 """
 type Path{T<:Number} <: AbstractArray{Node,1}
-    p0::Point{2,T}
+    p0::Point{T}
     α0::Real
     style0::Style
     nodes::Array{Node,1}
@@ -206,12 +206,12 @@ end
 
 """
 ```
-Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0))
+Path{T<:Real}(p0::Point{T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0))
 ```
 
 Convenience constructor for `Path{T}` object.
 """
-Path{T<:Real}(p0::Point{2,T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0)) =
+Path{T<:Real}(p0::Point{T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0)) =
     Path{T}(p0, α0, style0, Node[])
 
 """

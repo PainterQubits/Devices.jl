@@ -21,9 +21,9 @@ export isproper
 
 """
 ```
-type Rectangle{T<:Real} <: AbstractPolygon{T}
-    ll::Point{2,T}
-    ur::Point{2,T}
+type Rectangle{T} <: AbstractPolygon{T}
+    ll::Point{T}
+    ur::Point{T}
     properties::Dict{Symbol, Any}
     Rectangle(ll,ur) = new(ll,ur,Dict{Symbol,Any}())
     Rectangle(ll,ur,props) = new(ll,ur,props)
@@ -32,50 +32,39 @@ end
 
 A rectangle, defined by opposing lower-left and upper-right corner coordinates.
 """
-type Rectangle{T<:Real} <: AbstractPolygon{T}
-    ll::Point{2,T}
-    ur::Point{2,T}
+type Rectangle{T} <: AbstractPolygon{T}
+    ll::Point{T}
+    ur::Point{T}
     properties::Dict{Symbol, Any}
-    Rectangle(ll,ur) = new(ll,ur,Dict{Symbol,Any}())
-    Rectangle(ll,ur,props) = new(ll,ur,props)
 end
 
 """
 ```
-Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}; kwargs...)
+Rectangle(ll::Point, ur::Point; kwargs...)
 ```
 
-Convenience constructor for `Rectangle{T}` objects.
+Convenience constructor for `Rectangle` objects.
 """
-Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}; kwargs...) =
-    Rectangle{T}(ll, ur, Dict{Symbol,Any}(kwargs))
-
-"""
-```
-Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}, dict)
-```
-
-Convenience constructor for `Rectangle{T}` objects.
-"""
-Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}, dict) =
-    Rectangle{T}(ll, ur, dict)
+Rectangle(ll::Point, ur::Point; kwargs...) =
+    Rectangle(promote(ll, ur)..., Dict{Symbol,Any}(kwargs))
 
 """
 ```
-Rectangle{T<:Real}(width::T, height::T; kwargs...)
+Rectangle(width, height, kwargs...)
 ```
 
-Constructs `Rectangle{T}` objects by specifying the width and height rather than
+Constructs `Rectangle` objects by specifying the width and height rather than
 the lower-left and upper-right corners.
 
 The rectangle will sit with the lower-left corner at the origin. With centered
-rectangles we would need to divide width and height by 2 to properly position.
+rectangles we would need to divide width zeand height by 2 to properly position.
 If we wanted an object of `Rectangle{Int}` type, this would not be possible
 if either `width` or `height` were odd numbers. This definition ensures type
 stability in the constructor.
 """
-Rectangle{T<:Real}(width::T, height::T; kwargs...) =
-    Rectangle{T}(Point(zero(T),zero(T)), Point(width, height), Dict{Symbol,Any}(kwargs))
+Rectangle(width, height; kwargs...) =
+    Rectangle(Point(zero(typeof(width)), zero(typeof(height))),
+        Point(width, height), Dict{Symbol,Any}(kwargs))
 
 copy(p::Rectangle) = Rectangle(p.ll, p.ur, copy(p.properties))
 
@@ -133,8 +122,8 @@ center(r::Rectangle) = (r.ur+r.ll)/2
 center!(r::Rectangle)
 ```
 
-Centers a rectangle. Will throw an `InexactError()` if `r` is `Rectangle{T<:Integer}`
-and the rectangle cannot be centered with integer corner coordinates.
+Centers a rectangle. Will throw an `InexactError()` if
+the rectangle cannot be centered with integer corner coordinates.
 """
 function center!(r::Rectangle)
     c = center(r)

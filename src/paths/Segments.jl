@@ -5,7 +5,7 @@ p0{T}(s::Segment{T})
 
 Return the first point in a segment (calculated).
 """
-p0{T}(s::Segment{T}) = s.f(0.0)::Point{2,T}
+p0{T}(s::Segment{T}) = s.f(0.0)::Point{T}
 
 """
 ```
@@ -14,7 +14,7 @@ p1{T}(s::Segment{T})
 
 Return the last point in a segment (calculated).
 """
-p1{T}(s::Segment{T}) = s.f(1.0)::Point{2,T}
+p1{T}(s::Segment{T}) = s.f(1.0)::Point{T}
 
 """
 ```
@@ -70,7 +70,7 @@ end
 ```
 type Straight{T<:Real} <: Segment{T}
     l::T
-    p0::Point{2,T}
+    p0::Point{T}
     α0::Real
     f::Function
     Straight(l, p0, α0) = begin
@@ -90,7 +90,7 @@ The parametric function over `t ∈ [0,1]` describing the line segment is given 
 """
 type Straight{T<:Real} <: Segment{T}
     l::T
-    p0::Point{2,T}
+    p0::Point{T}
     α0::Real
     f::Function
     Straight(l, p0, α0) = begin
@@ -102,15 +102,15 @@ end
 
 """
 ```
-Straight{T<:Real}(l::T, p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0)
+Straight{T<:Real}(l::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0)
 ```
 
 Outer constructor for `Straight` segments.
 """
-Straight{T<:Real}(l::T, p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0) =
+Straight{T<:Real}(l::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0) =
     Straight{T}(l, p0, α0)
 convert{T<:Real}(::Type{Straight{T}}, x::Straight) =
-    Straight(T(x.l), convert(Point{2,T}, x.p0), x.α0)
+    Straight(T(x.l), convert(Point{T}, x.p0), x.α0)
 
 copy(s::Straight) = Straight(s.l,s.p0,s.α0)
 pathlength(s::Straight) = s.l
@@ -143,7 +143,7 @@ setα0!(s::Straight, α0′) = s.α0 = α0′
 type Turn{T<:Real} <: Segment{T}
     α::Real
     r::T
-    p0::Point{2,T}
+    p0::Point{T}
     α0::Real
     f::Function
     Turn(α, r, p0, α0) = begin
@@ -171,7 +171,7 @@ The parametric function over `t ∈ [0,1]` describing the turn is given by:
 type Turn{T<:Real} <: Segment{T}
     α::Real
     r::T
-    p0::Point{2,T}
+    p0::Point{T}
     α0::Real
     f::Function
 
@@ -187,15 +187,15 @@ end
 
 """
 ```
-Turn{T<:Real}(α::Real, r::T, p0::Point{2,T}=Point(0.0,0.0), α0::Real=0.0)
+Turn{T<:Real}(α::Real, r::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0)
 ```
 
 Outer constructor for `Turn` segments.
 """
-Turn{T<:Real}(α, r::T, p0::Point{2,T}=Point(zero(T),zero(T)), α0=0.0) =
+Turn{T<:Real}(α, r::T, p0::Point{T}=Point(zero(T),zero(T)), α0=0.0) =
     Turn{T}(α, r, p0, α0)
 convert{T<:Real}(::Type{Turn{T}}, x::Turn) =
-    Turn(x.α, T(x.r), convert(Point{2,T}, x.p0), x.α0)
+    Turn(x.α, T(x.r), convert(Point{T}, x.p0), x.α0)
 copy(s::Turn) = Turn(s.α,s.r,s.p0,s.α0)
 
 pathlength{T<:Real}(s::Turn{T}) = T(abs(s.r*s.α))
@@ -225,7 +225,7 @@ setα0!(s::Turn, α0′) = s.α0 = α0′
 
 type Corner{T<:Real} <: Segment{T}
     α::Real
-    p0::Point{2,T}
+    p0::Point{T}
     α0::Real
     extent::Real
     Corner(a) = new(a,Point(0.,0.),0.,0.)

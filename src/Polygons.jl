@@ -29,8 +29,8 @@ const PCSCALE = 2^31
 
 """
 ```
-type Polygon{T<:Real} <: AbstractPolygon{T}
-    p::Array{Point{2,T},1}
+type Polygon{T} <: AbstractPolygon{T}
+    p::Array{Point{T},1}
     properties::Dict{Symbol, Any}
     Polygon(x,y) = new(x,y)
     Polygon(x) = new(x, Dict{Symbol, Any}())
@@ -40,8 +40,8 @@ end
 Polygon defined by list of coordinates. The first point should not be repeated
 at the end (although this is true for the GDS format).
 """
-type Polygon{T<:Real} <: AbstractPolygon{T}
-    p::Array{Point{2,T},1}
+type Polygon{T} <: AbstractPolygon{T}
+    p::Array{Point{T},1}
     properties::Dict{Symbol, Any}
     Polygon(x,y) = new(x,y)
     Polygon(x) = new(x, Dict{Symbol, Any}())
@@ -50,40 +50,36 @@ end
 
 """
 ```
-Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}; kwargs...)
+Polygon{T}(parr::AbstractArray{Point{T},1}; kwargs...)
 ```
 
 Convenience constructor for a `Polygon{T}` object.
 """
-Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}; kwargs...) =
+Polygon{T}(parr::AbstractArray{Point{T},1}; kwargs...) =
     Polygon{T}(parr, Dict{Symbol,Any}(kwargs))
 
 """
 ```
-Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, dict)
+Polygon{T}(parr::AbstractArray{Point{T},1}, dict)
 ```
 
 Convenience constructor for a `Polygon{T}` object.
 """
-Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, dict) =
+Polygon{T}(parr::AbstractArray{Point{T},1}, dict) =
     Polygon{T}(parr, dict)
 
 """
 ```
-Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
-    p3::Point{2,T}...; kwargs...)
+Polygon(p0::Point, p1::Point, p2::Point, p3::Point...; kwargs...)
 ```
 
 Convenience constructor for a `Polygon{T}` object.
 """
-Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
-    p3::Point{2,T}...; kwargs...) =
-        Polygon{T}([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
-
+Polygon(p0::Point, p1::Point, p2::Point, p3::Point...; kwargs...) =
+    Polygon([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
 
 layer(p::Polygon) = p.properties[:layer]
 datatype(p::Polygon) = p.properties[:datatype]
-
 copy(p::Polygon) = Polygon(copy(p.p), copy(p.properties))
 
 """
@@ -97,12 +93,12 @@ points(x::Polygon) = x.p
 
 """
 ```
-points{T<:Real}(x::Rectangle{T})
+points{T}(x::Rectangle{T})
 ```
 
 Returns the array of `Point` objects defining the rectangle.
 """
-points{T<:Real}(x::Rectangle{T}) = points(convert(Polygon{T}, x))
+points{T}(x::Rectangle{T}) = points(convert(Polygon{T}, x))
 
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
     @eval function ($op)(r::Polygon, p::Point)
@@ -110,9 +106,9 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
     end
     # @eval ($op)(p::Point, r::Polygon) = ($op)(r,p)
 end
-*(r::Polygon, a::Real) = Polygon(r.p .* a, copy(r.properties))
-*(a::Real, r::Polygon) = *(r,a)
-/(r::Polygon, a::Real) = Polygon(r.p ./ a, copy(r.properties))
+*(r::Polygon, a::Number) = Polygon(r.p .* a, copy(r.properties))
+*(a::Number, r::Polygon) = *(r,a)
+/(r::Polygon, a::Number) = Polygon(r.p ./ a, copy(r.properties))
 
 """
 ```
@@ -147,28 +143,28 @@ end
 
 """
 ```
-convert{T<:Real}(::Type{Polygon{T}}, s::Rectangle)
+convert{T}(::Type{Polygon{T}}, s::Rectangle)
 ```
 
 Convert a Rectangle into a Polygon (explicitly keep all points).
 """
-function convert{T<:Real}(::Type{Polygon{T}}, s::Rectangle)
-    ll = convert(Point{2,T}, s.ll)
-    ur = convert(Point{2,T}, s.ur)
+function convert{T}(::Type{Polygon{T}}, s::Rectangle)
+    ll = convert(Point{T}, s.ll)
+    ur = convert(Point{T}, s.ur)
     lr = Point(T(getx(ur)), T(gety(ll)))
     ul = Point(T(getx(ll)), T(gety(ur)))
-    Polygon{T}(Point{2,T}[ll,lr,ur,ul], copy(s.properties))
+    Polygon{T}(Point{T}[ll,lr,ur,ul], copy(s.properties))
 end
 
 """
 ```
-convert{T<:Real}(::Type{Polygon{T}}, p::Polygon)
+convert{T}(::Type{Polygon{T}}, p::Polygon)
 ```
 
 Convert between types of polygons.
 """
-function convert{T<:Real}(::Type{Polygon{T}}, p::Polygon)
-    Polygon{T}(convert(Array{Point{2,T},1}, p.p), copy(p.properties))
+function convert{T}(::Type{Polygon{T}}, p::Polygon)
+    Polygon{T}(convert(Array{Point{T},1}, p.p), copy(p.properties))
 end
 
 """
@@ -243,7 +239,7 @@ function clip{S<:Integer}(op::Clipper.ClipType,
     c = [Polygon{Int64}(x) for x in cl]::Array{Polygon{Int64},1}
     polys = clip(op, s, c, pfs=pfs, pfc=pfc)
 
-    [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, copy(p.properties))
+    [Polygon{S}(convert(Array{Point{S},1}, p.p) ./ PCSCALE, copy(p.properties))
         for p in polys]::Array{Polygon{S},1}
 end
 
@@ -259,7 +255,7 @@ function clip{S<:Real}(op::Clipper.ClipType,
         for x in cl]::Array{Polygon{Int64},1}
     polys = clip(op, s, c, pfs=pfs, pfc=pfc)
 
-    [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, copy(p.properties))
+    [Polygon{S}(convert(Array{Point{S},1}, p.p) ./ PCSCALE, copy(p.properties))
         for p in polys]::Array{Polygon{S},1}
 end
 
@@ -278,7 +274,7 @@ function clip(op::Clipper.ClipType,
         Clipper.add_path!(c, reinterpret(Clipper.IntPoint, c0.p),
             Clipper.PolyTypeClip, true)
     end
-    result = convert(Clipper.PolyTree{Point{2,Int64}},
+    result = convert(Clipper.PolyTree{Point{Int64}},
         Clipper.execute_pt(c, op, pfs, pfc)[2])
     # println(result)
     interiorcuts(result, Polygon{Int64}[], subject[1].properties)
@@ -290,7 +286,7 @@ function offset{S<:Real}(subject::Polygon{S}, delta::Real;
 
     s = Polygon{Int64}(map(round, subject.p .* PCSCALE), subject.properties)
     polys = offset(s, delta * PCSCALE, j=j, e=e)
-    [Polygon{S}(convert(Array{Point{2,S},1}, p.p) ./ PCSCALE, p.properties)
+    [Polygon{S}(convert(Array{Point{S},1}, p.p) ./ PCSCALE, p.properties)
         for p in polys]
 end
 
@@ -302,7 +298,7 @@ function offset(subject::Polygon{Int64}, delta::Real;
     Clipper.clear!(c)
     Clipper.add_path!(c, reinterpret(Clipper.IntPoint, subject.p), j, e)
     result = Clipper.execute(c, Float64(delta))
-    result2 = map(x->Polygon{Int64}(reinterpret(Point{2,Int64}, x),
+    result2 = map(x->Polygon{Int64}(reinterpret(Point{Int64}, x),
         copy(subject.properties)), result)
     result2
 end
@@ -319,23 +315,23 @@ abstract D1
 ab(p0, p1) = Point(gety(p1)-gety(p0), getx(p0)-getx(p1))
 
 immutable Segment <: D1
-    p0::Point{2,Float64}
-    p1::Point{2,Float64}
-    ab::Point{2,Float64}
+    p0::Point{Float64}
+    p1::Point{Float64}
+    ab::Point{Float64}
 end
 Segment(p0,p1) = Segment(p0, p1, ab(p0, p1))
 
 immutable Ray <: D1
-    p0::Point{2,Float64}
-    p1::Point{2,Float64}
-    ab::Point{2,Float64}
+    p0::Point{Float64}
+    p1::Point{Float64}
+    ab::Point{Float64}
 end
 Ray(p0,p1) = Ray(p0, p1, ab(p0, p1))
 
 immutable Line <: D1
-    p0::Point{2,Float64}
-    p1::Point{2,Float64}
-    ab::Point{2,Float64}
+    p0::Point{Float64}
+    p1::Point{Float64}
+    ab::Point{Float64}
 end
 Line(p0,p1) = Line(p0, p1, ab(p0, p1))
 
@@ -345,7 +341,7 @@ function segments(vertices)
 end
 
 # Find the lower-most then left-most polygon
-function uniqueray{T<:Real}(v::Vector{Point{2,T}})
+function uniqueray{T<:Real}(v::Vector{Point{T}})
     nopts = reinterpret(T, v)
     yarr = slice(nopts, 2:2:length(nopts))
     miny, indy = findmin(yarr)
@@ -377,12 +373,12 @@ function intersects(A::Segment, B::Segment)
     end
 end
 
-function onray{T<:Real}(p::Point{2,T}, A::Ray)
+function onray{T<:Real}(p::Point{T}, A::Ray)
     return (dot(A.ab, p-A.p0) ≈ 0) &&
         (dot(A.p1-A.p0, p-A.p0) >= 0)
 end
 
-function onsegment{T<:Real}(p::Point{2,T}, A::Segment)
+function onsegment{T<:Real}(p::Point{T}, A::Segment)
     return (dot(A.ab, p-A.p0) ≈ 0) &&
         (dot(A.p1-A.p0, p-A.p0) >= 0) &&
         (dot(A.p0-A.p1, p-A.p1) >= 0)
@@ -398,13 +394,13 @@ function intersection(A::Ray, B::Segment)
             if dist0 >= 0
                 if dist1 >= 0
                     # Both in correct direction
-                    return true, Point{2,Float64}(min(dist0, dist1) == dist0 ? B.p0 : B.p1)
+                    return true, Point{Float64}(min(dist0, dist1) == dist0 ? B.p0 : B.p1)
                 else
-                    return true, Point{2,Float64}(B.p0)
+                    return true, Point{Float64}(B.p0)
                 end
             else
                 if dist1 >= 0
-                    return true, Point{2,Float64}(B.p1)
+                    return true, Point{Float64}(B.p1)
                 else
                     # Neither in correct direction
                     return false, Point(0.,0.)
@@ -465,7 +461,7 @@ function interiorcuts(nodeortree::Union{Clipper.PolyNode, Clipper.PolyTree}, out
             # println(ray)
             # Since the polygon was enclosing, an intersection had to happen *somewhere*.
             if k != -1
-                w = Point{2,Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
+                w = Point{Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
                 kp1 = enclosing.v[(k+1 > length(enclosing.v)) ? 1 : k+1]
 
                 # Make the cut in the enclosing polygon

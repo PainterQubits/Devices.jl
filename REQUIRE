@@ -1,7 +1,7 @@
-julia 0.4
+julia 0.5
 PyCall
 ForwardDiff
-FixedSizeArrays
+StaticArrays
 AffineTransforms
 FileIO
 Compat

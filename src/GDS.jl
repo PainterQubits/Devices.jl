@@ -578,7 +578,7 @@ end
 function boundary(s, verbose)
     haseflags, hasplex, haslayer, hasdt, hasxy = false, false, false, false, false
     layer, dt = 0, 0
-    xy = Array{Point{2,Int32}}(0)
+    xy = Array{Point{Int32}}(0)
     while true
         bytes = ntoh(read(s, UInt16)) - 4
         token = ntoh(read(s, UInt16))
@@ -608,7 +608,7 @@ function boundary(s, verbose)
         elseif token == XY
             verbose && info("XY: $(bytes) bytes")
             hasxy && error("Already read XY tag for this BOUNDARY tag.")
-            xy = Array{Point{2,Int32}}(Int(floor(bytes / 8)))
+            xy = Array{Point{Int32}}(Int(floor(bytes / 8)))
             i = 1
             while i <= length(xy)
                 xy[i] = Point(ntoh(read(s, Int32)), ntoh(read(s, Int32)))

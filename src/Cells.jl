@@ -20,7 +20,7 @@ abstract CellRef{S, T<:Real}
 ```
 type CellReference{S,T} <: CellRef{S,T}
     cell::S
-    origin::Point{2,T}
+    origin::Point{T}
     xrefl::Bool
     mag::Float64
     rot::Float64
@@ -34,7 +34,7 @@ The type variable `S` is to avoid circular definitions with `Cell`.
 """
 type CellReference{S,T} <: CellRef{S,T}
     cell::S
-    origin::Point{2,T}
+    origin::Point{T}
     xrefl::Bool
     mag::Float64
     rot::Float64
@@ -44,9 +44,9 @@ end
 ```
 type CellArray{S,T} <: CellRef{S,T}
     cell::S
-    origin::Point{2,T}
-    deltacol::Point{2,T}
-    deltarow::Point{2,T}
+    origin::Point{T}
+    deltacol::Point{T}
+    deltarow::Point{T}
     col::Int
     row::Int
     xrefl::Bool
@@ -64,9 +64,9 @@ The type variable `S` is to avoid circular definitions with `Cell`.
 """
 type CellArray{S,T} <: CellRef{S,T}
     cell::S
-    origin::Point{2,T}
-    deltacol::Point{2,T}
-    deltarow::Point{2,T}
+    origin::Point{T}
+    deltacol::Point{T}
+    deltarow::Point{T}
     col::Int
     row::Int
     xrefl::Bool
@@ -123,25 +123,25 @@ end
 
 """
 ```
-CellReference{T<:Real}(x::Cell, y::Point{2,T}=Point(0.,0.);
+CellReference{T<:Real}(x::Cell, y::Point{T}=Point(0.,0.);
     xrefl=false, mag=1.0, rot=0.0)
 ```
 
 Convenience constructor for `CellReference{typeof(x), T}`.
 """
-CellReference{T<:Real}(x, origin::Point{2,T}=Point(0.,0.); xrefl=false,
+CellReference{T<:Real}(x, origin::Point{T}=Point(0.,0.); xrefl=false,
     mag=1.0, rot=0.0) = CellReference{typeof(x), T}(x, origin, xrefl, mag, rot)
 
 """
 ```
-CellArray{T<:Real}(x::Cell, origin::Point{2,T}, dc::Point{2,T}, dr::Point{2,T},
+CellArray{T<:Real}(x::Cell, origin::Point{T}, dc::Point{T}, dr::Point{T},
     c::Integer, r::Integer; xrefl=false, mag=1.0, rot=0.0)
 ```
 
 Construct a `CellArray{typeof(x),T}` object, with `xrefl`, `mag`, and `rot` as
 keyword arguments (x-reflection, magnification factor, rotation in degrees).
 """
-CellArray{T<:Real}(x::Cell, origin::Point{2,T}, dc::Point{2,T}, dr::Point{2,T},
+CellArray{T<:Real}(x::Cell, origin::Point{T}, dc::Point{T}, dr::Point{T},
     c::Real, r::Real; xrefl=false, mag=1.0, rot=0.0) =
     CellArray{typeof(x),T}(x,origin,dc,dr,c,r,xrefl,mag,rot)
 
@@ -316,7 +316,7 @@ function bounds{S<:Real, T<:Real}(ref::CellArray{Cell{S},T}; kwargs...)
     !isproper(b) && return b
 
     # The following code block is very inefficient
-    lls = [(b.ll + (i-1) * ref.deltarow + (j-1) * ref.deltacol)::Point{2,promote_type(S,T)}
+    lls = [(b.ll + (i-1) * ref.deltarow + (j-1) * ref.deltacol)::Point{promote_type(S,T)}
             for i in 1:(ref.row), j in 1:(ref.col)]
     urs = lls .+ Point(width(b), height(b))
     mb = Rectangle(minimum(lls[1:end]), maximum(urs[1:end]))
