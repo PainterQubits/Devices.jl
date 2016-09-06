@@ -1,7 +1,7 @@
 using Base.Test
 using Devices
 using Unitful
-import Unitful: m, cm
+import Unitful: m, cm, s
 import Clipper
 
 # This is needed in case the user has changed the default length promotion type.
@@ -10,6 +10,7 @@ ru = promote_type(typeof(m),typeof(cm))()
 @testset "Points" begin
     @testset "Point constructors" begin
         @test_throws ErrorException Point(2,3m)
+        @test_throws ErrorException Point(2s,3s)    # has to be a length
         @test typeof(Point(2,3)) == Point{Int}
         @test typeof(Point(2,3.)) == Point{Float64}
         @test typeof(Point(2.,3)) == Point{Float64}
@@ -83,6 +84,7 @@ end
         r = Rectangle(1u"m",2u"m")
         @test width(r) == 1u"m"
         @test height(r) == 2u"m"
-
+        @test_throws InexactError center!(Rectangle(1,1))
+        @test_throws InexactError center!(Rectangle(1u"m",1u"m"))
     end
 end

@@ -4,7 +4,7 @@ import Clipper: IntPoint
 import Base: convert, .+, .-, *, summary, promote_rule, show
 import StaticArrays: FieldVector
 import ForwardDiff: ForwardDiff, extract_derivative
-import Unitful: Quantity
+import Unitful: Length
 import PyCall.PyObject
 export Point
 export getx, gety
@@ -16,14 +16,14 @@ immutable Point{T} <: FieldVector{T}
 
 This type inherits from
 """
-immutable Point{T<:Number} <: FieldVector{T}
+immutable Point{T<:Union{Real,Length}} <: FieldVector{T}
     x::T
     y::T
 end
 
 Point(x::Number, y::Number) =
     error("Cannot use `Point` with this combination of types.")
-Point(x::Quantity, y::Quantity) = Point{promote_type(typeof(x),typeof(y))}(x,y)
+Point(x::Length, y::Length) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 Point(x::Real, y::Real) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 
 convert{T<:Real}(::Type{Point{T}}, x::IntPoint) = Point{T}(x.X, x.Y)
