@@ -50,6 +50,16 @@ end
 
 """
 ```
+Polygon(p0::Point, p1::Point, p2::Point, p3::Point...; kwargs...)
+```
+
+Convenience constructor for a `Polygon{T}` object.
+"""
+Polygon(p0::Point, p1::Point, p2::Point, p3::Point...; kwargs...) =
+    Polygon([p0, p1, p2, p3...]; kwargs...)
+
+"""
+```
 Polygon{T}(parr::AbstractArray{Point{T},1}; kwargs...)
 ```
 
@@ -58,25 +68,9 @@ Convenience constructor for a `Polygon{T}` object.
 Polygon{T}(parr::AbstractArray{Point{T},1}; kwargs...) =
     Polygon{T}(parr, Dict{Symbol,Any}(kwargs))
 
-"""
-```
-Polygon{T}(parr::AbstractArray{Point{T},1}, dict)
-```
+Polygon(parr::AbstractArray{Point,1}; kwargs...) =
+    error("Polygon creation failed. Perhaps you mixed units and unitless numbers?")
 
-Convenience constructor for a `Polygon{T}` object.
-"""
-Polygon{T}(parr::AbstractArray{Point{T},1}, dict) =
-    Polygon{T}(parr, dict)
-
-"""
-```
-Polygon(p0::Point, p1::Point, p2::Point, p3::Point...; kwargs...)
-```
-
-Convenience constructor for a `Polygon{T}` object.
-"""
-Polygon(p0::Point, p1::Point, p2::Point, p3::Point...; kwargs...) =
-    Polygon([p0, p1, p2, p3...], Dict{Symbol,Any}(kwargs))
 
 layer(p::Polygon) = p.properties[:layer]
 datatype(p::Polygon) = p.properties[:datatype]

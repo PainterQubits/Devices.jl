@@ -87,4 +87,8 @@ end
         @test_throws InexactError center!(Rectangle(1,1))
         @test_throws InexactError center!(Rectangle(1u"m",1u"m"))
     end
+
+    @testset "Polygons" begin
+        @test_throws ErrorException Polygon(Point(1,2), Point(3,5), Point(4u"cm",7u"cm"))
+    end
 end

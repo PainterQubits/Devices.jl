@@ -1,7 +1,7 @@
 module Points
 import AffineTransforms: AffineTransform
 import Clipper: IntPoint
-import Base: convert, .+, .-, *, summary, promote_rule, show
+import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret
 import StaticArrays: FieldVector
 import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Length
@@ -13,8 +13,6 @@ export getx, gety
 ```
 immutable Point{T} <: FieldVector{T}
 ```
-
-This type inherits from
 """
 immutable Point{T<:Union{Real,Length}} <: FieldVector{T}
     x::T
@@ -27,8 +25,16 @@ Point(x::Length, y::Length) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 Point(x::Real, y::Real) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 
 convert{T<:Real}(::Type{Point{T}}, x::IntPoint) = Point{T}(x.X, x.Y)
-promote_rule{S,T}(::Type{Point{S}}, ::Type{Point{T}}) = Point{promote_type(S,T)}
+promote_rule{S<:Real,T<:Real}(::Type{Point{S}}, ::Type{Point{T}}) =
+    Point{promote_type(S,T)}
+promote_rule{S<:Length,T<:Length}(::Type{Point{S}}, ::Type{Point{T}}) =
+    Point{promote_type(S,T)}
 show(io::IO, p::Point) = print(io, "(",string(getx(p)),",",string(gety(p)),")")
+
+function reinterpret{T,S}(::Type{T}, a::Point{S})
+    nel = Int(div(length(a)*sizeof(S),sizeof(T)))
+    return reinterpret(T, a, (nel,))
+end
 
 """
 ```
