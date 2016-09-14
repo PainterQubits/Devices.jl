@@ -1,4 +1,6 @@
 module Cells
+using Unitful
+using Unitful: Length
 
 import Compat.String
 
@@ -98,13 +100,10 @@ A cell has a name and contains polygons and references to `CellArray` or
 `CellReference` objects. It also records the time of its own creation. As
 currently implemented it mirrors the notion of cells in GDS-II files.
 
-In the future, it may make sense to generalize the idea and permit
-`Path` objects within a Cell.
-
 To add elements, push them to `elements` field (or use `render!`);
 to add references, push them to `refs` field.
 """
-type Cell{T<:Real}
+type Cell{T<:Union{Real,Length}}
     name::String
     elements::Array{AbstractPolygon{T},1}
     refs::Array{CellRef,1}

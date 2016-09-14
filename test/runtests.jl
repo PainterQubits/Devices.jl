@@ -107,7 +107,7 @@ end
                          Point(1.0u"m", 0.0u"m"),
                          Point(0.0u"m", 1.0u"m"))
     end
-    
+
     @testset "Affine transformations" begin
         pfloat = Polygon(Point(0.0u"m", 0.0u"m"),
                          Point(1.0u"m", 0.0u"m"),
@@ -115,14 +115,30 @@ end
         pint = Polygon(Point(0u"m",0u"m"),
                        Point(1u"m",0u"m"),
                        Point(0u"m",1u"m"))
+        rfloat = Rectangle(1.0u"m",1.0u"m")
+        rint = Rectangle(1u"m",1u"m")
+        rinttr = Rectangle(Point(1u"m",2u"m"), Point(2u"m",3u"m"))
+        pfloatrot = Polygon(Point(0.0u"m", 0.0u"m"),
+                            Point(0.0u"m", 1.0u"m"),
+                            Point(-1.0u"m", 0.0u"m"))
+        pfloattr = Polygon(Point(1.0u"m", 2.0u"m"),
+                           Point(2.0u"m", 2.0u"m"),
+                           Point(1.0u"m", 3.0u"m"))
         rotDeg = Rotation(90u"°")
         rotRad = Rotation(π/2*u"rad")
         rotFlt = Rotation(π/2)
-        trU = Translation(1.0u"m", 2.0u"m")
-        tr = Translation(1.0, 2.0)
-        @test rotDeg(pfloat) ≈ Polygon(Point(0.0u"m", 0.0u"m"),
-                                       Point(0.0u"m", 1.0u"m"),
-                                       Point(-1.0u"m", 0.0u"m"))
-        # rotRad(pfloat) ==
+        trU = Translation(1u"m", 2u"m")
+        @test rotDeg(pfloat) ≈ pfloatrot
+        @test rotRad(pfloat) ≈ pfloatrot
+        @test rotFlt(pfloat) ≈ pfloatrot
+        @test rotDeg(pint) ≈ pfloatrot
+        @test rotRad(pint) ≈ pfloatrot
+        @test rotFlt(pint) ≈ pfloatrot
+        @test trU(pfloat) ≈ pfloattr
+        @test trU(pint) ≈ pfloattr
+        @test trU(rint) == rinttr
+        @test trU(rfloat) == rinttr
     end
+
+    
 end

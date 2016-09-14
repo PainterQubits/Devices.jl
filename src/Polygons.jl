@@ -131,10 +131,13 @@ Note that this point doesn't have to be in the polygon.
 """
 maximum(x::Polygon) = maximum(x.p)
 
-for T in (:LinearMap, :AffineMap, :Translation)
+for T in (:LinearMap, :AffineMap)
     @eval (f::$T)(x::Polygon) = Polygon(f.(x.p), copy(x.properties))
     @eval (f::$T)(x::Rectangle) = f(convert(Polygon, x))
 end
+
+(f::Translation)(x::Polygon) = Polygon(f.(x.p), copy(x.properties))
+(f::Translation)(x::Rectangle) = Rectangle(f(x.ll), f(x.ur), copy(x.properties))
 
 """
 ```
@@ -150,6 +153,8 @@ function convert{T}(::Type{Polygon{T}}, s::Rectangle)
     ul = Point(T(getx(ll)), T(gety(ur)))
     Polygon{T}(Point{T}[ll,lr,ur,ul], copy(s.properties))
 end
+
+convert{T}(::Type{Polygon}, s::Rectangle{T}) = convert(Polygon{T}, s)
 
 """
 ```

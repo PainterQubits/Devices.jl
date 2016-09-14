@@ -2,7 +2,7 @@ module Points
 import StaticArrays: FieldVector, @SMatrix
 import CoordinateTransformations: LinearMap, Translation
 import Clipper: IntPoint
-import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret
+import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret, isapprox
 import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Length
 import PyCall.PyObject
@@ -78,6 +78,11 @@ for f in (:.+, :.-)
         end
         b
     end
+end
+
+function isapprox{S<:Point,T<:Point}(x::AbstractArray{S},
+        y::AbstractArray{T}; kwargs...)
+    all(ab->isapprox(ab[1],ab[2]; kwargs...), zip(x,y))
 end
 
 
