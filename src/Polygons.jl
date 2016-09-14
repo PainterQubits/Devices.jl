@@ -2,19 +2,20 @@ module Polygons
 
 using PyCall
 using ForwardDiff
-using AffineTransforms
+import CoordinateTransformations: AffineMap, LinearMap, Translation
 import Clipper
 import Clipper.orientation
 using ..Points
 using ..Rectangles
 
-import Base: +, -, *, .*, /, minimum, maximum, convert, getindex, start, next, done
+import Base: +, -, *, .*, /, ==, isapprox
+import Base: minimum, maximum
+import Base: convert, getindex, start, next, done
 import Base: copy
 import Devices
 import Devices: AbstractPolygon
 import Devices: bounds
 gdspy() = Devices._gdspy
-# pyclipper() = Devices._pyclipper
 
 export Polygon
 export Plain
@@ -65,12 +66,18 @@ Polygon{T}(parr::AbstractArray{Point{T},1}; kwargs...)
 
 Convenience constructor for a `Polygon{T}` object.
 """
-Polygon{T}(parr::AbstractArray{Point{T},1}; kwargs...) =
+Polygon{T}(parr::AbstractVector{Point{T}}; kwargs...) =
     Polygon{T}(parr, Dict{Symbol,Any}(kwargs))
+Polygon{T}(parr::AbstractVector{Point{T}}, dict) =
+    Polygon{T}(parr, dict)
 
-Polygon(parr::AbstractArray{Point,1}; kwargs...) =
+Polygon(parr::AbstractVector{Point}; kwargs...) =
     error("Polygon creation failed. Perhaps you mixed units and unitless numbers?")
 
+==(p1::Polygon, p2::Polygon) =
+    (p1.p == p2.p) && (p1.properties == p2.properties)
+isapprox(p1::Polygon, p2::Polygon) =
+    isapprox(p1.p, p2.p) && (p1.properties == p2.properties)
 
 layer(p::Polygon) = p.properties[:layer]
 datatype(p::Polygon) = p.properties[:datatype]
@@ -124,15 +131,9 @@ Note that this point doesn't have to be in the polygon.
 """
 maximum(x::Polygon) = maximum(x.p)
 
-function *(a::AffineTransform, x::Polygon)
-    Polygon(map(x->Point(a*Array(x)), x.p), copy(x.properties))
-end
-
-.*{T<:AbstractPolygon}(a::AffineTransform, x::AbstractArray{T,1}) =
-    [a * y for y in x]
-
-function *(a::AffineTransform, x::Rectangle)
-    Rectangle(Point(a*Array(x.ll)),Point(a*Array(x.ur)), copy(x.properties))
+for T in (:LinearMap, :AffineMap, :Translation)
+    @eval (f::$T)(x::Polygon) = Polygon(f.(x.p), copy(x.properties))
+    @eval (f::$T)(x::Rectangle) = f(convert(Polygon, x))
 end
 
 """

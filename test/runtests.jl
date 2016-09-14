@@ -67,7 +67,7 @@ ru = promote_type(typeof(m),typeof(cm))()
 end
 
 @testset "Polygons" begin
-    @testset "Rectangles" begin
+    @testset "Rectangle construction" begin
         # lower-left and upper-right constructor
         @test typeof(Rectangle(Point(1,2), Point(2,0))) == Rectangle{Int}
         @test typeof(Rectangle(Point(1u"m",2u"cm"), Point(3u"nm",4u"μm"))) ==
@@ -77,18 +77,52 @@ end
         @test typeof(Rectangle(1,2)) == Rectangle{Int}
         @test typeof(Rectangle(1.0,2)) == Rectangle{Float64}
         @test typeof(Rectangle(1.0u"m",2.0u"μm")) == Rectangle{typeof(1.0*ru)}
-
-        # methods
-        @test width(Rectangle(1,2)) == 1
-        @test height(Rectangle(1,2)) == 2
-        r = Rectangle(1u"m",2u"m")
-        @test width(r) == 1u"m"
-        @test height(r) == 2u"m"
-        @test_throws InexactError center!(Rectangle(1,1))
-        @test_throws InexactError center!(Rectangle(1u"m",1u"m"))
     end
 
-    @testset "Polygons" begin
+    @testset "Polygon construction" begin
         @test_throws ErrorException Polygon(Point(1,2), Point(3,5), Point(4u"cm",7u"cm"))
+    end
+
+    @testset "Rectangle methods" begin
+        # width and height
+        @test width(Rectangle(1,2)) == 1
+        @test height(Rectangle(1,2)) == 2
+        @test width(Rectangle(1u"m",2u"m")) == 1u"m"
+        @test height(Rectangle(1u"m",2u"m")) == 2u"m"
+
+        # centering
+        @test_throws InexactError center!(Rectangle(1,1))
+        @test_throws InexactError center!(Rectangle(1u"m",1u"m"))
+
+        # Rectangle equality
+        @test Rectangle(1,2) == Rectangle(1,2)
+    end
+
+    @testset "Polygon methods" begin
+        pfloat = Polygon(Point(0.0u"m", 0.0u"m"),
+                         Point(1.0u"m", 0.0u"m"),
+                         Point(0.0u"m", 1.0u"m"))
+        # Polygon equality
+        @test pfloat == Polygon(Point(0.0u"m", 0.0u"m"),
+                         Point(1.0u"m", 0.0u"m"),
+                         Point(0.0u"m", 1.0u"m"))
+    end
+    
+    @testset "Affine transformations" begin
+        pfloat = Polygon(Point(0.0u"m", 0.0u"m"),
+                         Point(1.0u"m", 0.0u"m"),
+                         Point(0.0u"m", 1.0u"m"))
+        pint = Polygon(Point(0u"m",0u"m"),
+                       Point(1u"m",0u"m"),
+                       Point(0u"m",1u"m"))
+        rotDeg = Rotation(90u"°")
+        rotRad = Rotation(π/2*u"rad")
+        rotFlt = Rotation(π/2)
+        trU = Translation(1.0u"m", 2.0u"m")
+        tr = Translation(1.0, 2.0)
+        @test rotDeg(pfloat) ≈ Polygon(Point(0.0u"m", 0.0u"m"),
+                                       Point(0.0u"m", 1.0u"m"),
+                                       Point(-1.0u"m", 0.0u"m"))
+        # rotRad(pfloat) ==
     end
 end

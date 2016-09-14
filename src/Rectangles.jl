@@ -3,7 +3,7 @@ module Rectangles
 using ForwardDiff
 using ..Points
 
-import Base: +, -, *, /, minimum, maximum, copy
+import Base: +, -, *, /, minimum, maximum, copy, ==
 import Devices
 import Devices: AbstractPolygon
 import Devices: bounds, center, center!
@@ -67,6 +67,12 @@ Rectangle(width, height; kwargs...) =
         Point(width, height), Dict{Symbol,Any}(kwargs))
 
 copy(p::Rectangle) = Rectangle(p.ll, p.ur, copy(p.properties))
+
+==(r1::Rectangle, r2::Rectangle) =
+    (r1.ll == r2.ll) && (r1.ur == r2.ur) && (r1.properties == r2.properties)
+isapprox(r1::Rectangle, r2::Rectangle) =
+    isapprox(r1.ul, r2.ul) && isapprox(r1.ur, r2.ur) &&
+        (p1.properties == p2.properties)
 
 """
 ```

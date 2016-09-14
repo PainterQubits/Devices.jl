@@ -1,12 +1,13 @@
 module Points
-import AffineTransforms: AffineTransform
+import StaticArrays: FieldVector, @SMatrix
+import CoordinateTransformations: LinearMap, Translation
 import Clipper: IntPoint
 import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret
-import StaticArrays: FieldVector
 import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Length
 import PyCall.PyObject
 export Point
+export Rotation, Translation
 export getx, gety
 
 """
@@ -35,6 +36,7 @@ function reinterpret{T,S}(::Type{T}, a::Point{S})
     nel = Int(div(length(a)*sizeof(S),sizeof(T)))
     return reinterpret(T, a, (nel,))
 end
+
 
 """
 ```
@@ -78,7 +80,12 @@ for f in (:.+, :.-)
     end
 end
 
-*(a::AffineTransform, p::Point) = Point(a * Array(p))
+
+## Affine transformations
+
+# Translation already defined for 2D by the CoordinateTransformations package
+# Still need 2D rotation.
+Rotation(Θ) = LinearMap(@SMatrix [cos(Θ) -sin(Θ); sin(Θ) cos(Θ)])
 
 extract_derivative{T<:Real}(x::Point{T}) =
     Point(ForwardDiff.partials(getx(x),1),ForwardDiff.partials(gety(x),1))

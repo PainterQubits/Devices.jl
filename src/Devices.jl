@@ -43,9 +43,9 @@ export interdigit
 function render! end
 
 include("Points.jl")
-import .Points: Point, getx, gety
+import .Points: Point, getx, gety, Rotation, Translation
 export Points
-export Point, getx, gety
+export Point, getx, gety, Rotation, Translation
 
 function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, layer=FEATURES_LAYER)
     c = gdspy()[:Cell](cellname)
