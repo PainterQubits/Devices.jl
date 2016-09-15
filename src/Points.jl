@@ -1,13 +1,14 @@
 module Points
+import Devices: Coordinate
 import StaticArrays: FieldVector, @SMatrix
-import CoordinateTransformations: LinearMap, Translation
+import CoordinateTransformations: LinearMap, Translation, ∘
 import Clipper: IntPoint
 import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret, isapprox
 import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Length
 import PyCall.PyObject
 export Point
-export Rotation, Translation
+export Rotation, Translation, ∘
 export getx, gety
 
 """
@@ -15,7 +16,7 @@ export getx, gety
 immutable Point{T} <: FieldVector{T}
 ```
 """
-immutable Point{T<:Union{Real,Length}} <: FieldVector{T}
+immutable Point{T<:Coordinate} <: FieldVector{T}
     x::T
     y::T
 end

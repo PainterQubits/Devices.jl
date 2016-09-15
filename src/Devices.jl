@@ -2,13 +2,12 @@ __precompile__()
 module Devices
 
 using PyCall
-using AffineTransforms
 using ForwardDiff
 using FileIO
-import AffineTransforms: transform
 import Clipper
 import FileIO: save, load
 import Base: cell, length, show, .+, .-
+import Unitful: Length
 
 render_counter = UInt64(0)
 
@@ -42,10 +41,19 @@ export interdigit
 
 function render! end
 
+"""
+```
+typealias Coordinate Union{Real,Length}
+```
+
+Type alias for numeric types suitable for coordinate systems.
+"""
+typealias Coordinate Union{Real,Length}
+
 include("Points.jl")
-import .Points: Point, getx, gety, Rotation, Translation
+import .Points: Point, getx, gety, Rotation, Translation, ∘
 export Points
-export Point, getx, gety, Rotation, Translation
+export Point, getx, gety, Rotation, Translation, ∘
 
 function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, layer=FEATURES_LAYER)
     c = gdspy()[:Cell](cellname)

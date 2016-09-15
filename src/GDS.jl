@@ -378,13 +378,13 @@ function strans(io::IO, ref)
     if ref.mag != 1.0
         bits += 0x0004
     end
-    if ref.rot != 0.0
+    if mod(ref.rot,2π) != 0.0
         bits += 0x0002
     end
     bytes = 0
     bits != 0 && (bytes += gdswrite(io, STRANS, bits))
     bits & 0x0004 > 0 && (bytes += gdswrite(io, MAG, ref.mag))
-    bits & 0x0002 > 0 && (bytes += gdswrite(io, ANGLE, ref.rot))
+    bits & 0x0002 > 0 && (bytes += gdswrite(io, ANGLE, ref.rot*180/π))
     bytes
 end
 
