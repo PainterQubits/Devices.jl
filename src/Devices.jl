@@ -82,7 +82,7 @@ abstract AbstractPolygon{T}
 Anything you could call a polygon regardless of the underlying representation.
 Currently only `Rectangle` or `Polygon` are concrete subtypes.
 """
-abstract AbstractPolygon{T}
+abstract AbstractPolygon{T<:Coordinate}
 
 include("Rectangles.jl")
 import .Rectangles: Rectangle, center!, height, width, isproper

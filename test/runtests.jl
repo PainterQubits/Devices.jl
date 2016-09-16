@@ -96,6 +96,7 @@ end
 
         # Rectangle equality
         @test Rectangle(1,2) == Rectangle(1,2)
+        @test bounds(Rectangle(1,2)) == Rectangle(1,2)
     end
 
     @testset "Polygon methods" begin
@@ -141,14 +142,21 @@ end
     @test trU(rfloat) == rinttr
 end
 
-@testset "Cell coordinate transformations" begin
+@testset "Cell methods" begin
+    # Setup
     c = Cell("main")
     c2 = Cell("c2")
     c3 = Cell("c3")
+    @test_throws ErrorException render!(c3, Rectangle(5m,10m))
+    render!(c3, Rectangle(5,10))
     c2ref = CellReference(c2, Point(-10.0m,0.0m); mag=1.0, rot=180°)
     c3ref = CellReference(c3, Point(10.0m,0.0m); mag=2.0, rot=90°)
     push!(c.refs, c2ref)
     push!(c2.refs, c3ref)
     tr = transform(c,c3ref)
+
+    # Test cell transformations
     @test tr(Point(1m,1m)) ≈ Point(-18.0m,-2.0m)
+    @test c["c2"]["c3"] == c3ref
+    println(bounds(c2ref))
 end

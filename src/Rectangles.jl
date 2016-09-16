@@ -3,7 +3,7 @@ module Rectangles
 using ForwardDiff
 using ..Points
 
-import Base: +, -, *, /, minimum, maximum, copy, ==
+import Base: +, -, *, /, minimum, maximum, copy, ==, convert
 import Devices
 import Devices: AbstractPolygon
 import Devices: bounds, center, center!
@@ -57,7 +57,7 @@ Constructs `Rectangle` objects by specifying the width and height rather than
 the lower-left and upper-right corners.
 
 The rectangle will sit with the lower-left corner at the origin. With centered
-rectangles we would need to divide width zeand height by 2 to properly position.
+rectangles we would need to divide width and height by 2 to properly position.
 If we wanted an object of `Rectangle{Int}` type, this would not be possible
 if either `width` or `height` were odd numbers. This definition ensures type
 stability in the constructor.
@@ -65,6 +65,8 @@ stability in the constructor.
 Rectangle(width, height; kwargs...) =
     Rectangle(Point(zero(typeof(width)), zero(typeof(height))),
         Point(width, height), Dict{Symbol,Any}(kwargs))
+
+convert{T}(::Type{Rectangle{T}}, x::Rectangle) = Rectangle{T}(x.ll, x.ur, x.properties)
 
 copy(p::Rectangle) = Rectangle(p.ll, p.ur, copy(p.properties))
 

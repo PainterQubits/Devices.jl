@@ -155,6 +155,7 @@ function convert{T}(::Type{Polygon{T}}, s::Rectangle)
 end
 
 convert{T}(::Type{Polygon}, s::Rectangle{T}) = convert(Polygon{T}, s)
+convert{T}(::Type{AbstractPolygon{T}}, s::Rectangle) = convert(Rectangle{T}, s)
 
 """
 ```

@@ -85,15 +85,15 @@ end
 ```
 type Cell{T<:Coordinate}
     name::String
-    elements::Array{AbstractPolygon{T},1}
+    elements::Array{Polygon{T},1}
     refs::Array{CellRef,1}
     create::DateTime
     Cell(x,y,z) = new(x, y, z, now())
     Cell(x,y) = new(x, y, CellRef[], now())
-    Cell(x) = new(x, AbstractPolygon{T}[], CellRef[], now())
+    Cell(x) = new(x, Polygon{T}[], CellRef[], now())
     Cell() = begin
         c = new()
-        c.elements = AbstractPolygon{T}[]
+        c.elements = Polygon{T}[]
         c.refs = CellRef[]
         c.create = now()
         c
@@ -110,15 +110,15 @@ to add references, push them to `refs` field.
 """
 type Cell{T<:Coordinate}
     name::String
-    elements::Array{AbstractPolygon{T},1}
+    elements::Array{Polygon{T},1}
     refs::Array{CellRef,1}
     create::DateTime
     Cell(x,y,z) = new(x, y, z, now())
     Cell(x,y) = new(x, y, CellRef[], now())
-    Cell(x) = new(x, AbstractPolygon{T}[], CellRef[], now())
+    Cell(x) = new(x, Polygon{T}[], CellRef[], now())
     Cell() = begin
         c = new()
-        c.elements = AbstractPolygon{T}[]
+        c.elements = Polygon{T}[]
         c.refs = CellRef[]
         c.create = now()
         c
@@ -180,24 +180,24 @@ Cell(name::AbstractString) = Cell{Float64}(name)
 
 """
 ```
-Cell{T<:Coordinate}(name::AbstractString, elements::AbstractArray{AbstractPolygon{T},1})
+Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractArray{T,1})
 ```
 
 Convenience constructor for `Cell{T}`.
 """
-Cell{T<:Coordinate}(name::AbstractString, elements::AbstractArray{AbstractPolygon{T},1}) =
+Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractArray{T,1}) =
     Cell{T}(name, elements)
 
 """
 ```
-Cell{T<:Coordinate}(name::AbstractString, elements::AbstractArray{AbstractPolygon{T},1},
+Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractArray{T,1},
     refs::AbstractArray{CellReference,1})
 ```
 
 Convenience constructor for `Cell{T}`.
 """
-Cell{T<:Coordinate}(name::AbstractString,
-    elements::AbstractArray{AbstractPolygon{T},1},
+Cell{T<:AbstractPolygon}(name::AbstractString,
+    elements::AbstractArray{T,1},
     refs::AbstractArray{CellReference,1}) =
     Cell{T}(name, elements, refs)
 
@@ -281,7 +281,7 @@ function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
 
     for el in cell.elements
         b = bounds(el)
-        mi, ma = min(mi,minimum(b)), max(ma,maximum(b))
+        mi, ma = min.(mi,minimum(b)), max.(ma,maximum(b))
     end
 
     for el in cell.refs
@@ -289,7 +289,7 @@ function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
         # We should grow to accommodate if necessary.
         br = bounds(el)
         b = Rectangle{T}(bfl(T, br.ll), bce(T, br.ur))
-        mi, ma = min(mi,minimum(b)), max(ma,maximum(b))
+        mi, ma = min.(mi,minimum(b)), max.(ma,maximum(b))
     end
 
     Rectangle(mi, ma; kwargs...)
@@ -331,7 +331,7 @@ function bounds{S<:Coordinate, T<:Coordinate}(
     a = Translation(ref.origin) ∘ CoordinateTransformations.LinearMap(
         @SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
                   sgn*ref.mag*sin(ref.rot) ref.mag*cos(ref.rot)])
-    c = a(convert(Polygon{Float64}, mb))
+    c = a(mb)
     bounds(c; kwargs...)
 end
 
@@ -351,7 +351,7 @@ function bounds(ref::CellReference; kwargs...)
     a = Translation(ref.origin) ∘ CoordinateTransformations.LinearMap(
         @SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
                   sgn*ref.mag*sin(ref.rot) ref.mag*cos(ref.rot)])
-    c = a(convert(Polygon{Float64}, b))
+    c = a(b)
     bounds(c; kwargs...)
 end
 
