@@ -69,7 +69,12 @@ end
 @testset "Polygon basics" begin
     @testset "Rectangle construction" begin
         # lower-left and upper-right constructor
-        @test typeof(Rectangle(Point(1,2), Point(2,0))) == Rectangle{Int}
+        r = Rectangle(Point(1,2), Point(2,0))
+        @test typeof(r) == Rectangle{Int}
+        @test r.ll == Point(1,0)
+        @test r.ur == Point(2,2)
+
+        # with units
         @test typeof(Rectangle(Point(1m,2cm), Point(3nm,4μm))) ==
             Rectangle{typeof(1ru//1)}
 
@@ -147,16 +152,21 @@ end
     c = Cell("main")
     c2 = Cell("c2")
     c3 = Cell("c3")
+    r = Rectangle(5,10)
     @test_throws ErrorException render!(c3, Rectangle(5m,10m))
-    render!(c3, Rectangle(5,10))
-    c2ref = CellReference(c2, Point(-10.0m,0.0m); mag=1.0, rot=180°)
-    c3ref = CellReference(c3, Point(10.0m,0.0m); mag=2.0, rot=90°)
+    render!(c3, r)
+    c2ref = CellReference(c2, Point(-10.0,0.0); mag=1.0, rot=180°)
+    c3ref = CellReference(c3, Point(10.0,0.0); mag=2.0, rot=90°)
     push!(c.refs, c2ref)
     push!(c2.refs, c3ref)
     tr = transform(c,c3ref)
 
     # Test cell transformations
-    @test tr(Point(1m,1m)) ≈ Point(-18.0m,-2.0m)
+    @test tr(Point(1,1)) ≈ Point(-18.0,-2.0)
     @test c["c2"]["c3"] == c3ref
-    println(bounds(c2ref))
+
+    # Test bounds
+    @test bounds(c3) == r
+    @test bounds(c2) == bounds(c3ref)
+    @test bounds(c) == bounds(c2ref)
 end

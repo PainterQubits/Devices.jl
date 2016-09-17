@@ -3,7 +3,8 @@ import Devices: Coordinate
 import StaticArrays: FieldVector, @SMatrix
 import CoordinateTransformations: LinearMap, Translation, ∘
 import Clipper: IntPoint
-import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret, isapprox
+import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret
+import Base: scalarmin, scalarmax, isapprox
 import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Length
 import PyCall.PyObject
@@ -37,7 +38,6 @@ function reinterpret{T,S}(::Type{T}, a::Point{S})
     nel = Int(div(length(a)*sizeof(S),sizeof(T)))
     return reinterpret(T, a, (nel,))
 end
-
 
 """
 ```

@@ -119,7 +119,7 @@ minimum(x::Polygon)
 Return the lower-left-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
 """
-minimum(x::Polygon) = minimum(x.p)
+minimum(x::Polygon) = Point(reduce(min, x.p))
 
 """
 ```
@@ -129,7 +129,7 @@ maximum(x::Polygon)
 Return the upper-right-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
 """
-maximum(x::Polygon) = maximum(x.p)
+maximum(x::Polygon) = Point(reduce(max, x.p))
 
 for T in (:LinearMap, :AffineMap)
     @eval (f::$T)(x::Polygon) = Polygon(f.(x.p), copy(x.properties))

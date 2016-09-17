@@ -36,7 +36,15 @@ type Rectangle{T} <: AbstractPolygon{T}
     ll::Point{T}
     ur::Point{T}
     properties::Dict{Symbol, Any}
+    Rectangle(ll,ur) = Rectangle(ll,ur,Dict{Symbol,Any}())
+    function Rectangle(a,b,props)
+        # Ensure ll is lower-left, ur is upper-right.
+        ll = Point(a.<=b) .* a + Point(b.<=a) .* b
+        ur = Point(a.<=b) .* b + Point(b.<=a) .* a
+        new(ll,ur,props)
+    end
 end
+Rectangle{T}(ll::Point{T}, ur::Point{T}, dict) = Rectangle{T}(ll,ur,dict)
 
 """
 ```
@@ -57,13 +65,13 @@ Constructs `Rectangle` objects by specifying the width and height rather than
 the lower-left and upper-right corners.
 
 The rectangle will sit with the lower-left corner at the origin. With centered
-rectangles we would need to divide width and height by 2 to properly position.
+rectangles we would need to divide width zeand height by 2 to properly position.
 If we wanted an object of `Rectangle{Int}` type, this would not be possible
 if either `width` or `height` were odd numbers. This definition ensures type
 stability in the constructor.
 """
 Rectangle(width, height; kwargs...) =
-    Rectangle(Point(zero(typeof(width)), zero(typeof(height))),
+    Rectangle(Point(zero(width), zero(height)),
         Point(width, height), Dict{Symbol,Any}(kwargs))
 
 convert{T}(::Type{Rectangle{T}}, x::Rectangle) = Rectangle{T}(x.ll, x.ur, x.properties)
