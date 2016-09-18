@@ -13,6 +13,9 @@ abstract AbstractPolygon{T}
 Anything you could call a polygon regardless of the underlying representation. Currently only `Rectangle` or `Polygon` are concrete subtypes.
 
 
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L77-L84' class='documenter-source'>source</a><br>
+
+
 <a id='Rectangles-1'></a>
 
 ## Rectangles
@@ -23,9 +26,9 @@ Anything you could call a polygon regardless of the underlying representation. C
 
 
 ```
-type Rectangle{T<:Real} <: AbstractPolygon{T}
-    ll::Point{2,T}
-    ur::Point{2,T}
+type Rectangle{T} <: AbstractPolygon{T}
+    ll::Point{T}
+    ur::Point{T}
     properties::Dict{Symbol, Any}
     Rectangle(ll,ur) = new(ll,ur,Dict{Symbol,Any}())
     Rectangle(ll,ur,props) = new(ll,ur,props)
@@ -35,64 +38,39 @@ end
 A rectangle, defined by opposing lower-left and upper-right corner coordinates.
 
 
-```
-Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}; kwargs...)
-```
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L18-L30' class='documenter-source'>source</a><br>
 
-Convenience constructor for `Rectangle{T}` objects.
-
-
-```
-Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}, dict)
-```
-
-Convenience constructor for `Rectangle{T}` objects.
-
-
-```
-Rectangle{T<:Real}(width::T, height::T; kwargs...)
-```
-
-Constructs `Rectangle{T}` objects by specifying the width and height rather than the lower-left and upper-right corners.
-
-The rectangle will sit with the lower-left corner at the origin. With centered rectangles we would need to divide width and height by 2 to properly position. If we wanted an object of `Rectangle{Int}` type, this would not be possible if either `width` or `height` were odd numbers. This definition ensures type stability in the constructor.
-
-<a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}'>#</a>
+<a id='Devices.Rectangles.Rectangle-Tuple{Devices.Points.Point,Devices.Points.Point}' href='#Devices.Rectangles.Rectangle-Tuple{Devices.Points.Point,Devices.Points.Point}'>#</a>
 **`Devices.Rectangles.Rectangle`** &mdash; *Method*.
 
 
 
 ```
-Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}; kwargs...)
+Rectangle(ll::Point, ur::Point; kwargs...)
 ```
 
-Convenience constructor for `Rectangle{T}` objects.
+Convenience constructor for `Rectangle` objects.
 
-<a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Any}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Any}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L45-L51' class='documenter-source'>source</a><br>
+
+<a id='Devices.Rectangles.Rectangle-Tuple{Any,Any}' href='#Devices.Rectangles.Rectangle-Tuple{Any,Any}'>#</a>
 **`Devices.Rectangles.Rectangle`** &mdash; *Method*.
 
 
 
 ```
-Rectangle{T<:Real}(ll::Point{2,T}, ur::Point{2,T}, dict)
+Rectangle(width, height, kwargs...)
 ```
 
-Convenience constructor for `Rectangle{T}` objects.
+Constructs `Rectangle` objects by specifying the width and height rather than the lower-left and upper-right corners.
 
-<a id='Devices.Rectangles.Rectangle-Tuple{T<:Real,T<:Real}' href='#Devices.Rectangles.Rectangle-Tuple{T<:Real,T<:Real}'>#</a>
-**`Devices.Rectangles.Rectangle`** &mdash; *Method*.
-
+The rectangle will sit with the lower-left corner at the origin. With centered rectangles we would need to divide width zeand height by 2 to properly position. If we wanted an object of `Rectangle{Int}` type, this would not be possible if either `width` or `height` were odd numbers. This definition ensures type stability in the constructor.
 
 
-```
-Rectangle{T<:Real}(width::T, height::T; kwargs...)
-```
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L55-L68' class='documenter-source'>source</a><br>
 
-Constructs `Rectangle{T}` objects by specifying the width and height rather than the lower-left and upper-right corners.
-
-The rectangle will sit with the lower-left corner at the origin. With centered rectangles we would need to divide width and height by 2 to properly position. If we wanted an object of `Rectangle{Int}` type, this would not be possible if either `width` or `height` were odd numbers. This definition ensures type stability in the constructor.
-
-<a id='Devices.bounds-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.bounds-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<a id='Devices.bounds-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.bounds-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 **`Devices.bounds`** &mdash; *Method*.
 
 
@@ -104,13 +82,9 @@ bounds(r::Rectangle)
 No-op (just returns `r`).
 
 
-```
-bounds(p0::AbstractPolygon, p::AbstractPolygon...)
-```
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L112-L118' class='documenter-source'>source</a><br>
 
-Return a bounding `Rectangle` with no properties for several `AbstractPolygon` objects.
-
-<a id='Devices.center-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.center-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<a id='Devices.center-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.center-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 **`Devices.center`** &mdash; *Method*.
 
 
@@ -121,7 +95,10 @@ center(r::Rectangle)
 
 Returns a Point corresponding to the center of the rectangle.
 
-<a id='Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L121-L127' class='documenter-source'>source</a><br>
+
+<a id='Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 **`Devices.Rectangles.height`** &mdash; *Method*.
 
 
@@ -132,7 +109,10 @@ height(r::Rectangle)
 
 Return the height of a rectangle.
 
-<a id='Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L92-L98' class='documenter-source'>source</a><br>
+
+<a id='Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 **`Devices.Rectangles.isproper`** &mdash; *Method*.
 
 
@@ -141,18 +121,14 @@ Return the height of a rectangle.
 isproper(r::Rectangle)
 ```
 
-Returns `true` if the rectangle has a non-zero size and if the upper-right and lower-left corner coordinates `ur` and `ll` really are at the upper-right and lower-left. Otherwise, returns `false`.
+Returns `true` if the rectangle has a non-zero size. Otherwise, returns `false`. Note that the upper-right and lower-left corners are enforced to be the `ur` and `ll` fields of a `Rectangle` by the inner constructor.
 
-<a id='Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L101-L109' class='documenter-source'>source</a><br>
+
+<a id='Base.minimum-Tuple{Devices.Rectangles.Rectangle}' href='#Base.minimum-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 **`Base.minimum`** &mdash; *Method*.
 
-
-
-```
-minimum(itr)
-```
-
-Returns the smallest element in a collection.
 
 
 ```
@@ -161,16 +137,12 @@ minimum(r::Rectangle)
 
 Returns the lower-left corner of a rectangle (Point object).
 
-<a id='Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L145-L151' class='documenter-source'>source</a><br>
+
+<a id='Base.maximum-Tuple{Devices.Rectangles.Rectangle}' href='#Base.maximum-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 **`Base.maximum`** &mdash; *Method*.
 
-
-
-```
-maximum(itr)
-```
-
-Returns the largest element in a collection.
 
 
 ```
@@ -179,18 +151,24 @@ maximum(r::Rectangle)
 
 Returns the upper-right corner of a rectangle (Point object).
 
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L154-L160' class='documenter-source'>source</a><br>
+
 <a id='Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 **`Devices.Polygons.points`** &mdash; *Method*.
 
 
 
 ```
-points{T<:Real}(x::Rectangle{T})
+points{T}(x::Rectangle{T})
 ```
 
 Returns the array of `Point` objects defining the rectangle.
 
-<a id='Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L95-L101' class='documenter-source'>source</a><br>
+
+<a id='Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 **`Devices.Rectangles.width`** &mdash; *Method*.
 
 
@@ -201,8 +179,11 @@ width(r::Rectangle)
 
 Return the width of a rectangle.
 
-<a id='Base.+-Tuple{Devices.Rectangles.Rectangle{T<:Real},FixedSizeArrays.Point{N,T}}' href='#Base.+-Tuple{Devices.Rectangles.Rectangle{T<:Real},FixedSizeArrays.Point{N,T}}'>#</a>
-**`Base.+`** &mdash; *Method*.
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L83-L89' class='documenter-source'>source</a><br>
+
+<a id='Base.:+-Tuple{Devices.Rectangles.Rectangle,Devices.Points.Point}' href='#Base.:+-Tuple{Devices.Rectangles.Rectangle,Devices.Points.Point}'>#</a>
+**`Base.:+`** &mdash; *Method*.
 
 
 
@@ -211,6 +192,9 @@ Return the width of a rectangle.
 ```
 
 Translate a rectangle by `p`.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L169-L175' class='documenter-source'>source</a><br>
 
 
 <a id='Polygons-1'></a>
@@ -223,8 +207,8 @@ Translate a rectangle by `p`.
 
 
 ```
-type Polygon{T<:Real} <: AbstractPolygon{T}
-    p::Array{Point{2,T},1}
+type Polygon{T} <: AbstractPolygon{T}
+    p::Array{Point{T},1}
     properties::Dict{Symbol, Any}
     Polygon(x,y) = new(x,y)
     Polygon(x) = new(x, Dict{Symbol, Any}())
@@ -234,62 +218,37 @@ end
 Polygon defined by list of coordinates. The first point should not be repeated at the end (although this is true for the GDS format).
 
 
-```
-Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}; kwargs...)
-```
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L31-L43' class='documenter-source'>source</a><br>
 
-Convenience constructor for a `Polygon{T}` object.
-
-
-```
-Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, dict)
-```
-
-Convenience constructor for a `Polygon{T}` object.
-
-
-```
-Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
-    p3::Point{2,T}...; kwargs...)
-```
-
-Convenience constructor for a `Polygon{T}` object.
-
-<a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}'>#</a>
+<a id='Devices.Polygons.Polygon-Tuple{AbstractArray{Devices.Points.Point{T},1}}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{Devices.Points.Point{T},1}}'>#</a>
 **`Devices.Polygons.Polygon`** &mdash; *Method*.
 
 
 
 ```
-Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}; kwargs...)
+Polygon{T}(parr::AbstractArray{Point{T},1}; kwargs...)
 ```
 
 Convenience constructor for a `Polygon{T}` object.
 
-<a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1},Any}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1},Any}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L62-L68' class='documenter-source'>source</a><br>
+
+<a id='Devices.Polygons.Polygon-Tuple{Devices.Points.Point,Devices.Points.Point,Devices.Points.Point,Vararg{Devices.Points.Point,N}}' href='#Devices.Polygons.Polygon-Tuple{Devices.Points.Point,Devices.Points.Point,Devices.Points.Point,Vararg{Devices.Points.Point,N}}'>#</a>
 **`Devices.Polygons.Polygon`** &mdash; *Method*.
 
 
 
 ```
-Polygon{T<:Real}(parr::AbstractArray{Point{2,T},1}, dict)
+Polygon(p0::Point, p1::Point, p2::Point, p3::Point...; kwargs...)
 ```
 
 Convenience constructor for a `Polygon{T}` object.
 
-<a id='Devices.Polygons.Polygon-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Vararg{FixedSizeArrays.Point{2,T<:Real}}}' href='#Devices.Polygons.Polygon-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Vararg{FixedSizeArrays.Point{2,T<:Real}}}'>#</a>
-**`Devices.Polygons.Polygon`** &mdash; *Method*.
 
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L52-L58' class='documenter-source'>source</a><br>
 
-
-```
-Polygon{T<:Real}(p0::Point{2,T}, p1::Point{2,T}, p2::Point{2,T},
-    p3::Point{2,T}...; kwargs...)
-```
-
-Convenience constructor for a `Polygon{T}` object.
-
-<a id='Devices.bounds-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.bounds-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
+<a id='Devices.bounds-Tuple{Devices.Polygons.Polygon}' href='#Devices.bounds-Tuple{Devices.Polygons.Polygon}'>#</a>
 **`Devices.bounds`** &mdash; *Method*.
 
 
@@ -301,13 +260,9 @@ bounds(p::Polygon)
 Return a bounding Rectangle with no properties for polygon `p`.
 
 
-```
-bounds(p0::AbstractPolygon, p::AbstractPolygon...)
-```
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L171-L177' class='documenter-source'>source</a><br>
 
-Return a bounding `Rectangle` with no properties for several `AbstractPolygon` objects.
-
-<a id='Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon{T},N}}' href='#Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon{T},N}}'>#</a>
+<a id='Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon,N}}' href='#Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon,N}}'>#</a>
 **`Devices.bounds`** &mdash; *Method*.
 
 
@@ -318,7 +273,10 @@ bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
 
 Return a bounding `Rectangle` with no properties for an array `parr` of `AbstractPolygon` objects.
 
-<a id='Devices.bounds-Tuple{Devices.AbstractPolygon{T},Vararg{Devices.AbstractPolygon{T}}}' href='#Devices.bounds-Tuple{Devices.AbstractPolygon{T},Vararg{Devices.AbstractPolygon{T}}}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L180-L187' class='documenter-source'>source</a><br>
+
+<a id='Devices.bounds-Tuple{Devices.AbstractPolygon,Vararg{Devices.AbstractPolygon,N}}' href='#Devices.bounds-Tuple{Devices.AbstractPolygon,Vararg{Devices.AbstractPolygon,N}}'>#</a>
 **`Devices.bounds`** &mdash; *Method*.
 
 
@@ -329,16 +287,12 @@ bounds(p0::AbstractPolygon, p::AbstractPolygon...)
 
 Return a bounding `Rectangle` with no properties for several `AbstractPolygon` objects.
 
-<a id='Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L195-L202' class='documenter-source'>source</a><br>
+
+<a id='Base.minimum-Tuple{Devices.Polygons.Polygon}' href='#Base.minimum-Tuple{Devices.Polygons.Polygon}'>#</a>
 **`Base.minimum`** &mdash; *Method*.
 
-
-
-```
-minimum(itr)
-```
-
-Returns the smallest element in a collection.
 
 
 ```
@@ -347,16 +301,12 @@ minimum(x::Polygon)
 
 Return the lower-left-most corner of a rectangle bounding polygon `x`. Note that this point doesn't have to be in the polygon.
 
-<a id='Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L114-L121' class='documenter-source'>source</a><br>
+
+<a id='Base.maximum-Tuple{Devices.Polygons.Polygon}' href='#Base.maximum-Tuple{Devices.Polygons.Polygon}'>#</a>
 **`Base.maximum`** &mdash; *Method*.
 
-
-
-```
-maximum(itr)
-```
-
-Returns the largest element in a collection.
 
 
 ```
@@ -365,7 +315,10 @@ maximum(x::Polygon)
 
 Return the upper-right-most corner of a rectangle bounding polygon `x`. Note that this point doesn't have to be in the polygon.
 
-<a id='Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L124-L131' class='documenter-source'>source</a><br>
+
+<a id='Devices.Polygons.points-Tuple{Devices.Polygons.Polygon}' href='#Devices.Polygons.points-Tuple{Devices.Polygons.Polygon}'>#</a>
 **`Devices.Polygons.points`** &mdash; *Method*.
 
 
@@ -377,15 +330,16 @@ points(x::Polygon)
 Returns the array of `Point` objects defining the polygon.
 
 
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Polygons.jl#L86-L92' class='documenter-source'>source</a><br>
+
+
 <a id='Clipping-and-offsetting-1'></a>
 
 ## Clipping and offsetting
 
-<a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
-**`Devices.Polygons.clip`** &mdash; *Function*.
 
-
-<a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
-**`Devices.Polygons.offset`** &mdash; *Function*.
-
+```
+    clip
+    offset
+```
 

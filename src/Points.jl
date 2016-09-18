@@ -16,6 +16,8 @@ export getx, gety
 ```
 immutable Point{T} <: FieldVector{T}
 ```
+
+2D coordinate in the plane.
 """
 immutable Point{T<:Coordinate} <: FieldVector{T}
     x::T

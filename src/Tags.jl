@@ -1,7 +1,6 @@
 module Tags
 import Clipper
 import Compat.String
-import AffineTransforms: AffineTransform
 import ForwardDiff
 import Devices
 import Devices: render!
@@ -11,7 +10,7 @@ using Devices.Polygons
 using Devices.Points
 using Devices.Cells
 using Devices: uniquename
-import Devices.Polygons.AbstractPolygon
+import ..AbstractPolygon
 
 qr() = Devices._qr
 gdspy() = Devices._gdspy

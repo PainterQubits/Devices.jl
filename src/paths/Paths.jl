@@ -2,6 +2,8 @@ module Paths
 
 using ..Points
 using ..Cells
+using Unitful
+using Unitful: Length, DimensionError
 
 import Base:
     convert,
@@ -36,7 +38,7 @@ import Base:
 import Compat.String
 using ForwardDiff
 import Devices
-import Devices: bounds, cell
+import Devices: bounds, cell, Coordinate
 gdspy() = Devices._gdspy
 
 export Path
@@ -155,8 +157,6 @@ type Node
     end
     Node(a,b,c,d) = new(a,b,c,d)
 end
-# Node(seg::Segment, sty::Style) = Node(seg, sty)
-# Node(seg::Segment, sty::Style, p, n) = Node(seg, sty, p, n)
 
 previous(x::Node) = x.prev
 next(x::Node) = x.next
@@ -171,9 +171,9 @@ include("Segments.jl")
 
 """
 ```
-type Path{T<:Real} <: AbstractArray{Node,1}
+type Path{T<:Coordinate} <: AbstractVector{Node}
     p0::Point{T}
-    α0::Real
+    α0::Float64
     style0::Style
     nodes::Array{Node,1}
 end
@@ -182,9 +182,9 @@ end
 Type for abstracting an arbitrary styled path in the plane. Iterating returns
 tuples of (`segment`, `style`).
 """
-type Path{T<:Number} <: AbstractArray{Node,1}
+type Path{T<:Coordinate} <: AbstractVector{Node}
     p0::Point{T}
-    α0::Real
+    α0::Float64
     style0::Style
     nodes::Array{Node,1}
 end
@@ -206,12 +206,12 @@ end
 
 """
 ```
-Path{T<:Real}(p0::Point{T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0))
+Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0))
 ```
 
 Convenience constructor for `Path{T}` object.
 """
-Path{T<:Real}(p0::Point{T}=Point(0.0,0.0); α0::Real=0.0, style0::Style=Trace(1.0)) =
+Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0)) =
     Path{T}(p0, α0, style0, Node[])
 
 """
@@ -220,7 +220,7 @@ pathlength(p::Path)
 ```
 
 Physical length of a path. Note that `length` will return the number of
-segments in a path, not the physical length.
+segments in a path, not the physical length of the path.
 """
 pathlength(p::Path) = pathlength(nodes(p))
 
@@ -527,12 +527,13 @@ end
 
 """
 ```
-straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=style1(p))
+straight!{T<:Coordinate}(p::Path{T}, l::Coordinate, sty::Style=style1(p))
 ```
 
 Extend a path `p` straight by length `l` in the current direction.
 """
-function straight!{T<:Real}(p::Path{T}, l::Real, sty::Style=style1(p))
+function straight!{T<:Coordinate}(p::Path{T}, l::Coordinate, sty::Style=style1(p))
+    dimension(T) != dimension(typeof(l)) && throw(DimensionError())
     p0 = p1(p)
     α = α1(p)
     s = Straight{T}(l, p0, α)
@@ -542,13 +543,14 @@ end
 
 """
 ```
-turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=style1(p))
+turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p))
 ```
 
 Turn a path `p` by angle `α` with a turning radius `r` in the current direction.
 Positive angle turns left.
 """
-function turn!{T<:Real}(p::Path{T}, α::Real, r::Real, sty::Style=style1(p))
+function turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p))
+    dimension(T) != dimension(typeof(r)) && throw(DimensionError())
     p0 = p1(p)
     α0 = α1(p)
     turn = Turn{T}(α, r, p0, α0)
@@ -558,16 +560,17 @@ end
 
 """
 ```
-turn!{T<:Real}(p::Path{T}, s::String, r::Real, sty::Style=style1(p))
+turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate, sty::Style=style1(p))
 ```
 
 Turn a path `p` with direction coded by string `s`:
 
-- "l": turn by π/2 (left)
-- "r": turn by -π/2 (right)
+- "l": turn by π/2 radians (left)
+- "r": turn by -π/2 radians (right)
 - "lrlrllrrll": do those turns in that order
 """
-function turn!{T<:Real}(p::Path{T}, s::String, r::Real, sty::Style=style1(p))
+function turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate, sty::Style=style1(p))
+    dimension(T) != dimension(typeof(r)) && throw(DimensionError())
     for ch in s
         if ch == 'l'
             α = π/2
@@ -582,7 +585,7 @@ function turn!{T<:Real}(p::Path{T}, s::String, r::Real, sty::Style=style1(p))
     nothing
 end
 
-function corner!{T<:Real}(p::Path{T}, α::Real, sty::Style=style1(p))
+function corner!{T<:Coordinate}(p::Path{T}, α, sty::Style=style1(p))
     corn = Corner{T}(α)
     push!(p, Node(corn,sty))
     nothing

@@ -7,9 +7,8 @@ should be a subtype of [`Devices.AbstractPolygon`](@ref).
 ## Rectangles
 ```@docs
     Rectangle
-    Rectangle{T<:Real}(::Point{2,T}, ::Point{2,T})
-    Rectangle{T<:Real}(::Point{2,T}, ::Point{2,T}, ::Any)
-    Rectangle{T<:Real}(::T, ::T)
+    Rectangle(::Point, ::Point)
+    Rectangle(::Any, ::Any)
     bounds(::Rectangle)
     center(::Rectangle)
     height(::Rectangle)
@@ -24,9 +23,8 @@ should be a subtype of [`Devices.AbstractPolygon`](@ref).
 
 ```@docs
     Polygon
-    Polygon{T<:Real}(::AbstractArray{Point{2,T},1})
-    Polygon{T<:Real}(::AbstractArray{Point{2,T},1}, ::Any)
-    Polygon{T<:Real}(::Point{2,T}, ::Point{2,T}, ::Point{2,T}, ::Point{2,T}...)
+    Polygon{T}(::AbstractVector{Point{T}})
+    Polygon(::Point, ::Point, ::Point, ::Point...)
     bounds(::Polygon)
     bounds{T<:Devices.AbstractPolygon}(::AbstractArray{T})
     bounds(::Devices.AbstractPolygon, ::Devices.AbstractPolygon...)

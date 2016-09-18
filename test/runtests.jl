@@ -168,7 +168,7 @@ end
     c2 = Cell("c2")
     c3 = Cell("c3")
     r = Rectangle(5,10)
-    @test_throws ErrorException render!(c3, Rectangle(5m,10m))
+    @test_throws Unitful.DimensionError render!(c3, Rectangle(5m,10m))
     render!(c3, r)
     c2ref = CellReference(c2, Point(-10.0,0.0); mag=1.0, rot=180°)
     c3ref = CellReference(c3, Point(10.0,0.0); mag=2.0, rot=90°)
@@ -188,4 +188,18 @@ end
     @test bounds(c) == bounds(c2ref)
     @test bounds(c′) ≈ (bounds(c) + Point(10.0,10.0))
     @test bounds(c2ref′) ≈ (bounds(c2ref) + Point(10.,10.))
+
+    # TODO: Tests for `flatten`
+end
+
+@testset "Paths" begin
+    @testset "Path constructors" begin
+        @test typeof(Path()) == Path{Float64}
+        @test typeof(Path(Point(0.0μm, 0.0μm))) == Path{typeof(1.0μm)}
+    end
+
+    @testset "Path segments" begin
+        p = Path()
+        @test_throws Unitful.DimensionError straight!(p, 10.0μm)
+    end
 end

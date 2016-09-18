@@ -18,11 +18,11 @@ display complexity.
 
 ```@docs
     CellArray
-    CellArray{T<:Real}(::Cell, ::Point{2,T}, ::Point{2,T}, ::Point{2,T},
+    CellArray{T<:Real}(::Cell, ::Point{T}, ::Point{T}, ::Point{T},
         ::Integer, ::Integer)
     CellArray{T<:Real}(::Cell, ::Range{T}, ::Range{T})
     CellReference
-    CellReference{T<:Real}(::Cell, ::Point{2,T})
+    CellReference{T<:Real}(::Cell, ::Point{T})
     bounds{S<:Real, T<:Real}(::CellArray{Cell{S},T})
     bounds(::CellReference)
     copy(::CellReference)

@@ -76,7 +76,7 @@ end
 
 """
 ```
-abstract AbstractPolygon{T}
+abstract AbstractPolygon{T<:Coordinate}
 ```
 
 Anything you could call a polygon regardless of the underlying representation.

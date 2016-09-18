@@ -29,6 +29,9 @@ Encountering an ENDLIB record will discard the remainder of the GDS-II file with
 The content of some records are currently discarded (mainly the more obscure GDS-II record types, but also BGNLIB and LIBNAME).
 
 
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L461-L485' class='documenter-source'>source</a><br>
+
+
 <a id='Saving-patterns-1'></a>
 
 ## Saving patterns
@@ -36,7 +39,7 @@ The content of some records are currently discarded (mainly the more obscure GDS
 
 To save a pattern, make sure you are `using FileIO`.
 
-<a id='FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}' href='#FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell{T<:Real},Vararg{Devices.Cells.Cell{T<:Real}}}'>#</a>
+<a id='FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell,Vararg{Devices.Cells.Cell,N}}' href='#FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell,Vararg{Devices.Cells.Cell,N}}'>#</a>
 **`FileIO.save`** &mdash; *Method*.
 
 
@@ -56,6 +59,9 @@ The `name` keyword argument is used for the internal library name of the GDS-II 
 The `verbose` keyword argument allows you to monitor the output of [`traverse!`](cells.md#Devices.Cells.traverse!) and [`order!`](cells.md#Devices.Cells.order!) if something funny is happening while saving.
 
 
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L411-L428' class='documenter-source'>source</a><br>
+
+
 <a id='Internals-1'></a>
 
 ## Internals
@@ -69,6 +75,9 @@ The `verbose` keyword argument allows you to monitor the output of [`traverse!`]
 
 Floating-point formats found in GDS-II files.
 
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L61-L65' class='documenter-source'>source</a><br>
+
 <a id='Devices.GDS.GDS64' href='#Devices.GDS.GDS64'>#</a>
 **`Devices.GDS.GDS64`** &mdash; *Type*.
 
@@ -77,6 +86,9 @@ Floating-point formats found in GDS-II files.
 `bitstype 64 GDS64 <: GDSFloat`
 
 "8-byte (64-bit) real" format found in GDS-II files.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L68-L72' class='documenter-source'>source</a><br>
 
 <a id='Base.bits-Tuple{Devices.GDS.GDS64}' href='#Base.bits-Tuple{Devices.GDS.GDS64}'>#</a>
 **`Base.bits`** &mdash; *Method*.
@@ -87,6 +99,9 @@ Floating-point formats found in GDS-II files.
 
 A string giving the literal bit representation of a GDS64 number.
 
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L75-L79' class='documenter-source'>source</a><br>
+
 <a id='Base.bswap-Tuple{Devices.GDS.GDS64}' href='#Base.bswap-Tuple{Devices.GDS.GDS64}'>#</a>
 **`Base.bswap`** &mdash; *Method*.
 
@@ -95,6 +110,9 @@ A string giving the literal bit representation of a GDS64 number.
 `bswap(x::GDS64)`
 
 Byte-swap a GDS64 number. Used implicitly by `hton`, `ntoh` for endian conversion.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L82-L86' class='documenter-source'>source</a><br>
 
 <a id='Devices.GDS.gdswrite' href='#Devices.GDS.gdswrite'>#</a>
 **`Devices.GDS.gdswrite`** &mdash; *Function*.
@@ -108,11 +126,17 @@ gdswrite(io::IO, cell::Cell)
 Write a `Cell` to an IO buffer. The creation and modification date of the cell are written first, followed by the cell name, the polygons in the cell, and finally any references or arrays.
 
 
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L247-L255' class='documenter-source'>source</a><br>
+
+
 ```
 gdswrite{T}(io::IO, el::AbstractPolygon{T}; unit=1e-6, precision=1e-9)
 ```
 
 Write a polygon to an IO buffer. The layer and datatype are written first, then the `AbstractPolygon{T}` object is converted to a `Polygon{T}`, and the boundary of the polygon is written in a 32-bit integer format with specified database unit and precision.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L286-L295' class='documenter-source'>source</a><br>
 
 
 ```
@@ -122,11 +146,17 @@ gdswrite(io::IO, el::CellReference; unit=1e-6, precision=1e-9)
 Write a cell reference to an IO buffer. The name of the referenced cell is written first. Reflection, magnification, and rotation info are written next. Finally, the origin of the cell reference is written.
 
 
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L314-L322' class='documenter-source'>source</a><br>
+
+
 ```
 gdswrite(io::IO, el::CellArray; unit=1e-6, precision=1e-9)
 ```
 
 Write a cell array to an IO buffer. The name of the referenced cell is written first. Reflection, magnification, and rotation info are written next. After that the number of columns and rows are written. Finally, the origin, column vector, and row vector are written.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L335-L344' class='documenter-source'>source</a><br>
 
 <a id='Devices.GDS.strans' href='#Devices.GDS.strans'>#</a>
 **`Devices.GDS.strans`** &mdash; *Function*.
@@ -139,6 +169,9 @@ strans(io::IO, ref)
 
 Writes bytes to the IO stream (if needed) to encode x-reflection, magnification, and rotation settings of a reference or array. Returns the number of bytes written.
 
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L366-L373' class='documenter-source'>source</a><br>
+
 <a id='Base.write-Tuple{IO,Devices.GDS.GDS64}' href='#Base.write-Tuple{IO,Devices.GDS.GDS64}'>#</a>
 **`Base.write`** &mdash; *Method*.
 
@@ -150,16 +183,12 @@ write(s::IO, x::GDS64)
 
 Write a GDS64 number to an IO stream.
 
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L160-L166' class='documenter-source'>source</a><br>
+
 <a id='Base.read-Tuple{IO,Type{Devices.GDS.GDS64}}' href='#Base.read-Tuple{IO,Type{Devices.GDS.GDS64}}'>#</a>
 **`Base.read`** &mdash; *Method*.
 
-
-
-```
-read(stream, type)
-```
-
-Read a value of the given type from a stream, in canonical binary representation.
 
 
 ```
@@ -167,4 +196,7 @@ read(s::IO, ::Type{GDS64})
 ```
 
 Read a GDS64 number from an IO stream.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L169-L175' class='documenter-source'>source</a><br>
 

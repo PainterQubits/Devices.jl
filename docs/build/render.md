@@ -1,11 +1,77 @@
 
-<a id='Rendering-1'></a>
+<a id='Rectangle-styles-1'></a>
 
-## Rendering
+## Rectangle styles
+
+<a id='Devices.Rectangles.Plain' href='#Devices.Rectangles.Plain'>#</a>
+**`Devices.Rectangles.Plain`** &mdash; *Type*.
+
+
+
+```
+type Plain <: Style end
+```
+
+Plain rectangle style. Use this if you are fond for the simpler times when rectangles were just rectangles.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L190-L197' class='documenter-source'>source</a><br>
+
+<a id='Devices.Rectangles.Rounded' href='#Devices.Rectangles.Rounded'>#</a>
+**`Devices.Rectangles.Rounded`** &mdash; *Type*.
+
+
+
+```
+type Rounded{T<:Coordinate} <: Style
+    r::T
+end
+```
+
+Rounded rectangle style. All corners are rounded off with a given radius `r`. The bounding box of the unstyled rectangle should remain unaffected.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L200-L209' class='documenter-source'>source</a><br>
+
+<a id='Devices.Rectangles.Undercut' href='#Devices.Rectangles.Undercut'>#</a>
+**`Devices.Rectangles.Undercut`** &mdash; *Type*.
+
+
+
+```
+type Undercut{T<:Coordinate} <: Style
+    ucl::T
+    uct::T
+    ucr::T
+    ucb::T
+end
+```
+
+Undercut rectangles. In each direction around a rectangle (left, top, right, bottom) an undercut is rendered on a different layer.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Rectangles.jl#L214-L226' class='documenter-source'>source</a><br>
+
+
+<a id='Render-methods-1'></a>
+
+## Render methods
 
 <a id='Devices.render!' href='#Devices.render!'>#</a>
 **`Devices.render!`** &mdash; *Function*.
 
+
+
+```
+render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)
+```
+
+Render a rectangle `r` to cell `c`, defaulting to plain styling.
+
+Returns an array of the AbstractPolygons added to the cell.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L131-L139' class='documenter-source'>source</a><br>
 
 
 ```
@@ -17,6 +83,9 @@ Render a rectangle `r` to cell `c` with plain styling.
 Returns an array with the rectangle in it.
 
 
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L144-L152' class='documenter-source'>source</a><br>
+
+
 ```
 render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
 ```
@@ -24,6 +93,9 @@ render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
 Render a rounded rectangle `r` to cell `c`. This is accomplished by rendering a path around the outside of a (smaller than requested) solid rectangle. The bounding box of `r` is preserved.
 
 Returns an array of the AbstractPolygons added to the cell.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L159-L169' class='documenter-source'>source</a><br>
 
 
 ```
@@ -36,13 +108,7 @@ Render a rectangle `r` to cell `c`. Additionally, put a hollow border around the
 Returns an array of the AbstractPolygons added to the cell.
 
 
-```
-render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)
-```
-
-Render a rectangle `r` to cell `c`, defaulting to plain styling.
-
-Returns an array of the AbstractPolygons added to the cell.
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L191-L201' class='documenter-source'>source</a><br>
 
 
 ```
@@ -52,11 +118,27 @@ render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
 Render a polygon `r` to cell `c`, defaulting to plain styling.
 
 
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L216-L223' class='documenter-source'>source</a><br>
+
+
 ```
 render!(c::Cell, p::Path; kwargs...)
 ```
 
 Render a path `p` to a cell `c`.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L230-L236' class='documenter-source'>source</a><br>
+
+
+```
+render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
+```
+
+Render a `segment` with style `s` to cell `c`.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L257-L263' class='documenter-source'>source</a><br>
 
 
 ```
@@ -68,9 +150,5 @@ Render a `segment` with decorated style `s` to cell `c`. Cell references held by
 This method draws the decorations before the path itself is drawn.
 
 
-```
-render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
-```
-
-Render a `segment` with style `s` to cell `c`.
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L294-L305' class='documenter-source'>source</a><br>
 

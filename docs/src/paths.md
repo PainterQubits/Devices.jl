@@ -2,7 +2,7 @@
 
 ```@docs
     Paths.Path
-    Paths.Path{T<:Real}(::Point{2,T})
+    Paths.Path{T<:Real}(::Point{T})
     Paths.pathlength(::Path)
 ```
 ## Segments
