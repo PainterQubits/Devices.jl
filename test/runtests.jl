@@ -95,12 +95,21 @@ end
         @test width(Rectangle(1m,2m)) == 1m
         @test height(Rectangle(1m,2m)) == 2m
 
+        # propriety
+        @test Rectangle(Point(3,3),Point(0,0)) ==
+            Rectangle(Point(0,0), Point(3,3))
+        @test isproper(Rectangle(3,3))
+        @test !isproper(Rectangle(0,0))
+
         # centering
         @test_throws InexactError center!(Rectangle(1,1))
         @test_throws InexactError center!(Rectangle(1m,1m))
 
         # Rectangle equality
         @test Rectangle(1,2) == Rectangle(1,2)
+        @test Rectangle(1,2) ≈ Rectangle(1,2)
+
+        # Rectangle bounds
         @test bounds(Rectangle(1,2)) == Rectangle(1,2)
     end
 
@@ -112,6 +121,12 @@ end
         @test pfloat == Polygon(Point(0.0m, 0.0m),
                          Point(1.0m, 0.0m),
                          Point(0.0m, 1.0m))
+        @test pfloat ≈ Polygon(Point(0.0m, 0.0m),
+                         Point(1.0m, 0.0m),
+                         Point(0.0m, 1.0m))
+
+        # Bounds
+        @test bounds(pfloat) ≈ Rectangle(1m,1m)
     end
 end
 
@@ -164,9 +179,13 @@ end
     # Test cell transformations
     @test tr(Point(1,1)) ≈ Point(-18.0,-2.0)
     @test c["c2"]["c3"] == c3ref
+    c′ = c + Point(10.0,10.0)
+    c2ref′ = c2ref + Point(10.,10.)
 
     # Test bounds
     @test bounds(c3) == r
     @test bounds(c2) == bounds(c3ref)
     @test bounds(c) == bounds(c2ref)
+    @test bounds(c′) ≈ (bounds(c) + Point(10.0,10.0))
+    @test bounds(c2ref′) ≈ (bounds(c2ref) + Point(10.,10.))
 end

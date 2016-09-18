@@ -1,15 +1,11 @@
 module Rectangles
 
-using ForwardDiff
 using ..Points
-
-import Base: +, -, *, /, minimum, maximum, copy, ==, convert
+import Base: +, -, *, /, minimum, maximum, copy, ==, convert, isapprox
 import Devices
-import Devices: AbstractPolygon
+import Devices: AbstractPolygon, Coordinate
 import Devices: bounds, center, center!
 gdspy() = Devices._gdspy
-
-# using AffineTransforms
 
 export Rectangle
 export Plain
@@ -81,8 +77,8 @@ copy(p::Rectangle) = Rectangle(p.ll, p.ur, copy(p.properties))
 ==(r1::Rectangle, r2::Rectangle) =
     (r1.ll == r2.ll) && (r1.ur == r2.ur) && (r1.properties == r2.properties)
 isapprox(r1::Rectangle, r2::Rectangle) =
-    isapprox(r1.ul, r2.ul) && isapprox(r1.ur, r2.ur) &&
-        (p1.properties == p2.properties)
+    isapprox(r1.ll, r2.ll) && isapprox(r1.ur, r2.ur) &&
+        (r1.properties == r2.properties)
 
 """
 ```
@@ -107,13 +103,11 @@ height(r::Rectangle) = gety(r.ur)-gety(r.ll)
 isproper(r::Rectangle)
 ```
 
-Returns `true` if the rectangle has a non-zero size and if the upper-right and
-lower-left corner coordinates `ur` and `ll` really are at the upper-right
-and lower-left. Otherwise, returns `false`.
+Returns `true` if the rectangle has a non-zero size. Otherwise, returns `false`.
+Note that the upper-right and lower-left corners are enforced to be the `ur`
+and `ll` fields of a `Rectangle` by the inner constructor.
 """
-isproper(r::Rectangle) = getx(r.ur) >= getx(r.ll) &&
-                        gety(r.ur) >= gety(r.ll) &&
-                        r.ur != r.ll
+isproper(r::Rectangle) = r.ur != r.ll
 
 """
 ```
@@ -184,30 +178,58 @@ Translate a rectangle by `p`.
 *(a::Real, r::Rectangle) = *(r,a)
 /(r::Rectangle, a::Real) = Rectangle(/(r.ll,a), /(r.ur,a), r.properties)
 
-"How to draw the rectangle."
+"""
+```
+abstract Style
+```
+
+Implement new rectangle drawing styles by subtyping this.
+"""
 abstract Style
 
-"Simple solid rectangle."
+"""
+```
+type Plain <: Style end
+```
+
+Plain rectangle style. Use this if you are fond for the simpler times when
+rectangles were just rectangles.
+"""
 type Plain <: Style end
 
-"The corners are rounded off (bounding box of the unstyled rectangle unaffected)."
-type Rounded <: Style
-    r::Float64
+"""
+```
+type Rounded{T<:Coordinate} <: Style
+    r::T
+end
+```
+
+Rounded rectangle style. All corners are rounded off with a given radius `r`.
+The bounding box of the unstyled rectangle should remain unaffected.
+"""
+type Rounded{T<:Coordinate} <: Style
+    r::T
 end
 
 """
 ```
-type Undercut{T<:Real} <: Style
-```
-
-Undercut in each direction around a rectangle.
-"""
-type Undercut{T<:Real} <: Style
+type Undercut{T<:Coordinate} <: Style
     ucl::T
     uct::T
     ucr::T
     ucb::T
 end
-Undercut{T<:Real}(uc::T) = Undercut{T}(uc,uc,uc,uc)
+```
+
+Undercut rectangles. In each direction around a rectangle (left, top, right,
+bottom) an undercut is rendered on a different layer.
+"""
+type Undercut{T<:Coordinate} <: Style
+    ucl::T
+    uct::T
+    ucr::T
+    ucb::T
+end
+Undercut{T<:Coordinate}(uc::T) = Undercut{T}(uc,uc,uc,uc)
 
 end

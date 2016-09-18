@@ -86,7 +86,6 @@ function isapprox{S<:Point,T<:Point}(x::AbstractArray{S},
     all(ab->isapprox(ab[1],ab[2]; kwargs...), zip(x,y))
 end
 
-
 ## Affine transformations
 
 # Translation already defined for 2D by the CoordinateTransformations package
