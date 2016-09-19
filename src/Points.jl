@@ -6,7 +6,7 @@ import Clipper: IntPoint
 import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret
 import Base: scalarmin, scalarmax, isapprox
 import ForwardDiff: ForwardDiff, extract_derivative
-import Unitful: Length
+import Unitful: Length, ustrip, unit
 import PyCall.PyObject
 export Point
 export Rotation, Translation, ∘
@@ -94,7 +94,8 @@ end
 # Still need 2D rotation.
 Rotation(Θ) = LinearMap(@SMatrix [cos(Θ) -sin(Θ); sin(Θ) cos(Θ)])
 
-extract_derivative{T<:Real}(x::Point{T}) =
-    Point(ForwardDiff.partials(getx(x),1),ForwardDiff.partials(gety(x),1))
+extract_derivative{T<:Coordinate}(x::Point{T}) =
+    Point(unit(T)*ForwardDiff.partials(ustrip(getx(x)),1),
+          unit(T)*ForwardDiff.partials(ustrip(gety(x)),1))
 
 end

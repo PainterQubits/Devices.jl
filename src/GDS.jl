@@ -1,7 +1,11 @@
 module GDS
 import Compat.String
+
+using Unitful
+import Unitful: Length, nm, μm, m
+
 import Base: bswap, bits, convert, write, read
-import Devices: AbstractPolygon
+import ..AbstractPolygon
 using ..Points
 import ..Rectangles: Rectangle
 import ..Polygons: Polygon
@@ -222,8 +226,8 @@ function gdswrite(io::IO, x::UInt16, y::Int...)
     end
 end
 
-function gdsbegin(io::IO, libname::String,
-        precision, unit, modify::DateTime, acc::DateTime)
+function gdsbegin(io::IO, libname::String, dbunit::Length, userunit::Length,
+        modify::DateTime, acc::DateTime)
     y    = UInt16(Dates.Year(modify))
     mo   = UInt16(Dates.Month(modify))
     d    = UInt16(Dates.Day(modify))
@@ -241,19 +245,19 @@ function gdsbegin(io::IO, libname::String,
     # gdswrite(io, HEADER, GDSVERSION) +
     gdswrite(io, BGNLIB, y,mo,d,h,min,s, y1,mo1,d1,h1,min1,s1) +
     gdswrite(io, LIBNAME, libname) +
-    gdswrite(io, UNITS, precision/unit, precision)
+    gdswrite(io, UNITS, Float64(dbunit/userunit), Float64(dbunit/(1m)))
 end
 
 """
 ```
-gdswrite(io::IO, cell::Cell)
+gdswrite(io::IO, cell::Cell, dbs::Length)
 ```
 
 Write a `Cell` to an IO buffer. The creation and modification date of the cell
 are written first, followed by the cell name, the polygons in the cell,
 and finally any references or arrays.
 """
-function gdswrite(io::IO, cell::Cell)
+function gdswrite(io::IO, cell::Cell, dbs::Length)
     name = even(cell.name)
     namecheck(name)
 
@@ -275,74 +279,88 @@ function gdswrite(io::IO, cell::Cell)
     bytes = gdswrite(io, BGNSTR, y,mo,d,h,min,s, y1,mo1,d1,h1,min1,s1)
     bytes += gdswrite(io, STRNAME, name)
     for x in cell.elements
-        bytes += gdswrite(io, x)
+        bytes += gdswrite(io, x, dbs)
     end
     for x in cell.refs
-        bytes += gdswrite(io, x)
+        bytes += gdswrite(io, x, dbs)
     end
     bytes += gdswrite(io, ENDSTR)
 end
 
+p2p{T<:Length}(x::T, dbs) = Int(round(Float64(x/dbs)))
+
 """
 ```
-gdswrite{T}(io::IO, el::AbstractPolygon{T}; unit=1e-6, precision=1e-9)
+gdswrite{T<:Real}(io::IO, el::Polygon{T}, dbs)
+gdswrite{T<:Length}(io::IO, poly::Polygon{T}, dbs)
 ```
 
 Write a polygon to an IO buffer. The layer and datatype are written first,
-then the `AbstractPolygon{T}` object is converted to a `Polygon{T}`, and
-the boundary of the polygon is written in a 32-bit integer format with specified
-database unit and precision.
+then the boundary of the polygon is written in a 32-bit integer format with
+specified database scale.
+
+Note that polygons without units are presumed to be in microns.
 """
-function gdswrite{T}(io::IO, el::AbstractPolygon{T}; unit=1e-6, precision=1e-9)
-    poly  =  convert(Polygon{T}, el)
-    bytes =  gdswrite(io, BOUNDARY)
-    props = el.properties
+function gdswrite{T<:Length}(io::IO, poly::Polygon{T}, dbs)
+    bytes = gdswrite(io, BOUNDARY)
+    props = poly.properties
     layer = haskey(props, :layer) ? props[:layer] : DEFAULT_LAYER
     datatype = haskey(props, :datatype) ? props[:datatype] : DEFAULT_DATATYPE
     bytes += gdswrite(io, LAYER, layer)
     bytes += gdswrite(io, DATATYPE, datatype)
 
-    xy = reinterpret(T, poly.p)
-    xy .*= unit/precision
-    xy = round(xy)
-    xyInt =  convert(Array{Int32,1}, xy)
-    push!(xyInt, xyInt[1], xyInt[2]) # closed polygons
+    xy = reinterpret(T, poly.p)          # Go from Point to sequential numbers
+    xyf = map(x->p2p(x,dbs), xy)         # Divide by the scale and such
+    xyInt = convert(Array{Int32,1}, xyf) # Convert to Int32
+    push!(xyInt, xyInt[1], xyInt[2])     # Need closed polygons for GDSII
     bytes += gdswrite(io, XY, xyInt)
     bytes += gdswrite(io, ENDEL)
 end
+gdswrite{T<:Real}(io::IO, el::Polygon{T}, dbs) = gdswrite(io, el*(1μm), dbs)
 
 """
 ```
-gdswrite(io::IO, el::CellReference; unit=1e-6, precision=1e-9)
+gdswrite{T<:Real}(io::IO, ref::CellReference{T}, dbs)
+gdswrite{T<:Length}(io::IO, el::CellReference{T}, dbs)
 ```
 
-Write a cell reference to an IO buffer. The name of the referenced cell is
-written first. Reflection, magnification, and rotation info are written next.
+Write a [`CellReference`](@ref) to an IO buffer. The name of the referenced cell
+is written first. Reflection, magnification, and rotation info are written next.
 Finally, the origin of the cell reference is written.
+
+Note that cell references without units on their `origin` are presumed to
+be in microns.
 """
-function gdswrite(io::IO, ref::CellReference; unit=1e-6, precision=1e-9)
+function gdswrite{T<:Length}(io::IO, ref::CellReference{T}, dbs)
     bytes =  gdswrite(io, SREF)
     bytes += gdswrite(io, SNAME, even(ref.cell.name))
 
     bytes += strans(io, ref)
 
-    o = ref.origin * unit/precision
-    x,y = Int(round(getx(o))), Int(round(gety(o)))
+    x0,y0 = ref.origin.x, ref.origin.y
+    x,y = p2p(x0,dbs), p2p(y0,dbs)
     bytes += gdswrite(io, XY, x, y)
     bytes += gdswrite(io, ENDEL)
+end
+function gdswrite{T<:Real}(io::IO, ref::CellReference{T}, dbs)
+    cref = CellReference(ref.cell, ref.origin*(1μm), ref.xrefl, ref.mag, ref.rot)
+    gdswrite(io, cref, dbs)
 end
 
 """
 ```
-gdswrite(io::IO, el::CellArray; unit=1e-6, precision=1e-9)
+gdswrite(io::IO, a::CellArray, dbs)
 ```
 
-Write a cell array to an IO buffer. The name of the referenced cell is
+Write a [`CellArray`](@ref) to an IO buffer. The name of the referenced cell is
 written first. Reflection, magnification, and rotation info are written next.
 After that the number of columns and rows are written. Finally, the origin,
 column vector, and row vector are written.
+
+Note that cell references without units on their `origin` are presumed to
+be in microns.
 """
-function gdswrite(io::IO, a::CellArray; unit=1e-6, precision=1e-9)
+function gdswrite{T<:Length}(io::IO, a::CellArray{T}, dbs)
     colrowcheck(a.col)
     colrowcheck(a.row)
 
@@ -352,15 +370,20 @@ function gdswrite(io::IO, a::CellArray; unit=1e-6, precision=1e-9)
     bytes += strans(io, a)
 
     gdswrite(io, COLROW, a.col, a.row)
-    o = a.origin * unit/precision
-    dc = a.deltacol * unit/precision
-    dr = a.deltarow * unit/precision
-    x,y = Int(round(getx(o))), Int(round(gety(o)))
-    cx,cy = Int(round(getx(dc)*(a.col))), Int(round(gety(dc)*(a.col)))
-    rx,ry = Int(round(getx(dr)*(a.row))), Int(round(gety(dr)*(a.row)))
+    ox,oy = a.origin.x, a.origin.y
+    dcx,dcy = a.deltacol.x, a.deltacol.y
+    drx,dry = a.deltarow.x, a.deltarow.y
+    x,y = p2p(ox,dbs), p2p(oy,dbs)
+    cx,cy = p2p(dcx, dbs)*a.col, p2p(dcy, dbs)*a.col
+    rx,ry = p2p(drx, dbs)*a.row, p2p(dry, dbs)*a.row
     cx += x; cy += y; rx += x; ry += y;
     bytes += gdswrite(io, XY, x, y, cx, cy, rx, ry)
     bytes += gdswrite(io, ENDEL)
+end
+function gdswrite{T<:Real}(io::IO, a::CellArray{T}, dbs)
+    car = CellArray(a.cell, a.origin*(1μm), a.deltacol*(1μm), a.deltarow*(1μm),
+                    a.col, a.row, a.xrefl, a.mag, a.rot)
+    gdswrite(io, car, dbs)
 end
 
 """
@@ -410,10 +433,10 @@ gdsend(io::IO) = gdswrite(io, ENDLIB)
 
 """
 ```
-save(::Union{AbstractString,IO}, cell0::Cell, cell::Cell...)
+save(::Union{AbstractString,IO}, cell0::Cell{T}, cell::Cell...)
 
 save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
-name="GDSIILIB", precision=1e-9, unit=1e-6, modify=now(), acc=now(),
+name="GDSIILIB", userunit=1μm, modify=now(), acc=now(),
 verbose=false)`
 ```
 
@@ -423,18 +446,24 @@ the top method: `save("/path/to/my.gds", cells_i_want_to_save...)`
 The `name` keyword argument is used for the internal library name of the GDS-II
 file and is probably inconsequential for modern workflows.
 
+The `userunit` keyword sets what 1.0 corresponds to when viewing this file in
+graphical GDS editors with inferior unit support.
+
+The `modify` and `acc` keywords correspond to the date of last modification and
+the date of last accession. It would be unusual to have this differ from `now()`.
+
 The `verbose` keyword argument allows you to monitor the output of [`traverse!`](@ref)
 and [`order!`](@ref) if something funny is happening while saving.
 """
 function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
-        name="GDSIILIB", precision=1e-9, unit=1e-6, modify=now(), acc=now(),
-        verbose=false)
+        name="GDSIILIB", userunit=1μm, modify=now(), acc=now(), verbose=false)
+    dbs = dbscale(cell0, cell...)
     pad = mod(length(name), 2) == 1 ? "\0" : ""
     open(f, "w") do s
         io = stream(s)
         bytes = 0
         bytes += write(io, magic(format"GDS"))
-        bytes += gdsbegin(io, name*pad, precision, unit, modify, acc)
+        bytes += gdsbegin(io, name*pad, dbs, userunit, modify, acc)
         a = Tuple{Int,Cell}[]
         traverse!(a, cell0)
         for c in cell
@@ -452,7 +481,7 @@ function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
             print("\n")
         end
         for c in ordered
-            bytes += gdswrite(io, c)
+            bytes += gdswrite(io, c, dbs)
         end
         bytes += gdsend(io)
     end

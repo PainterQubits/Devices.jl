@@ -41,18 +41,19 @@ end
 
 """
 ```
-pathlength(s::Segment, verbose::Bool=false)
+pathlength{T}(s::Segment{T}, verbose::Bool=false)
 ```
 
 Return the length of a segment (calculated).
 """
-function pathlength(s::Segment, verbose::Bool=false)
+function pathlength{T}(s::Segment{T}, verbose::Bool=false)
     path = s.f
-    ds(t) = sqrt(dot(ForwardDiff.derivative(s.f, t), ForwardDiff.derivative(s.f, t)))
+    ds(t) = ustrip(sqrt(dot(ForwardDiff.derivative(s.f, t),
+                            ForwardDiff.derivative(s.f, t))))
     val, err = quadgk(ds, 0.0, 1.0)
     verbose && info("Integration estimate: $val")
     verbose && info("Error upper bound estimate: $err")
-    val
+    val * unit(T)
 end
 
 show(io::IO, s::Segment) = print(io, summary(s))
@@ -68,7 +69,7 @@ end
 
 """
 ```
-type Straight{T<:Real} <: Segment{T}
+type Straight{T} <: Segment{T}
     l::T
     p0::Point{T}
     α0::Real
@@ -88,7 +89,7 @@ The parametric function over `t ∈ [0,1]` describing the line segment is given 
 
 `t -> p0 + Point(t*l*cos(α),t*l*sin(α))`
 """
-type Straight{T<:Real} <: Segment{T}
+type Straight{T} <: Segment{T}
     l::T
     p0::Point{T}
     α0::Real
@@ -102,14 +103,14 @@ end
 
 """
 ```
-Straight{T<:Real}(l::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0)
+Straight{T<:Coordinate}(l::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0)
 ```
 
 Outer constructor for `Straight` segments.
 """
-Straight{T<:Real}(l::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0) =
+Straight{T<:Coordinate}(l::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0) =
     Straight{T}(l, p0, α0)
-convert{T<:Real}(::Type{Straight{T}}, x::Straight) =
+convert{T}(::Type{Straight{T}}, x::Straight) =
     Straight(T(x.l), convert(Point{T}, x.p0), x.α0)
 
 copy(s::Straight) = Straight(s.l,s.p0,s.α0)
@@ -140,11 +141,11 @@ setα0!(s::Straight, α0′) = s.α0 = α0′
 
 """
 ```
-type Turn{T<:Real} <: Segment{T}
-    α::Real
+type Turn{T} <: Segment{T}
+    α::typeof(1.0°)
     r::T
     p0::Point{T}
-    α0::Real
+    α0::typeof(1.0°)
     f::Function
     Turn(α, r, p0, α0) = begin
         s = new(α, r, p0, α0)
@@ -168,11 +169,11 @@ The parametric function over `t ∈ [0,1]` describing the turn is given by:
 
 `t -> cen + Point(r*cos(α0-sign(α)*π/2+α*t), r*sin(α0-sign(α)*π/2+α*t))`
 """
-type Turn{T<:Real} <: Segment{T}
-    α::Real
+type Turn{T} <: Segment{T}
+    α::typeof(1.0°)
     r::T
     p0::Point{T}
-    α0::Real
+    α0::typeof(1.0°)
     f::Function
 
     Turn(α, r, p0, α0) = begin
@@ -187,21 +188,21 @@ end
 
 """
 ```
-Turn{T<:Real}(α::Real, r::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0)
+Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0)
 ```
 
 Outer constructor for `Turn` segments.
 """
-Turn{T<:Real}(α, r::T, p0::Point{T}=Point(zero(T),zero(T)), α0=0.0) =
+Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(zero(T),zero(T)), α0=0.0) =
     Turn{T}(α, r, p0, α0)
-convert{T<:Real}(::Type{Turn{T}}, x::Turn) =
+convert{T}(::Type{Turn{T}}, x::Turn) =
     Turn(x.α, T(x.r), convert(Point{T}, x.p0), x.α0)
 copy(s::Turn) = Turn(s.α,s.r,s.p0,s.α0)
 
-pathlength{T<:Real}(s::Turn{T}) = T(abs(s.r*s.α))
+pathlength{T}(s::Turn{T}) = T(abs(s.r*s.α))
 p0(s::Turn) = s.p0
 α0(s::Turn) = s.α0
-summary(s::Turn) = "Turn by "*(@sprintf "%0.3f" s.α)*" with radius $(s.r)"
+summary(s::Turn) = "Turn by $(s.α) with radius $(s.r)"
 
 """
 ```
@@ -223,10 +224,10 @@ setα0!(s::Turn, α0′) = s.α0 = α0′
 
 α1(s::Turn) = s.α0 + s.α
 
-type Corner{T<:Real} <: Segment{T}
-    α::Real
+type Corner{T} <: Segment{T}
+    α::typeof(1.0°)
     p0::Point{T}
-    α0::Real
+    α0::typeof(1.0°)
     extent::Real
     Corner(a) = new(a,Point(0.,0.),0.,0.)
     Corner(a,b,c,d) = new(a,b,c,d)
@@ -251,7 +252,7 @@ summary(s::Corner) = "Corner by "*(@sprintf "%0.3f" s.α)
 
 """
 ```
-type CompoundSegment{T<:Real} <: Segment{T}
+type CompoundSegment{T} <: Segment{T}
     segments::Array{Segment{T},1}
     f::Function
 
@@ -268,7 +269,7 @@ Useful e.g. for applying styles, uninterrupted over segment changes.
 The array of segments given to the constructor is copied and retained
 by the compound segment.
 """
-type CompoundSegment{T<:Real} <: Segment{T}
+type CompoundSegment{T} <: Segment{T}
     segments::Array{Segment{T},1}
     f::Function
 

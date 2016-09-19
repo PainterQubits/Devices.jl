@@ -3,7 +3,7 @@ module Paths
 using ..Points
 using ..Cells
 using Unitful
-using Unitful: Length, DimensionError
+using Unitful: Length, DimensionError, °
 
 import Base:
     convert,
@@ -124,11 +124,11 @@ methods:
  - `width`
  - `divs`
 """
-abstract Style
+abstract Style{T<:Coordinate}
 
 """
 ```
-abstract Segment{T<:Number}
+abstract Segment{T<:Coordinate}
 ```
 
 Path segment in the plane. All Segment objects should have the implement
@@ -141,14 +141,14 @@ the following methods:
 - `setα0!`
 - `α1`
 """
-abstract Segment{T<:Number}
+abstract Segment{T<:Coordinate}
 
 # doubly linked-list behavior
-type Node
-    seg::Segment
-    sty::Style
-    prev::Node
-    next::Node
+type Node{T<:Coordinate}
+    seg::Segment{T}
+    sty::Style{T}
+    prev::Node{T}
+    next::Node{T}
 
     Node(a,b) = begin
         n = new(a,b)
@@ -157,6 +157,7 @@ type Node
     end
     Node(a,b,c,d) = new(a,b,c,d)
 end
+Node{T}(a::Segment{T}, b::Style) = Node{T}(a,b)
 
 previous(x::Node) = x.prev
 next(x::Node) = x.next
@@ -171,22 +172,25 @@ include("Segments.jl")
 
 """
 ```
-type Path{T<:Coordinate} <: AbstractVector{Node}
+type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
     α0::Float64
     style0::Style
-    nodes::Array{Node,1}
+    nodes::Array{Node{T},1}
 end
 ```
 
 Type for abstracting an arbitrary styled path in the plane. Iterating returns
 tuples of (`segment`, `style`).
 """
-type Path{T<:Coordinate} <: AbstractVector{Node}
+type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
-    α0::Float64
-    style0::Style
-    nodes::Array{Node,1}
+    α0::typeof(0.0°)
+    style0::Style{T}
+    nodes::Array{Node{T},1}
+
+    Path() = new(Point(zero(T),zero(T)), 0.0°, Trace(T(1)), Node{T}[])
+    Path(a,b,c,d) = new(a,b,c,d)
 end
 
 nodes(p::Path) = p.nodes
@@ -211,8 +215,10 @@ Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.
 
 Convenience constructor for `Path{T}` object.
 """
-Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0)) =
-    Path{T}(p0, α0, style0, Node[])
+function Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0);
+    α0=0.0, style0::Style=Trace(T(1)))
+    Path{T}(p0, α0, style0, Node{T}[])
+end
 
 """
 ```
@@ -231,7 +237,7 @@ pathlength(p::AbstractArray)
 
 Total physical length of segments.
 """
-pathlength(array::AbstractArray) = mapreduce(pathlength, +, array)
+pathlength{T}(array::AbstractArray{Node{T}}) = mapreduce(pathlength, +, zero(T), array)
 pathlength(node::Node) = pathlength(segment(node))
 
 """

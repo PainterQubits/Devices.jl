@@ -4,6 +4,8 @@ module Devices
 using PyCall
 using ForwardDiff
 using FileIO
+using Unitful
+
 import Clipper
 import FileIO: save, load
 import Base: cell, length, show, .+, .-
@@ -251,8 +253,18 @@ function render!(c::Cell, seg::Paths.Corner, sty::Paths.Style; kwargs...)
     p3 = p2 + ex*Point(cos(seg.α0),sin(seg.α0))
     p4 = p3 + ex*Point(cos(seg.α0+seg.α), sin(seg.α0+seg.α))
 
-    push!(c.elements, Polygon{Float64}([p1,p2,p3,p4], Dict{Symbol,Any}(kwargs)))
+    push!(c.elements, Polygon([p1,p2,p3,p4], Dict{Symbol,Any}(kwargs)))
 end
+
+#
+# function render!{T}(c::Cell{T}, segment::Paths.Segment, s::Paths.Style; kwargs...)
+#     polys = Polygon{T}[]
+#     f = segment.f
+#     g(t) = ForwardDiff.derivative(f,t)
+#
+#     for ti in
+#
+# end
 
 """
 ```
@@ -261,30 +273,30 @@ render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
 
 Render a `segment` with style `s` to cell `c`.
 """
-function render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)
-    polys = AbstractPolygon[]
+function render!{T}(c::Cell{T}, segment::Paths.Segment, s::Paths.Style; kwargs...)
+    polys = Polygon{T}[]
     f = segment.f
     g(t) = ForwardDiff.derivative(f,t)
     last = 0.0
     first = true
-    gp = gdspy()[:Path](Paths.width(s, 0.0), Point(0.0,0.0),
-        number_of_paths=Paths.paths(s, 0.0), distance=Paths.distance(s, 0.0))
+    gp = gdspy()[:Path](ustrip(T(Paths.width(s, 0.0))), Point(0.0,0.0),
+        number_of_paths=Paths.paths(s, 0.0), distance=ustrip(T(Paths.distance(s, 0.0))))
     for t in Paths.divs(s)
         if first
             first = false
             continue
         end
-        gp[:parametric](x->f(last+x*(t-last)),
-            curve_derivative=x->g(last+x*(t-last)),
-            final_width=Paths.width(s,t),
-            final_distance=Paths.distance(s,t))
+        gp[:parametric](x->ustrip.(Point{T}(f(last+x*(t-last)))),
+            curve_derivative=x->ustrip.(Point{T}(g(last+x*(t-last)))),
+            final_width=ustrip(T(Paths.width(s,t))),
+            final_distance=ustrip(T(Paths.distance(s,t))))
         for a in gp[:polygons]
-            points = reinterpret(Point{Float64}, reshape(transpose(a), length(a)))
-            poly = Polygon{Float64}(points, Dict{Symbol,Any}(kwargs))
+            points = reinterpret(Point{T}, reshape(transpose(a), length(a)))
+            poly = Polygon{T}(points, Dict{Symbol,Any}(kwargs))
             push!(polys, poly)
         end
-        gp = gdspy()[:Path](Paths.width(s,t), Point(0.0,0.0),
-            number_of_paths=Paths.paths(s,t), distance=Paths.distance(s,t))
+        gp = gdspy()[:Path](ustrip(T(Paths.width(s,t))), Point(0.0,0.0),
+            number_of_paths=Paths.paths(s,t), distance=ustrip(T(Paths.distance(s,t))))
         last = t
     end
     append!(c.elements, polys)

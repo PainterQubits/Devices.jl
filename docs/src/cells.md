@@ -3,6 +3,11 @@ into a single entity.
 
 ```@docs
     Cell
+```
+
+The type of a cell can be thought of as the database unit.
+
+```@docs
     Cell(::AbstractString)
     Cell{T<:Real}(::AbstractString, ::AbstractArray{Devices.AbstractPolygon{T},1})
     Cell{T<:Real}(::AbstractString, ::AbstractArray{Devices.AbstractPolygon{T},1},
@@ -10,6 +15,8 @@ into a single entity.
     bounds(::Cell)
     center(::Cell)
     name(::Cell)
+    dbunit{T}(::Cell{T})
+    dbunit(::Cell, ::Cell, ::Cell...)
 ```
 ## Referenced and arrayed cells
 

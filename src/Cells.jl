@@ -1,6 +1,6 @@
 module Cells
 using Unitful
-import Unitful: Length
+import Unitful: Length, nm
 
 import Compat.String
 
@@ -15,18 +15,18 @@ using ..Points
 using ..Rectangles
 using ..Polygons
 
-import Base: show, +, -, copy, getindex
+import Base: show, +, -, copy, getindex, convert
 import Devices: AbstractPolygon, Coordinate, bounds, center, center!
 export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!, transform, name
+export traverse!, order!, flatten, flatten!, transform, name, dbscale
 
-abstract CellRef{S, T<:Coordinate}
+abstract CellRef{S<:Coordinate, T}
 
 """
 ```
 type CellReference{S,T} <: CellRef{S,T}
-    cell::S
-    origin::Point{T}
+    cell::T
+    origin::Point{S}
     xrefl::Bool
     mag::Float64
     rot::Float64
@@ -40,20 +40,22 @@ is given without units it is assumed to be in radians.
 The type variable `S` is to avoid circular definitions with `Cell`.
 """
 type CellReference{S,T} <: CellRef{S,T}
-    cell::S
-    origin::Point{T}
+    cell::T
+    origin::Point{S}
     xrefl::Bool
     mag::Float64
     rot::Float64
 end
+convert{T}(::Type{CellRef{T}}, x::CellReference) =
+    CellReference(x.cell, convert(Point{T}, x.origin), x.xrefl, x.mag, x.rot)
 
 """
 ```
 type CellArray{S,T} <: CellRef{S,T}
-    cell::S
-    origin::Point{T}
-    deltacol::Point{T}
-    deltarow::Point{T}
+    cell::T
+    origin::Point{S}
+    deltacol::Point{S}
+    deltarow::Point{S}
     col::Int
     row::Int
     xrefl::Bool
@@ -70,31 +72,37 @@ as a whole. If an angle is given without units it is assumed to be in radians.
 The type variable `S` is to avoid circular definitions with `Cell`.
 """
 type CellArray{S,T} <: CellRef{S,T}
-    cell::S
-    origin::Point{T}
-    deltacol::Point{T}
-    deltarow::Point{T}
+    cell::T
+    origin::Point{S}
+    deltacol::Point{S}
+    deltarow::Point{S}
     col::Int
     row::Int
     xrefl::Bool
     mag::Float64
     rot::Float64
 end
+convert{T}(::Type{CellRef{T}}, x::CellArray) =
+    CellArray(x.cell, convert(Point{T}, x.origin),
+                      convert(Point{T}, x.deltacol),
+                      convert(Point{T}, x.deltarow),
+                      x.col, x.row, x.xrefl, x.mag, x.rot)
 
 """
 ```
 type Cell{T<:Coordinate}
     name::String
     elements::Array{Polygon{T},1}
-    refs::Array{CellRef,1}
+    refs::Array{CellRef{T},1}
     create::DateTime
+    Cell(x,y,z,t) = new(x, y, z, t)
     Cell(x,y,z) = new(x, y, z, now())
-    Cell(x,y) = new(x, y, CellRef[], now())
-    Cell(x) = new(x, Polygon{T}[], CellRef[], now())
+    Cell(x,y) = new(x, y, CellRef{T}[], now())
+    Cell(x) = new(x, Polygon{T}[], CellRef{T}[], now())
     Cell() = begin
         c = new()
         c.elements = Polygon{T}[]
-        c.refs = CellRef[]
+        c.refs = CellRef{T}[]
         c.create = now()
         c
     end
@@ -111,19 +119,54 @@ to add references, push them to `refs` field.
 type Cell{T<:Coordinate}
     name::String
     elements::Array{Polygon{T},1}
-    refs::Array{CellRef,1}
+    refs::Array{CellRef{T},1}
     create::DateTime
+    Cell(x,y,z,t) = new(x, y, z, t)
     Cell(x,y,z) = new(x, y, z, now())
-    Cell(x,y) = new(x, y, CellRef[], now())
-    Cell(x) = new(x, Polygon{T}[], CellRef[], now())
+    Cell(x,y) = new(x, y, CellRef{T}[], now())
+    Cell(x) = new(x, Polygon{T}[], CellRef{T}[], now())
     Cell() = begin
         c = new()
         c.elements = Polygon{T}[]
-        c.refs = CellRef[]
+        c.refs = CellRef{T}[]
         c.create = now()
         c
     end
 end
+convert{T}(::Type{Cell{T}}, x::Cell) =
+    Cell{T}(x.name, convert(Array{Polygon{T},1}, x.elements),
+                    convert(Array{CellRef{T},1}, x.refs),
+                    x.create)
+
+"""
+```
+dbscale{T}(c::Cell{T})
+```
+
+Give the database scale for a cell. The database scale is the
+smallest increment of length that will be represented in the output CAD file.
+
+For `Cell{T<:Length}`, the database scale is `T(1)`. For floating-point lengths,
+this means that anything after the decimal point will be rounded off. For
+this reason, Cell{typeof(1.0nm)} is probably the most convenient type
+to work with.
+
+The database scale of a `Cell{T<:Real}` is assumed to be `1nm` (`1.0nm` if
+`T <: AbstractFloat`) because insufficient information is provided to know
+otherwise.
+"""
+dbscale{T}(c::Cell{T}) = ifelse(T<:AbstractFloat, 1.0nm, ifelse(T<:Real, 1nm, T(1)))
+
+"""
+```
+dbscale(cell::Cell...)
+```
+
+Choose an appropriate database scale for a GDSII file given [`Cell`](@ref)s of
+different types. The smallest database scale of all cells considered is returned.
+"""
+dbscale(c0::Cell, c1::Cell, c2::Cell...) =
+    minimum([dbscale(c0); dbscale(c1); map(dbscale, collect(c2))])
 
 """
 ```
@@ -134,7 +177,7 @@ CellReference{T<:Coordinate}(x::Cell, y::Point{T}=Point(0.,0.);
 Convenience constructor for `CellReference{typeof(x), T}`.
 """
 CellReference{T<:Coordinate}(x, origin::Point{T}=Point(0.,0.); xrefl=false,
-    mag=1.0, rot=0.0) = CellReference{typeof(x), T}(x, origin, xrefl, mag, rot)
+    mag=1.0, rot=0.0) = CellReference{T, typeof(x)}(x, origin, xrefl, mag, rot)
 
 """
 ```
@@ -142,12 +185,12 @@ CellArray{T<:Coordinate}(x::Cell, origin::Point{T}, dc::Point{T},
     dr::Point{T}, c::Integer, r::Integer; xrefl=false, mag=1.0, rot=0.0)
 ```
 
-Construct a `CellArray{typeof(x),T}` object, with `xrefl`, `mag`, and `rot` as
+Construct a `CellArray{T,typeof(x)}` object, with `xrefl`, `mag`, and `rot` as
 keyword arguments (x-reflection, magnification factor, rotation in degrees).
 """
 CellArray{T<:Coordinate}(x::Cell, origin::Point{T}, dc::Point{T},
     dr::Point{T}, c::Real, r::Real; xrefl=false, mag=1.0, rot=0.0) =
-    CellArray{typeof(x),T}(x,origin,dc,dr,c,r,xrefl,mag,rot)
+    CellArray{T, typeof(x)}(x,origin,dc,dr,c,r,xrefl,mag,rot)
 
 """
 ```
@@ -155,7 +198,7 @@ CellArray{T<:Coordinate}(x::Cell, c::Range{T}, r::Range{T};
     xrefl=false, mag=1.0, rot=0.0)
 ```
 
-Construct a `CellArray{typeof(x), T}` based on ranges (probably `LinSpace` or
+Construct a `CellArray{T,typeof(x)}` based on ranges (probably `LinSpace` or
 `FloatRange`). `c` specifies column coordinates and `r` for the rows. Pairs from
 `c` and `r` specify the origins of the repeated cells. The extrema of the ranges
 therefore do not specify the extrema of the resulting `CellArray`'s bounding box;
@@ -166,7 +209,7 @@ some care is required.
 """
 CellArray{T<:Coordinate}(x::Cell, c::Range{T}, r::Range{T};
     xrefl=false, mag=1.0, rot=0.0) =
-    CellArray{typeof(x),T}(x, Point(first(c),first(r)), Point(step(c),zero(step(c))),
+    CellArray{T,typeof(x)}(x, Point(first(c),first(r)), Point(step(c),zero(step(c))),
         Point(zero(step(r)), step(r)), length(c), length(r), xrefl, mag, rot)
 
 """
@@ -188,18 +231,18 @@ Convenience constructor for `Cell{T}`.
 Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractArray{T,1}) =
     Cell{T}(name, elements)
 
-"""
-```
-Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractArray{T,1},
-    refs::AbstractArray{CellReference,1})
-```
-
-Convenience constructor for `Cell{T}`.
-"""
-Cell{T<:AbstractPolygon}(name::AbstractString,
-    elements::AbstractArray{T,1},
-    refs::AbstractArray{CellReference,1}) =
-    Cell{T}(name, elements, refs)
+# """
+# ```
+# Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractArray{T,1},
+#     refs::AbstractArray{CellReference,1})
+# ```
+#
+# Convenience constructor for `Cell{T}`.
+# """
+# Cell{T<:AbstractPolygon}(name::AbstractString,
+#     elements::AbstractArray{T,1},
+#     refs::AbstractArray{CellRef{T},1}) =
+#     Cell{T}(name, elements, refs)
 
 # Don't print out everything in the cell, it is a mess that way.
 show(io::IO, c::Cell) = print(io,
@@ -317,7 +360,7 @@ magnification specified by `ref`.
 Please do rewrite this method when feeling motivated... it is very inefficient.
 """
 function bounds{S<:Coordinate, T<:Coordinate}(
-        ref::CellArray{Cell{S},T}; kwargs...)
+        ref::CellArray{T, Cell{S}}; kwargs...)
     b = bounds(ref.cell)::Rectangle{S}
     !isproper(b) && return b
 
@@ -523,10 +566,8 @@ end
 function transform(c::Cell, d::CellRef, a)
     # look for the reference in the top level of the reference tree.
     for ref in c.refs
-        println(ref.cell.name)
         if ref === d
             sgn = d.xrefl ? -1 : 1
-            println("Found $(ref.cell.name)")
             return true, a ∘ Translation(d.origin) ∘
             CoordinateTransformations.LinearMap(
                 @SMatrix [sgn*d.mag*cos(d.rot) -d.mag*sin(d.rot);
@@ -536,7 +577,6 @@ function transform(c::Cell, d::CellRef, a)
 
     # didn't find the reference at this level.
     # we must go deeper...
-    println("Didn't find ref, going deeper")
     for ref in c.refs
         sgn = ref.xrefl ? -1 : 1
         (x,y) = transform(ref.cell, d, a ∘ Translation(ref.origin) ∘
@@ -564,11 +604,11 @@ for op in [:+, :-]
         end
         n
     end
-    @eval function ($op){S,T<:Coordinate}(r::CellArray{S,T}, p::Point)
+    @eval function ($op){S<:Coordinate,T}(r::CellArray{S,T}, p::Point)
         CellArray(r.cell, ($op)(r.origin,p), r.deltacol, r.deltarow,
             r.col, r.row, r.xrefl, r.mag, r.rot)
     end
-    @eval function ($op){S,T<:Coordinate}(r::CellReference{S,T}, p::Point)
+    @eval function ($op){S<:Coordinate,T}(r::CellReference{S,T}, p::Point)
         CellReference(r.cell, ($op)(r.origin,p),
             xrefl=r.xrefl, mag=r.mag, rot=r.rot)
     end

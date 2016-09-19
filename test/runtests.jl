@@ -3,6 +3,7 @@ using Devices
 using Unitful
 import Unitful: m, cm, nm, μm, s, °, rad
 import Clipper
+import ForwardDiff
 
 # This is needed in case the user has changed the default length promotion type.
 ru = promote_type(typeof(m),typeof(cm))()
@@ -196,10 +197,18 @@ end
     @testset "Path constructors" begin
         @test typeof(Path()) == Path{Float64}
         @test typeof(Path(Point(0.0μm, 0.0μm))) == Path{typeof(1.0μm)}
+        @test α0(Path(Point(0.0μm, 0.0μm); α0 = 90°)) == 90.0° == π*rad/2 == π/2
+        @test α0(Path(Point(0.0μm, 0.0μm); α0 = π/2)) == 90.0° == π*rad/2 == π/2
     end
 
     @testset "Path segments" begin
-        p = Path()
-        @test_throws Unitful.DimensionError straight!(p, 10.0μm)
+        p = Path(Point(0.0μm, 0.0μm))
+        @test_throws Unitful.DimensionError straight!(p, 10.0)
+        @test pathlength(p) == 0.0μm
+        straight!(p, 10μm)
+        @test pathlength(p) == 10μm
+        @test ForwardDiff.derivative(p[1].seg.f, 0.0) ≈ Point(10.0μm, 0.0μm)
     end
 end
+
+# TODO: How to test GDS output? diff with known good result files?
