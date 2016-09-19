@@ -463,6 +463,7 @@ function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
         io = stream(s)
         bytes = 0
         bytes += write(io, magic(format"GDS"))
+        bytes += write(io, 0x02, 0x58)
         bytes += gdsbegin(io, name*pad, dbs, userunit, modify, acc)
         a = Tuple{Int,Cell}[]
         traverse!(a, cell0)
@@ -515,8 +516,10 @@ GDS-II record types, but also BGNLIB and LIBNAME).
 function load(f::File{format"GDS"}; verbose=false)
     cells = Dict{String, Cell}()
     open(f) do s
-        # Skip over GDS-II version 6.0.0 header record
+        # Skip over GDS-II header record
         skipmagic(s)
+        version = ntoh(read(s, UInt16))
+        info("Reading GDS-II v$version")
 
         # Record processing loop
         first = true

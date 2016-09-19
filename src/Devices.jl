@@ -23,8 +23,9 @@ function __init__()
     global const _clip = Clipper.Clip()
     global const _coffset = Clipper.ClipperOffset()
 
-    # The magic bytes specify GDS version 6.0.0, which probably everyone is using
-    add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02, 0x02, 0x58], ".gds")
+    # The magic bytes are the GDS HEADER tag (0x0002), preceded by the number of
+    # bytes in total (6) for the HEADER record.
+    add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02], ".gds")
 end
 
 gdspy() = Devices._gdspy

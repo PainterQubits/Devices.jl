@@ -33,10 +33,20 @@ account's PATH variable. Probably these are located in:
 `C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin`, respectively.
 
 + `Pkg.build("Clipper")`
-
-### And finally...
-
 + `Pkg.clone("https://github.com/PainterQubits/Devices.jl.git")`
+
+Finally, for convenience you may want to have `Devices` load up every time
+you open Julia. You can do this by adding the following to a file `.juliarc.jl`
+in the directory returned by `homedir()`:
+
+```
+using Devices, Unitful, FileIO
+using Unitful: μm, µm, nm, °, rad
+```
+
+You can then create and save CAD files with unit support as soon as Julia
+starts up. This will also enable the unqualified use of microns, nanometers,
+degrees, and radians.
 
 ## Quick start
 
