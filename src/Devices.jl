@@ -31,11 +31,6 @@ end
 gdspy() = Devices._gdspy
 qr() = Devices._qr
 
-const UNIT      = 1.0e-6
-const PRECISION = 1.0e-9
-export UNIT
-export PRECISION
-
 export bounds
 export center
 export render!
