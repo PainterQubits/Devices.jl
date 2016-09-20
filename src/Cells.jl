@@ -46,8 +46,8 @@ type CellReference{S,T} <: CellRef{S,T}
     mag::Float64
     rot::Float64
 end
-convert{T}(::Type{CellRef{T}}, x::CellReference) =
-    CellReference(x.cell, convert(Point{T}, x.origin), x.xrefl, x.mag, x.rot)
+# convert{T}(::Type{CellRef{T}}, x::CellReference) =
+#     CellReference(x.cell, convert(Point{T}, x.origin), x.xrefl, x.mag, x.rot)
 
 """
 ```
@@ -82,27 +82,27 @@ type CellArray{S,T} <: CellRef{S,T}
     mag::Float64
     rot::Float64
 end
-convert{T}(::Type{CellRef{T}}, x::CellArray) =
-    CellArray(x.cell, convert(Point{T}, x.origin),
-                      convert(Point{T}, x.deltacol),
-                      convert(Point{T}, x.deltarow),
-                      x.col, x.row, x.xrefl, x.mag, x.rot)
+# convert{T}(::Type{CellRef{T}}, x::CellArray) =
+#     CellArray(x.cell, convert(Point{T}, x.origin),
+#                       convert(Point{T}, x.deltacol),
+#                       convert(Point{T}, x.deltarow),
+#                       x.col, x.row, x.xrefl, x.mag, x.rot)
 
 """
 ```
 type Cell{T<:Coordinate}
     name::String
     elements::Array{Polygon{T},1}
-    refs::Array{CellRef{T},1}
+    refs::Array{CellRef,1}
     create::DateTime
     Cell(x,y,z,t) = new(x, y, z, t)
     Cell(x,y,z) = new(x, y, z, now())
-    Cell(x,y) = new(x, y, CellRef{T}[], now())
-    Cell(x) = new(x, Polygon{T}[], CellRef{T}[], now())
+    Cell(x,y) = new(x, y, CellRef[], now())
+    Cell(x) = new(x, Polygon{T}[], CellRef[], now())
     Cell() = begin
         c = new()
         c.elements = Polygon{T}[]
-        c.refs = CellRef{T}[]
+        c.refs = CellRef[]
         c.create = now()
         c
     end
@@ -119,24 +119,24 @@ to add references, push them to `refs` field.
 type Cell{T<:Coordinate}
     name::String
     elements::Array{Polygon{T},1}
-    refs::Array{CellRef{T},1}
+    refs::Array{CellRef,1}
     create::DateTime
     Cell(x,y,z,t) = new(x, y, z, t)
     Cell(x,y,z) = new(x, y, z, now())
-    Cell(x,y) = new(x, y, CellRef{T}[], now())
-    Cell(x) = new(x, Polygon{T}[], CellRef{T}[], now())
+    Cell(x,y) = new(x, y, CellRef[], now())
+    Cell(x) = new(x, Polygon{T}[], CellRef[], now())
     Cell() = begin
         c = new()
         c.elements = Polygon{T}[]
-        c.refs = CellRef{T}[]
+        c.refs = CellRef[]
         c.create = now()
         c
     end
 end
-convert{T}(::Type{Cell{T}}, x::Cell) =
-    Cell{T}(x.name, convert(Array{Polygon{T},1}, x.elements),
-                    convert(Array{CellRef{T},1}, x.refs),
-                    x.create)
+# convert{T}(::Type{Cell{T}}, x::Cell) =
+#     Cell{T}(x.name, convert(Array{Polygon{T},1}, x.elements),
+#                     convert(Array{CellRef{T},1}, x.refs),
+#                     x.create)
 
 """
 ```
@@ -170,7 +170,7 @@ dbscale(c0::Cell, c1::Cell, c2::Cell...) =
 
 """
 ```
-CellReference{T<:Coordinate}(x::Cell, y::Point{T}=Point(0.,0.);
+CellReference{T<:Coordinate}(x, y::Point{T}=Point(0.,0.);
     xrefl=false, mag=1.0, rot=0.0)
 ```
 
@@ -181,20 +181,20 @@ CellReference{T<:Coordinate}(x, origin::Point{T}=Point(0.,0.); xrefl=false,
 
 """
 ```
-CellArray{T<:Coordinate}(x::Cell, origin::Point{T}, dc::Point{T},
+CellArray{T<:Coordinate}(x, origin::Point{T}, dc::Point{T},
     dr::Point{T}, c::Integer, r::Integer; xrefl=false, mag=1.0, rot=0.0)
 ```
 
 Construct a `CellArray{T,typeof(x)}` object, with `xrefl`, `mag`, and `rot` as
 keyword arguments (x-reflection, magnification factor, rotation in degrees).
 """
-CellArray{T<:Coordinate}(x::Cell, origin::Point{T}, dc::Point{T},
+CellArray{T<:Coordinate}(x, origin::Point{T}, dc::Point{T},
     dr::Point{T}, c::Real, r::Real; xrefl=false, mag=1.0, rot=0.0) =
     CellArray{T, typeof(x)}(x,origin,dc,dr,c,r,xrefl,mag,rot)
 
 """
 ```
-CellArray{T<:Coordinate}(x::Cell, c::Range{T}, r::Range{T};
+CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T};
     xrefl=false, mag=1.0, rot=0.0)
 ```
 
@@ -207,7 +207,7 @@ some care is required.
 `xrefl`, `mag`, and `rot` are keyword arguments
 (x-reflection, magnification factor, rotation in degrees).
 """
-CellArray{T<:Coordinate}(x::Cell, c::Range{T}, r::Range{T};
+CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T};
     xrefl=false, mag=1.0, rot=0.0) =
     CellArray{T,typeof(x)}(x, Point(first(c),first(r)), Point(step(c),zero(step(c))),
         Point(zero(step(r)), step(r)), length(c), length(r), xrefl, mag, rot)

@@ -111,8 +111,8 @@ divs(s::CPW) = linspace(0.0, 1.0, s.divs+1)
 
 """
 ```
-type CompoundStyle <: Style
-    styles::Array{Style,1}
+type CompoundStyle{T} <: Style{T}
+    styles::Array{Style{T},1}
     divs::Array{Float64,1}
     f::Function
 end
@@ -126,13 +126,13 @@ by the outer constructor.
 - `f`: returns tuple of style index and the `t` to use for that
 style's parametric function.
 """
-type CompoundStyle <: Style
-    styles::Array{Style,1}
+type CompoundStyle{T} <: Style{T}
+    styles::Array{Style{T},1}
     divs::Array{Float64,1}
     f::Function
 end
 CompoundStyle{S<:Segment,T<:Style}(seg::AbstractArray{S,1},
-        sty::AbstractArray{T,1}) =
+        sty::AbstractArray{Style{T},1}) =
     CompoundStyle(deepcopy(Array(sty)), makedivs(seg, sty), cstylef(seg))
 
 divs(s::CompoundStyle) = s.divs

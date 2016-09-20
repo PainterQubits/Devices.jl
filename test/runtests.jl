@@ -164,7 +164,7 @@ end
 end
 
 @testset "Cell methods" begin
-    # Setup
+    # Setup nested cell refs
     c = Cell("main")
     c2 = Cell("c2")
     c3 = Cell("c3")
@@ -183,12 +183,19 @@ end
     c′ = c + Point(10.0,10.0)
     c2ref′ = c2ref + Point(10.,10.)
 
-    # Test bounds
+    # Test bounds with cell refs
     @test bounds(c3) == r
     @test bounds(c2) == bounds(c3ref)
     @test bounds(c) == bounds(c2ref)
     @test bounds(c′) ≈ (bounds(c) + Point(10.0,10.0))
     @test bounds(c2ref′) ≈ (bounds(c2ref) + Point(10.,10.))
+
+    # More setup
+    c = Cell("main")
+    push!(c.refs, CellArray(c2, Point(0,0), Point(10,0), Point(0,10), 10, 10))
+
+    # Test bounds with cell arrays
+    @test bounds(c) == Rectangle(110,110)
 
     # TODO: Tests for `flatten`
 end
