@@ -5,6 +5,7 @@ using PyCall
 using ForwardDiff
 using FileIO
 using Unitful
+import Unitful: °
 
 import Clipper
 import FileIO: save, load
@@ -236,7 +237,7 @@ function render!(c::Cell, p::Path; kwargs...)
 end
 
 function render!(c::Cell, seg::Paths.Corner, sty::Paths.Style; kwargs...)
-    sgn = ifelse(seg.α >= 0, 1, -1)
+    sgn = ifelse(seg.α >= 0.0°, 1, -1)
     ∠A = seg.α0+sgn*π/2
     p = Point(cos(∠A),sin(∠A))
     p1 = seg.extent*p + seg.p0

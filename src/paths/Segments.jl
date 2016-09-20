@@ -72,7 +72,7 @@ end
 type Straight{T} <: Segment{T}
     l::T
     p0::Point{T}
-    α0::Real
+    α0::typeof(0.0°)
     f::Function
     Straight(l, p0, α0) = begin
         s = new(l, p0, α0)
@@ -92,7 +92,7 @@ The parametric function over `t ∈ [0,1]` describing the line segment is given 
 type Straight{T} <: Segment{T}
     l::T
     p0::Point{T}
-    α0::Real
+    α0::typeof(0.0°)
     f::Function
     Straight(l, p0, α0) = begin
         s = new(l, p0, α0)
@@ -103,12 +103,12 @@ end
 
 """
 ```
-Straight{T<:Coordinate}(l::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0)
+Straight{T<:Coordinate}(l::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°)
 ```
 
 Outer constructor for `Straight` segments.
 """
-Straight{T<:Coordinate}(l::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0) =
+Straight{T<:Coordinate}(l::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°) =
     Straight{T}(l, p0, α0)
 convert{T}(::Type{Straight{T}}, x::Straight) =
     Straight(T(x.l), convert(Point{T}, x.p0), x.α0)
@@ -188,12 +188,12 @@ end
 
 """
 ```
-Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(0.0,0.0), α0::Real=0.0)
+Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°)
 ```
 
 Outer constructor for `Turn` segments.
 """
-Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(zero(T),zero(T)), α0=0.0) =
+Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(zero(T),zero(T)), α0=0.0°) =
     Turn{T}(α, r, p0, α0)
 convert{T}(::Type{Turn{T}}, x::Turn) =
     Turn(x.α, T(x.r), convert(Point{T}, x.p0), x.α0)
@@ -228,17 +228,17 @@ type Corner{T} <: Segment{T}
     α::typeof(1.0°)
     p0::Point{T}
     α0::typeof(1.0°)
-    extent::Real
-    Corner(a) = new(a,Point(0.,0.),0.,0.)
+    extent::T
+    Corner(a) = new(a, Point(zero(T),zero(T)), 0.0°, zero(T))
     Corner(a,b,c,d) = new(a,b,c,d)
 end
-Corner(α) = Corner{Float64}(α, Point(0.,0.), 0., 0.)
+Corner(α) = Corner{Float64}(α, Point(0.,0.), 0.0°, 0.)
 copy{T}(x::Corner{T}) = Corner{T}(x.α, x.p0, x.α0, x.extent)
 
 pathlength(::Corner) = 0
 p0(s::Corner) = s.p0
 function p1(s::Corner)
-    sgn = ifelse(s.α >= 0, 1, -1)
+    sgn = ifelse(s.α >= 0°, 1, -1)
     ∠A = s.α0+sgn*π/2
     v = s.extent*Point(cos(∠A),sin(∠A))
     ∠B = -∠A + s.α
@@ -248,7 +248,7 @@ end
 α1(s::Corner) = s.α0 + s.α
 setp0!(s::Corner, p::Point) = s.p0 = p
 setα0!(s::Corner, α0′) = s.α0 = α0′
-summary(s::Corner) = "Corner by "*(@sprintf "%0.3f" s.α)
+summary(s::Corner) = "Corner by $(s.α)"
 
 """
 ```
