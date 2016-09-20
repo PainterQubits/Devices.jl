@@ -174,14 +174,69 @@ dbscale(c0::Cell, c1::Cell, c2::Cell...) =
 
 """
 ```
-CellReference{T<:Coordinate}(x, y::Point{T}=Point(0.,0.);
-    xrefl=false, mag=1.0, rot=0.0)
+CellReference{T<:Coordinate}(x, y::Point{T}=Point(0.,0.); kwargs...
 ```
 
 Convenience constructor for `CellReference{typeof(x), T}`.
+
+Keyword arguments can specify x-reflection, magnification, or rotation.
+Synonyms are accepted, in case you forget the "correct keyword"...
+
+X-reflection:
+- :xrefl
+- :xreflection
+- :refl
+- :reflect
+- :xreflect
+- :xmirror
+- :mirror
+
+Magnification:
+- :mag
+- :magnification
+- :magnify
+- :zoom
+- :scale
+
+Rotation:
+- :rot
+- :rotation
+- :rotate
+- :angle
 """
-CellReference{T<:Coordinate}(x, origin::Point{T}=Point(0.,0.); xrefl=false,
-    mag=1.0, rot=0.0) = CellReference{T, typeof(x)}(x, origin, xrefl, mag, rot)
+function CellReference{T<:Coordinate}(x, origin::Point{T}=Point(0.,0.); kwargs...)
+    argdict = Dict(k=>v for (k,v) in kwargs)
+    xreflkeys = [:xrefl, :xreflection, :refl, :reflect,
+                    :xreflect, :xmirror, :mirror]
+    magkeys = [:mag, :magnification, :magnify, :zoom, :scale]
+    rotkeys = [:rot, :rotation, :rotate, :angle]
+
+    xrefl = false
+    for k in xreflkeys
+        if haskey(argdict, k)
+            @inbounds xrefl = argdict[k]
+            break
+        end
+    end
+
+    mag = 1.0
+    for k in magkeys
+        if haskey(argdict, k)
+            @inbounds mag = argdict[k]
+            break
+        end
+    end
+
+    rot = 0.0
+    for k in rotkeys
+        if haskey(argdict, k)
+            @inbounds rot = argdict[k]
+            break
+        end
+    end
+
+    CellReference{T, typeof(x)}(x, origin, xrefl, mag, rot)
+end
 
 """
 ```
