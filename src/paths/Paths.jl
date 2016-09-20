@@ -169,7 +169,80 @@ setsegment!(x::Node, s::Segment) = x.seg = s
 setstyle!(x::Node, s::Style) = x.sty = s
 
 include("styles.jl")
-include("segments.jl")
+
+include("segments/straight.jl")
+include("segments/turn.jl")
+include("segments/corner.jl")
+include("segments/compound.jl")
+
+"""
+```
+p0{T}(s::Segment{T})
+```
+
+Return the first point in a segment (calculated).
+"""
+p0{T}(s::Segment{T}) = s.f(0.0)::Point{T}
+
+"""
+```
+p1{T}(s::Segment{T})
+```
+
+Return the last point in a segment (calculated).
+"""
+p1{T}(s::Segment{T}) = s.f(1.0)::Point{T}
+
+"""
+```
+α0(s::Segment)
+```
+
+Return the first angle in a segment (calculated).
+"""
+α0(s::Segment) = direction(s.f, 0.0)
+
+"""
+```
+α1(s::Segment)
+```
+
+Return the last angle in a segment (calculated).
+"""
+α1(s::Segment) = direction(s.f, 1.0)
+
+function setα0p0!(s::Segment, angle, p::Point)
+    setα0!(s, angle)
+    setp0!(s, p)
+end
+
+"""
+```
+pathlength{T}(s::Segment{T}, verbose::Bool=false)
+```
+
+Return the length of a segment (calculated).
+"""
+function pathlength{T}(s::Segment{T}, verbose::Bool=false)
+    path = s.f
+    ds(t) = ustrip(sqrt(dot(ForwardDiff.derivative(s.f, t),
+                            ForwardDiff.derivative(s.f, t))))
+    val, err = quadgk(ds, 0.0, 1.0)
+    verbose && info("Integration estimate: $val")
+    verbose && info("Error upper bound estimate: $err")
+    val * unit(T)
+end
+
+show(io::IO, s::Segment) = print(io, summary(s))
+
+function deepcopy_internal(x::Segment, stackdict::ObjectIdDict)
+    if haskey(stackdict, x)
+        return stackdict[x]
+    end
+    y = copy(x)
+    stackdict[x] = y
+    return y
+end
 
 """
 ```
