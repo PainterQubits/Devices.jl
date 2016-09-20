@@ -4,7 +4,7 @@ using ..Points
 import Base: +, -, *, /, minimum, maximum, copy, ==, convert, isapprox
 import Devices
 import Devices: AbstractPolygon, Coordinate
-import Devices: bounds, center, center!
+import Devices: bounds, center, centered, centered!
 gdspy() = Devices._gdspy
 
 export Rectangle
@@ -129,17 +129,31 @@ center(r::Rectangle) = (r.ur+r.ll)/2
 
 """
 ```
-center!(r::Rectangle)
+centered!(r::Rectangle)
 ```
 
 Centers a rectangle. Will throw an `InexactError()` if
-the rectangle cannot be centered with integer corner coordinates.
+the rectangle cannot be centered with integer coordinates.
 """
-function center!(r::Rectangle)
+function centered!(r::Rectangle)
     c = center(r)
     r.ll -= c
     r.ur -= c
     r
+end
+
+"""
+```
+centered(r::Rectangle)
+```
+
+Centers a copy of `r`, with promoted coordinates if necessary.
+This function will not throw an `InexactError()`, even if `r` had integer
+coordinates.
+"""
+function centered(r::Rectangle)
+    c = center(r)
+    Rectangle(r.ll - c, r.ur - c, r.properties)
 end
 
 """

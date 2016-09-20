@@ -95,14 +95,15 @@ For some parameteric function `p(t)↦Point(x(t),y(t))`, returns the angle at
 which the path is pointing for a given `t`.
 """
 function direction(p::Function, t)
+    z = zero(getx(p(0)))
     f′ = ForwardDiff.derivative(p, t)
     fx′,fy′ = getx(f′),gety(f′)
-    if !(fx′ ≈ 0)
+    if !(fx′ ≈ z)
         atan(fy′/fx′)
     else
-        if fy′ > 0
+        if fy′ > z
             π/2
-        elseif fy′ < 0
+        elseif fy′ < z
             -π/2
         else
             error("Could not determine last angle.")
@@ -237,7 +238,11 @@ pathlength(p::AbstractArray)
 
 Total physical length of segments.
 """
-pathlength{T}(array::AbstractArray{Node{T}}) = mapreduce(pathlength, +, zero(T), array)
+pathlength{T}(array::AbstractArray{Node{T}}) =
+    mapreduce(pathlength, +, zero(T), array)
+pathlength{T}(array::AbstractArray{Segment{T}}) =
+    mapreduce(pathlength, +, zero(T), array)
+
 pathlength(node::Node) = pathlength(segment(node))
 
 """
@@ -660,13 +665,13 @@ end
 
 """
 ```
-param{T<:Real}(c::AbstractArray{Segment{T}})
+param{T<:Coordinate}(c::AbstractVector{Segment{T}})
 ```
 
 Return a parametric function over the domain [0,1] that represents the
 compound segments.
 """
-function param{T<:Real}(c::AbstractArray{Segment{T},1})
+function param{T<:Coordinate}(c::AbstractVector{Segment{T}})
     isempty(c) && error("Cannot parameterize with zero segments.")
 
     # Build up our piecewise parametric function

@@ -24,13 +24,12 @@ function __init__()
     global const _coffset = Clipper.ClipperOffset()
 
     # The magic bytes are the GDS HEADER tag (0x0002), preceded by the number of
-    # bytes in total (6) for the HEADER record.
+    # bytes in total (6 == 0x0006) for the HEADER record.
     add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02], ".gds")
 end
 
 gdspy() = Devices._gdspy
 qr() = Devices._qr
-
 
 # The following functions are imported by submodules and have methods
 # added, e.g. bounds(::Rectangle), bounds(::Polygon), etc.
@@ -40,8 +39,9 @@ function bounds end
 export center
 function center end
 
-export center!
-function center! end
+export centered!, centered
+function centered! end
+function centered end
 
 """
 ```
@@ -316,7 +316,7 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
         rot = direction(segment.f, t)
         if dir == 0
             ref.origin += segment.f(t)
-            ref.rot += rot*180/π
+            ref.rot += rot#*180/π
         else
             if dir == -1
                 rot2 = rot + π/2
@@ -329,7 +329,7 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
             newy = offset * sin(rot2)
             ref.origin = Point(tformrotate(rot)*Array(ref.origin))
             ref.origin += (Point(newx,newy) + segment.f(t))
-            ref.rot += rot*180/π
+            ref.rot += rot#*180/π
         end
         push!(c.refs, ref)
     end
@@ -348,10 +348,5 @@ export pecbasedose, checkerboard
 export interdigit
 
 include("GDS.jl")
-import .GDS: GDS64
-import .GDS: gdsbegin, gdsend, gdswrite
-export GDS
-export GDS64
-export gdsbegin, gdsend, gdswrite
 
 end

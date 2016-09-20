@@ -16,7 +16,7 @@ using ..Rectangles
 using ..Polygons
 
 import Base: show, +, -, copy, getindex, convert
-import Devices: AbstractPolygon, Coordinate, bounds, center, center!
+import Devices: AbstractPolygon, Coordinate, bounds, center
 export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!, transform, name, dbscale
 
@@ -37,7 +37,7 @@ Reference to a `cell` positioned at `origin`, with optional x-reflection
 `xrefl`, magnification factor `mag`, and rotation angle `rot`. If an angle
 is given without units it is assumed to be in radians.
 
-The type variable `S` is to avoid circular definitions with `Cell`.
+The type variable `T` is to avoid circular definitions with `Cell`.
 """
 type CellReference{S,T} <: CellRef{S,T}
     cell::T
@@ -46,8 +46,12 @@ type CellReference{S,T} <: CellRef{S,T}
     mag::Float64
     rot::Float64
 end
-# convert{T}(::Type{CellRef{T}}, x::CellReference) =
-#     CellReference(x.cell, convert(Point{T}, x.origin), x.xrefl, x.mag, x.rot)
+convert{S,T}(::Type{CellReference{S,T}}, x::CellReference) =
+    CellReference(convert(T, x.cell), convert(Point{S}, x.origin),
+        x.xrefl, x.mag, x.rot)
+convert{S}(::Type{CellReference{S}}, x::CellReference) =
+    CellReference(x.cell, convert(Point{S}, x.origin),
+        x.xrefl, x.mag, x.rot)
 
 """
 ```
@@ -69,7 +73,7 @@ spanned by vectors `deltacol` and `deltarow`. Optional x-reflection
 `xrefl`, magnification factor `mag`, and rotation angle `rot` for the array
 as a whole. If an angle is given without units it is assumed to be in radians.
 
-The type variable `S` is to avoid circular definitions with `Cell`.
+The type variable `T` is to avoid circular definitions with `Cell`.
 """
 type CellArray{S,T} <: CellRef{S,T}
     cell::T
@@ -82,18 +86,18 @@ type CellArray{S,T} <: CellRef{S,T}
     mag::Float64
     rot::Float64
 end
-# convert{T}(::Type{CellRef{T}}, x::CellArray) =
-#     CellArray(x.cell, convert(Point{T}, x.origin),
-#                       convert(Point{T}, x.deltacol),
-#                       convert(Point{T}, x.deltarow),
-#                       x.col, x.row, x.xrefl, x.mag, x.rot)
+convert{S,T}(::Type{CellArray{S,T}}, x::CellArray) =
+    CellArray(T(x.cell), convert(Point{S}, x.origin),
+                         convert(Point{S}, x.deltacol),
+                         convert(Point{S}, x.deltarow),
+                         x.col, x.row, x.xrefl, x.mag, x.rot)
 
 """
 ```
 type Cell{T<:Coordinate}
     name::String
-    elements::Array{Polygon{T},1}
-    refs::Array{CellRef,1}
+    elements::Vector{Polygon{T}}
+    refs::Vector{CellRef}
     create::DateTime
     Cell(x,y,z,t) = new(x, y, z, t)
     Cell(x,y,z) = new(x, y, z, now())
@@ -118,8 +122,8 @@ to add references, push them to `refs` field.
 """
 type Cell{T<:Coordinate}
     name::String
-    elements::Array{Polygon{T},1}
-    refs::Array{CellRef,1}
+    elements::Vector{Polygon{T}}
+    refs::Vector{CellRef}
     create::DateTime
     Cell(x,y,z,t) = new(x, y, z, t)
     Cell(x,y,z) = new(x, y, z, now())
@@ -133,10 +137,10 @@ type Cell{T<:Coordinate}
         c
     end
 end
-# convert{T}(::Type{Cell{T}}, x::Cell) =
-#     Cell{T}(x.name, convert(Array{Polygon{T},1}, x.elements),
-#                     convert(Array{CellRef{T},1}, x.refs),
-#                     x.create)
+convert{T}(::Type{Cell{T}}, x::Cell) =
+    Cell{T}(x.name, convert(Vector{Polygon{T}}, x.elements),
+                    convert(Vector{CellRef}, x.refs),
+                    x.create)
 
 """
 ```

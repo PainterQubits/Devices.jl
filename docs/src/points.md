@@ -39,4 +39,6 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
     Points.Point
     Points.getx
     Points.gety
+    Points.lowerleft
+    Points.upperright
 ```

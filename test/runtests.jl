@@ -103,8 +103,10 @@ end
         @test !isproper(Rectangle(0,0))
 
         # centering
-        @test_throws InexactError center!(Rectangle(1,1))
-        @test_throws InexactError center!(Rectangle(1m,1m))
+        @test_throws InexactError centered!(Rectangle(1,1))
+        @test_throws InexactError centered!(Rectangle(1m,1m))
+        @test centered(Rectangle(1,1)) ==
+            Rectangle(Point(-0.5,-0.5), Point(0.5,0.5))
 
         # Rectangle equality
         @test Rectangle(1,2) == Rectangle(1,2)
@@ -218,6 +220,10 @@ end
         @test pathlength(p) == 10μm
         @test ForwardDiff.derivative(p[1].seg.f, 0.0) ≈ Point(10.0μm, 0.0μm)
     end
+
+    # TODO: How to test `CompoundSegment` / `CompoundStyle`?
+    # TODO: How to test `DecoratedStyle` / `attach!`?
 end
 
-# TODO: How to test GDS output? diff with known good result files?
+# TODO: How to test GDS import?
+# TODO: How to test GDS export? diff with known good result files?

@@ -253,29 +253,12 @@ summary(s::Corner) = "Corner by "*(@sprintf "%0.3f" s.α)
 """
 ```
 type CompoundSegment{T} <: Segment{T}
-    segments::Array{Segment{T},1}
+    segments::Vector{Segment{T}}
     f::Function
 
     CompoundSegment(segments) = begin
-        s = new(Array(segments))
-        s.f = param(s.segments)
-        s
-    end
-end
-```
-
-Consider an array of segments as one contiguous segment.
-Useful e.g. for applying styles, uninterrupted over segment changes.
-The array of segments given to the constructor is copied and retained
-by the compound segment.
-"""
-type CompoundSegment{T} <: Segment{T}
-    segments::Array{Segment{T},1}
-    f::Function
-
-    CompoundSegment(segments) = begin
-        if mapreduce(x->isa(x,Corner),|,false,segments)
-            error("Cannot have corners in a `CompoundSegment`. You may have ",
+        if any(x->isa(x,Corner), segments)
+            error("cannot have corners in a `CompoundSegment`. You may have ",
                 "tried to simplify a path containing `Corner` objects.")
         else
             s = new(deepcopy(Array(segments)))
@@ -284,10 +267,35 @@ type CompoundSegment{T} <: Segment{T}
         end
     end
 end
-CompoundSegment(nodes::AbstractArray{Node,1}) =
-    CompoundSegment(map(segment, nodes))
+```
 
-copy(s::CompoundSegment) = CompoundSegment(s.segments)
+Consider an array of segments as one contiguous segment.
+Useful e.g. for applying styles, uninterrupted over segment changes.
+The array of segments given to the constructor is copied and retained
+by the compound segment.
+
+Note that [`Corner`](@ref)s introduce a discontinuity in the derivative of the
+path function, and are not allowed in a `CompoundSegment`.
+"""
+type CompoundSegment{T} <: Segment{T}
+    segments::Vector{Segment{T}}
+    f::Function
+
+    CompoundSegment(segments) = begin
+        if any(x->isa(x,Corner), segments)
+            error("cannot have corners in a `CompoundSegment`. You may have ",
+                "tried to simplify a path containing `Corner` objects.")
+        else
+            s = new(deepcopy(Array(segments)))
+            s.f = param(s.segments)
+            s
+        end
+    end
+end
+CompoundSegment{T}(nodes::AbstractArray{Node{T},1}) =
+    CompoundSegment{T}(map(segment, nodes))
+
+copy{T}(s::CompoundSegment{T}) = CompoundSegment{T}(s.segments)
 
 function setα0p0!(s::CompoundSegment, angle, p::Point)
     setα0p0!(s.segments[1], angle, p)

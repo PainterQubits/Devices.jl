@@ -11,6 +11,8 @@ should be a subtype of [`Devices.AbstractPolygon`](@ref).
     Rectangle(::Any, ::Any)
     bounds(::Rectangle)
     center(::Rectangle)
+    centered(::Rectangle)
+    centered!(::Rectangle)
     height(::Rectangle)
     isproper(::Rectangle)
     minimum(::Rectangle)

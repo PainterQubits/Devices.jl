@@ -112,8 +112,8 @@ divs(s::CPW) = linspace(0.0, 1.0, s.divs+1)
 """
 ```
 type CompoundStyle{T} <: Style{T}
-    styles::Array{Style{T},1}
-    divs::Array{Float64,1}
+    styles::Vector{Style{T}}
+    divs::Vector{Float64}
     f::Function
 end
 ```
@@ -127,13 +127,12 @@ by the outer constructor.
 style's parametric function.
 """
 type CompoundStyle{T} <: Style{T}
-    styles::Array{Style{T},1}
-    divs::Array{Float64,1}
+    styles::Vector{Style{T}}
+    divs::Vector{Float64}
     f::Function
 end
-CompoundStyle{S<:Segment,T<:Style}(seg::AbstractArray{S,1},
-        sty::AbstractArray{Style{T},1}) =
-    CompoundStyle(deepcopy(Array(sty)), makedivs(seg, sty), cstylef(seg))
+CompoundStyle{S<:Segment,T<:Style}(seg::AbstractVector{S}, sty::AbstractVector{T}) =
+    CompoundStyle{T.parameters[1]}(deepcopy(Array(sty)), makedivs(seg, sty), cstylef(seg))
 
 divs(s::CompoundStyle) = s.divs
 
@@ -173,12 +172,14 @@ function makedivs{T<:Number}(segments::AbstractArray{Segment{T},1}, styles)
 end
 
 """
-`cstylef{T<:Real}(seg::AbstractArray{Segment{T},1})`
+```
+cstylef{T<:Coordinate}(seg::AbstractArray{Segment{T},1})
+```
 
 Returns the function needed for a `CompoundStyle`. The segments array is
 shallow-copied for use in the function.
 """
-function cstylef{T<:Real}(seg::AbstractArray{Segment{T},1})
+function cstylef{T<:Coordinate}(seg::AbstractArray{Segment{T},1})
     segments = deepcopy(Array(seg))
     isempty(segments) && error("Cannot parameterize with zero segments.")
 
@@ -212,16 +213,16 @@ end
 
 """
 ```
-type DecoratedStyle <: Style
-    s::Style
+type DecoratedStyle{T} <: Style{T}
+    s::Style{T}
     ts::Array{Float64,1}
     dirs::Array{Int,1}
-    refs::Array{CellReference,1}
+    refs::Array{CellReference{T},1}
     DecoratedStyle(s) = begin
         a = new(s)
         a.ts = Float64[]
         a.dirs = Int[]
-        a.refs = CellReference[]
+        a.refs = CellReference{T}[]
         a
     end
     DecoratedStyle(s,t,d,r) = new(s,t,d,r)
@@ -230,20 +231,21 @@ end
 
 Style with decorations, like structures periodically repeated along the path, etc.
 """
-type DecoratedStyle <: Style
-    s::Style
+type DecoratedStyle{T} <: Style{T}
+    s::Style{T}
     ts::Array{Float64,1}
     dirs::Array{Int,1}
-    refs::Array{CellReference,1}
+    refs::Array{CellReference{T},1}
     DecoratedStyle(s) = begin
         a = new(s)
         a.ts = Float64[]
         a.dirs = Int[]
-        a.refs = CellReference[]
+        a.refs = CellReference{T}[]
         a
     end
     DecoratedStyle(s,t,d,r) = new(s,t,d,r)
 end
+DecoratedStyle{T}(x::Style{T}) = DecoratedStyle{T}(x)
 
 """
 ```
