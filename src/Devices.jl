@@ -63,7 +63,7 @@ Currently only `Rectangle` or `Polygon` are concrete subtypes.
 """
 abstract AbstractPolygon{T<:Coordinate}
 
-include("Points.jl")
+include("points.jl")
 import .Points: Point, getx, gety, Rotation, Translation, ∘
 import .Points: lowerleft, upperright
 export Points
@@ -80,7 +80,7 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
     end
 end
 
-include("Rectangles.jl")
+include("rectangles.jl")
 import .Rectangles: Rectangle, height, width, isproper
 export Rectangles
 export Rectangle
@@ -88,20 +88,20 @@ export height
 export width
 export isproper
 
-include("Polygons.jl")
+include("polygons.jl")
 import .Polygons: Polygon, clip, offset, points, layer, datatype
 export Polygons
 export Polygon
 export clip, offset, points, layer, datatype
 
-include("Cells.jl")
+include("cells.jl")
 import .Cells: Cell, CellArray, CellReference
 import .Cells: traverse!, order!, flatten, flatten!, transform, name
 export Cells
 export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!, transform, name
 
-include("paths/Paths.jl")
+include("paths/paths.jl")
 import .Paths: Path, adjust!, attach!, direction, meander!, launch!, corner!
 import .Paths: param, pathf, pathlength, simplify, simplify!, straight!, turn!
 import .Paths: α0, α1, p0, p1, style0, style1, extent, undecorated
@@ -337,7 +337,7 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
     render!(c, segment, undecorated(s); kwargs...)
 end
 
-include("Tags.jl")
+include("tags.jl")
 import .Tags: qrcode, radialstub, radialcut #, cpwlauncher #, launch!
 import .Tags: pecbasedose, checkerboard, surf1d
 export Tags
@@ -348,6 +348,6 @@ export cpwlauncher, surf1d
 export pecbasedose, checkerboard
 export interdigit
 
-include("GDS.jl")
+include("gds.jl")
 
 end

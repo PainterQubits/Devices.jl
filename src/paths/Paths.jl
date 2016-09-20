@@ -168,8 +168,8 @@ style(x::Node) = x.sty
 setsegment!(x::Node, s::Segment) = x.seg = s
 setstyle!(x::Node, s::Style) = x.sty = s
 
-include("Styles.jl")
-include("Segments.jl")
+include("styles.jl")
+include("segments.jl")
 
 """
 ```
