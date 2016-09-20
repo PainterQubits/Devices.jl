@@ -5,7 +5,6 @@ using Unitful
 import Unitful: Length, fm, pm, nm, μm, m
 
 import Base: bswap, bits, convert, write, read
-import ..AbstractPolygon
 using ..Points
 import ..Rectangles: Rectangle
 import ..Polygons: Polygon

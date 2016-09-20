@@ -365,10 +365,11 @@ function bounds{S<:Coordinate, T<:Coordinate}(
     !isproper(b) && return b
 
     # The following code block is very inefficient
+
     lls = [(b.ll + (i-1) * ref.deltarow + (j-1) * ref.deltacol)::Point{promote_type(S,T)}
             for i in 1:(ref.row), j in 1:(ref.col)]
     urs = lls .+ Point(width(b), height(b))
-    mb = Rectangle(minimum(lls[1:end]), maximum(urs[1:end]))
+    mb = Rectangle(lowerleft(lls), upperright(urs))
 
     sgn = ref.xrefl ? -1 : 1
     a = Translation(ref.origin) ∘ CoordinateTransformations.LinearMap(

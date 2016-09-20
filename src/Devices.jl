@@ -11,7 +11,7 @@ import FileIO: save, load
 import Base: cell, length, show, .+, .-
 import Unitful: Length
 
-render_counter = UInt64(0)
+export render!
 
 # The PyNULL() and __init__() are necessary to use PyCall with precompiled modules.
 const _gdspy = PyCall.PyNULL()
@@ -31,13 +31,17 @@ end
 gdspy() = Devices._gdspy
 qr() = Devices._qr
 
+
+# The following functions are imported by submodules and have methods
+# added, e.g. bounds(::Rectangle), bounds(::Polygon), etc.
 export bounds
+function bounds end
+
 export center
-export render!
+function center end
 
-export interdigit
-
-function render! end
+export center!
+function center! end
 
 """
 ```
@@ -47,30 +51,6 @@ typealias Coordinate Union{Real,Length}
 Type alias for numeric types suitable for coordinate systems.
 """
 typealias Coordinate Union{Real,Length}
-
-include("Points.jl")
-import .Points: Point, getx, gety, Rotation, Translation, ∘
-export Points
-export Point, getx, gety, Rotation, Translation, ∘
-
-function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, layer=FEATURES_LAYER)
-    c = gdspy()[:Cell](cellname)
-
-    for i = 1:npairs
-        c[:add](gdspy()[:Rectangle]((0,(i-1)*2*(width+ygap)), (length,(i-1)*2*(width+ygap)+width), layer=layer))
-        c[:add](gdspy()[:Rectangle]((xgap,(2i-1)*(width+ygap)), (xgap+length,width+(2i-1)*(width+ygap)), layer=layer))
-    end
-
-    c
-end
-
-function bounds end
-function center end
-function center! end
-
-function uniquename(str)
-    replace(str*string(gensym()),"##","_")
-end
 
 """
 ```
@@ -82,11 +62,27 @@ Currently only `Rectangle` or `Polygon` are concrete subtypes.
 """
 abstract AbstractPolygon{T<:Coordinate}
 
+include("Points.jl")
+import .Points: Point, getx, gety, Rotation, Translation, ∘
+import .Points: lowerleft, upperright
+export Points
+export Point, getx, gety, Rotation, Translation, ∘, lowerleft, upperright
+
+# TODO: Operations on arrays of AbstractPolygons
+for (op, dotop) in [(:+, :.+), (:-, :.-)]
+    @eval function ($dotop){S<:Real, T<:Real}(a::AbstractArray{AbstractPolygon{S},1}, p::Point{T})
+        b = similar(a)
+        for (ia, ib) in zip(eachindex(a), eachindex(b))
+            @inbounds b[ib] = ($op)(a[ia], p)
+        end
+        b
+    end
+end
+
 include("Rectangles.jl")
-import .Rectangles: Rectangle, center!, height, width, isproper
+import .Rectangles: Rectangle, height, width, isproper
 export Rectangles
 export Rectangle
-export center!
 export height
 export width
 export isproper
@@ -349,17 +345,7 @@ export radialstub, radialcut
 export cpwlauncher, surf1d
 # export launch!
 export pecbasedose, checkerboard
-
-# Operations on arrays of AbstractPolygons
-for (op, dotop) in [(:+, :.+), (:-, :.-)]
-    @eval function ($dotop){S<:Real, T<:Real}(a::AbstractArray{AbstractPolygon{S},1}, p::Point{T})
-        b = similar(a)
-        for (ia, ib) in zip(eachindex(a), eachindex(b))
-            @inbounds b[ib] = ($op)(a[ia], p)
-        end
-        b
-    end
-end
+export interdigit
 
 include("GDS.jl")
 import .GDS: GDS64

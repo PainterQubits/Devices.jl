@@ -192,10 +192,12 @@ end
 
     # More setup
     c = Cell("main")
+    c2 = Cell("rect")
+    render!(c2, Rectangle(5,5))
     push!(c.refs, CellArray(c2, Point(0,0), Point(10,0), Point(0,10), 10, 10))
 
     # Test bounds with cell arrays
-    @test bounds(c) == Rectangle(110,110)
+    @test bounds(c) == Rectangle(95,95)
 
     # TODO: Tests for `flatten`
 end

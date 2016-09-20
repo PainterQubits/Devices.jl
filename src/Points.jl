@@ -10,7 +10,7 @@ import Unitful: Length, ustrip, unit
 import PyCall.PyObject
 export Point
 export Rotation, Translation, ∘
-export getx, gety
+export getx, gety, lowerleft, upperright
 
 """
 ```
@@ -82,6 +82,37 @@ for f in (:.+, :.-)
         b
     end
 end
+
+"""
+```
+lowerleft{T}(A::AbstractArray{Point{T}})
+```
+
+Returns the lower-left [`Point`](@ref) of the smallest bounding rectangle
+(with sides parallel to the x- and y-axes) that contains all points in `A`.
+"""
+function lowerleft{T}(A::AbstractArray{Point{T}})
+    B = reinterpret(T, A, (2*length(A),))
+    @inbounds Bx = view(B, 1:2:length(B))
+    @inbounds By = view(B, 2:2:length(B))
+    Point(minimum(Bx), minimum(By))
+end
+
+"""
+```
+upperright{T}(A::AbstractArray{Point{T}})
+```
+
+Returns the upper-right [`Point`](@ref) of the smallest bounding rectangle
+(with sides parallel to the x- and y-axes) that contains all points in `A`.
+"""
+function upperright{T}(A::AbstractArray{Point{T}})
+    B = reinterpret(T, A, (2*length(A),))
+    @inbounds Bx = view(B, 1:2:length(B))
+    @inbounds By = view(B, 2:2:length(B))
+    Point(maximum(Bx), maximum(By))
+end
+
 
 function isapprox{S<:Point,T<:Point}(x::AbstractArray{S},
         y::AbstractArray{T}; kwargs...)
