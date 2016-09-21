@@ -222,16 +222,6 @@ end
 #
 # end
 
-include("styles/trace.jl")
-include("styles/cpw.jl")
-include("styles/compound.jl")
-include("styles/decorated.jl")
-
-include("segments/straight.jl")
-include("segments/turn.jl")
-include("segments/corner.jl")
-include("segments/compound.jl")
-
 """
 ```
 p0{T}(s::Segment{T})
@@ -464,6 +454,16 @@ function style1(p::Path)
         style(nodes(p)[end])
     end
 end
+
+include("styles/trace.jl")
+include("styles/cpw.jl")
+include("styles/compound.jl")
+include("styles/decorated.jl")
+
+include("segments/straight.jl")
+include("segments/turn.jl")
+include("segments/corner.jl")
+include("segments/compound.jl")
 
 """
 ```
