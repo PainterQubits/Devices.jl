@@ -1,4 +1,3 @@
-
 """
 ```
 type Straight{T} <: Segment{T}
@@ -35,15 +34,15 @@ end
 
 """
 ```
-Straight{T<:Coordinate}(l::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°)
+Straight{T<:Coordinate}(l::T; p0::Point{T}=Point(0.0,0.0), α0=0.0°)
 ```
 
 Outer constructor for `Straight` segments.
 """
-Straight{T<:Coordinate}(l::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°) =
+Straight{T<:Coordinate}(l::T; p0::Point{T}=Point(0.0,0.0), α0=0.0°) =
     Straight{T}(l, p0, α0)
 convert{T}(::Type{Straight{T}}, x::Straight) =
-    Straight(T(x.l), convert(Point{T}, x.p0), x.α0)
+    Straight(convert(T, x.l), convert(Point{T}, x.p0), x.α0)
 
 copy(s::Straight) = Straight(s.l,s.p0,s.α0)
 pathlength(s::Straight) = s.l

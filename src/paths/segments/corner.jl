@@ -1,3 +1,5 @@
+"""
+```
 type Corner{T} <: Segment{T}
     α::typeof(1.0°)
     p0::Point{T}
@@ -6,6 +8,32 @@ type Corner{T} <: Segment{T}
     Corner(a) = new(a, Point(zero(T),zero(T)), 0.0°, zero(T))
     Corner(a,b,c,d) = new(a,b,c,d)
 end
+```
+
+A corner, or sudden kink in a path. The only parameter is the angle `α` of the
+kink. The kink begins at a point `p0` with initial angle `α0`. It will also
+end at `p0`, since the corner has zero path length. However, during rendering,
+neighboring segments will be tweaked slightly so that the rendered path is
+properly centered about the path function (the rendered corner has a finite width).
+"""
+type Corner{T} <: Segment{T}
+    α::typeof(1.0°)
+    p0::Point{T}
+    α0::typeof(1.0°)
+    extent::T
+    Corner(a) = new(a, Point(zero(T),zero(T)), 0.0°, zero(T))
+    Corner(a,b,c,d) = new(a,b,c,d)
+end
+
+"""
+```
+Corner(α)
+```
+
+Outer constructor for `Corner{Float64}` segments. If you are using units,
+then you need to specify an appropriate type: `Corner{typeof(1.0nm)}(α)`, for
+example.
+"""
 Corner(α) = Corner{Float64}(α, Point(0.,0.), 0.0°, 0.)
 copy{T}(x::Corner{T}) = Corner{T}(x.α, x.p0, x.α0, x.extent)
 

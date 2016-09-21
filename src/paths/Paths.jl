@@ -113,7 +113,7 @@ end
 
 """
 ```
-abstract Style
+abstract Style{T<:Coordinate}
 ```
 
 How to render a given path segment. All styles should implement the following
@@ -126,6 +126,24 @@ methods:
  - `divs`
 """
 abstract Style{T<:Coordinate}
+
+"""
+```
+abstract ContinuousStyle{T} <: Style{T}
+```
+
+Any style that applies to segments which have non-zero path length.
+"""
+abstract ContinuousStyle{T} <: Style{T}
+
+"""
+```
+abstract DiscreteStyle{T} <: Style{T}
+```
+
+Any style that applies to segments which have zero path length.
+"""
+abstract DiscreteStyle{T} <: Style{T}
 
 """
 ```
@@ -168,7 +186,46 @@ style(x::Node) = x.sty
 setsegment!(x::Node, s::Segment) = x.seg = s
 setstyle!(x::Node, s::Style) = x.sty = s
 
-include("styles.jl")
+function deepcopy_internal(x::Style, stackdict::ObjectIdDict)
+    if haskey(stackdict, x)
+        return stackdict[x]
+    end
+    y = copy(x)
+    stackdict[x] = y
+    return y
+end
+# # experimental
+# import Roots:fzeros
+# function divs(f::Function, FType, dens)
+#     # find zeros of f′ to locate extrema
+#     D = ForwardDiff.derivative
+#     extr = fzeros(x->D(f,x), 0.0, 1.0)
+#     mi,ma = extrema(f.(extr))
+#     normcurv = x->D(x->D(x->(f(x)-mi)/ma,x), x)
+#     divs = Float64[]
+#     !(extr[1] ≈ 0.0) && unshift!(extr, 0.0)
+#     !(extr[end] ≈ 1.0) && push!(extr, 1.0)
+#
+#     for (i, start) in enumerate(extr[1:(end-1)])
+#         push!(divs, start)
+#         stop = extr[i+1]
+#         where = start
+#         while where < stop
+#             push!(divs, where += dens/normcurv(where))
+#         end
+#         start = stop
+#     end
+#     push!(divs, extr[end])
+#     # mm = D2nd.(zeros)
+#     # minima = zeros[mm .> 0]
+#     # maxima = zeros[mm .< 0]
+#
+# end
+
+include("styles/trace.jl")
+include("styles/cpw.jl")
+include("styles/compound.jl")
+include("styles/decorated.jl")
 
 include("segments/straight.jl")
 include("segments/turn.jl")

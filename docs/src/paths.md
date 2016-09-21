@@ -11,6 +11,7 @@
     Paths.Segment
     Paths.Straight
     Paths.Turn
+    Paths.Corner
     Paths.CompoundSegment
 ```
 
@@ -18,6 +19,8 @@
 
 ```@docs
     Paths.Style
+    Paths.ContinuousStyle
+    Paths.DiscreteStyle
     Paths.Trace
     Paths.CPW
     Paths.CompoundStyle
