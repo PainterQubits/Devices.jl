@@ -40,6 +40,8 @@
     Paths.α1
     Paths.style0
     Paths.style1
+    Paths.discretestyle1
+    Paths.contstyle1
 ```
 ## Path building
 

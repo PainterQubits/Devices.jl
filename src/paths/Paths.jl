@@ -46,7 +46,7 @@ export Path
 export CPW
 export Trace
 
-export α0, α1, p0, p1, style0, style1
+export α0, α1, p0, p1, style0, style1, discretestyle1, contstyle1
 export adjust!
 export attach!
 export corner!
@@ -161,6 +161,9 @@ the following methods:
 - `α1`
 """
 abstract Segment{T<:Coordinate}
+
+abstract DiscreteSegment{T} <: Segment{T}
+abstract ContinuousSegment{T} <: Segment{T}
 
 # doubly linked-list behavior
 type Node{T<:Coordinate}
@@ -295,8 +298,8 @@ end
 ```
 type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
-    α0::Float64
-    style0::Style
+    α0::typeof(0.0°)
+    style0::ContinuousStyle{T}
     nodes::Array{Node{T},1}
 end
 ```
@@ -307,7 +310,7 @@ tuples of (`segment`, `style`).
 type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
     α0::typeof(0.0°)
-    style0::Style{T}
+    style0::ContinuousStyle{T}
     nodes::Array{Node{T},1}
 
     Path() = new(Point(zero(T),zero(T)), 0.0°, Trace(T(1)), Node{T}[])
@@ -447,23 +450,52 @@ style1(p::Path)
 
 Style of the last segment of a path.
 """
-function style1(p::Path)
+style1(p::Path) = style1(p, Style, p.style0)
+
+function style1(p::Path, T, default)
     if isempty(p)
-        p.style0
+        default
     else
-        style(nodes(p)[end])
+        A = view(nodes(p), reverse(1:length(nodes(p))))
+        i = findfirst(x->isa(style(x), T), A)
+        if i > 0
+            style(A[i])
+        else
+            default
+        end
     end
 end
 
-include("styles/trace.jl")
-include("styles/cpw.jl")
-include("styles/compound.jl")
-include("styles/decorated.jl")
+include("contstyles/trace.jl")
+include("contstyles/cpw.jl")
+include("contstyles/compound.jl")
+include("contstyles/decorated.jl")
+include("discretestyles/simple.jl")
 
 include("segments/straight.jl")
 include("segments/turn.jl")
 include("segments/corner.jl")
 include("segments/compound.jl")
+
+"""
+```
+discretestyle1{T}(p::Path{T})
+```
+
+Returns the last-used discrete style in the path. If one was not used,
+returns `SimpleCornerStyle()`.
+"""
+discretestyle1{T}(p::Path{T}) = style1(p, DiscreteStyle, SimpleCornerStyle{T}())
+
+"""
+```
+contstyle1(p::Path)
+```
+
+Returns the last-used discrete style in the path. If one was not used,
+returns `p.style0`.
+"""
+contstyle1(p::Path) = style1(p, ContinuousStyle, p.style0)
 
 """
 ```
@@ -727,108 +759,6 @@ function launch!(p::Path; extround=5, trace0=300, trace1=5,
     CPW(trace1, gap1)
 end
 
-"""
-```
-param{T<:Coordinate}(c::AbstractVector{Segment{T}})
-```
 
-Return a parametric function over the domain [0,1] that represents the
-compound segments.
-"""
-function param{T<:Coordinate}(c::AbstractVector{Segment{T}})
-    isempty(c) && error("Cannot parameterize with zero segments.")
-
-    # Build up our piecewise parametric function
-    f = Expr(:(->), :t, Expr(:block))
-    push!(f.args[2].args, quote
-        L = pathlength(($c))
-        l0 = zero($T)
-    end)
-
-    for i in 1:length(c)
-        push!(f.args[2].args, quote
-            fn = (($c))[$i].f
-            l1 = l0 + pathlength((($c))[$i])
-            (l0/L <= t < l1/L) && return (fn)((t*L-l0)/(l1-l0))
-            l0 = l1
-        end)
-    end
-
-    # For continuity of the derivative
-    push!(f.args[2].args, quote
-        g = (($c))[1].f
-        h = (($c))[end].f
-        g′ = ForwardDiff.derivative(g,0.0)
-        h′ = ForwardDiff.derivative(h,1.0)
-        D0x, D0y = getx(g′), gety(g′)
-        D1x, D1y = getx(h′), gety(h′)
-        a0,a = p0((($c))[1]),p1((($c))[end])
-        l0,l1 = pathlength((($c))[1]), pathlength((($c))[end])
-        (t >= 1.0) &&
-            return a + Point(D1x*(t-1)*(L/l1), D1y*(t-1)*(L/l1))
-        (t < 0.0) &&
-            return a0 + Point(D0x*t*(L/l0), D0y*t*(L/l0))
-    end)
-
-    # Return our parametric function
-    return eval(f)
-end
-
-"""
-```
-attach!(p::Path, c::CellReference, t::Real; i::Integer=length(p), where::Integer=0)
-```
-
-Attach `c` along a path.
-
-By default, the attachment occurs at `t ∈ [0,1]` along the most recent path
-segment, but a different path segment index can be specified using `i`. The
-reference is oriented with zero rotation if the path is pointing at 0°,
-otherwise it is rotated with the path.
-
-The origin of the cell reference tells the method where to place the cell *with
-respect to a coordinate system that rotates with the path*. Suppose the path is
-a straight line with angle 0°. Then an origin of `Point(0.,10.)` will put the
-cell at 10 above the path, or 10 to the left of the path if it turns left by
-90°.
-
-The `where` option is for convenience. If `where == 0`, nothing special happens.
-If `where == -1`, then the point of attachment for the reference is on the
-leftmost edge of the waveguide (the rendered polygons; the path itself has no
-width). Likewise if `where == 1`, the point of attachment is on the rightmost
-edge. This option does not automatically rotate the cell reference, apart from
-what is already done as described in the first paragraph. You can think of this
-option as setting a special origin for the coordinate system that rotates with
-the path. For instance, an origin for the cell reference of `Point(0.,10.)`
-together with `where == -1` will put the cell at 10 above the edge of a
-rendered (finite width) path with angle 0°.
-"""
-function attach!(p::Path, c::CellReference, t::Real;
-        i::Integer=length(p), where::Integer=0)
-    if i==0
-        sty0 = style0(p)
-        sty = decorate(sty0,c,t,where)
-        p.style0 = sty
-    else
-        node = p[i]
-        seg0,sty0 = segment(node), style(node)
-        sty = decorate(sty0,c,t,where)
-        p[i] = Node(seg0,sty)
-    end
-end
-
-# undocumented private methods for attach!
-function decorate(sty0::Style, c, t, where)
-    sty = DecoratedStyle(sty0)
-    decorate(sty,c,t,where)
-end
-
-# undocumented private methods for attach!
-function decorate(sty::DecoratedStyle, c, t, where)
-    push!(sty.ts, t)
-    push!(sty.dirs, where)
-    push!(sty.refs, c)
-    sty
-end
 
 end

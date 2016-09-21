@@ -103,7 +103,8 @@ end
 
 """
 ```
-turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate, sty::Style=style1(p))
+turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate,
+    sty::ContinuousStyle=contstyle1(p))
 ```
 
 Turn a path `p` with direction coded by string `s`:
@@ -111,8 +112,11 @@ Turn a path `p` with direction coded by string `s`:
 - "l": turn by π/2 radians (left)
 - "r": turn by -π/2 radians (right)
 - "lrlrllrrll": do those turns in that order
+
+By default, we take the last continuous style in the path.
 """
-function turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate, sty::Style=style1(p))
+function turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate,
+        sty::ContinuousStyle=contstyle1(p))
     dimension(T) != dimension(typeof(r)) && throw(DimensionError())
     for ch in s
         if ch == 'l'

@@ -1,6 +1,6 @@
 """
 ```
-type Corner{T} <: Segment{T}
+type Corner{T} <: DiscreteSegment{T}
     α::typeof(1.0°)
     p0::Point{T}
     α0::typeof(1.0°)
@@ -16,7 +16,7 @@ end at `p0`, since the corner has zero path length. However, during rendering,
 neighboring segments will be tweaked slightly so that the rendered path is
 properly centered about the path function (the rendered corner has a finite width).
 """
-type Corner{T} <: Segment{T}
+type Corner{T} <: DiscreteSegment{T}
     α::typeof(1.0°)
     p0::Point{T}
     α0::typeof(1.0°)
@@ -52,7 +52,7 @@ setp0!(s::Corner, p::Point) = s.p0 = p
 setα0!(s::Corner, α0′) = s.α0 = α0′
 summary(s::Corner) = "Corner by $(s.α)"
 
-function corner!{T<:Coordinate}(p::Path{T}, α, sty::Style=style1(p))
+function corner!{T<:Coordinate}(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p))
     corn = Corner{T}(α)
     push!(p, Node(corn,sty))
     nothing

@@ -1,6 +1,6 @@
 """
 ```
-type Straight{T} <: Segment{T}
+type Straight{T} <: ContinuousSegment{T}
     l::T
     p0::Point{T}
     α0::typeof(0.0°)
@@ -20,7 +20,7 @@ The parametric function over `t ∈ [0,1]` describing the line segment is given 
 
 `t -> p0 + Point(t*l*cos(α),t*l*sin(α))`
 """
-type Straight{T} <: Segment{T}
+type Straight{T} <: ContinuousSegment{T}
     l::T
     p0::Point{T}
     α0::typeof(0.0°)
@@ -72,12 +72,15 @@ setα0!(s::Straight, α0′) = s.α0 = α0′
 
 """
 ```
-straight!{T<:Coordinate}(p::Path{T}, l::Coordinate, sty::Style=style1(p))
+straight!{T<:Coordinate}(p::Path{T}, l::Coordinate,
+    sty::ContinuousStyle=contstyle1(p))
 ```
 
-Extend a path `p` straight by length `l` in the current direction.
+Extend a path `p` straight by length `l` in the current direction. By default,
+we take the last continuous style in the path.
 """
-function straight!{T<:Coordinate}(p::Path{T}, l::Coordinate, sty::Style=style1(p))
+function straight!{T<:Coordinate}(p::Path{T}, l::Coordinate,
+        sty::Style=contstyle1(p))
     dimension(T) != dimension(typeof(l)) && throw(DimensionError())
     p0 = p1(p)
     α = α1(p)

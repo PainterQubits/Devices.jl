@@ -105,10 +105,10 @@ include("paths/paths.jl")
 import .Paths: Path, adjust!, attach!, direction, meander!, launch!, corner!
 import .Paths: param, pathf, pathlength, simplify, simplify!, straight!, turn!
 import .Paths: α0, α1, p0, p1, style0, style1, extent, undecorated
-import .Paths: segment, style
+import .Paths: segment, style, discretestyle1, contstyle1
 export Paths
 export Path
-export α0, α1, p0, p1, style0, style1, segment, style
+export α0, α1, p0, p1, style0, style1, segment, style, discretestyle1, contstyle1
 export adjust!
 export attach!
 export corner!
@@ -236,7 +236,7 @@ function render!(c::Cell, p::Path; kwargs...)
     end
 end
 
-function render!(c::Cell, seg::Paths.Corner, sty::Paths.Style; kwargs...)
+function render!(c::Cell, seg::Paths.Corner, ::Paths.SimpleCornerStyle; kwargs...)
     sgn = ifelse(seg.α >= 0.0°, 1, -1)
     ∠A = seg.α0+sgn*π/2
     p = Point(cos(∠A),sin(∠A))
