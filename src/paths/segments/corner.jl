@@ -51,3 +51,9 @@ end
 setp0!(s::Corner, p::Point) = s.p0 = p
 setα0!(s::Corner, α0′) = s.α0 = α0′
 summary(s::Corner) = "Corner by $(s.α)"
+
+function corner!{T<:Coordinate}(p::Path{T}, α, sty::Style=style1(p))
+    corn = Corner{T}(α)
+    push!(p, Node(corn,sty))
+    nothing
+end

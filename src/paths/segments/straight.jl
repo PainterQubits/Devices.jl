@@ -69,3 +69,19 @@ Set the angle of a straight segment.
 setα0!(s::Straight, α0′) = s.α0 = α0′
 
 α1(s::Straight) = s.α0
+
+"""
+```
+straight!{T<:Coordinate}(p::Path{T}, l::Coordinate, sty::Style=style1(p))
+```
+
+Extend a path `p` straight by length `l` in the current direction.
+"""
+function straight!{T<:Coordinate}(p::Path{T}, l::Coordinate, sty::Style=style1(p))
+    dimension(T) != dimension(typeof(l)) && throw(DimensionError())
+    p0 = p1(p)
+    α = α1(p)
+    s = Straight{T}(l, p0, α)
+    push!(p, Node(s,sty))
+    nothing
+end

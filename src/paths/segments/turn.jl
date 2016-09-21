@@ -82,3 +82,48 @@ Set the starting angle of a turn.
 setα0!(s::Turn, α0′) = s.α0 = α0′
 
 α1(s::Turn) = s.α0 + s.α
+
+
+"""
+```
+turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p))
+```
+
+Turn a path `p` by angle `α` with a turning radius `r` in the current direction.
+Positive angle turns left.
+"""
+function turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p))
+    dimension(T) != dimension(typeof(r)) && throw(DimensionError())
+    p0 = p1(p)
+    α0 = α1(p)
+    turn = Turn{T}(α, r, p0, α0)
+    push!(p, Node(turn,sty))
+    nothing
+end
+
+"""
+```
+turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate, sty::Style=style1(p))
+```
+
+Turn a path `p` with direction coded by string `s`:
+
+- "l": turn by π/2 radians (left)
+- "r": turn by -π/2 radians (right)
+- "lrlrllrrll": do those turns in that order
+"""
+function turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate, sty::Style=style1(p))
+    dimension(T) != dimension(typeof(r)) && throw(DimensionError())
+    for ch in s
+        if ch == 'l'
+            α = π/2
+        elseif ch == 'r'
+            α = -π/2
+        else
+            error("Unrecognizable turn command.")
+        end
+        turn = Turn{T}(α, r, p1(p), α1(p))
+        push!(p, Node(turn,sty))
+    end
+    nothing
+end
