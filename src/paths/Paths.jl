@@ -43,24 +43,28 @@ gdspy() = Devices._gdspy
 
 export Path
 
-export CPW
-export Trace
-
 export α0, α1, p0, p1, style0, style1, discretestyle1, contstyle1
-export adjust!
-export attach!
-export corner!
-export direction
-export launch!
-export meander!
-export param
-export pathf
-export pathlength
-export simplify
-export simplify!
-export straight!
-export turn!
-export undecorated
+export adjust!,
+    attach!,
+    corner!,
+    direction,
+    launch!,
+    meander!,
+    next,
+    nodes,
+    param,
+    pathf,
+    pathlength,
+    previous,
+    segment,
+    setsegment!,
+    simplify,
+    simplify!,
+    straight!,
+    style,
+    setstyle!,
+    turn!,
+    undecorated
 
 """
 For a style `s` and parameteric argument `t`, returns the distance
@@ -471,6 +475,7 @@ include("contstyles/cpw.jl")
 include("contstyles/compound.jl")
 include("contstyles/decorated.jl")
 include("discretestyles/simple.jl")
+include("skipstyles.jl")
 
 include("segments/straight.jl")
 include("segments/turn.jl")
@@ -531,7 +536,7 @@ function adjust!(p::Path, n::Integer=1)
         end
     end
 
-    function updateα0p0!(n::Node; α0=0, p0=Point(0,0))
+    function updateα0p0!{T}(n::Node{T}; α0=0.0°, p0=Point(zero(T),zero(T)))
         if previous(n) == n # first node
             setα0p0!(segment(n), α0, p0)
         else

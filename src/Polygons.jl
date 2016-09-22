@@ -277,7 +277,7 @@ function clip(op::Clipper.ClipType,
     end
     result = convert(Clipper.PolyTree{Point{Int64}},
         Clipper.execute_pt(c, op, pfs, pfc)[2])
-    # println(result)
+
     interiorcuts(result, Polygon{Int64}[], subject[1].properties)
 end
 

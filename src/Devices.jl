@@ -102,26 +102,36 @@ export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!, transform, name
 
 include("paths/paths.jl")
-import .Paths: Path, adjust!, attach!, direction, meander!, launch!, corner!
-import .Paths: param, pathf, pathlength, simplify, simplify!, straight!, turn!
-import .Paths: α0, α1, p0, p1, style0, style1, extent, undecorated
-import .Paths: segment, style, discretestyle1, contstyle1
-export Paths
-export Path
-export α0, α1, p0, p1, style0, style1, segment, style, discretestyle1, contstyle1
-export adjust!
-export attach!
-export corner!
-export direction
-export meander!, launch!
-export param
-export pathf
-export pathlength
-export simplify
-export simplify!
-export straight!
-export turn!
-export undecorated
+# import .Paths: Path, adjust!, attach!, direction, meander!, launch!, corner!
+# import .Paths: param, pathf, pathlength, simplify, simplify!, straight!, turn!
+# import .Paths: α0, α1, p0, p1, style0, style1, extent, undecorated
+# import .Paths: segment, style, discretestyle1, contstyle1, nodes
+importall .Paths
+export Paths, Path, Segment, Style
+export α0, α1,
+    adjust!,
+    attach!,
+    contstyle1,
+    corner!,
+    direction,
+    discretestyle1,
+    meander!,
+    launch!,
+    p0, p1,
+    param,
+    pathf,
+    pathlength,
+    segment,
+    setsegment!,
+    simplify,
+    simplify!,
+    style,
+    style0,
+    style1,
+    setstyle!,
+    straight!,
+    turn!,
+    undecorated
 
 """
 ```
@@ -229,12 +239,51 @@ render!(c::Cell, p::Path; kwargs...)
 
 Render a path `p` to a cell `c`.
 """
-function render!(c::Cell, p::Path; kwargs...)
+function render!{T}(c::Cell, p::Path{T}; kwargs...)
+
+    inds = find(map(x->isa(x, Paths.Corner), segment.(nodes(p))))
+    segs = []
+
+    # Adjust the path so corners, when rendered with finite extent,
+    # are properly positioned.
+    # TODO: Add error checking for styles.
+
+    for i in inds
+        cornernode = p[i]
+        prevseg = segment(previous(cornernode))
+        nextseg = segment(next(cornernode))
+        segs = [segs; prevseg; nextseg]
+        cornertweaks!(cornernode, prevseg, previous)
+        cornertweaks!(cornernode, nextseg, next)
+    end
+
     adjust!(p)
+
     for node in p
         render!(c, segment(node), style(node); kwargs...)
     end
+
+    # Restore corner positions
+    for i in reverse(inds)
+        setsegment!(next(p[i]), pop!(segs))
+        setsegment!(previous(p[i]), pop!(segs))
+    end
+    adjust!(p)
 end
+
+function cornertweaks!(cornernode, seg::Paths.Straight, which)
+    seg′ = copy(seg)
+    setsegment!(which(cornernode), seg′)
+
+    α = segment(cornernode).α
+    ex = segment(cornernode).extent
+    sgn = ifelse(α >= 0.0°, 1, -1)
+    seg′.l -= ex*tan(sgn*α/2)
+end
+
+cornertweak!(cornernode, seg::Paths.Segment) =
+    warn("corner was not sandwiched by straight segments. ",
+         "Rendering errors will result.")
 
 function render!(c::Cell, seg::Paths.Corner, ::Paths.SimpleCornerStyle; kwargs...)
     sgn = ifelse(seg.α >= 0.0°, 1, -1)

@@ -43,7 +43,7 @@ function p1(s::Corner)
     sgn = ifelse(s.α >= 0°, 1, -1)
     ∠A = s.α0+sgn*π/2
     v = s.extent*Point(cos(∠A),sin(∠A))
-    ∠B = -∠A + s.α
+    ∠B = ∠A + π + s.α
     s.p0+v+s.extent*Point(cos(∠B),sin(∠B))
 end
 α0(s::Corner) = s.α0

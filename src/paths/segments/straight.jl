@@ -42,9 +42,9 @@ Outer constructor for `Straight` segments.
 Straight{T<:Coordinate}(l::T; p0::Point{T}=Point(0.0,0.0), α0=0.0°) =
     Straight{T}(l, p0, α0)
 convert{T}(::Type{Straight{T}}, x::Straight) =
-    Straight(convert(T, x.l), convert(Point{T}, x.p0), x.α0)
+    Straight(convert(T, x.l); p0=convert(Point{T}, x.p0), α0=x.α0)
 
-copy(s::Straight) = Straight(s.l,s.p0,s.α0)
+copy(s::Straight) = Straight(s.l; p0=s.p0, α0=s.α0)
 pathlength(s::Straight) = s.l
 p0(s::Straight) = s.p0
 α0(s::Straight) = s.α0
