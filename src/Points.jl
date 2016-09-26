@@ -1,7 +1,7 @@
 module Points
 import Devices: Coordinate
 import StaticArrays: FieldVector, @SMatrix
-import CoordinateTransformations: LinearMap, Translation, ∘
+import CoordinateTransformations: LinearMap, Translation, ∘, compose
 import Clipper: IntPoint
 import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret
 import Base: scalarmin, scalarmax, isapprox
@@ -9,15 +9,18 @@ import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Length, ustrip, unit
 import PyCall.PyObject
 export Point
-export Rotation, Translation, ∘
+export Rotation, Translation, ∘, compose
 export getx, gety, lowerleft, upperright
 
 """
 ```
 immutable Point{T} <: FieldVector{T}
+    x::T
+    y::T
+end
 ```
 
-2D coordinate in the plane.
+2D Cartesian coordinate in the plane.
 """
 immutable Point{T<:Coordinate} <: FieldVector{T}
     x::T
@@ -46,7 +49,7 @@ end
 getx(p::Point)
 ```
 
-Get the x-coordinate of a point.
+Get the x-coordinate of a point. You can also use `p.x` or `p[1]`.
 """
 @inline getx(p::Point) = p.x
 
@@ -55,7 +58,7 @@ Get the x-coordinate of a point.
 gety(p::Point)
 ```
 
-Get the y-coordinate of a point.
+Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 """
 @inline gety(p::Point) = p.y
 
@@ -90,6 +93,14 @@ lowerleft{T}(A::AbstractArray{Point{T}})
 
 Returns the lower-left [`Point`](@ref) of the smallest bounding rectangle
 (with sides parallel to the x- and y-axes) that contains all points in `A`.
+
+Example:
+```jldoctest
+julia> lowerleft([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
+2-element Devices.Points.Point{Int64}:
+ -1
+  0
+```
 """
 function lowerleft{T}(A::AbstractArray{Point{T}})
     B = reinterpret(T, A, (2*length(A),))
@@ -105,6 +116,14 @@ upperright{T}(A::AbstractArray{Point{T}})
 
 Returns the upper-right [`Point`](@ref) of the smallest bounding rectangle
 (with sides parallel to the x- and y-axes) that contains all points in `A`.
+
+Example:
+```jldoctest
+julia> upperright([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
+2-element Devices.Points.Point{Int64}:
+ 2
+ 3
+```
 """
 function upperright{T}(A::AbstractArray{Point{T}})
     B = reinterpret(T, A, (2*length(A),))
@@ -123,6 +142,14 @@ end
 
 # Translation already defined for 2D by the CoordinateTransformations package
 # Still need 2D rotation.
+
+"""
+```
+Rotation(Θ)
+```
+
+Construct a rotation about the origin. Units accepted (no units ⇒ radians).
+"""
 Rotation(Θ) = LinearMap(@SMatrix [cos(Θ) -sin(Θ); sin(Θ) cos(Θ)])
 
 extract_derivative{T<:Coordinate}(x::Point{T}) =

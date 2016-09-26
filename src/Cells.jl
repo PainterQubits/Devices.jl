@@ -183,26 +183,26 @@ Keyword arguments can specify x-reflection, magnification, or rotation.
 Synonyms are accepted, in case you forget the "correct keyword"...
 
 X-reflection:
-- :xrefl
-- :xreflection
-- :refl
-- :reflect
-- :xreflect
-- :xmirror
-- :mirror
+- `:xrefl`
+- `:xreflection`
+- `:refl`
+- `:reflect`
+- `:xreflect`
+- `:xmirror`
+- `:mirror`
 
 Magnification:
-- :mag
-- :magnification
-- :magnify
-- :zoom
-- :scale
+- `:mag`
+- `:magnification`
+- `:magnify`
+- `:zoom`
+- `:scale`
 
 Rotation:
-- :rot
-- :rotation
-- :rotate
-- :angle
+- `:rot`
+- `:rotation`
+- `:rotate`
+- `:angle`
 """
 function CellReference{T<:Coordinate}(x, origin::Point{T}=Point(0.,0.); kwargs...)
     argdict = Dict(k=>v for (k,v) in kwargs)
@@ -282,12 +282,12 @@ Cell(name::AbstractString) = Cell{Float64}(name)
 
 """
 ```
-Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractArray{T,1})
+Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractVector{T})
 ```
 
 Convenience constructor for `Cell{T}`.
 """
-Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractArray{T,1}) =
+Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractVector{T}) =
     Cell{T}(name, elements)
 
 # """

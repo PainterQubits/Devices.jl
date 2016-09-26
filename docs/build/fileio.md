@@ -18,9 +18,11 @@ To load a pattern, make sure you are `using FileIO`.
 load(f::File{format"GDS"}; verbose=false)
 ```
 
-A dictionary of top-level cells (`Cell` objects) found in the GDS-II file is returned. The dictionary keys are the cell names. The other cells in the GDS-II file are retained by `CellReference` or `CellArray` objects held by the top-level cells. Currently, cell references and arrays are not implemented, and we do not handle the scale properly, as this is a work in progress.
+A dictionary of top-level cells (`Cell` objects) found in the GDS-II file is returned. The dictionary keys are the cell names. The other cells in the GDS-II file are retained by `CellReference` or `CellArray` objects held by the top-level cells. Currently, cell references and arrays are not implemented.
 
-The FileIO package treats the HEADER record as "magic bytes," and therefore only GDS-II version 6.0.0 can be read. LayoutEditor appears to save version 7, which as far as I can tell is unofficial, and probably just permits more layers than 64, or extra characters in cell names, etc. We will add support for this.
+The FileIO package recognizes files based on "magic bytes" at the start of the file. To permit any version of GDS-II file to be read, we consider the magic bytes to be the GDS HEADER tag (`0x0002`), preceded by the number of bytes in total (`0x0006`) for the entire HEADER record. The last well-documented version of GDS-II is v6.0.0, encoded as `0x0258 == 600`. LayoutEditor appears to save a version 7 as `0x0007`, which as far as I can tell is unofficial, and probably just permits more layers than 64, or extra characters in cell names, etc.
+
+If the database scale is `1μm`, `1nm`, or `1pm`, then the corresponding unit is used for the resulting imported cells. Otherwise, an "anonymous unit" is used that will display as `u"2.4μm"` if the database scale is 2.4μm, say.
 
 Warnings are thrown if the GDS-II file does not begin with a BGNLIB record following the HEADER record, but loading will proceed.
 
@@ -29,7 +31,7 @@ Encountering an ENDLIB record will discard the remainder of the GDS-II file with
 The content of some records are currently discarded (mainly the more obscure GDS-II record types, but also BGNLIB and LIBNAME).
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L461-L485' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L486-L516' class='documenter-source'>source</a><br>
 
 
 <a id='Saving-patterns-1'></a>
@@ -45,10 +47,10 @@ To save a pattern, make sure you are `using FileIO`.
 
 
 ```
-save(::Union{AbstractString,IO}, cell0::Cell, cell::Cell...)
+save(::Union{AbstractString,IO}, cell0::Cell{T}, cell::Cell...)
 
 save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
-name="GDSIILIB", precision=1e-9, unit=1e-6, modify=now(), acc=now(),
+name="GDSIILIB", userunit=1μm, modify=now(), acc=now(),
 verbose=false)`
 ```
 
@@ -56,10 +58,14 @@ This bottom method is implicitly called when you use the convenient syntax of th
 
 The `name` keyword argument is used for the internal library name of the GDS-II file and is probably inconsequential for modern workflows.
 
+The `userunit` keyword sets what 1.0 corresponds to when viewing this file in graphical GDS editors with inferior unit support.
+
+The `modify` and `acc` keywords correspond to the date of last modification and the date of last accession. It would be unusual to have this differ from `now()`.
+
 The `verbose` keyword argument allows you to monitor the output of [`traverse!`](cells.md#Devices.Cells.traverse!) and [`order!`](cells.md#Devices.Cells.order!) if something funny is happening while saving.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L411-L428' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L429-L452' class='documenter-source'>source</a><br>
 
 
 <a id='Internals-1'></a>
@@ -76,7 +82,7 @@ The `verbose` keyword argument allows you to monitor the output of [`traverse!`]
 Floating-point formats found in GDS-II files.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L61-L65' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L64-L68' class='documenter-source'>source</a><br>
 
 <a id='Devices.GDS.GDS64' href='#Devices.GDS.GDS64'>#</a>
 **`Devices.GDS.GDS64`** &mdash; *Type*.
@@ -88,7 +94,7 @@ Floating-point formats found in GDS-II files.
 "8-byte (64-bit) real" format found in GDS-II files.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L68-L72' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L71-L75' class='documenter-source'>source</a><br>
 
 <a id='Base.bits-Tuple{Devices.GDS.GDS64}' href='#Base.bits-Tuple{Devices.GDS.GDS64}'>#</a>
 **`Base.bits`** &mdash; *Method*.
@@ -100,7 +106,7 @@ Floating-point formats found in GDS-II files.
 A string giving the literal bit representation of a GDS64 number.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L75-L79' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L78-L82' class='documenter-source'>source</a><br>
 
 <a id='Base.bswap-Tuple{Devices.GDS.GDS64}' href='#Base.bswap-Tuple{Devices.GDS.GDS64}'>#</a>
 **`Base.bswap`** &mdash; *Method*.
@@ -112,7 +118,7 @@ A string giving the literal bit representation of a GDS64 number.
 Byte-swap a GDS64 number. Used implicitly by `hton`, `ntoh` for endian conversion.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L82-L86' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L85-L89' class='documenter-source'>source</a><br>
 
 <a id='Devices.GDS.gdswrite' href='#Devices.GDS.gdswrite'>#</a>
 **`Devices.GDS.gdswrite`** &mdash; *Function*.
@@ -120,43 +126,51 @@ Byte-swap a GDS64 number. Used implicitly by `hton`, `ntoh` for endian conversio
 
 
 ```
-gdswrite(io::IO, cell::Cell)
+gdswrite(io::IO, cell::Cell, dbs::Length)
 ```
 
 Write a `Cell` to an IO buffer. The creation and modification date of the cell are written first, followed by the cell name, the polygons in the cell, and finally any references or arrays.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L247-L255' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L245-L253' class='documenter-source'>source</a><br>
 
 
 ```
-gdswrite{T}(io::IO, el::AbstractPolygon{T}; unit=1e-6, precision=1e-9)
+gdswrite{T<:Real}(io::IO, el::Polygon{T}, dbs)
+gdswrite{T<:Length}(io::IO, poly::Polygon{T}, dbs)
 ```
 
-Write a polygon to an IO buffer. The layer and datatype are written first, then the `AbstractPolygon{T}` object is converted to a `Polygon{T}`, and the boundary of the polygon is written in a 32-bit integer format with specified database unit and precision.
+Write a polygon to an IO buffer. The layer and datatype are written first, then the boundary of the polygon is written in a 32-bit integer format with specified database scale.
+
+Note that polygons without units are presumed to be in microns.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L286-L295' class='documenter-source'>source</a><br>
-
-
-```
-gdswrite(io::IO, el::CellReference; unit=1e-6, precision=1e-9)
-```
-
-Write a cell reference to an IO buffer. The name of the referenced cell is written first. Reflection, magnification, and rotation info are written next. Finally, the origin of the cell reference is written.
-
-
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L314-L322' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L286-L297' class='documenter-source'>source</a><br>
 
 
 ```
-gdswrite(io::IO, el::CellArray; unit=1e-6, precision=1e-9)
+gdswrite{T<:Real}(io::IO, ref::CellReference{T}, dbs)
+gdswrite{T<:Length}(io::IO, el::CellReference{T}, dbs)
 ```
 
-Write a cell array to an IO buffer. The name of the referenced cell is written first. Reflection, magnification, and rotation info are written next. After that the number of columns and rows are written. Finally, the origin, column vector, and row vector are written.
+Write a [`CellReference`](cells.md#Devices.Cells.CellReference) to an IO buffer. The name of the referenced cell is written first. Reflection, magnification, and rotation info are written next. Finally, the origin of the cell reference is written.
+
+Note that cell references without units on their `origin` are presumed to be in microns.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L335-L344' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L316-L328' class='documenter-source'>source</a><br>
+
+
+```
+gdswrite(io::IO, a::CellArray, dbs)
+```
+
+Write a [`CellArray`](cells.md#Devices.Cells.CellArray) to an IO buffer. The name of the referenced cell is written first. Reflection, magnification, and rotation info are written next. After that the number of columns and rows are written. Finally, the origin, column vector, and row vector are written.
+
+Note that cell references without units on their `origin` are presumed to be in microns.
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L345-L357' class='documenter-source'>source</a><br>
 
 <a id='Devices.GDS.strans' href='#Devices.GDS.strans'>#</a>
 **`Devices.GDS.strans`** &mdash; *Function*.
@@ -170,7 +184,7 @@ strans(io::IO, ref)
 Writes bytes to the IO stream (if needed) to encode x-reflection, magnification, and rotation settings of a reference or array. Returns the number of bytes written.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L366-L373' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L384-L391' class='documenter-source'>source</a><br>
 
 <a id='Base.write-Tuple{IO,Devices.GDS.GDS64}' href='#Base.write-Tuple{IO,Devices.GDS.GDS64}'>#</a>
 **`Base.write`** &mdash; *Method*.
@@ -184,7 +198,7 @@ write(s::IO, x::GDS64)
 Write a GDS64 number to an IO stream.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L160-L166' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L159-L165' class='documenter-source'>source</a><br>
 
 <a id='Base.read-Tuple{IO,Type{Devices.GDS.GDS64}}' href='#Base.read-Tuple{IO,Type{Devices.GDS.GDS64}}'>#</a>
 **`Base.read`** &mdash; *Method*.
@@ -198,5 +212,5 @@ read(s::IO, ::Type{GDS64})
 Read a GDS64 number from an IO stream.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/GDS.jl#L169-L175' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/gds.jl#L168-L174' class='documenter-source'>source</a><br>
 

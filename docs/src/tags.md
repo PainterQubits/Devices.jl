@@ -1,10 +1,9 @@
 ## For convenience
 
 ```@docs
-    qrcode
+    qrcode!
     radialcut
     radialstub
-    launch!
     checkerboard
     pecbasedose
     surf1d

@@ -1,3 +1,5 @@
+## Cells
+
 Cells are used to logically group polygons or references to other cells
 into a single entity.
 
@@ -10,13 +12,11 @@ The type of a cell can be thought of as the database unit.
 ```@docs
     Cell(::AbstractString)
     Cell{T<:Real}(::AbstractString, ::AbstractArray{Devices.AbstractPolygon{T},1})
-    Cell{T<:Real}(::AbstractString, ::AbstractArray{Devices.AbstractPolygon{T},1},
-        ::AbstractArray{CellReference,1})
-    bounds(::Cell)
+    bounds{T<:Devices.Coordinate}(::Cell{T})
     center(::Cell)
     name(::Cell)
-    dbunit{T}(::Cell{T})
-    dbunit(::Cell, ::Cell, ::Cell...)
+    Cells.dbscale{T}(::Cell{T})
+    Cells.dbscale(::Cell, ::Cell, ::Cell...)
 ```
 ## Referenced and arrayed cells
 
@@ -25,12 +25,12 @@ display complexity.
 
 ```@docs
     CellArray
-    CellArray{T<:Real}(::Cell, ::Point{T}, ::Point{T}, ::Point{T},
-        ::Integer, ::Integer)
-    CellArray{T<:Real}(::Cell, ::Range{T}, ::Range{T})
+    CellArray{T<:Devices.Coordinate}(::Any, ::Point{T}, ::Point{T}, ::Point{T},
+        ::Real, ::Real)
+    CellArray{T<:Devices.Coordinate}(::Any, ::Range{T}, ::Range{T})
     CellReference
-    CellReference{T<:Real}(::Cell, ::Point{T})
-    bounds{S<:Real, T<:Real}(::CellArray{Cell{S},T})
+    CellReference{T<:Devices.Coordinate}(::Any, ::Point{T}=Point(0.,0.); kwargs...)
+    bounds{S<:Devices.Coordinate, T<:Devices.Coordinate}(::CellArray{T, Cell{S}})
     bounds(::CellReference)
     copy(::CellReference)
     copy(::CellArray)

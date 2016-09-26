@@ -1,7 +1,7 @@
 using Base.Test
 using Devices
 using Unitful
-import Unitful: m, cm, nm, μm, s, °, rad
+import Unitful: m, cm, nm, μm, s, °, rad, DimensionError
 import Clipper
 import ForwardDiff
 
@@ -9,7 +9,7 @@ import ForwardDiff
 ru = promote_type(typeof(m),typeof(cm))()
 
 @testset "Points" begin
-    @testset "Point constructors" begin
+    @testset "> Point constructors" begin
         @test_throws ErrorException Point(2,3m)
         @test_throws ErrorException Point(2s,3s)    # has to be a length
         @test typeof(Point(2,3)) == Point{Int}
@@ -20,7 +20,7 @@ ru = promote_type(typeof(m),typeof(cm))()
         @test typeof(Point(2.0m,3cm)) == Point{typeof(2.0ru)}
     end
 
-    @testset "Point arithmetic" begin
+    @testset "> Point arithmetic" begin
         @test Point(2,3) + Point(4,5) == Point(6,8)
         @test Point(1,0) - Point(0,1) == Point(1,-1)
         @test Point(3,3)/3 == Point(1,1)
@@ -31,7 +31,7 @@ ru = promote_type(typeof(m),typeof(cm))()
         @test Point(2.0m,3m) + Point(4cm,5cm) == Point(2.04ru,3.05ru)
     end
 
-    @testset "Point array arithmetic" begin
+    @testset "> Point array arithmetic" begin
         @test [Point(1,2), Point(3,4)] .+ Point(1,1) == [Point(2,3), Point(4,5)]
         @test Point(1,1) .+ [Point(1,2), Point(3,4)] == [Point(2,3), Point(4,5)]
         @test [Point(1,2), Point(3,4)] + [Point(1,1), Point(-1,2)] == [Point(2,3), Point(2,6)]
@@ -55,12 +55,12 @@ ru = promote_type(typeof(m),typeof(cm))()
         @test [Point(1m,2m)] .- Point(1cm,2cm) == [Point(99ru//100, 198ru//100)]
     end
 
-    @testset "Point accessors" begin
+    @testset "> Point accessors" begin
         @test getx(Point(1,2)) == 1
         @test gety(Point(1,2)) == 2
     end
 
-    @testset "Point conversion" begin
+    @testset "> Point conversion" begin
         @test [Point(1,3), Point(2,4)] .* m == [Point(1m,3m), Point(2m,4m)]
         @test convert(Point{Float64}, Clipper.IntPoint(1,2)) == Point(1.,2.)
         @test convert(Point{Int}, Clipper.IntPoint(1,2)) == Point(1,2)
@@ -68,7 +68,7 @@ ru = promote_type(typeof(m),typeof(cm))()
 end
 
 @testset "Polygon basics" begin
-    @testset "Rectangle construction" begin
+    @testset "> Rectangle construction" begin
         # lower-left and upper-right constructor
         r = Rectangle(Point(1,2), Point(2,0))
         @test typeof(r) == Rectangle{Int}
@@ -76,8 +76,8 @@ end
         @test r.ur == Point(2,2)
 
         # with units
-        @test typeof(Rectangle(Point(1m,2cm), Point(3nm,4μm))) ==
-            Rectangle{typeof(1ru//1)}
+        # @test typeof(Rectangle(Point(1m,2cm), Point(3nm,4μm))) ==
+            # Rectangle{typeof(1ru//1)} #TODO: uncomment once Julia #18465 is fixed
 
         # width and height constructor
         @test typeof(Rectangle(1,2)) == Rectangle{Int}
@@ -85,11 +85,11 @@ end
         @test typeof(Rectangle(1.0m,2.0μm)) == Rectangle{typeof(1.0*ru)}
     end
 
-    @testset "Polygon construction" begin
+    @testset "> Polygon construction" begin
         @test_throws ErrorException Polygon(Point(1,2), Point(3,5), Point(4cm,7cm))
     end
 
-    @testset "Rectangle methods" begin
+    @testset "> Rectangle methods" begin
         # width and height
         @test width(Rectangle(1,2)) == 1
         @test height(Rectangle(1,2)) == 2
@@ -116,7 +116,7 @@ end
         @test bounds(Rectangle(1,2)) == Rectangle(1,2)
     end
 
-    @testset "Polygon methods" begin
+    @testset "> Polygon methods" begin
         pfloat = Polygon(Point(0.0m, 0.0m),
                          Point(1.0m, 0.0m),
                          Point(0.0m, 1.0m))
@@ -165,6 +165,118 @@ end
     @test trU(rfloat) == rinttr
 end
 
+@testset "Polygon clipping" begin
+    @testset "> Clipping individuals w/o units" begin
+        # Rectangle{Int}, Rectangle{Int} clipping
+        r1 = Rectangle(2,2)
+        r2 = Rectangle(1,2)
+        @test clip(Clipper.ClipTypeDifference, r1, r2)[1] ==
+            Polygon(Point{Int}[(2,2),(1,2),(1,0),(2,0)])
+        @test typeof(clip(Clipper.ClipTypeDifference, r1, r2)[1]) ==
+            Polygon{Int}
+
+        # Rectangle{Int}, Polygon{Int} clipping
+        p2 = Polygon(Point{Int}[(0,0), (1,0), (1,2), (0,2)])
+        @test clip(Clipper.ClipTypeDifference, r1, p2)[1] ==
+            Polygon(Point{Int}[(2,2),(1,2),(1,0),(2,0)])
+        @test typeof(clip(Clipper.ClipTypeDifference, r1, p2)[1]) ==
+            Polygon{Int}
+
+        # Polygon{Int}, Polygon{Int} clipping
+        p1 = Polygon(Point{Int}[(0,0), (2,0), (2,2), (0,2)])
+        @test clip(Clipper.ClipTypeDifference, p1, p2)[1] ==
+            Polygon(Point{Int}[(2,2),(1,2),(1,0),(2,0)])
+        @test typeof(clip(Clipper.ClipTypeDifference, p1, p2)[1]) ==
+            Polygon{Int}
+
+        # Rectangle{Float64}, Rectangle{Float64} clipping
+        r1 = Rectangle(2.0,2.0)
+        r2 = Rectangle(1.0,2.0)
+        @test clip(Clipper.ClipTypeDifference, r1, r2)[1] ==
+            Polygon(Point{Float64}[(2.0,2.0),(1.0,2.0),(1.0,0.0),(2.0,0.0)])
+        @test typeof(clip(Clipper.ClipTypeDifference, r1, r2)[1]) ==
+            Polygon{Float64}
+
+        # Rectangle{Float64}, Polygon{Float64} clipping
+        p2 = Polygon(Point{Float64}[(0,0), (1,0), (1,2), (0,2)])
+        @test clip(Clipper.ClipTypeDifference, r1, p2)[1] ==
+            Polygon(Point{Float64}[(2,2),(1,2),(1,0),(2,0)])
+        @test typeof(clip(Clipper.ClipTypeDifference, r1, p2)[1]) ==
+            Polygon{Float64}
+
+        # Polygon{Float64}, Polygon{Float64} clipping
+        p1 = Polygon(Point{Float64}[(0,0), (2,0), (2,2), (0,2)])
+        @test clip(Clipper.ClipTypeDifference, p1, p2)[1] ==
+            Polygon(Point{Float64}[(2,2),(1,2),(1,0),(2,0)])
+        @test typeof(clip(Clipper.ClipTypeDifference, p1, p2)[1]) ==
+            Polygon{Float64}
+
+        # Test a case where the AbstractPolygon subtypes and numeric types are mixed
+        # Rectangle{Int}, Polygon{Float64} clipping
+        r2 = Rectangle(1,2)
+        @test clip(Clipper.ClipTypeDifference, p1, r2)[1] ==
+            Polygon(Point{Float64}[(2,2),(1,2),(1,0),(2,0)])
+        @test typeof(clip(Clipper.ClipTypeDifference, p1, r2)[1]) ==
+            Polygon{Float64}
+    end
+
+    @testset "> Clipping individuals w/units" begin
+        # Rectangle{typeof(1μm)}, Rectangle{typeof(1μm)} clipping
+        r1 = Rectangle(2μm,2μm)
+        r2 = Rectangle(1μm,2μm)
+        @test clip(Clipper.ClipTypeDifference, r1, r2)[1] ==
+            Polygon(Point{typeof(1μm)}[(2μm,2μm),(1μm,2μm),(1μm,0μm),(2μm,0μm)])
+        @test typeof(clip(Clipper.ClipTypeDifference, r1, r2)[1]) ==
+            Polygon{typeof(1μm)}
+
+        r1 = Rectangle(2.0μm,2.0μm)
+        r2 = Rectangle(1.0μm,2.0μm)
+        @test clip(Clipper.ClipTypeDifference, r1, r2)[1] ==
+            Polygon(Point{typeof(1.0μm)}[(2μm,2μm),(1μm,2μm),(1μm,0μm),(2μm,0μm)])
+        @test typeof(clip(Clipper.ClipTypeDifference, r1, r2)[1]) ==
+            Polygon{typeof(1.0μm)}
+
+        # MIXED UNITS do not behave ideally yet.
+    end
+
+    @testset "> Clipping arrays w/o units" begin
+        r1 = Rectangle(2,2)
+        s = [r1, r1+Point(0,4), r1+Point(0,8)]
+        c = [Rectangle(1,10)]
+        r = clip(Clipper.ClipTypeDifference, s, c)
+        @test Polygon(Point{Int}[(2,2),(1,2),(1,0),(2,0)]) in r
+        @test Polygon(Point{Int}[(2,6),(1,6),(1,4),(2,4)]) in r
+        @test Polygon(Point{Int}[(2,10),(1,10),(1,8),(2,8)]) in r
+        @test length(r) == 3
+    end
+end
+
+@testset "Polygon offsetting" begin
+    r = Rectangle(1, 1)
+    @test offset(r, 1)[1] ==
+        Polygon([Point(2,2),Point(-1,2),Point(-1,-1),Point(2,-1)])
+    @test_throws DimensionError offset(r,1μm)
+
+    r = Rectangle(1.0, 1.0)
+    @test offset(r, 0.5)[1] ==
+        Polygon(Point{Float64}[(1.5, 1.5),(-0.5, 1.5),(-0.5, -0.5),(1.5, -0.5)])
+    @test_throws DimensionError offset(r, 0.5μm)
+
+    r = Rectangle(1μm, 1μm)
+    @test_throws DimensionError offset(r, 1)
+    @test offset(r, 1μm)[1] == Polygon(
+        Point{typeof(1μm)}[(2μm, 2μm),(-1μm, 2μm),(-1μm, -1μm),(2μm, -1μm)])
+    @test offset(r, 5000nm)[1] == Polygon(
+        Point{typeof(1μm)}[(6μm, 6μm),(-5μm, 6μm),(-5μm, -5μm),(6μm, -5μm)])
+
+    r = Rectangle(1.0μm, 1.0μm)
+    @test_throws DimensionError offset(r, 1.0)
+    @test offset(r, 50nm)[1] ≈ Polygon(
+        Point{typeof(0.5μm)}[(1.05μm,1.05μm),(-0.05μm,1.05μm),
+                             (-0.05μm,-0.05μm),(1.05μm,-0.05μm)])
+
+end
+
 @testset "Cell methods" begin
     # Setup nested cell refs
     c = Cell("main")
@@ -205,14 +317,14 @@ end
 end
 
 @testset "Paths" begin
-    @testset "Path constructors" begin
+    @testset "> Path constructors" begin
         @test typeof(Path()) == Path{Float64}
         @test typeof(Path(Point(0.0μm, 0.0μm))) == Path{typeof(1.0μm)}
         @test α0(Path(Point(0.0μm, 0.0μm); α0 = 90°)) == 90.0° == π*rad/2 == π/2
         @test α0(Path(Point(0.0μm, 0.0μm); α0 = π/2)) == 90.0° == π*rad/2 == π/2
     end
 
-    @testset "Path segments" begin
+    @testset "> Path segments" begin
         p = Path(Point(0.0μm, 0.0μm))
         @test_throws Unitful.DimensionError straight!(p, 10.0)
         @test pathlength(p) == 0.0μm

@@ -21,12 +21,12 @@ To save a pattern, make sure you are `using FileIO`.
 ## Internals
 
 ```@docs
-    GDS.GDSFloat
-    GDS64
-    bits(::GDS64)
-    bswap(::GDS64)
-    GDS.gdswrite
-    GDS.strans
-    write(::IO, ::GDS64)
-    read(::IO, ::Type{GDS64})
+    Devices.GDS.GDSFloat
+    Devices.GDS.GDS64
+    bits(::Devices.GDS.GDS64)
+    bswap(::Devices.GDS.GDS64)
+    Devices.GDS.gdswrite
+    Devices.GDS.strans
+    write(::IO, ::Devices.GDS.GDS64)
+    read(::IO, ::Type{Devices.GDS.GDS64})
 ```

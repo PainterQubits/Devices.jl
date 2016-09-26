@@ -9,12 +9,12 @@ using Devices.Rectangles
 using Devices.Polygons
 using Devices.Points
 using Devices.Cells
-import ..AbstractPolygon
+import Devices: AbstractPolygon, Coordinate
 
 qr() = Devices._qr
 gdspy() = Devices._gdspy
 
-export qrcode
+export qrcode!
 export radialcut
 export radialstub
 export cpwlauncher
@@ -28,19 +28,19 @@ function uniquename(str)
     replace(str*string(gensym()),"##","_")
 end
 
-"""
-`qrcode{T<:Real}(a::AbstractString, name::String, pixel::T=1.0; kwargs...)`
 
-Renders a QR code of the string `a` with pixel size `pixel` to a new cell with `name`.
+"""
+```
+qrcode!{T<:Coordinate}(a::AbstractString, c::Cell{T}; pixel::T=T(1), kwargs...)
+```
+
+Renders a QR code of the string `a` with pixel size `pixel` to cell `c`.
+The pixel size defaults to one of whatever the cell's unit is.
 The lower left of the QR code will be at the origin of the cell.
 """
-function qrcode{T<:Real}(a::AbstractString, name::String, pixel::T=1.0, center::Bool=false; kwargs...)
-    c = Cell{T}(name)
-    qrcode(a, c, pixel, center; kwargs...)
-    c
-end
+function qrcode!{T<:Coordinate}(a::AbstractString, c::Cell{T}; pixel::T=T(1),
+        kwargs...)
 
-function qrcode{T<:Real}(a::AbstractString, c::Cell, pixel::T=1.0, center::Bool=false; kwargs...)
     myqr = qr()[:create](a)
     str = myqr[:text](quiet_zone=0)
 
@@ -66,7 +66,7 @@ end
 
 """
 ```
-radialcut{T<:Real}(r::T, Θ, c::T; narc=197)
+radialcut{T<:Coordinate}(r::T, Θ, c::T; narc=197)
 ```
 
 Returns a polygon for a radial cut (like a radial stub with no metal).
@@ -106,7 +106,7 @@ is part of the resulting polygon:
                     (circular arc)
 ```
 """
-function radialcut{T<:Real}(r::T, Θ, c::T; narc=197)
+function radialcut{T<:Coordinate}(r::T, Θ, c::T; narc=197)
     p = Path(Point(c*tan(Θ/2),-c), α0=(Θ-π)/2)
     straight!(p, r-c*sec(Θ/2))
     turn!(p, -π/2, 0.0)
@@ -124,7 +124,7 @@ end
 
 """
 ```
-radialstub{T<:Real}(r::T, Θ, c::T, t::T; narc=197)
+radialstub{T<:Coordinate}(r::T, Θ, c::T, t::T; narc=197)
 ```
 
 See also the documentation for `radialcut`.
@@ -246,15 +246,16 @@ end
 
 """
 ```
-checkerboard{T<:Real}(pixsize::T=10.;rows=28, kwargs...)
+checkerboard{T<:Coordinate}(pixsize::T=10.; rows=28, kwargs...)
 ```
 
 Generate a checkerboard pattern suitable for contrast curve measurement, or
-getting the base dose for BEAMER PEC.
+getting the base dose for BEAMER PEC. Returns a uniquely named cell with the
+rendered polygons inside.
 
-Note that the tip radius of the Ambios XP-2 profilometer is 2.5μm.
+Note that the tip radius of the Ambios XP-2 profilometer in the KNI is 2.5μm.
 """
-function checkerboard{T<:Real}(pixsize::T=10.;rows=28, kwargs...)
+function checkerboard{T<:Coordinate}(pixsize::T=10.; rows=28, kwargs...)
     r = Rectangle(pixsize, pixsize; kwargs...)
     rcell = Cell{T}(uniquename("checker"))
     render!(rcell, r, Rectangles.Plain())

@@ -21,12 +21,18 @@ type Rectangle{T} <: AbstractPolygon{T}
     ll::Point{T}
     ur::Point{T}
     properties::Dict{Symbol, Any}
-    Rectangle(ll,ur) = new(ll,ur,Dict{Symbol,Any}())
-    Rectangle(ll,ur,props) = new(ll,ur,props)
+    Rectangle(ll,ur) = Rectangle(ll,ur,Dict{Symbol,Any}())
+    function Rectangle(a,b,props)
+        # Ensure ll is lower-left, ur is upper-right.
+        ll = Point(a.<=b) .* a + Point(b.<=a) .* b
+        ur = Point(a.<=b) .* b + Point(b.<=a) .* a
+        new(ll,ur,props)
+    end
 end
 ```
 
 A rectangle, defined by opposing lower-left and upper-right corner coordinates.
+Lower-left and upper-right are guaranteed to be such by the inner constructor.
 """
 type Rectangle{T} <: AbstractPolygon{T}
     ll::Point{T}
@@ -61,7 +67,7 @@ Constructs `Rectangle` objects by specifying the width and height rather than
 the lower-left and upper-right corners.
 
 The rectangle will sit with the lower-left corner at the origin. With centered
-rectangles we would need to divide width zeand height by 2 to properly position.
+rectangles we would need to divide width and height by 2 to properly position.
 If we wanted an object of `Rectangle{Int}` type, this would not be possible
 if either `width` or `height` were odd numbers. This definition ensures type
 stability in the constructor.
@@ -70,12 +76,14 @@ Rectangle(width, height; kwargs...) =
     Rectangle(Point(zero(width), zero(height)),
         Point(width, height), Dict{Symbol,Any}(kwargs))
 
-convert{T}(::Type{Rectangle{T}}, x::Rectangle) = Rectangle{T}(x.ll, x.ur, x.properties)
+convert{T}(::Type{Rectangle{T}}, x::Rectangle) =
+    Rectangle{T}(x.ll, x.ur, x.properties)
 
 copy(p::Rectangle) = Rectangle(p.ll, p.ur, copy(p.properties))
 
 ==(r1::Rectangle, r2::Rectangle) =
     (r1.ll == r2.ll) && (r1.ur == r2.ur) && (r1.properties == r2.properties)
+
 isapprox(r1::Rectangle, r2::Rectangle) =
     isapprox(r1.ll, r2.ll) && isapprox(r1.ur, r2.ur) &&
         (r1.properties == r2.properties)
@@ -123,7 +131,7 @@ bounds(r::Rectangle) = r
 center(r::Rectangle)
 ```
 
-Returns a Point corresponding to the center of the rectangle.
+Returns a [`Point`](@ref) corresponding to the center of the rectangle.
 """
 center(r::Rectangle) = (r.ur+r.ll)/2
 

@@ -9,7 +9,7 @@ import Unitful: °
 
 import Clipper
 import FileIO: save, load
-import Base: cell, length, show, .+, .-
+import Base: cell, length, show, .+, .-, eltype
 import Unitful: Length
 
 export render!
@@ -59,15 +59,23 @@ abstract AbstractPolygon{T<:Coordinate}
 ```
 
 Anything you could call a polygon regardless of the underlying representation.
-Currently only `Rectangle` or `Polygon` are concrete subtypes.
+Currently only `Rectangle` or `Polygon` are concrete subtypes, but one could
+imagine further subtypes to represent specific shapes that appear in highly
+optimized pattern formats. Examples include the OASIS format (which has 25
+implementations of trapezoids) or e-beam lithography pattern files like the Raith
+GPF format.
 """
 abstract AbstractPolygon{T<:Coordinate}
 
+eltype{T}(::AbstractPolygon{T}) = T
+eltype{T}(::Type{AbstractPolygon{T}}) = T
+
 include("points.jl")
-import .Points: Point, getx, gety, Rotation, Translation, ∘
+import .Points: Point, getx, gety, Rotation, Translation, ∘, compose
 import .Points: lowerleft, upperright
 export Points
-export Point, getx, gety, Rotation, Translation, ∘, lowerleft, upperright
+export Point, getx, gety, Rotation, Translation, ∘, compose
+export lowerleft, upperright
 
 # TODO: Operations on arrays of AbstractPolygons
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
@@ -387,10 +395,10 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
 end
 
 include("tags.jl")
-import .Tags: qrcode, radialstub, radialcut #, cpwlauncher #, launch!
+import .Tags: qrcode!, radialstub, radialcut #, cpwlauncher #, launch!
 import .Tags: pecbasedose, checkerboard, surf1d
 export Tags
-export qrcode
+export qrcode!
 export radialstub, radialcut
 export cpwlauncher, surf1d
 # export launch!

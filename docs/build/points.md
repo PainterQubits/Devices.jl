@@ -1,17 +1,25 @@
 
 
 
-Points are implemented using the abstract type `FieldVector` from [StaticArrays.jl](https://github.com/JuliaArrays/StaticArrays.jl). This permits a fast, efficient representation of coordinates in the plane. Additionally, unlike `Tuple` objects, we can add points together, simplifying many function definitions.
+<a id='Summary-1'></a>
+
+## Summary
 
 
-Points can have `Real` or `Unitful.Length` coordinates:
+Points live in a Cartesian coordinate system with `Real` or `Unitful.Length` coordinates:
 
 
 ```jlcon
+julia> Point(1,1)
+2-element Devices.Points.Point{Int64}:
+ 1
+ 1
+
 julia> Point(1.0,1.0)
 2-element Devices.Points.Point{Float64}:
  1.0
  1.0
+
 julia> Point(1.0u"μm", 1.0u"μm")
 2-element Devices.Points.Point{Quantity{Float64, Dimensions:{𝐋}, Units:{μm}}}:
  1.0 μm
@@ -19,7 +27,7 @@ julia> Point(1.0u"μm", 1.0u"μm")
 ```
 
 
-If a point has `Real` coordinates, the absence of a unit is interpreted to mean `μm`. Note that you cannot mix and match `Real` and `Length` coordinates:
+If a point has `Real` coordinates, the absence of a unit is interpreted to mean `μm` whenever the geometry is saved to a GDS format, but until then it is just considered to be a pure number. Therefore you cannot mix and match `Real` and `Length` coordinates:
 
 
 ```jlcon
@@ -28,7 +36,34 @@ ERROR: Cannot use `Point` with this combination of types.
 ```
 
 
-To interface with gdspy, we simply convert the `Point` object to a `Tuple` and let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
+You can add Points together or scale them:
+
+
+```jlcon
+julia> 3*Point(1,1)+Point(1,2)
+2-element Devices.Points.Point{Int64}:
+ 4
+ 5
+```
+
+
+You can also do affine transformations by composing any number of `Translation` and `Rotation`s, which will return a callable object representing the transformation. You can type the following Unicode symbols with `\degree` and `\circ` tab-completions in the Julia REPL or using the Atom package `latex-completions`.
+
+
+```jlcon
+julia> aff = Rotation(90°) ∘ Translation(Point(1,2))
+AffineMap([6.12323e-17 -1.0; 1.0 6.12323e-17], (-2.0,1.0000000000000002))
+
+julia> aff(Point(0,0))
+2-element Devices.Points.Point{Float64}:
+ -2.0
+  1.0
+```
+
+
+<a id='API-1'></a>
+
+## API
 
 <a id='Devices.Coordinate' href='#Devices.Coordinate'>#</a>
 **`Devices.Coordinate`** &mdash; *Constant*.
@@ -42,7 +77,7 @@ typealias Coordinate Union{Real,Length}
 Type alias for numeric types suitable for coordinate systems.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Devices.jl#L44-L50' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/Devices.jl#L47-L53' class='documenter-source'>source</a><br>
 
 <a id='Devices.Points.Point' href='#Devices.Points.Point'>#</a>
 **`Devices.Points.Point`** &mdash; *Type*.
@@ -51,12 +86,15 @@ Type alias for numeric types suitable for coordinate systems.
 
 ```
 immutable Point{T} <: FieldVector{T}
+    x::T
+    y::T
+end
 ```
 
-2D coordinate in the plane.
+2D Cartesian coordinate in the plane.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Points.jl#L15-L21' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/points.jl#L15-L24' class='documenter-source'>source</a><br>
 
 <a id='Devices.Points.getx' href='#Devices.Points.getx'>#</a>
 **`Devices.Points.getx`** &mdash; *Function*.
@@ -67,10 +105,10 @@ immutable Point{T} <: FieldVector{T}
 getx(p::Point)
 ```
 
-Get the x-coordinate of a point.
+Get the x-coordinate of a point. You can also use `p.x` or `p[1]`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Points.jl#L44-L50' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/points.jl#L47-L53' class='documenter-source'>source</a><br>
 
 <a id='Devices.Points.gety' href='#Devices.Points.gety'>#</a>
 **`Devices.Points.gety`** &mdash; *Function*.
@@ -81,8 +119,65 @@ Get the x-coordinate of a point.
 gety(p::Point)
 ```
 
-Get the y-coordinate of a point.
+Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/4e771912a65b4a8591b1934e355e158db3cd60da/src/Points.jl#L53-L59' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/points.jl#L56-L62' class='documenter-source'>source</a><br>
+
+<a id='Devices.Points.lowerleft' href='#Devices.Points.lowerleft'>#</a>
+**`Devices.Points.lowerleft`** &mdash; *Function*.
+
+
+
+```
+lowerleft{T}(A::AbstractArray{Point{T}})
+```
+
+Returns the lower-left [`Point`](points.md#Devices.Points.Point) of the smallest bounding rectangle (with sides parallel to the x- and y-axes) that contains all points in `A`.
+
+Example:
+
+```jlcon
+julia> lowerleft([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
+2-element Devices.Points.Point{Int64}:
+ -1
+  0
+```
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/points.jl#L89-L104' class='documenter-source'>source</a><br>
+
+<a id='Devices.Points.upperright' href='#Devices.Points.upperright'>#</a>
+**`Devices.Points.upperright`** &mdash; *Function*.
+
+
+
+```
+upperright{T}(A::AbstractArray{Point{T}})
+```
+
+Returns the upper-right [`Point`](points.md#Devices.Points.Point) of the smallest bounding rectangle (with sides parallel to the x- and y-axes) that contains all points in `A`.
+
+Example:
+
+```jlcon
+julia> upperright([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
+2-element Devices.Points.Point{Int64}:
+ 2
+ 3
+```
+
+
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/points.jl#L112-L127' class='documenter-source'>source</a><br>
+
+
+<a id='Implementation-details-1'></a>
+
+## Implementation details
+
+
+Points are implemented using the abstract type `FieldVector` from [StaticArrays.jl](https://github.com/JuliaArrays/StaticArrays.jl). This permits a fast, efficient representation of coordinates in the plane. Additionally, unlike `Tuple` objects, we can add points together, simplifying many function definitions.
+
+
+To interface with gdspy, we simply convert the `Point` object to a `Tuple` and let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
 

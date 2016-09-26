@@ -1,22 +1,25 @@
 ```@meta
 DocTestSetup = quote
     using Unitful, Devices
+    using Unitful: °
 end
 ```
+## Summary
 
-Points are implemented using the abstract type `FieldVector`
-from [StaticArrays.jl](https://github.com/JuliaArrays/StaticArrays.jl).
-This permits a fast, efficient representation of
-coordinates in the plane. Additionally, unlike `Tuple` objects, we can
-add points together, simplifying many function definitions.
-
-Points can have `Real` or `Unitful.Length` coordinates:
+Points live in a Cartesian coordinate system with
+`Real` or `Unitful.Length` coordinates:
 
 ```jldoctest
+julia> Point(1,1)
+2-element Devices.Points.Point{Int64}:
+ 1
+ 1
+
 julia> Point(1.0,1.0)
 2-element Devices.Points.Point{Float64}:
  1.0
  1.0
+
 julia> Point(1.0u"μm", 1.0u"μm")
 2-element Devices.Points.Point{Quantity{Float64, Dimensions:{𝐋}, Units:{μm}}}:
  1.0 μm
@@ -24,15 +27,40 @@ julia> Point(1.0u"μm", 1.0u"μm")
 ```
 
 If a point has `Real` coordinates, the absence of a unit is interpreted to mean
-`μm`. Note that you cannot mix and match `Real` and `Length` coordinates:
+`μm` whenever the geometry is saved to a GDS format, but until then it is just
+considered to be a pure number. Therefore you cannot mix and match `Real` and
+`Length` coordinates:
 
 ```jldoctest
 julia> Point(1.0u"μm", 1.0)
 ERROR: Cannot use `Point` with this combination of types.
 ```
 
-To interface with gdspy, we simply convert the `Point` object to a `Tuple` and
-let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
+You can add Points together or scale them:
+```jldoctest
+julia> 3*Point(1,1)+Point(1,2)
+2-element Devices.Points.Point{Int64}:
+ 4
+ 5
+```
+
+You can also do affine transformations by composing any number of `Translation`
+and `Rotation`s, which will return a callable object representing the
+transformation. You can type the following Unicode symbols with `\degree` and
+`\circ` tab-completions in the Julia REPL or using the Atom package
+`latex-completions`.
+
+```jldoctest
+julia> aff = Rotation(90°) ∘ Translation(Point(1,2))
+AffineMap([6.12323e-17 -1.0; 1.0 6.12323e-17], (-2.0,1.0000000000000002))
+
+julia> aff(Point(0,0))
+2-element Devices.Points.Point{Float64}:
+ -2.0
+  1.0
+```
+
+## API
 
 ```@docs
     Devices.Coordinate
@@ -42,3 +70,14 @@ let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
     Points.lowerleft
     Points.upperright
 ```
+
+## Implementation details
+
+Points are implemented using the abstract type `FieldVector`
+from [StaticArrays.jl](https://github.com/JuliaArrays/StaticArrays.jl).
+This permits a fast, efficient representation of
+coordinates in the plane. Additionally, unlike `Tuple` objects, we can
+add points together, simplifying many function definitions.
+
+To interface with gdspy, we simply convert the `Point` object to a `Tuple` and
+let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.
