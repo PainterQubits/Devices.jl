@@ -4,6 +4,13 @@
  - Added unit support.
  - Made constructors for `CellArray` and `CellReference` more intuitive
    and easier to use.
+ - When rectangles have integer coordinates, it is not always the case that they can be centered.
+   Since `center!` implies that an object will be modified, and `center` is expected to return the
+   center of a rectangle, we disambiguated by making `centered` and `centered!`. The former will
+   return a centered copy of the rectangle, possibly with floating-point coordinates if it could not
+   be centered with integer coordinates. The latter will attempt to center the provided rectangle
+   and throw an `InexactError()` if it was not possible. `center` will still return the center
+   of a rectangle.
  - Made clipping and offsetting more reliable (and documented them).
  - Switched from [`AffineTransforms.jl`](https://github.com/timholy/AffineTransforms.jl)
    to [`CoordinateTransformations.jl`](https://github.com/FugroRoames/CoordinateTransformations.jl).
