@@ -181,15 +181,28 @@
     
       
       
-    
-  </li>
-
+        <ul>
           
-            
-  <li>
-    <a class="" title="Paths" href="../paths/">
-      Paths
-    </a>
+            <li class="anchor">
+              <a title="Summary" href="#summary">
+                Summary
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="API" href="#api">
+                API
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Implementation details" href="#implementation-details">
+                Implementation details
+              </a>
+            </li>
+          
+        </ul>
+      
     
   </li>
 
@@ -207,6 +220,15 @@
   <li>
     <a class="" title="Cells" href="../cells/">
       Cells
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Paths" href="../paths/">
+      Paths
     </a>
     
   </li>
@@ -241,15 +263,6 @@
           
             
   <li>
-    <a class="" title="Index" href="../idx/">
-      Index
-    </a>
-    
-  </li>
-
-          
-            
-  <li>
     <a class="" title="License" href="../LICENSE/">
       License
     </a>
@@ -269,22 +282,124 @@
           
             <h1>Points</h1>
           
-          <p>Points are implemented using the abstract type <code>FixedVectorNoTuple</code> from <a href="https://github.com/SimonDanisch/FixedSizeArrays.jl">FixedSizeArrays.jl</a>. This permits a fast, efficient representation of coordinates in the plane. Additionally, unlike <code>Tuple</code> objects, we can add points together, simplifying many function definitions.</p>
-<p>To interface with gdspy, we simply convert the <code>Point</code> object to a <code>Tuple</code> and let <a href="https://github.com/stevengj/PyCall.jl">PyCall.jl</a> figure out what to do.</p>
+          <p><a id='Summary-1'></a></p>
+<h2 id="summary">Summary</h2>
+<p>Points live in a Cartesian coordinate system with <code>Real</code> or <code>Unitful.Length</code> coordinates:</p>
+<div class="codehilite"><pre><span></span><span class="gp">julia&gt;</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">2-element Devices.Points.Point{Int64}:</span>
+<span class="go"> 1</span>
+<span class="go"> 1</span>
+
+<span class="gp">julia&gt;</span> <span class="n">Point</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="go">2-element Devices.Points.Point{Float64}:</span>
+<span class="go"> 1.0</span>
+<span class="go"> 1.0</span>
+
+<span class="gp">julia&gt;</span> <span class="n">Point</span><span class="p">(</span><span class="mf">1.0</span><span class="n">u</span><span class="s">&quot;μm&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="n">u</span><span class="s">&quot;μm&quot;</span><span class="p">)</span>
+<span class="go">2-element Devices.Points.Point{Quantity{Float64, Dimensions:{𝐋}, Units:{μm}}}:</span>
+<span class="go"> 1.0 μm</span>
+<span class="go"> 1.0 μm</span>
+</pre></div>
+
+
+<p>If a point has <code>Real</code> coordinates, the absence of a unit is interpreted to mean <code>μm</code> whenever the geometry is saved to a GDS format, but until then it is just considered to be a pure number. Therefore you cannot mix and match <code>Real</code> and <code>Length</code> coordinates:</p>
+<div class="codehilite"><pre><span></span><span class="gp">julia&gt;</span> <span class="n">Point</span><span class="p">(</span><span class="mf">1.0</span><span class="n">u</span><span class="s">&quot;μm&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="go">ERROR: Cannot use `Point` with this combination of types.</span>
+</pre></div>
+
+
+<p>You can add Points together or scale them:</p>
+<div class="codehilite"><pre><span></span><span class="gp">julia&gt;</span> <span class="mi">3</span><span class="o">*</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">2-element Devices.Points.Point{Int64}:</span>
+<span class="go"> 4</span>
+<span class="go"> 5</span>
+</pre></div>
+
+
+<p>You can also do affine transformations by composing any number of <code>Translation</code> and <code>Rotation</code>s, which will return a callable object representing the transformation. You can type the following Unicode symbols with <code>\degree</code> and <code>\circ</code> tab-completions in the Julia REPL or using the Atom package <code>latex-completions</code>.</p>
+<div class="codehilite"><pre><span></span><span class="gp">julia&gt;</span> <span class="n">aff</span> <span class="o">=</span> <span class="n">Rotation</span><span class="p">(</span><span class="mi">90</span><span class="n">°</span><span class="p">)</span> <span class="n">∘</span> <span class="n">Translation</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="go">AffineMap([6.12323e-17 -1.0; 1.0 6.12323e-17], (-2.0,1.0000000000000002))</span>
+
+<span class="gp">julia&gt;</span> <span class="n">aff</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="go">2-element Devices.Points.Point{Float64}:</span>
+<span class="go"> -2.0</span>
+<span class="go">  1.0</span>
+</pre></div>
+
+
+<p><a id='API-1'></a></p>
+<h2 id="api">API</h2>
+<p><a id='Devices.Coordinate' href='#Devices.Coordinate'>#</a>
+<strong><code>Devices.Coordinate</code></strong> &mdash; <em>Constant</em>.</p>
+<div class="codehilite"><pre><span></span>typealias Coordinate Union{Real,Length}
+</pre></div>
+
+
+<p>Type alias for numeric types suitable for coordinate systems.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/Devices.jl#L47-L53' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Points.Point' href='#Devices.Points.Point'>#</a>
+<strong><code>Devices.Points.Point</code></strong> &mdash; <em>Type</em>.</p>
+<div class="codehilite"><pre><span></span>immutable Point{T} &lt;: FieldVector{T}
+    x::T
+    y::T
+end
+</pre></div>
+
+
+<p>2D Cartesian coordinate in the plane.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/points.jl#L15-L24' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.getx' href='#Devices.Points.getx'>#</a>
 <strong><code>Devices.Points.getx</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>getx(p::Point)
 </pre></div>
 
 
-<p>Get the x-coordinate of a point.</p>
+<p>Get the x-coordinate of a point. You can also use <code>p.x</code> or <code>p[1]</code>.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/points.jl#L47-L53' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.gety' href='#Devices.Points.gety'>#</a>
 <strong><code>Devices.Points.gety</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>gety(p::Point)
 </pre></div>
 
 
-<p>Get the y-coordinate of a point.</p>
+<p>Get the y-coordinate of a point. You can also use <code>p.y</code> or <code>p[2]</code>.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/points.jl#L56-L62' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Points.lowerleft' href='#Devices.Points.lowerleft'>#</a>
+<strong><code>Devices.Points.lowerleft</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>lowerleft{T}(A::AbstractArray{Point{T}})
+</pre></div>
+
+
+<p>Returns the lower-left <a href="./#Devices.Points.Point"><code>Point</code></a> of the smallest bounding rectangle (with sides parallel to the x- and y-axes) that contains all points in <code>A</code>.</p>
+<p>Example:</p>
+<div class="codehilite"><pre><span></span><span class="gp">julia&gt;</span> <span class="n">lowerleft</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+<span class="go">2-element Devices.Points.Point{Int64}:</span>
+<span class="go"> -1</span>
+<span class="go">  0</span>
+</pre></div>
+
+
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/points.jl#L89-L104' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Points.upperright' href='#Devices.Points.upperright'>#</a>
+<strong><code>Devices.Points.upperright</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>upperright{T}(A::AbstractArray{Point{T}})
+</pre></div>
+
+
+<p>Returns the upper-right <a href="./#Devices.Points.Point"><code>Point</code></a> of the smallest bounding rectangle (with sides parallel to the x- and y-axes) that contains all points in <code>A</code>.</p>
+<p>Example:</p>
+<div class="codehilite"><pre><span></span><span class="gp">julia&gt;</span> <span class="n">upperright</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+<span class="go">2-element Devices.Points.Point{Int64}:</span>
+<span class="go"> 2</span>
+<span class="go"> 3</span>
+</pre></div>
+
+
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/points.jl#L112-L127' class='documenter-source'>source</a><br></p>
+<p><a id='Implementation-details-1'></a></p>
+<h2 id="implementation-details">Implementation details</h2>
+<p>Points are implemented using the abstract type <code>FieldVector</code> from <a href="https://github.com/JuliaArrays/StaticArrays.jl">StaticArrays.jl</a>. This permits a fast, efficient representation of coordinates in the plane. Additionally, unlike <code>Tuple</code> objects, we can add points together, simplifying many function definitions.</p>
+<p>To interface with gdspy, we simply convert the <code>Point</code> object to a <code>Tuple</code> and let <a href="https://github.com/stevengj/PyCall.jl">PyCall.jl</a> figure out what to do.</p>
           <aside class="copyright" role="note">
             
             Documentation built with
@@ -320,14 +435,14 @@
     </div>
     <div class="next">
       
-        <a href="../paths/" title="Paths">
+        <a href="../polygons/" title="Abstract polygons">
           <span class="direction">
             Next
           </span>
           <div class="page">
             <div class="stretch">
               <div class="title">
-                Paths
+                Abstract polygons
               </div>
             </div>
             <div class="button button-next" role="button" aria-label="Next">

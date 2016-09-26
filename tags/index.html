@@ -184,15 +184,6 @@
           
             
   <li>
-    <a class="" title="Paths" href="../paths/">
-      Paths
-    </a>
-    
-  </li>
-
-          
-            
-  <li>
     <a class="" title="Abstract polygons" href="../polygons/">
       Abstract polygons
     </a>
@@ -204,6 +195,15 @@
   <li>
     <a class="" title="Cells" href="../cells/">
       Cells
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Paths" href="../paths/">
+      Paths
     </a>
     
   </li>
@@ -251,15 +251,6 @@
           
             
   <li>
-    <a class="" title="Index" href="../idx/">
-      Index
-    </a>
-    
-  </li>
-
-          
-            
-  <li>
     <a class="" title="License" href="../LICENSE/">
       License
     </a>
@@ -281,13 +272,17 @@
           
           <p><a id='For-convenience-1'></a></p>
 <h2 id="for-convenience">For convenience</h2>
-<p><a id='Devices.Tags.qrcode' href='#Devices.Tags.qrcode'>#</a>
-<strong><code>Devices.Tags.qrcode</code></strong> &mdash; <em>Function</em>.</p>
-<p><code>qrcode{T&lt;:Real}(a::AbstractString, name::ASCIIString, pixel::T=1.0; kwargs...)</code></p>
-<p>Renders a QR code of the string <code>a</code> with pixel size <code>pixel</code> to a new cell with <code>name</code>. The lower left of the QR code will be at the origin of the cell.</p>
+<p><a id='Devices.Tags.qrcode!' href='#Devices.Tags.qrcode!'>#</a>
+<strong><code>Devices.Tags.qrcode!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">qrcode</span><span class="o">!</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Coordinate</span><span class="p">}</span><span class="o">(</span><span class="nt">a</span><span class="o">:</span><span class="nd">:AbstractString</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="p">{</span><span class="n">T</span><span class="p">}</span><span class="o">;</span> <span class="nt">pixel</span><span class="o">:</span><span class="nd">:T</span><span class="o">=</span><span class="nt">T</span><span class="o">(</span><span class="nt">1</span><span class="o">),</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Renders a QR code of the string <code>a</code> with pixel size <code>pixel</code> to cell <code>c</code>. The pixel size defaults to one of whatever the cell's unit is. The lower left of the QR code will be at the origin of the cell.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/tags.jl#L32-L40' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Tags.radialcut' href='#Devices.Tags.radialcut'>#</a>
 <strong><code>Devices.Tags.radialcut</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">radialcut</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">r</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="err">Θ</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">narc</span><span class="o">=</span><span class="nt">197</span><span class="o">)</span>
+<div class="codehilite"><pre><span></span><span class="nt">radialcut</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Coordinate</span><span class="p">}</span><span class="o">(</span><span class="nt">r</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="err">Θ</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">narc</span><span class="o">=</span><span class="nt">197</span><span class="o">)</span>
 </pre></div>
 
 
@@ -321,24 +316,25 @@
 </pre></div>
 
 
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/tags.jl#L67-L108' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Tags.radialstub' href='#Devices.Tags.radialstub'>#</a>
 <strong><code>Devices.Tags.radialstub</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">radialstub</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">r</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="err">Θ</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="nt">t</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">narc</span><span class="o">=</span><span class="nt">197</span><span class="o">)</span>
+<div class="codehilite"><pre><span></span><span class="nt">radialstub</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Coordinate</span><span class="p">}</span><span class="o">(</span><span class="nt">r</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="err">Θ</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="nt">t</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">narc</span><span class="o">=</span><span class="nt">197</span><span class="o">)</span>
 </pre></div>
 
 
 <p>See also the documentation for <code>radialcut</code>.</p>
 <p>Returns a polygon for a radial stub. The polygon has to be subtracted from a ground plane, and will leave a defect in the ground plane of uniform width <code>t</code> that outlines the (metallic) radial stub. <code>r</code> refers to the radius of the actual stub, not the radius of the circular arc bounding the ground plane defect. Likewise <code>c</code> has an analogous meaning to that in <code>radialcut</code> except it refers here to the radial stub, not the ground plane defect.</p>
-<p><a id='Devices.Paths.launch!' href='#Devices.Paths.launch!'>#</a>
-<strong><code>Devices.Paths.launch!</code></strong> &mdash; <em>Function</em>.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/tags.jl#L125-L138' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Tags.checkerboard' href='#Devices.Tags.checkerboard'>#</a>
 <strong><code>Devices.Tags.checkerboard</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">checkerboard</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">pixsize</span><span class="o">:</span><span class="nd">:T</span><span class="o">=</span><span class="nt">10</span><span class="o">.;</span><span class="nt">rows</span><span class="o">=</span><span class="nt">28</span><span class="o">,</span> <span class="nt">kwargs</span><span class="o">...)</span>
+<div class="codehilite"><pre><span></span><span class="nt">checkerboard</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Coordinate</span><span class="p">}</span><span class="o">(</span><span class="nt">pixsize</span><span class="o">:</span><span class="nd">:T</span><span class="o">=</span><span class="nt">10</span><span class="o">.;</span> <span class="nt">rows</span><span class="o">=</span><span class="nt">28</span><span class="o">,</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
-<p>Generate a checkerboard pattern suitable for contrast curve measurement, or getting the base dose for BEAMER PEC.</p>
-<p>Note that the tip radius of the Ambios XP-2 profilometer is 2.5μm.</p>
+<p>Generate a checkerboard pattern suitable for contrast curve measurement, or getting the base dose for BEAMER PEC. Returns a uniquely named cell with the rendered polygons inside.</p>
+<p>Note that the tip radius of the Ambios XP-2 profilometer in the KNI is 2.5μm.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/tags.jl#L247-L257' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Tags.pecbasedose' href='#Devices.Tags.pecbasedose'>#</a>
 <strong><code>Devices.Tags.pecbasedose</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>pecbasedose(kwargs...)
@@ -347,6 +343,7 @@
 
 <p>Generate lines and spaces suitable for obtaining the base dose for BEAMER PEC (100 keV on Si).</p>
 <p>To do: Modify to be more flexible for other substrates, beam energies, etc.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/tags.jl#L275-L284' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Tags.surf1d' href='#Devices.Tags.surf1d'>#</a>
 <strong><code>Devices.Tags.surf1d</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>surf1d(length, width, contour_fn; zbins=20, step=1., max_seg_len=1.)
@@ -354,6 +351,7 @@
 
 
 <p>Given <code>length</code> and <code>width</code> of a rectangular patch, this generates a mesh for 3D surface PEC according to a particular contour function <code>contour_fn</code>. The meshing is done in the length direction (+y). The number of bins (layers) can be controlled with <code>zbins</code>, the maximum step change in the resist height is given by <code>step</code>, and the <code>max_seg_len</code> is the maximum segment length in the mesh.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/tags.jl#L335-L346' class='documenter-source'>source</a><br></p>
           <aside class="copyright" role="note">
             
             Documentation built with
@@ -370,7 +368,7 @@
   <nav class="pagination" aria-label="Footer">
     <div class="previous">
       
-        <a href="../cells/" title="Cells">
+        <a href="../paths/" title="Paths">
           <span class="direction">
             Previous
           </span>
@@ -380,7 +378,7 @@
             </div>
             <div class="stretch">
               <div class="title">
-                Cells
+                Paths
               </div>
             </div>
           </div>

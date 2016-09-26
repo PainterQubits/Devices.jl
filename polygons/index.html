@@ -184,15 +184,6 @@
           
             
   <li>
-    <a class="" title="Paths" href="../paths/">
-      Paths
-    </a>
-    
-  </li>
-
-          
-            
-  <li>
     <a class="current" title="Abstract polygons" href="./">
       Abstract polygons
     </a>
@@ -202,20 +193,38 @@
         <ul>
           
             <li class="anchor">
-              <a title="Rectangles" href="#rectangles">
-                Rectangles
+              <a title="Abstract polygons" href="#abstract-polygons">
+                Abstract polygons
               </a>
             </li>
           
             <li class="anchor">
-              <a title="Polygons" href="#polygons">
-                Polygons
+              <a title="Affine transformations" href="#affine-transformations">
+                Affine transformations
               </a>
             </li>
           
             <li class="anchor">
-              <a title="Clipping and offsetting" href="#clipping-and-offsetting">
-                Clipping and offsetting
+              <a title="Clipping" href="#clipping">
+                Clipping
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Offsetting" href="#offsetting">
+                Offsetting
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Rectangle API" href="#rectangle-api">
+                Rectangle API
+              </a>
+            </li>
+          
+            <li class="anchor">
+              <a title="Polygon API" href="#polygon-api">
+                Polygon API
               </a>
             </li>
           
@@ -229,6 +238,15 @@
   <li>
     <a class="" title="Cells" href="../cells/">
       Cells
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Paths" href="../paths/">
+      Paths
     </a>
     
   </li>
@@ -263,15 +281,6 @@
           
             
   <li>
-    <a class="" title="Index" href="../idx/">
-      Index
-    </a>
-    
-  </li>
-
-          
-            
-  <li>
     <a class="" title="License" href="../LICENSE/">
       License
     </a>
@@ -291,151 +300,280 @@
           
             <h1>Abstract polygons</h1>
           
-          <p>In this package, any polygon regardless of its concrete representation in memory should be a subtype of <a href="./#Devices.AbstractPolygon"><code>Devices.AbstractPolygon</code></a>.</p>
+          <p><a id='Abstract-polygons-1'></a></p>
+<h2 id="abstract-polygons">Abstract polygons</h2>
+<p>In this package, any polygon regardless of its concrete representation in memory should be a subtype of <a href="./#Devices.AbstractPolygon"><code>Devices.AbstractPolygon</code></a>.</p>
 <p><a id='Devices.AbstractPolygon' href='#Devices.AbstractPolygon'>#</a>
 <strong><code>Devices.AbstractPolygon</code></strong> &mdash; <em>Type</em>.</p>
-<div class="codehilite"><pre><span></span>abstract AbstractPolygon{T}
+<div class="codehilite"><pre><span></span>abstract AbstractPolygon{T&lt;:Coordinate}
 </pre></div>
 
 
-<p>Anything you could call a polygon regardless of the underlying representation. Currently only <code>Rectangle</code> or <code>Polygon</code> are concrete subtypes.</p>
-<p><a id='Rectangles-1'></a></p>
-<h2 id="rectangles">Rectangles</h2>
+<p>Anything you could call a polygon regardless of the underlying representation. Currently only <code>Rectangle</code> or <code>Polygon</code> are concrete subtypes, but one could imagine further subtypes to represent specific shapes that appear in highly optimized pattern formats. Examples include the OASIS format (which has 25 implementations of trapezoids) or e-beam lithography pattern files like the Raith GPF format.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/Devices.jl#L56-L67' class='documenter-source'>source</a><br></p>
+<p><a id='Affine-transformations-1'></a></p>
+<h2 id="affine-transformations">Affine transformations</h2>
+<p>The mechanism for affine transformations is largely provided by the <a href="https://github.com/FugroRoames/CoordinateTransformations.jl"><code>CoordinateTransformations.jl</code></a> package. For convenience, the documentation for <code>Translation</code> and <code>compose</code> is reproduced below from that package. We implement our own 2D rotations.</p>
+<p>An example of how to use affine transformations with polygons:</p>
+<div class="codehilite"><pre><span></span><span class="gp">julia&gt;</span> <span class="n">r</span> <span class="o">=</span> <span class="n">Rectangle</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">Devices.Rectangles.Rectangle{Int64}((0,0),(1,1),Dict{Symbol,Any}())</span>
+
+<span class="gp">julia&gt;</span> <span class="n">trans</span> <span class="o">=</span> <span class="n">Translation</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">Translation(10,10)</span>
+
+<span class="gp">julia&gt;</span> <span class="n">trans</span> <span class="o">=</span> <span class="n">Rotation</span><span class="p">(</span><span class="mi">90</span><span class="n">°</span><span class="p">)</span> <span class="n">∘</span> <span class="n">trans</span>
+<span class="go">AffineMap([6.12323e-17 -1.0; 1.0 6.12323e-17], [-10.0,10.0])</span>
+
+<span class="gp">julia&gt;</span> <span class="n">trans</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="go">Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-10.0,11.0),(-11.0,11.0),(-11.0,10.0)],Dict{Symbol,Any}())</span>
+</pre></div>
+
+
+<p><a id='CoordinateTransformations.compose' href='#CoordinateTransformations.compose'>#</a>
+<strong><code>CoordinateTransformations.compose</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>compose(trans1, trans2)
+trans1 ∘ trans2
+</pre></div>
+
+
+<p>Take two transformations and create a new transformation that is equivalent to successively applying <code>trans2</code> to the coordinate, and then <code>trans1</code>. By default will create a <code>ComposedTransformation</code>, however this method can be overloaded for efficiency (e.g. two affine transformations naturally compose to a single affine transformation).</p>
+<p><a target='_blank' href='https://github.com/FugroRoames/CoordinateTransformations.jl/tree/529d9501be719490f54a503d8130e0ed10822cac/src/core.jl#L40-L49' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Points.Rotation' href='#Devices.Points.Rotation'>#</a>
+<strong><code>Devices.Points.Rotation</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>Rotation(Θ)
+</pre></div>
+
+
+<p>Construct a rotation about the origin. Units accepted (no units ⇒ radians).</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/points.jl#L146-L152' class='documenter-source'>source</a><br></p>
+<p><a id='CoordinateTransformations.Translation' href='#CoordinateTransformations.Translation'>#</a>
+<strong><code>CoordinateTransformations.Translation</code></strong> &mdash; <em>Type</em>.</p>
+<div class="codehilite"><pre><span></span>Translation(v) &lt;: AbstractAffineMap
+Translation(dx, dy)       (2D)
+Translation(dx, dy, dz)   (3D)
+</pre></div>
+
+
+<p>Construct the <code>Translation</code> transformation for translating Cartesian points by an offset <code>v = (dx, dy, ...)</code></p>
+<p><a target='_blank' href='https://github.com/FugroRoames/CoordinateTransformations.jl/tree/529d9501be719490f54a503d8130e0ed10822cac/src/affine.jl#L3-L10' class='documenter-source'>source</a><br></p>
+<p><a id='Clipping-1'></a></p>
+<h2 id="clipping">Clipping</h2>
+<p><a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
+<strong><code>Devices.Polygons.clip</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">clip</span><span class="p">{</span><span class="n">S</span><span class="o">&lt;:</span><span class="n">Coordinate</span><span class="o">,</span> <span class="n">T</span><span class="o">&lt;:</span><span class="n">Coordinate</span><span class="p">}</span><span class="o">(</span><span class="nt">op</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.ClipType</span><span class="o">,</span>
+    <span class="nt">s</span><span class="o">:</span><span class="nd">:AbstractPolygon</span><span class="p">{</span><span class="n">S</span><span class="p">}</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:AbstractPolygon</span><span class="p">{</span><span class="n">T</span><span class="p">}</span><span class="o">;</span>
+    <span class="nt">pfs</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.PolyFillType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.PolyFillTypeEvenOdd</span><span class="o">,</span>
+    <span class="nt">pfc</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.PolyFillType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.PolyFillTypeEvenOdd</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Using the <a href="http://www.angusj.com/delphi/clipper.php"><code>Clipper</code></a> library and the <a href="https://github.com/Voxel8/Clipper.jl"><code>Clipper.jl</code></a> wrapper, perform polygon clipping. The first argument must be one of the following types :</p>
+<ul>
+<li><code>Clipper.ClipTypeDifference</code></li>
+<li><code>Clipper.ClipTypeIntersection</code></li>
+<li><code>Clipper.ClipTypeUnion</code></li>
+<li><code>Clipper.ClipTypeXor</code></li>
+</ul>
+<p>Note that these are types; you should not follow them with <code>()</code>. The second and third arguments are <code>AbstractPolygon</code> objects. Keyword arguments <code>pfs</code> and <code>pfc</code> specify polygon fill rules (see the <a href="http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/PolyFillType.htm"><code>Clipper</code> docs</a> for further information). These arguments may include:</p>
+<ul>
+<li><code>Clipper.PolyFillTypeNegative</code></li>
+<li><code>Clipper.PolyFillTypePositive</code></li>
+<li><code>Clipper.PolyFillTypeEvenOdd</code></li>
+<li><code>Clipper.PolyFillTypeNonZero</code></li>
+</ul>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L224-L250' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="nt">clip</span><span class="p">{</span><span class="n">S</span><span class="o">&lt;:</span><span class="n">AbstractPolygon</span><span class="o">,</span> <span class="n">T</span><span class="o">&lt;:</span><span class="n">AbstractPolygon</span><span class="p">}</span><span class="o">(</span><span class="nt">op</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.ClipType</span><span class="o">,</span>
+    <span class="nt">s</span><span class="o">:</span><span class="nd">:AbstractVector</span><span class="p">{</span><span class="n">S</span><span class="p">}</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:AbstractVector</span><span class="p">{</span><span class="n">T</span><span class="p">}</span><span class="o">;</span>
+    <span class="nt">pfs</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.PolyFillType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.PolyFillTypeEvenOdd</span><span class="o">,</span>
+    <span class="nt">pfc</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.PolyFillType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.PolyFillTypeEvenOdd</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Perform polygon clipping. The first argument must be as listed above. The second and third arguments are arrays (vectors) of <a href="./#Devices.AbstractPolygon"><code>AbstractPolygon</code></a>s. Keyword arguments are explained above.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L262-L273' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="nt">clip</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Polygon</span><span class="p">}</span><span class="o">(</span><span class="nt">op</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.ClipType</span><span class="o">,</span>
+    <span class="nt">s</span><span class="o">:</span><span class="nd">:AbstractVector</span><span class="p">{</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:AbstractVector</span><span class="p">{</span><span class="n">T</span><span class="p">}</span><span class="o">;</span>
+    <span class="nt">pfs</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.PolyFillType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.PolyFillTypeEvenOdd</span><span class="o">,</span>
+    <span class="nt">pfc</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.PolyFillType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.PolyFillTypeEvenOdd</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Perform polygon clipping. The first argument must be as listed above. The second and third arguments are identically-typed arrays (vectors) of <a href="./#Devices.Polygons.Polygon"><code>Polygon{T}</code></a> objects. Keyword arguments are explained above.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L285-L296' class='documenter-source'>source</a><br></p>
+<p><a id='Offsetting-1'></a></p>
+<h2 id="offsetting">Offsetting</h2>
+<p><a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
+<strong><code>Devices.Polygons.offset</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">offset</span><span class="p">{</span><span class="n">S</span><span class="o">&lt;:</span><span class="n">Coordinate</span><span class="p">}</span><span class="o">(</span><span class="nt">s</span><span class="o">:</span><span class="nd">:AbstractPolygon</span><span class="p">{</span><span class="n">S</span><span class="p">}</span><span class="o">,</span> <span class="nt">delta</span><span class="o">:</span><span class="nd">:Coordinate</span><span class="o">;</span>
+    <span class="nt">j</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.JoinType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.JoinTypeMiter</span><span class="o">,</span>
+    <span class="nt">e</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.EndType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.EndTypeClosedPolygon</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Using the <a href="http://www.angusj.com/delphi/clipper.php"><code>Clipper</code></a> library and the <a href="https://github.com/Voxel8/Clipper.jl"><code>Clipper.jl</code></a> wrapper, perform polygon offsetting.</p>
+<p>The first argument should be an <a href="./#Devices.AbstractPolygon"><code>AbstractPolygon</code></a>. The second argument is how much to offset the polygon. Keyword arguments include a <a href="http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/JoinType.htm">join type</a>:</p>
+<ul>
+<li><code>Clipper.JoinTypeMiter</code></li>
+<li><code>Clipper.JoinTypeRound</code></li>
+<li><code>Clipper.JoinTypeSquare</code></li>
+</ul>
+<p>and also an <a href="http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/EndType.htm">end type</a>:</p>
+<ul>
+<li><code>Clipper.EndTypeClosedPolygon</code></li>
+<li><code>Clipper.EndTypeClosedLine</code></li>
+<li><code>Clipper.EndTypeOpenSquare</code></li>
+<li><code>Clipper.EndTypeOpenRound</code></li>
+<li><code>Clipper.EndTypeOpenButt</code></li>
+</ul>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L351-L378' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="nt">offset</span><span class="p">{</span><span class="n">S</span><span class="o">&lt;:</span><span class="n">AbstractPolygon</span><span class="p">}</span><span class="o">(</span><span class="nt">subject</span><span class="o">:</span><span class="nd">:AbstractVector</span><span class="p">{</span><span class="n">S</span><span class="p">}</span><span class="o">,</span> <span class="nt">delta</span><span class="o">:</span><span class="nd">:Coordinate</span><span class="o">;</span>
+    <span class="nt">j</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.JoinType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.JoinTypeMiter</span><span class="o">,</span>
+    <span class="nt">e</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.EndType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.EndTypeClosedPolygon</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Perform polygon offsetting. The first argument is an array (vector) of <a href="./#Devices.AbstractPolygon"><code>AbstractPolygon</code></a>s. The second argument is how much to offset the polygon. Keyword arguments explained above.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L386-L396' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="nt">offset</span><span class="p">{</span><span class="n">S</span><span class="o">&lt;:</span><span class="n">Polygon</span><span class="p">}</span><span class="o">(</span><span class="nt">s</span><span class="o">:</span><span class="nd">:AbstractVector</span><span class="p">{</span><span class="n">S</span><span class="p">}</span><span class="o">,</span> <span class="nt">delta</span><span class="o">:</span><span class="nd">:Coordinate</span><span class="o">;</span>
+    <span class="nt">j</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.JoinType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.JoinTypeMiter</span><span class="o">,</span>
+    <span class="nt">e</span><span class="o">:</span><span class="nd">:Clipper</span><span class="nc">.EndType</span><span class="o">=</span><span class="nt">Clipper</span><span class="nc">.EndTypeClosedPolygon</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Perform polygon offsetting. The first argument is an array (vector) of <a href="./#Devices.Polygons.Polygon"><code>Polygon</code></a>s. The second argument is how much to offset the polygon. Keyword arguments explained above.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L404-L414' class='documenter-source'>source</a><br></p>
+<p><a id='Rectangle-API-1'></a></p>
+<h2 id="rectangle-api">Rectangle API</h2>
 <p><a id='Devices.Rectangles.Rectangle' href='#Devices.Rectangles.Rectangle'>#</a>
 <strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Type</em>.</p>
-<div class="codehilite"><pre><span></span>type Rectangle{T&lt;:Real} &lt;: AbstractPolygon{T}
-    ll::Point{2,T}
-    ur::Point{2,T}
+<div class="codehilite"><pre><span></span>type Rectangle{T} &lt;: AbstractPolygon{T}
+    ll::Point{T}
+    ur::Point{T}
     properties::Dict{Symbol, Any}
-    Rectangle(ll,ur) = new(ll,ur,Dict{Symbol,Any}())
-    Rectangle(ll,ur,props) = new(ll,ur,props)
+    Rectangle(ll,ur) = Rectangle(ll,ur,Dict{Symbol,Any}())
+    function Rectangle(a,b,props)
+        # Ensure ll is lower-left, ur is upper-right.
+        ll = Point(a.&lt;=b) .* a + Point(b.&lt;=a) .* b
+        ur = Point(a.&lt;=b) .* b + Point(b.&lt;=a) .* a
+        new(ll,ur,props)
+    end
 end
 </pre></div>
 
 
-<p>A rectangle, defined by opposing lower-left and upper-right corner coordinates.</p>
-<div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">ll</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">ur</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+<p>A rectangle, defined by opposing lower-left and upper-right corner coordinates. Lower-left and upper-right are guaranteed to be such by the inner constructor.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L18-L36' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Rectangles.Rectangle-Tuple{Devices.Points.Point,Devices.Points.Point}' href='#Devices.Rectangles.Rectangle-Tuple{Devices.Points.Point,Devices.Points.Point}'>#</a>
+<strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="o">(</span><span class="nt">ll</span><span class="o">:</span><span class="nd">:Point</span><span class="o">,</span> <span class="nt">ur</span><span class="o">:</span><span class="nd">:Point</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
-<p>Convenience constructor for <code>Rectangle{T}</code> objects.</p>
-<div class="codehilite"><pre><span></span>Rectangle{T&lt;:Real}(ll::Point{2,T}, ur::Point{2,T}, dict)
+<p>Convenience constructor for <code>Rectangle</code> objects.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L51-L57' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Rectangles.Rectangle-Tuple{Any,Any}' href='#Devices.Rectangles.Rectangle-Tuple{Any,Any}'>#</a>
+<strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
+<div class="codehilite"><pre><span></span>Rectangle(width, height, kwargs...)
 </pre></div>
 
 
-<p>Convenience constructor for <code>Rectangle{T}</code> objects.</p>
-<div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">width</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="nt">height</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Constructs <code>Rectangle{T}</code> objects by specifying the width and height rather than the lower-left and upper-right corners.</p>
+<p>Constructs <code>Rectangle</code> objects by specifying the width and height rather than the lower-left and upper-right corners.</p>
 <p>The rectangle will sit with the lower-left corner at the origin. With centered rectangles we would need to divide width and height by 2 to properly position. If we wanted an object of <code>Rectangle{Int}</code> type, this would not be possible if either <code>width</code> or <code>height</code> were odd numbers. This definition ensures type stability in the constructor.</p>
-<p><a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real}}'>#</a>
-<strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">ll</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">ur</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Convenience constructor for <code>Rectangle{T}</code> objects.</p>
-<p><a id='Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Any}' href='#Devices.Rectangles.Rectangle-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Any}'>#</a>
-<strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>Rectangle{T&lt;:Real}(ll::Point{2,T}, ur::Point{2,T}, dict)
-</pre></div>
-
-
-<p>Convenience constructor for <code>Rectangle{T}</code> objects.</p>
-<p><a id='Devices.Rectangles.Rectangle-Tuple{T<:Real,T<:Real}' href='#Devices.Rectangles.Rectangle-Tuple{T<:Real,T<:Real}'>#</a>
-<strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">Rectangle</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">width</span><span class="o">:</span><span class="nd">:T</span><span class="o">,</span> <span class="nt">height</span><span class="o">:</span><span class="nd">:T</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Constructs <code>Rectangle{T}</code> objects by specifying the width and height rather than the lower-left and upper-right corners.</p>
-<p>The rectangle will sit with the lower-left corner at the origin. With centered rectangles we would need to divide width and height by 2 to properly position. If we wanted an object of <code>Rectangle{Int}</code> type, this would not be possible if either <code>width</code> or <code>height</code> were odd numbers. This definition ensures type stability in the constructor.</p>
-<p><a id='Devices.bounds-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.bounds-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L61-L74' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.bounds-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.bounds-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>bounds(r::Rectangle)
 </pre></div>
 
 
 <p>No-op (just returns <code>r</code>).</p>
-<div class="codehilite"><pre><span></span>bounds(p0::AbstractPolygon, p::AbstractPolygon...)
-</pre></div>
-
-
-<p>Return a bounding <code>Rectangle</code> with no properties for several <code>AbstractPolygon</code> objects.</p>
-<p><a id='Devices.center-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.center-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L120-L126' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.center-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.center-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 <strong><code>Devices.center</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>center(r::Rectangle)
 </pre></div>
 
 
-<p>Returns a Point corresponding to the center of the rectangle.</p>
-<p><a id='Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<p>Returns a <a href="../points/#Devices.Points.Point"><code>Point</code></a> corresponding to the center of the rectangle.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L129-L135' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.centered-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.centered-Tuple{Devices.Rectangles.Rectangle}'>#</a>
+<strong><code>Devices.centered</code></strong> &mdash; <em>Method</em>.</p>
+<div class="codehilite"><pre><span></span>centered(r::Rectangle)
+</pre></div>
+
+
+<p>Centers a copy of <code>r</code>, with promoted coordinates if necessary. This function will not throw an <code>InexactError()</code>, even if <code>r</code> had integer coordinates.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L153-L161' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.centered!-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.centered!-Tuple{Devices.Rectangles.Rectangle}'>#</a>
+<strong><code>Devices.centered!</code></strong> &mdash; <em>Method</em>.</p>
+<div class="codehilite"><pre><span></span>centered!(r::Rectangle)
+</pre></div>
+
+
+<p>Centers a rectangle. Will throw an <code>InexactError()</code> if the rectangle cannot be centered with integer coordinates.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L138-L145' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.Rectangles.height-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 <strong><code>Devices.Rectangles.height</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>height(r::Rectangle)
 </pre></div>
 
 
 <p>Return the height of a rectangle.</p>
-<p><a id='Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L100-L106' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.Rectangles.isproper-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 <strong><code>Devices.Rectangles.isproper</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>isproper(r::Rectangle)
 </pre></div>
 
 
-<p>Returns <code>true</code> if the rectangle has a non-zero size and if the upper-right and lower-left corner coordinates <code>ur</code> and <code>ll</code> really are at the upper-right and lower-left. Otherwise, returns <code>false</code>.</p>
-<p><a id='Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.minimum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<p>Returns <code>true</code> if the rectangle has a non-zero size. Otherwise, returns <code>false</code>. Note that the upper-right and lower-left corners are enforced to be the <code>ur</code> and <code>ll</code> fields of a <code>Rectangle</code> by the inner constructor.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L109-L117' class='documenter-source'>source</a><br></p>
+<p><a id='Base.minimum-Tuple{Devices.Rectangles.Rectangle}' href='#Base.minimum-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 <strong><code>Base.minimum</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>minimum(itr)
-</pre></div>
-
-
-<p>Returns the smallest element in a collection.</p>
 <div class="codehilite"><pre><span></span>minimum(r::Rectangle)
 </pre></div>
 
 
 <p>Returns the lower-left corner of a rectangle (Point object).</p>
-<p><a id='Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Base.maximum-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L167-L173' class='documenter-source'>source</a><br></p>
+<p><a id='Base.maximum-Tuple{Devices.Rectangles.Rectangle}' href='#Base.maximum-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 <strong><code>Base.maximum</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>maximum(itr)
-</pre></div>
-
-
-<p>Returns the largest element in a collection.</p>
 <div class="codehilite"><pre><span></span>maximum(r::Rectangle)
 </pre></div>
 
 
 <p>Returns the upper-right corner of a rectangle (Point object).</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L176-L182' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
 <strong><code>Devices.Polygons.points</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>points{T&lt;:Real}(x::Rectangle{T})
+<div class="codehilite"><pre><span></span>points{T}(x::Rectangle{T})
 </pre></div>
 
 
 <p>Returns the array of <code>Point</code> objects defining the rectangle.</p>
-<p><a id='Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle{T<:Real}}' href='#Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle{T<:Real}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L98-L104' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle}' href='#Devices.Rectangles.width-Tuple{Devices.Rectangles.Rectangle}'>#</a>
 <strong><code>Devices.Rectangles.width</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>width(r::Rectangle)
 </pre></div>
 
 
 <p>Return the width of a rectangle.</p>
-<p><a id='Base.+-Tuple{Devices.Rectangles.Rectangle{T<:Real},FixedSizeArrays.Point{N,T}}' href='#Base.+-Tuple{Devices.Rectangles.Rectangle{T<:Real},FixedSizeArrays.Point{N,T}}'>#</a>
-<strong><code>Base.+</code></strong> &mdash; <em>Method</em>.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L91-L97' class='documenter-source'>source</a><br></p>
+<p><a id='Base.:+-Tuple{Devices.Rectangles.Rectangle,Devices.Points.Point}' href='#Base.:+-Tuple{Devices.Rectangles.Rectangle,Devices.Points.Point}'>#</a>
+<strong><code>Base.:+</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>+(r::Rectangle, p::Point)
 </pre></div>
 
 
 <p>Translate a rectangle by <code>p</code>.</p>
-<p><a id='Polygons-1'></a></p>
-<h2 id="polygons">Polygons</h2>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/rectangles.jl#L191-L197' class='documenter-source'>source</a><br></p>
+<p><a id='Polygon-API-1'></a></p>
+<h2 id="polygon-api">Polygon API</h2>
 <p><a id='Devices.Polygons.Polygon' href='#Devices.Polygons.Polygon'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Type</em>.</p>
-<div class="codehilite"><pre><span></span>type Polygon{T&lt;:Real} &lt;: AbstractPolygon{T}
-    p::Array{Point{2,T},1}
+<div class="codehilite"><pre><span></span>type Polygon{T} &lt;: AbstractPolygon{T}
+    p::Array{Point{T},1}
     properties::Dict{Symbol, Any}
     Polygon(x,y) = new(x,y)
     Polygon(x) = new(x, Dict{Symbol, Any}())
@@ -444,107 +582,71 @@ end
 
 
 <p>Polygon defined by list of coordinates. The first point should not be repeated at the end (although this is true for the GDS format).</p>
-<div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">parr</span><span class="o">:</span><span class="nd">:AbstractArray</span><span class="p">{</span><span class="n">Point</span><span class="err">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span><span class="nt">1</span><span class="err">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
-<div class="codehilite"><pre><span></span>Polygon{T&lt;:Real}(parr::AbstractArray{Point{2,T},1}, dict)
-</pre></div>
-
-
-<p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
-<div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">p0</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">p1</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">p2</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span>
-    <span class="nt">p3</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">...;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
-<p><a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L34-L46' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Polygons.Polygon-Tuple{AbstractArray{Devices.Points.Point{T},1}}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{Devices.Points.Point{T},1}}'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">parr</span><span class="o">:</span><span class="nd">:AbstractArray</span><span class="p">{</span><span class="n">Point</span><span class="err">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span><span class="nt">1</span><span class="err">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+<div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="p">}</span><span class="o">(</span><span class="nt">parr</span><span class="o">:</span><span class="nd">:AbstractArray</span><span class="p">{</span><span class="n">Point</span><span class="err">{</span><span class="n">T</span><span class="p">}</span><span class="o">,</span><span class="nt">1</span><span class="err">}</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
-<p><a id='Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1},Any}' href='#Devices.Polygons.Polygon-Tuple{AbstractArray{FixedSizeArrays.Point{2,T<:Real},1},Any}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L65-L71' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Polygons.Polygon-Tuple{Devices.Points.Point,Devices.Points.Point,Devices.Points.Point,Vararg{Devices.Points.Point,N}}' href='#Devices.Polygons.Polygon-Tuple{Devices.Points.Point,Devices.Points.Point,Devices.Points.Point,Vararg{Devices.Points.Point,N}}'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>Polygon{T&lt;:Real}(parr::AbstractArray{Point{2,T},1}, dict)
+<div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="o">(</span><span class="nt">p0</span><span class="o">:</span><span class="nd">:Point</span><span class="o">,</span> <span class="nt">p1</span><span class="o">:</span><span class="nd">:Point</span><span class="o">,</span> <span class="nt">p2</span><span class="o">:</span><span class="nd">:Point</span><span class="o">,</span> <span class="nt">p3</span><span class="o">:</span><span class="nd">:Point</span><span class="o">...;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
-<p><a id='Devices.Polygons.Polygon-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Vararg{FixedSizeArrays.Point{2,T<:Real}}}' href='#Devices.Polygons.Polygon-Tuple{FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},FixedSizeArrays.Point{2,T<:Real},Vararg{FixedSizeArrays.Point{2,T<:Real}}}'>#</a>
-<strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">Polygon</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Real</span><span class="p">}</span><span class="o">(</span><span class="nt">p0</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">p1</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">p2</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">,</span>
-    <span class="nt">p3</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="m">2</span><span class="o">,</span><span class="n">T</span><span class="p">}</span><span class="o">...;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
-<p><a id='Devices.bounds-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.bounds-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L55-L61' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.bounds-Tuple{Devices.Polygons.Polygon}' href='#Devices.bounds-Tuple{Devices.Polygons.Polygon}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>bounds(p::Polygon)
 </pre></div>
 
 
 <p>Return a bounding Rectangle with no properties for polygon <code>p</code>.</p>
-<div class="codehilite"><pre><span></span>bounds(p0::AbstractPolygon, p::AbstractPolygon...)
-</pre></div>
-
-
-<p>Return a bounding <code>Rectangle</code> with no properties for several <code>AbstractPolygon</code> objects.</p>
-<p><a id='Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon{T},N}}' href='#Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon{T},N}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L174-L180' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon,N}}' href='#Devices.bounds-Tuple{AbstractArray{T<:Devices.AbstractPolygon,N}}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>bounds{T&lt;:AbstractPolygon}(parr::AbstractArray{T})
 </pre></div>
 
 
 <p>Return a bounding <code>Rectangle</code> with no properties for an array <code>parr</code> of <code>AbstractPolygon</code> objects.</p>
-<p><a id='Devices.bounds-Tuple{Devices.AbstractPolygon{T},Vararg{Devices.AbstractPolygon{T}}}' href='#Devices.bounds-Tuple{Devices.AbstractPolygon{T},Vararg{Devices.AbstractPolygon{T}}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L183-L190' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.bounds-Tuple{Devices.AbstractPolygon,Vararg{Devices.AbstractPolygon,N}}' href='#Devices.bounds-Tuple{Devices.AbstractPolygon,Vararg{Devices.AbstractPolygon,N}}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>bounds(p0::AbstractPolygon, p::AbstractPolygon...)
 </pre></div>
 
 
 <p>Return a bounding <code>Rectangle</code> with no properties for several <code>AbstractPolygon</code> objects.</p>
-<p><a id='Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.minimum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L198-L205' class='documenter-source'>source</a><br></p>
+<p><a id='Base.minimum-Tuple{Devices.Polygons.Polygon}' href='#Base.minimum-Tuple{Devices.Polygons.Polygon}'>#</a>
 <strong><code>Base.minimum</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>minimum(itr)
-</pre></div>
-
-
-<p>Returns the smallest element in a collection.</p>
 <div class="codehilite"><pre><span></span>minimum(x::Polygon)
 </pre></div>
 
 
 <p>Return the lower-left-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
-<p><a id='Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Base.maximum-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L117-L124' class='documenter-source'>source</a><br></p>
+<p><a id='Base.maximum-Tuple{Devices.Polygons.Polygon}' href='#Base.maximum-Tuple{Devices.Polygons.Polygon}'>#</a>
 <strong><code>Base.maximum</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>maximum(itr)
-</pre></div>
-
-
-<p>Returns the largest element in a collection.</p>
 <div class="codehilite"><pre><span></span>maximum(x::Polygon)
 </pre></div>
 
 
 <p>Return the upper-right-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
-<p><a id='Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}' href='#Devices.Polygons.points-Tuple{Devices.Polygons.Polygon{T<:Real}}'>#</a>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L127-L134' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Polygons.points-Tuple{Devices.Polygons.Polygon}' href='#Devices.Polygons.points-Tuple{Devices.Polygons.Polygon}'>#</a>
 <strong><code>Devices.Polygons.points</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>points(x::Polygon)
 </pre></div>
 
 
 <p>Returns the array of <code>Point</code> objects defining the polygon.</p>
-<p><a id='Clipping-and-offsetting-1'></a></p>
-<h2 id="clipping-and-offsetting">Clipping and offsetting</h2>
-<p><a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
-<strong><code>Devices.Polygons.clip</code></strong> &mdash; <em>Function</em>.</p>
-<p><a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
-<strong><code>Devices.Polygons.offset</code></strong> &mdash; <em>Function</em>.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/polygons.jl#L89-L95' class='documenter-source'>source</a><br></p>
           <aside class="copyright" role="note">
             
             Documentation built with
@@ -561,7 +663,7 @@ end
   <nav class="pagination" aria-label="Footer">
     <div class="previous">
       
-        <a href="../paths/" title="Paths">
+        <a href="../points/" title="Points">
           <span class="direction">
             Previous
           </span>
@@ -571,7 +673,7 @@ end
             </div>
             <div class="stretch">
               <div class="title">
-                Paths
+                Points
               </div>
             </div>
           </div>

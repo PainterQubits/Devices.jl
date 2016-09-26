@@ -213,15 +213,6 @@
           
             
   <li>
-    <a class="" title="Paths" href="paths/">
-      Paths
-    </a>
-    
-  </li>
-
-          
-            
-  <li>
     <a class="" title="Abstract polygons" href="polygons/">
       Abstract polygons
     </a>
@@ -233,6 +224,15 @@
   <li>
     <a class="" title="Cells" href="cells/">
       Cells
+    </a>
+    
+  </li>
+
+          
+            
+  <li>
+    <a class="" title="Paths" href="paths/">
+      Paths
     </a>
     
   </li>
@@ -267,15 +267,6 @@
           
             
   <li>
-    <a class="" title="Index" href="idx/">
-      Index
-    </a>
-    
-  </li>
-
-          
-            
-  <li>
     <a class="" title="License" href="LICENSE/">
       License
     </a>
@@ -301,12 +292,8 @@
 <p><a id='Install-Python-packages-1'></a></p>
 <h3 id="install-python-packages">Install Python packages</h3>
 <ul>
-<li>
-<p>Install <a href="http://gdspy.readthedocs.org">gdspy</a>, which is currently used only for rendering paths into polygons: <code>pip install gdspy</code>. Ensure that it is accessible from the Python installation that PyCall.jl is using. If the installation fails, it may be failing because it is trying to compile the Clipper library. We will use a Julia package for Clipper anyway. Try installing an older version of gdspy that does not have the Clipper library: <code>pip install 'gdspy==0.7.1' --force-reinstall</code>.</p>
-</li>
-<li>
-<p>Install <a href="https://github.com/mnooner256/pyqrcode">pyqrcode</a>, which is used for generating QR codes: <code>pip install pyqrcode</code>.</p>
-</li>
+<li>Install <a href="http://gdspy.readthedocs.org">gdspy</a>, which is currently used only for rendering paths into polygons: <code>pip install gdspy</code>. Ensure that it is accessible from the Python installation that PyCall.jl is using. If the installation fails, it may be failing because it is trying to compile the Clipper library. We will use a Julia package for Clipper anyway. Try installing an older version of gdspy that does not have the Clipper library: <code>pip install 'gdspy==0.7.1' --force-reinstall</code>.</li>
+<li>Install <a href="https://github.com/mnooner256/pyqrcode">pyqrcode</a>, which is used for generating QR codes: <code>pip install pyqrcode</code>.</li>
 </ul>
 <p><a id='Install-Julia-packages-1'></a></p>
 <h3 id="install-julia-packages">Install Julia packages</h3>
@@ -315,15 +302,18 @@
 <li><code>Pkg.clone("https://github.com/PainterQubits/Clipper.jl.git")</code></li>
 <li><code>Pkg.checkout("Clipper", "pointinpoly")</code></li>
 </ul>
-<p>You will need to build the package to compile shared library / DLL files. This should just work on Mac OS X, and should also work on Windows provided you install Visual Studio and ensure that <code>vcvarsall.bat</code> and <code>cl.exe</code> are in your account's PATH variable.</p>
+<p>You will need to build the package to compile shared library / DLL files. This should just work on Mac OS X, and should also work on Windows provided you install <a href="https://www.visualstudio.com/en-us/visual-studio-homepage-vs.aspx">Visual Studio</a> and ensure that <code>vcvarsall.bat</code> and <code>cl.exe</code> are in your account's PATH variable. Probably these are located in: <code>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC</code> and <code>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin</code>, respectively.</p>
 <ul>
 <li><code>Pkg.build("Clipper")</code></li>
-</ul>
-<p><a id='And-finally...-1'></a></p>
-<h3 id="and-finally">And finally...</h3>
-<ul>
 <li><code>Pkg.clone("https://github.com/PainterQubits/Devices.jl.git")</code></li>
 </ul>
+<p>Finally, for convenience you may want to have <code>Devices</code> load up every time you open Julia. You can do this by adding the following to a file <code>.juliarc.jl</code> in the directory returned by <code>homedir()</code>:</p>
+<div class="codehilite"><pre><span></span>using Devices, Unitful, FileIO
+using Unitful: μm, µm, nm, °, rad
+</pre></div>
+
+
+<p>You can then create and save CAD files with unit support as soon as Julia starts up. This will also enable the unqualified use of microns, nanometers, degrees, and radians (any other units you want to use will still need to be imported from Unitful).</p>
 <p><a id='Quick-start-1'></a></p>
 <h2 id="quick-start">Quick start</h2>
 <div class="codehilite"><pre><span></span>using Devices, FileIO
@@ -343,7 +333,7 @@ save(&quot;test.gds&quot;, c)
 <p><a id='Troubleshooting-1'></a></p>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <ul>
-<li>If you cannot save the GDS file, try deleting any file that happens to be at the target path.</li>
+<li>If you cannot save the GDS file, try deleting any file that happens to be at the target path. A corrupted file at the target path may prevent saving.</li>
 <li>Decorated styles should not become part of compound styles, for now. Avoid this by decorating / attaching cell references at the end.</li>
 </ul>
           <aside class="copyright" role="note">
