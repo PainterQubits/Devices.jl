@@ -291,7 +291,7 @@
 
 
 <p>Plain rectangle style. Use this if you are fond for the simpler times when rectangles were just rectangles.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/rectangles.jl#L212-L219' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/rectangles.jl#L212-L219' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Rectangles.Rounded' href='#Devices.Rectangles.Rounded'>#</a>
 <strong><code>Devices.Rectangles.Rounded</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type Rounded{T&lt;:Coordinate} &lt;: Style
@@ -301,7 +301,7 @@ end
 
 
 <p>Rounded rectangle style. All corners are rounded off with a given radius <code>r</code>. The bounding box of the unstyled rectangle should remain unaffected.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/rectangles.jl#L222-L231' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/rectangles.jl#L222-L231' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Rectangles.Undercut' href='#Devices.Rectangles.Undercut'>#</a>
 <strong><code>Devices.Rectangles.Undercut</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type Undercut{T&lt;:Coordinate} &lt;: Style
@@ -314,13 +314,13 @@ end
 
 
 <p>Undercut rectangles. In each direction around a rectangle (left, top, right, bottom) an undercut is rendered on a different layer.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/rectangles.jl#L236-L248' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/rectangles.jl#L236-L248' class='documenter-source'>source</a><br></p>
 <p><a id='Polygon-styles-1'></a></p>
 <h2 id="polygon-styles">Polygon styles</h2>
 <p><a id='Devices.Polygons.Plain' href='#Devices.Polygons.Plain'>#</a>
 <strong><code>Devices.Polygons.Plain</code></strong> &mdash; <em>Type</em>.</p>
 <p>Plain polygon style.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/polygons.jl#L210' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/polygons.jl#L220' class='documenter-source'>source</a><br></p>
 <p><a id='Render-methods-1'></a></p>
 <h2 id="render-methods">Render methods</h2>
 <p><a id='Devices.render!' href='#Devices.render!'>#</a>
@@ -331,21 +331,21 @@ end
 
 <p>Render a rectangle <code>r</code> to cell <code>c</code>, defaulting to plain styling.</p>
 <p>Returns an array of the AbstractPolygons added to the cell.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L144-L152' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/Devices.jl#L146-L154' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Rectangle</span><span class="o">,</span> <span class="o">:</span><span class="nd">:Rectangles</span><span class="nc">.Plain</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Render a rectangle <code>r</code> to cell <code>c</code> with plain styling.</p>
 <p>Returns an array with the rectangle in it.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L157-L165' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/Devices.jl#L159-L167' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Rectangle</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Rectangles</span><span class="nc">.Rounded</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Render a rounded rectangle <code>r</code> to cell <code>c</code>. This is accomplished by rendering a path around the outside of a (smaller than requested) solid rectangle. The bounding box of <code>r</code> is preserved.</p>
 <p>Returns an array of the AbstractPolygons added to the cell.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L172-L182' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/Devices.jl#L174-L184' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Rectangle</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Rectangles</span><span class="nc">.Undercut</span><span class="o">;</span>
     <span class="nt">layer</span><span class="o">=</span><span class="nt">0</span><span class="o">,</span> <span class="nt">uclayer</span><span class="o">=</span><span class="nt">0</span><span class="o">,</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
@@ -353,32 +353,32 @@ end
 
 <p>Render a rectangle <code>r</code> to cell <code>c</code>. Additionally, put a hollow border around the rectangle with layer <code>uclayer</code>. Useful for undercut structures.</p>
 <p>Returns an array of the AbstractPolygons added to the cell.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L204-L214' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/Devices.jl#L206-L216' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">r</span><span class="o">:</span><span class="nd">:Polygon</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Polygons</span><span class="nc">.Style</span><span class="o">=</span><span class="nt">Polygons</span><span class="nc">.Plain</span><span class="o">();</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Render a polygon <code>r</code> to cell <code>c</code>, defaulting to plain styling.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L229-L236' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/Devices.jl#L231-L238' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">p</span><span class="o">:</span><span class="nd">:Path</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Render a path <code>p</code> to a cell <code>c</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L243-L249' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/Devices.jl#L245-L251' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">segment</span><span class="o">:</span><span class="nd">:Paths</span><span class="nc">.Segment</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Paths</span><span class="nc">.Style</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Render a <code>segment</code> with style <code>s</code> to cell <code>c</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L319-L325' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/Devices.jl#L321-L327' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="o">:</span><span class="nd">:Cell</span><span class="o">,</span> <span class="nt">segment</span><span class="o">:</span><span class="nd">:Paths</span><span class="nc">.Segment</span><span class="o">,</span> <span class="nt">s</span><span class="o">:</span><span class="nd">:Paths</span><span class="nc">.DecoratedStyle</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Render a <code>segment</code> with decorated style <code>s</code> to cell <code>c</code>. Cell references held by the decorated style will have their fields modified by this method, which is why they are shallow copied in the <a href="../paths/#Devices.Paths.attach!"><code>Paths.attach!</code></a> function.</p>
 <p>This method draws the decorations before the path itself is drawn.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L356-L367' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/Devices.jl#L358-L369' class='documenter-source'>source</a><br></p>
           <aside class="copyright" role="note">
             
             Documentation built with
