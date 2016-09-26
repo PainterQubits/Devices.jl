@@ -32,7 +32,8 @@ Corner(α)
 
 Outer constructor for `Corner{Float64}` segments. If you are using units,
 then you need to specify an appropriate type: `Corner{typeof(1.0nm)}(α)`, for
-example.
+example. More likely, you will just use [`corner!`](@ref) rather than
+directly creating a `Corner` object.
 """
 Corner(α) = Corner{Float64}(α, Point(0.,0.), 0.0°, 0.)
 copy{T}(x::Corner{T}) = Corner{T}(x.α, x.p0, x.α0, x.extent)
@@ -52,6 +53,17 @@ setp0!(s::Corner, p::Point) = s.p0 = p
 setα0!(s::Corner, α0′) = s.α0 = α0′
 summary(s::Corner) = "Corner by $(s.α)"
 
+
+"""
+```
+corner!{T<:Coordinate}(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p))
+```
+
+Append a sharp turn or "corner" to path `p` with angle `α`.
+
+The style chosen for this corner, if not specified, is the last `DiscreteStyle`
+used in the path, or `SimpleCornerStyle` if one has not been used yet.
+"""
 function corner!{T<:Coordinate}(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p))
     corn = Corner{T}(α)
     push!(p, Node(corn,sty))

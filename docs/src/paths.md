@@ -49,6 +49,7 @@
     append!(::Path, ::Path)
     adjust!
     attach!
+    corner!
     meander!
     param
     simplify
