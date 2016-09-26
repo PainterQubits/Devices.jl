@@ -1,5 +1,6 @@
 - v0.0.2
- - Introduced GDS-II import capability.
+ - Introduced GDS-II import capability. After `using FileIO`, `load` will return a dictionary
+   with string keys (names of cells) and Cell values.
  - Introduced sharp bends in paths via `corner!`.
  - Added unit support.
  - Made constructors for `CellArray` and `CellReference` more intuitive
