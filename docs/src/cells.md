@@ -1,13 +1,47 @@
 ## Cells
 
 Cells are used to logically group polygons or references to other cells
-into a single entity.
+into a single entity. They can contain references to other cells or arrays of
+other cells. They also store polygons. Here is the definition of a `Cell`:
 
 ```@docs
     Cell
 ```
 
-The type of a cell can be thought of as the database unit.
+The type parameter of a `Cell{T}` object is used in two ways:
+
+1. Determine the units of the coordinates of all polygons in a cell, as well
+   as origins and offset vectors of [`CellArray`](@ref)s and
+   [`CellReference`](@ref)s.
+2. Determine whether the cell will contain integer coordinates or floating-point
+   coordinates. Currently, you cannot do a whole lot (particularly with regard
+   to paths) if the cell has integer coordinates. However, they do have an
+   inherent advantage because the coordinates are exact, and ultimately the
+   GDS-II file represents shapes with integer coordinates. In the future,
+   we intend to improve support for cells with integer coordinates.
+
+For instance, `Cell{typeof(1.0u"nm")}` specifies a cell where the database
+unit is `nm` and polygons may have `Float64`-based coordinates (the type of
+`1.0` is `Float64`). Note that `Cell{typeof(2.0u"nm")}` does not mean the database
+unit is 2.0nm, because the returned type is the same. If that is intended,
+instead make a new unit such that one of that new unit is equal to 2nm. You can
+do this using the `@unit` macro in Unitful.
+
+For most cases, if you want to use units, `Cell{typeof(1.0u"nm")}("my_cell_name")`
+is a good way to construct a cell which will ultimately have all coordinates
+rounded to the nearest `nm` when exported into GDS-II. You can add polygons
+with whatever length units you want to such a cell, and the coordinates will
+be converted automatically to `nm`. You can change `nm` to `pm` or `fm` or
+whatever, but this will limit the pattern extent and probably doesn't
+make sense anyway.
+
+If you don't want units, just construct the cell with a name only:
+`Cell("my_cell_name")` will return a `Cell{Float64}` object. In this case too,
+the ultimate database resolution is `1nm`; until exporting the cell into a GDS-II
+file, the coordinates are interpreted to be in units of `1μm`. This behavior
+cannot be changed for cells without units.
+
+## Cell API
 
 ```@docs
     Cell(::AbstractString)
