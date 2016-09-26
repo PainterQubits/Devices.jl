@@ -17,7 +17,8 @@
    See the documentation (under Abstract polygons) for usage instructions, the syntax has changed.
  - Switched from [`FixedSizeArrays.jl`](https://github.com/SimonDanisch/FixedSizeArrays.jl) to
    [`StaticArrays.jl`](https://github.com/JuliaArrays/StaticArrays.jl) for our
-   `Point` implementation.
+   `Point` implementation. Syntax should remain largely the same. This switch was made for
+   compatibility with Julia 0.5 and is an improvement.
  - Other various changes.
 
 - v0.0.1 - Initial release used to generate our first qubit.
