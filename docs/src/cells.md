@@ -25,11 +25,10 @@ display complexity.
 
 ```@docs
     CellArray
-    CellArray{T<:Devices.Coordinate}(::Any, ::Point{T}, ::Point{T}, ::Point{T},
-        ::Real, ::Real)
+    CellArray{T<:Devices.Coordinate}(::Any, ::Point{T})
     CellArray{T<:Devices.Coordinate}(::Any, ::Range{T}, ::Range{T})
     CellReference
-    CellReference{T<:Devices.Coordinate}(::Any, ::Point{T}=Point(0.,0.); kwargs...)
+    CellReference{T<:Devices.Coordinate}(::Any, ::Point{T}=Point(0.,0.))
     bounds{S<:Devices.Coordinate, T<:Devices.Coordinate}(::CellArray{T, Cell{S}})
     bounds(::CellReference)
     copy(::CellReference)

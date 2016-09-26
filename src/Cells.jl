@@ -182,27 +182,10 @@ Convenience constructor for `CellReference{typeof(x), T}`.
 Keyword arguments can specify x-reflection, magnification, or rotation.
 Synonyms are accepted, in case you forget the "correct keyword"...
 
-X-reflection:
-- `:xrefl`
-- `:xreflection`
-- `:refl`
-- `:reflect`
-- `:xreflect`
-- `:xmirror`
-- `:mirror`
-
-Magnification:
-- `:mag`
-- `:magnification`
-- `:magnify`
-- `:zoom`
-- `:scale`
-
-Rotation:
-- `:rot`
-- `:rotation`
-- `:rotate`
-- `:angle`
+- X-reflection: `:xrefl`, `:xreflection`, `:refl`, `:reflect`, `:xreflect`,
+  `:xmirror`, `:mirror`
+- Magnification: `:mag`, `:magnification`, `:magnify`, `:zoom`, `:scale`
+- Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
 """
 function CellReference{T<:Coordinate}(x, origin::Point{T}=Point(0.,0.); kwargs...)
     argdict = Dict(k=>v for (k,v) in kwargs)
@@ -244,17 +227,99 @@ CellArray{T<:Coordinate}(x, origin::Point{T}, dc::Point{T},
     dr::Point{T}, c::Integer, r::Integer; xrefl=false, mag=1.0, rot=0.0)
 ```
 
-Construct a `CellArray{T,typeof(x)}` object, with `xrefl`, `mag`, and `rot` as
-keyword arguments (x-reflection, magnification factor, rotation in degrees).
+Construct a `CellArray{T,typeof(x)}` object.
+
+Keyword arguments specify the column vector, row vector, number of columns,
+number of rows, x-reflection, magnification factor, and rotation.
+Synonyms are accepted for these keywords:
+
+- Column vector: `:deltacol`, `:dcol`, `:dc`, `:vcol`, `:colv`, `:colvec`,
+  `:colvector`, `:columnv`, `:columnvec`, `:columnvector`
+- Row vector: `:deltarow`, `:drow`, `:dr`, `:vrow`, `:rv`, `:rowvec`,
+  `:rowvector`
+- Number of columns: `:nc`, `:numcols`, `:numcol`, `:ncols`, `:ncol`
+- Number of rows: `:nr`, `:numrows`, `:numrow`, `:nrows`, `:nrow`
+- X-reflection: `:xrefl`, `:xreflection`, `:refl`, `:reflect`, `:xreflect`,
+  `:xmirror`, `:mirror`
+- Magnification: `:mag`, `:magnification`, `:magnify`, `:zoom`, `:scale`
+- Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
+
 """
-CellArray{T<:Coordinate}(x, origin::Point{T}, dc::Point{T},
-    dr::Point{T}, c::Real, r::Real; xrefl=false, mag=1.0, rot=0.0) =
+function CellArray{T<:Coordinate}(x, origin::Point{T}; kwargs...)
+    argdict = Dict(k=>v for (k,v) in kwargs)
+
+    dckeys = [:deltacol, :dcol, :dc, :vcol, :colv, :colvec,
+              :colvector, :columnv, :columnvec, :columnvector]
+    drkeys = [:deltarow, :drow, :dr, :vrow, :rv, :rowvec, :rowvector]
+    ckeys = [:nc, :numcols, :numcol, :ncols, :ncol]
+    rkeys = [:nr, :numrows, :numrow, :nrows, :nrow]
+    xreflkeys = [:xrefl, :xreflection, :refl, :reflect,
+                 :xreflect, :xmirror, :mirror]
+    magkeys = [:mag, :magnification, :magnify, :zoom, :scale]
+    rotkeys = [:rot, :rotation, :rotate, :angle]
+
+    dc = Point(zero(T), zero(T))
+    for k in dckeys
+        if haskey(argdict, k)
+            @inbounds dc = argdict[k]
+            break
+        end
+    end
+
+    dr = Point(zero(T), zero(T))
+    for k in drkeys
+        if haskey(argdict, k)
+            @inbounds dr = argdict[k]
+            break
+        end
+    end
+
+    c = 1
+    for k in ckeys
+        if haskey(argdict, k)
+            @inbounds c = argdict[k]
+            break
+        end
+    end
+
+    r = 1
+    for k in rkeys
+        if haskey(argdict, k)
+            @inbounds r = argdict[k]
+            break
+        end
+    end
+
+    xrefl = false
+    for k in xreflkeys
+        if haskey(argdict, k)
+            @inbounds xrefl = argdict[k]
+            break
+        end
+    end
+
+    mag = 1.0
+    for k in magkeys
+        if haskey(argdict, k)
+            @inbounds mag = argdict[k]
+            break
+        end
+    end
+
+    rot = 0.0
+    for k in rotkeys
+        if haskey(argdict, k)
+            @inbounds rot = argdict[k]
+            break
+        end
+    end
+
     CellArray{T, typeof(x)}(x,origin,dc,dr,c,r,xrefl,mag,rot)
+end
 
 """
 ```
-CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T};
-    xrefl=false, mag=1.0, rot=0.0)
+CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T}; kwargs...)
 ```
 
 Construct a `CellArray{T,typeof(x)}` based on ranges (probably `LinSpace` or
@@ -263,13 +328,51 @@ Construct a `CellArray{T,typeof(x)}` based on ranges (probably `LinSpace` or
 therefore do not specify the extrema of the resulting `CellArray`'s bounding box;
 some care is required.
 
-`xrefl`, `mag`, and `rot` are keyword arguments
-(x-reflection, magnification factor, rotation in degrees).
+Keyword arguments specify x-reflection, magnification factor, and rotation,
+with synonyms allowed:
+
+- X-reflection: `:xrefl`, `:xreflection`, `:refl`, `:reflect`, `:xreflect`,
+  `:xmirror`, `:mirror`
+- Magnification: `:mag`, `:magnification`, `:magnify`, `:zoom`, `:scale`
+- Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
+
 """
-CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T};
-    xrefl=false, mag=1.0, rot=0.0) =
-    CellArray{T,typeof(x)}(x, Point(first(c),first(r)), Point(step(c),zero(step(c))),
-        Point(zero(step(r)), step(r)), length(c), length(r), xrefl, mag, rot)
+function CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T}; kwargs...)
+    argdict = Dict(k=>v for (k,v) in kwargs)
+    xreflkeys = [:xrefl, :xreflection, :refl, :reflect,
+                 :xreflect, :xmirror, :mirror]
+    magkeys = [:mag, :magnification, :magnify, :zoom, :scale]
+    rotkeys = [:rot, :rotation, :rotate, :angle]
+
+    xrefl = false
+    for k in xreflkeys
+        if haskey(argdict, k)
+            @inbounds xrefl = argdict[k]
+            break
+        end
+    end
+
+    mag = 1.0
+    for k in magkeys
+        if haskey(argdict, k)
+            @inbounds mag = argdict[k]
+            break
+        end
+    end
+
+    rot = 0.0
+    for k in rotkeys
+        if haskey(argdict, k)
+            @inbounds rot = argdict[k]
+            break
+        end
+    end
+
+    CellArray{T, typeof(x)}(x, Point(first(c),first(r)),
+        Point(step(c),zero(step(c))), Point(zero(step(r)), step(r)),
+        length(c), length(r), xrefl, mag, rot)
+end
+
 
 """
 ```

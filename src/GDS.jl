@@ -853,7 +853,8 @@ function aref(s, dbs, verbose)
     hascolrow || error("Missing COLROW tag.")
     hasxy || error("Missing XY tag.")
 
-    CellArray(str, o, ec/col, er/row, col, row; xrefl=xrefl, mag=mag, rot=rot)
+    CellArray(str, o; dc=ec/col, dr=er/row, c=col, r=row,
+        xrefl=xrefl, mag=mag, rot=rot)
 end
 
 function sname(s, bytes)

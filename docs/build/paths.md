@@ -20,7 +20,7 @@ end
 Type for abstracting an arbitrary styled path in the plane. Iterating returns tuples of (`segment`, `style`).
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L301-L313' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L301-L313' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.Path-Tuple{Devices.Points.Point{T<:Real}}' href='#Devices.Paths.Path-Tuple{Devices.Points.Point{T<:Real}}'>#</a>
 **`Devices.Paths.Path`** &mdash; *Method*.
@@ -34,7 +34,7 @@ Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.
 Convenience constructor for `Path{T}` object.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L339-L345' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L339-L345' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.pathlength-Tuple{Devices.Paths.Path}' href='#Devices.Paths.pathlength-Tuple{Devices.Paths.Path}'>#</a>
 **`Devices.Paths.pathlength`** &mdash; *Method*.
@@ -48,7 +48,7 @@ pathlength(p::Path)
 Physical length of a path. Note that `length` will return the number of segments in a path, not the physical length of the path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L351-L358' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L351-L358' class='documenter-source'>source</a><br>
 
 
 <a id='Segments-1'></a>
@@ -74,7 +74,7 @@ Path segment in the plane. All Segment objects should have the implement the fol
   * `α1`
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L152-L166' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L152-L166' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.Straight' href='#Devices.Paths.Straight'>#</a>
 **`Devices.Paths.Straight`** &mdash; *Type*.
@@ -102,7 +102,7 @@ The parametric function over `t ∈ [0,1]` describing the line segment is given 
 `t -> p0 + Point(t*l*cos(α),t*l*sin(α))`
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/straight.jl#L1-L22' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/straight.jl#L1-L22' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.Turn' href='#Devices.Paths.Turn'>#</a>
 **`Devices.Paths.Turn`** &mdash; *Type*.
@@ -138,7 +138,7 @@ The parametric function over `t ∈ [0,1]` describing the turn is given by:
 `t -> cen + Point(r*cos(α0-sign(α)*π/2+α*t), r*sin(α0-sign(α)*π/2+α*t))`
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/turn.jl#L1-L30' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L1-L30' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.Corner' href='#Devices.Paths.Corner'>#</a>
 **`Devices.Paths.Corner`** &mdash; *Type*.
@@ -159,7 +159,7 @@ end
 A corner, or sudden kink in a path. The only parameter is the angle `α` of the kink. The kink begins at a point `p0` with initial angle `α0`. It will also end at `p0`, since the corner has zero path length. However, during rendering, neighboring segments will be tweaked slightly so that the rendered path is properly centered about the path function (the rendered corner has a finite width).
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/corner.jl#L1-L18' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/corner.jl#L1-L18' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.CompoundSegment' href='#Devices.Paths.CompoundSegment'>#</a>
 **`Devices.Paths.CompoundSegment`** &mdash; *Type*.
@@ -189,7 +189,7 @@ Consider an array of segments as one contiguous segment. Useful e.g. for applyin
 Note that [`Corner`](paths.md#Devices.Paths.Corner)s introduce a discontinuity in the derivative of the path function, and are not allowed in a `CompoundSegment`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/compound.jl#L2-L28' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/compound.jl#L2-L28' class='documenter-source'>source</a><br>
 
 
 <a id='Styles-1'></a>
@@ -214,7 +214,7 @@ How to render a given path segment. All styles should implement the following me
   * `divs`
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L118-L131' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L118-L131' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.ContinuousStyle' href='#Devices.Paths.ContinuousStyle'>#</a>
 **`Devices.Paths.ContinuousStyle`** &mdash; *Type*.
@@ -228,7 +228,7 @@ abstract ContinuousStyle{T} <: Style{T}
 Any style that applies to segments which have non-zero path length.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L134-L140' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L134-L140' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.DiscreteStyle' href='#Devices.Paths.DiscreteStyle'>#</a>
 **`Devices.Paths.DiscreteStyle`** &mdash; *Type*.
@@ -242,7 +242,7 @@ abstract DiscreteStyle{T} <: Style{T}
 Any style that applies to segments which have zero path length.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L143-L149' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L143-L149' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.Trace' href='#Devices.Paths.Trace'>#</a>
 **`Devices.Paths.Trace`** &mdash; *Type*.
@@ -262,7 +262,7 @@ Simple, single trace.
   * `divs::Int`: number of segments to render. Increase if you see artifacts.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/contstyles/trace.jl#L1-L13' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/trace.jl#L1-L13' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.CPW' href='#Devices.Paths.CPW'>#</a>
 **`Devices.Paths.CPW`** &mdash; *Type*.
@@ -286,7 +286,7 @@ Two adjacent traces can form a coplanar waveguide.
 May need to be inverted with respect to a ground plane, depending on how the pattern is written.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/contstyles/cpw.jl#L1-L18' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/cpw.jl#L1-L18' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.CompoundStyle' href='#Devices.Paths.CompoundStyle'>#</a>
 **`Devices.Paths.CompoundStyle`** &mdash; *Type*.
@@ -313,7 +313,7 @@ by the outer constructor.
 style's parametric function.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/contstyles/compound.jl#L1-L17' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/compound.jl#L1-L17' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.DecoratedStyle' href='#Devices.Paths.DecoratedStyle'>#</a>
 **`Devices.Paths.DecoratedStyle`** &mdash; *Type*.
@@ -340,7 +340,7 @@ end
 Style with decorations, like structures periodically repeated along the path, etc.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/contstyles/decorated.jl#L1-L20' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/decorated.jl#L1-L20' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.undecorated' href='#Devices.Paths.undecorated'>#</a>
 **`Devices.Paths.undecorated`** &mdash; *Function*.
@@ -354,7 +354,7 @@ undecorated(s::Style)
 Returns `s`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/contstyles/decorated.jl#L37-L43' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/decorated.jl#L37-L43' class='documenter-source'>source</a><br>
 
 
 ```
@@ -364,7 +364,7 @@ undecorated(s::DecoratedStyle)
 Returns the underlying, undecorated style.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/contstyles/decorated.jl#L46-L52' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/decorated.jl#L46-L52' class='documenter-source'>source</a><br>
 
 
 <a id='Path-interrogation-1'></a>
@@ -383,7 +383,7 @@ direction(p::Function, t)
 For some parameteric function `p(t)↦Point(x(t),y(t))`, returns the angle at which the path is pointing for a given `t`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L93-L100' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L93-L100' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.pathlength' href='#Devices.Paths.pathlength'>#</a>
 **`Devices.Paths.pathlength`** &mdash; *Function*.
@@ -397,7 +397,7 @@ pathlength{T}(s::Segment{T}, verbose::Bool=false)
 Return the length of a segment (calculated).
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L273-L279' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L273-L279' class='documenter-source'>source</a><br>
 
 
 ```
@@ -407,7 +407,7 @@ pathlength(p::Path)
 Physical length of a path. Note that `length` will return the number of segments in a path, not the physical length of the path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L351-L358' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L351-L358' class='documenter-source'>source</a><br>
 
 
 ```
@@ -417,7 +417,7 @@ pathlength(p::AbstractArray)
 Total physical length of segments.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L361-L367' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L361-L367' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.p0' href='#Devices.Paths.p0'>#</a>
 **`Devices.Paths.p0`** &mdash; *Function*.
@@ -431,7 +431,7 @@ p0{T}(s::Segment{T})
 Return the first point in a segment (calculated).
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L232-L238' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L232-L238' class='documenter-source'>source</a><br>
 
 
 ```
@@ -441,7 +441,7 @@ p0(p::Path)
 First point of a path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L405-L411' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L405-L411' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.setp0!' href='#Devices.Paths.setp0!'>#</a>
 **`Devices.Paths.setp0!`** &mdash; *Function*.
@@ -455,7 +455,7 @@ setp0!(s::Straight, p::Point)
 Set the p0 of a straight segment.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/straight.jl#L53-L59' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/straight.jl#L53-L59' class='documenter-source'>source</a><br>
 
 
 ```
@@ -465,7 +465,7 @@ setp0!(s::Turn, p::Point)
 Set the p0 of a turn.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/turn.jl#L66-L72' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L66-L72' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.α0' href='#Devices.Paths.α0'>#</a>
 **`Devices.Paths.α0`** &mdash; *Function*.
@@ -479,7 +479,7 @@ Set the p0 of a turn.
 Return the first angle in a segment (calculated).
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L250-L256' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L250-L256' class='documenter-source'>source</a><br>
 
 
 ```
@@ -489,7 +489,7 @@ Return the first angle in a segment (calculated).
 First angle of a path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L375-L381' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L375-L381' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.setα0!' href='#Devices.Paths.setα0!'>#</a>
 **`Devices.Paths.setα0!`** &mdash; *Function*.
@@ -503,7 +503,7 @@ setα0!(s::Straight, α0′)
 Set the angle of a straight segment.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/straight.jl#L62-L68' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/straight.jl#L62-L68' class='documenter-source'>source</a><br>
 
 
 ```
@@ -513,7 +513,7 @@ setα0!(s::Turn, α0′)
 Set the starting angle of a turn.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/turn.jl#L75-L81' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L75-L81' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.p1' href='#Devices.Paths.p1'>#</a>
 **`Devices.Paths.p1`** &mdash; *Function*.
@@ -527,7 +527,7 @@ p1{T}(s::Segment{T})
 Return the last point in a segment (calculated).
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L241-L247' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L241-L247' class='documenter-source'>source</a><br>
 
 
 ```
@@ -537,7 +537,7 @@ p1(p::Path)
 Last point of a path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L420-L426' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L420-L426' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.α1' href='#Devices.Paths.α1'>#</a>
 **`Devices.Paths.α1`** &mdash; *Function*.
@@ -551,7 +551,7 @@ Last point of a path.
 Return the last angle in a segment (calculated).
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L259-L265' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L259-L265' class='documenter-source'>source</a><br>
 
 
 ```
@@ -561,7 +561,7 @@ Return the last angle in a segment (calculated).
 Last angle of a path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L390-L396' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L390-L396' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.style0' href='#Devices.Paths.style0'>#</a>
 **`Devices.Paths.style0`** &mdash; *Function*.
@@ -575,7 +575,7 @@ style0(p::Path)
 Style of the first segment of a path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L435-L441' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L435-L441' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.style1' href='#Devices.Paths.style1'>#</a>
 **`Devices.Paths.style1`** &mdash; *Function*.
@@ -589,7 +589,7 @@ style1(p::Path)
 Style of the last segment of a path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L450-L456' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L450-L456' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.discretestyle1' href='#Devices.Paths.discretestyle1'>#</a>
 **`Devices.Paths.discretestyle1`** &mdash; *Function*.
@@ -603,7 +603,7 @@ discretestyle1{T}(p::Path{T})
 Returns the last-used discrete style in the path. If one was not used, returns `SimpleCornerStyle()`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L485-L492' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L485-L492' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.contstyle1' href='#Devices.Paths.contstyle1'>#</a>
 **`Devices.Paths.contstyle1`** &mdash; *Function*.
@@ -617,7 +617,7 @@ contstyle1(p::Path)
 Returns the last-used discrete style in the path. If one was not used, returns `p.style0`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L495-L502' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L495-L502' class='documenter-source'>source</a><br>
 
 
 <a id='Path-building-1'></a>
@@ -636,7 +636,7 @@ append!(p::Path, p′::Path)
 Given paths `p` and `p′`, path `p′` is appended to path `p`. The p0 and initial angle of the first segment from path `p′` is modified to match the last point and last angle of path `p`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L648-L656' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L648-L656' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.adjust!' href='#Devices.Paths.adjust!'>#</a>
 **`Devices.Paths.adjust!`** &mdash; *Function*.
@@ -650,7 +650,7 @@ adjust!(p::Path, n::Integer=1)
 Adjust a path's parametric functions starting from index `n`. Used internally whenever segments are inserted into the path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L505-L512' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L505-L512' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.attach!' href='#Devices.Paths.attach!'>#</a>
 **`Devices.Paths.attach!`** &mdash; *Function*.
@@ -670,7 +670,7 @@ The origin of the cell reference tells the method where to place the cell *with 
 The `where` option is for convenience. If `where == 0`, nothing special happens. If `where == -1`, then the point of attachment for the reference is on the leftmost edge of the waveguide (the rendered polygons; the path itself has no width). Likewise if `where == 1`, the point of attachment is on the rightmost edge. This option does not automatically rotate the cell reference, apart from what is already done as described in the first paragraph. You can think of this option as setting a special origin for the coordinate system that rotates with the path. For instance, an origin for the cell reference of `Point(0.,10.)` together with `where == -1` will put the cell at 10 above the edge of a rendered (finite width) path with angle 0°.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/contstyles/decorated.jl#L59-L87' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/decorated.jl#L59-L87' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.meander!' href='#Devices.Paths.meander!'>#</a>
 **`Devices.Paths.meander!`** &mdash; *Function*.
@@ -686,7 +686,7 @@ Alternate between going straight with length `straightlen` and turning with radi
 The straight and turn segments are combined into a `CompoundSegment` and appended to the path `p`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L706-L717' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L706-L717' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.param' href='#Devices.Paths.param'>#</a>
 **`Devices.Paths.param`** &mdash; *Function*.
@@ -700,7 +700,7 @@ param{T<:Coordinate}(c::AbstractVector{Segment{T}})
 Return a parametric function over the domain [0,1] that represents the compound segments.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/compound.jl#L56-L63' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/compound.jl#L56-L63' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.simplify' href='#Devices.Paths.simplify'>#</a>
 **`Devices.Paths.simplify`** &mdash; *Function*.
@@ -722,7 +722,7 @@ segments into one logical element. A launcher would have several indices in a pa
 when you want a continuous styling of a very long path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L666-L680' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L666-L680' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.simplify!' href='#Devices.Paths.simplify!'>#</a>
 **`Devices.Paths.simplify!`** &mdash; *Function*.
@@ -736,7 +736,7 @@ simplify!(p::Path, inds::UnitRange=1:length(p))
 In-place version of [`simplify`](paths.md#Devices.Paths.simplify).
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L687-L693' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L687-L693' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.straight!' href='#Devices.Paths.straight!'>#</a>
 **`Devices.Paths.straight!`** &mdash; *Function*.
@@ -751,7 +751,7 @@ straight!{T<:Coordinate}(p::Path{T}, l::Coordinate,
 Extend a path `p` straight by length `l` in the current direction. By default, we take the last continuous style in the path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/straight.jl#L73-L81' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/straight.jl#L73-L81' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.turn!' href='#Devices.Paths.turn!'>#</a>
 **`Devices.Paths.turn!`** &mdash; *Function*.
@@ -765,7 +765,7 @@ turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p))
 Turn a path `p` by angle `α` with a turning radius `r` in the current direction. Positive angle turns left.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/turn.jl#L87-L94' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L87-L94' class='documenter-source'>source</a><br>
 
 
 ```
@@ -782,7 +782,7 @@ Turn a path `p` with direction coded by string `s`:
 By default, we take the last continuous style in the path.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/segments/turn.jl#L104-L117' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L104-L117' class='documenter-source'>source</a><br>
 
 
 <a id='Attachments-1'></a>
@@ -823,7 +823,7 @@ The Python package `gdspy` is used for rendering paths into polygons. Ultimately
 For a style `s` and parameteric argument `t`, returns the distance between the centers of parallel paths rendered by gdspy.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L69-L72' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L69-L72' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.extent' href='#Devices.Paths.extent'>#</a>
 **`Devices.Paths.extent`** &mdash; *Function*.
@@ -833,7 +833,7 @@ For a style `s` and parameteric argument `t`, returns the distance between the c
 For a style `s` and parameteric argument `t`, returns a distance tangential to the path specifying the lateral extent of the polygons rendered by gdspy.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L75-L78' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L75-L78' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.paths' href='#Devices.Paths.paths'>#</a>
 **`Devices.Paths.paths`** &mdash; *Function*.
@@ -843,7 +843,7 @@ For a style `s` and parameteric argument `t`, returns a distance tangential to t
 For a style `s` and parameteric argument `t`, returns the number of parallel paths rendered by gdspy.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L81-L84' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L81-L84' class='documenter-source'>source</a><br>
 
 <a id='Devices.Paths.width' href='#Devices.Paths.width'>#</a>
 **`Devices.Paths.width`** &mdash; *Function*.
@@ -853,5 +853,5 @@ For a style `s` and parameteric argument `t`, returns the number of parallel pat
 For a style `s` and parameteric argument `t`, returns the width of paths rendered by gdspy.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/183856efb0a3d8cd89111991bbe16370a7482d30/src/paths/paths.jl#L87-L90' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L87-L90' class='documenter-source'>source</a><br>
 

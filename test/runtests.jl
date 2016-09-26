@@ -308,7 +308,8 @@ end
     c = Cell("main")
     c2 = Cell("rect")
     render!(c2, Rectangle(5,5))
-    push!(c.refs, CellArray(c2, Point(0,0), Point(10,0), Point(0,10), 10, 10))
+    push!(c.refs, CellArray(c2, Point(0,0); dc=Point(10,0), dr=Point(0,10),
+        ncols=10, nrows=10))
 
     # Test bounds with cell arrays
     @test bounds(c) == Rectangle(95,95)
