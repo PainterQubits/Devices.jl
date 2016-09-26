@@ -320,7 +320,7 @@ end
 
 
 <p>Type for abstracting an arbitrary styled path in the plane. Iterating returns tuples of (<code>segment</code>, <code>style</code>).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L301-L313' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L301-L313' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.Path-Tuple{Devices.Points.Point{T<:Real}}' href='#Devices.Paths.Path-Tuple{Devices.Points.Point{T<:Real}}'>#</a>
 <strong><code>Devices.Paths.Path</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span><span class="nt">Path</span><span class="p">{</span><span class="n">T</span><span class="o">&lt;:</span><span class="n">Coordinate</span><span class="p">}</span><span class="o">(</span><span class="nt">p0</span><span class="o">:</span><span class="nd">:Point</span><span class="p">{</span><span class="n">T</span><span class="p">}</span><span class="o">=</span><span class="nt">Point</span><span class="o">(</span><span class="nt">0</span><span class="nc">.0</span><span class="o">,</span><span class="nt">0</span><span class="nc">.0</span><span class="o">);</span> <span class="err">α</span><span class="nt">0</span><span class="o">=</span><span class="nt">0</span><span class="nc">.0</span><span class="o">,</span> <span class="nt">style0</span><span class="o">:</span><span class="nd">:Style</span><span class="o">=</span><span class="nt">Trace</span><span class="o">(</span><span class="nt">1</span><span class="nc">.0</span><span class="o">))</span>
@@ -328,7 +328,7 @@ end
 
 
 <p>Convenience constructor for <code>Path{T}</code> object.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L339-L345' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L339-L345' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.pathlength-Tuple{Devices.Paths.Path}' href='#Devices.Paths.pathlength-Tuple{Devices.Paths.Path}'>#</a>
 <strong><code>Devices.Paths.pathlength</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>pathlength(p::Path)
@@ -336,7 +336,7 @@ end
 
 
 <p>Physical length of a path. Note that <code>length</code> will return the number of segments in a path, not the physical length of the path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L351-L358' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L351-L358' class='documenter-source'>source</a><br></p>
 <p><a id='Segments-1'></a></p>
 <h2 id="segments">Segments</h2>
 <p><a id='Devices.Paths.Segment' href='#Devices.Paths.Segment'>#</a>
@@ -354,7 +354,7 @@ end
 <li><code>setα0!</code></li>
 <li><code>α1</code></li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L152-L166' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L152-L166' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.Straight' href='#Devices.Paths.Straight'>#</a>
 <strong><code>Devices.Paths.Straight</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type Straight{T} &lt;: ContinuousSegment{T}
@@ -374,7 +374,7 @@ end
 <p>A straight line segment is parameterized by its length. It begins at a point <code>p0</code> with initial angle <code>α0</code>.</p>
 <p>The parametric function over <code>t ∈ [0,1]</code> describing the line segment is given by:</p>
 <p><code>t -&gt; p0 + Point(t*l*cos(α),t*l*sin(α))</code></p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/straight.jl#L1-L22' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/straight.jl#L1-L22' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.Turn' href='#Devices.Paths.Turn'>#</a>
 <strong><code>Devices.Paths.Turn</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type Turn{T} &lt;: Segment{T}
@@ -400,7 +400,7 @@ end
 <p><code>cen = p0 + Point(r*cos(α0+sign(α)*π/2), r*sin(α0+sign(α)*π/2))</code></p>
 <p>The parametric function over <code>t ∈ [0,1]</code> describing the turn is given by:</p>
 <p><code>t -&gt; cen + Point(r*cos(α0-sign(α)*π/2+α*t), r*sin(α0-sign(α)*π/2+α*t))</code></p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L1-L30' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/turn.jl#L1-L30' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.Corner' href='#Devices.Paths.Corner'>#</a>
 <strong><code>Devices.Paths.Corner</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type Corner{T} &lt;: DiscreteSegment{T}
@@ -415,7 +415,7 @@ end
 
 
 <p>A corner, or sudden kink in a path. The only parameter is the angle <code>α</code> of the kink. The kink begins at a point <code>p0</code> with initial angle <code>α0</code>. It will also end at <code>p0</code>, since the corner has zero path length. However, during rendering, neighboring segments will be tweaked slightly so that the rendered path is properly centered about the path function (the rendered corner has a finite width).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/corner.jl#L1-L18' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/corner.jl#L1-L18' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.CompoundSegment' href='#Devices.Paths.CompoundSegment'>#</a>
 <strong><code>Devices.Paths.CompoundSegment</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type CompoundSegment{T} &lt;: ContinuousSegment{T}
@@ -438,7 +438,7 @@ end
 
 <p>Consider an array of segments as one contiguous segment. Useful e.g. for applying styles, uninterrupted over segment changes. The array of segments given to the constructor is copied and retained by the compound segment.</p>
 <p>Note that <a href="./#Devices.Paths.Corner"><code>Corner</code></a>s introduce a discontinuity in the derivative of the path function, and are not allowed in a <code>CompoundSegment</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/compound.jl#L2-L28' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/compound.jl#L2-L28' class='documenter-source'>source</a><br></p>
 <p><a id='Styles-1'></a></p>
 <h2 id="styles">Styles</h2>
 <p><a id='Devices.Paths.Style' href='#Devices.Paths.Style'>#</a>
@@ -455,7 +455,7 @@ end
 <li><code>width</code></li>
 <li><code>divs</code></li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L118-L131' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L118-L131' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.ContinuousStyle' href='#Devices.Paths.ContinuousStyle'>#</a>
 <strong><code>Devices.Paths.ContinuousStyle</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>abstract ContinuousStyle{T} &lt;: Style{T}
@@ -463,7 +463,7 @@ end
 
 
 <p>Any style that applies to segments which have non-zero path length.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L134-L140' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L134-L140' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.DiscreteStyle' href='#Devices.Paths.DiscreteStyle'>#</a>
 <strong><code>Devices.Paths.DiscreteStyle</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>abstract DiscreteStyle{T} &lt;: Style{T}
@@ -471,7 +471,7 @@ end
 
 
 <p>Any style that applies to segments which have zero path length.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L143-L149' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L143-L149' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.Trace' href='#Devices.Paths.Trace'>#</a>
 <strong><code>Devices.Paths.Trace</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type Trace{T} &lt;: ContinuousStyle{T}
@@ -486,7 +486,7 @@ end
 <li><code>width::Function</code>: trace width.</li>
 <li><code>divs::Int</code>: number of segments to render. Increase if you see artifacts.</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/trace.jl#L1-L13' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/contstyles/trace.jl#L1-L13' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.CPW' href='#Devices.Paths.CPW'>#</a>
 <strong><code>Devices.Paths.CPW</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type CPW{T} &lt;: ContinuousStyle{T}
@@ -504,7 +504,7 @@ end
 <li><code>divs::Int</code>: number of segments to render. Increase if you see artifacts.</li>
 </ul>
 <p>May need to be inverted with respect to a ground plane, depending on how the pattern is written.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/cpw.jl#L1-L18' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/contstyles/cpw.jl#L1-L18' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.CompoundStyle' href='#Devices.Paths.CompoundStyle'>#</a>
 <strong><code>Devices.Paths.CompoundStyle</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type CompoundStyle{T} &lt;: ContinuousStyle{T}
@@ -525,7 +525,7 @@ end
 <li><code>f</code>: returns tuple of style index and the <code>t</code> to use for that</li>
 </ul>
 <p>style's parametric function.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/compound.jl#L1-L17' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/contstyles/compound.jl#L1-L17' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.DecoratedStyle' href='#Devices.Paths.DecoratedStyle'>#</a>
 <strong><code>Devices.Paths.DecoratedStyle</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>type DecoratedStyle{T} &lt;: ContinuousStyle{T}
@@ -546,7 +546,7 @@ end
 
 
 <p>Style with decorations, like structures periodically repeated along the path, etc.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/decorated.jl#L1-L20' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/contstyles/decorated.jl#L1-L20' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.undecorated' href='#Devices.Paths.undecorated'>#</a>
 <strong><code>Devices.Paths.undecorated</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>undecorated(s::Style)
@@ -554,13 +554,13 @@ end
 
 
 <p>Returns <code>s</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/decorated.jl#L37-L43' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/contstyles/decorated.jl#L37-L43' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>undecorated(s::DecoratedStyle)
 </pre></div>
 
 
 <p>Returns the underlying, undecorated style.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/decorated.jl#L46-L52' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/contstyles/decorated.jl#L46-L52' class='documenter-source'>source</a><br></p>
 <p><a id='Path-interrogation-1'></a></p>
 <h2 id="path-interrogation">Path interrogation</h2>
 <p><a id='Devices.Paths.direction' href='#Devices.Paths.direction'>#</a>
@@ -570,7 +570,7 @@ end
 
 
 <p>For some parameteric function <code>p(t)↦Point(x(t),y(t))</code>, returns the angle at which the path is pointing for a given <code>t</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L93-L100' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L93-L100' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.pathlength' href='#Devices.Paths.pathlength'>#</a>
 <strong><code>Devices.Paths.pathlength</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>pathlength{T}(s::Segment{T}, verbose::Bool=false)
@@ -578,19 +578,19 @@ end
 
 
 <p>Return the length of a segment (calculated).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L273-L279' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L273-L279' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>pathlength(p::Path)
 </pre></div>
 
 
 <p>Physical length of a path. Note that <code>length</code> will return the number of segments in a path, not the physical length of the path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L351-L358' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L351-L358' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>pathlength(p::AbstractArray)
 </pre></div>
 
 
 <p>Total physical length of segments.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L361-L367' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L361-L367' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.p0' href='#Devices.Paths.p0'>#</a>
 <strong><code>Devices.Paths.p0</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>p0{T}(s::Segment{T})
@@ -598,13 +598,13 @@ end
 
 
 <p>Return the first point in a segment (calculated).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L232-L238' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L232-L238' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>p0(p::Path)
 </pre></div>
 
 
 <p>First point of a path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L405-L411' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L405-L411' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.setp0!' href='#Devices.Paths.setp0!'>#</a>
 <strong><code>Devices.Paths.setp0!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>setp0!(s::Straight, p::Point)
@@ -612,13 +612,13 @@ end
 
 
 <p>Set the p0 of a straight segment.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/straight.jl#L53-L59' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/straight.jl#L53-L59' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>setp0!(s::Turn, p::Point)
 </pre></div>
 
 
 <p>Set the p0 of a turn.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L66-L72' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/turn.jl#L66-L72' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.α0' href='#Devices.Paths.α0'>#</a>
 <strong><code>Devices.Paths.α0</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>α0(s::Segment)
@@ -626,13 +626,13 @@ end
 
 
 <p>Return the first angle in a segment (calculated).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L250-L256' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L250-L256' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>α0(p::Path)
 </pre></div>
 
 
 <p>First angle of a path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L375-L381' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L375-L381' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.setα0!' href='#Devices.Paths.setα0!'>#</a>
 <strong><code>Devices.Paths.setα0!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>setα0!(s::Straight, α0′)
@@ -640,13 +640,13 @@ end
 
 
 <p>Set the angle of a straight segment.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/straight.jl#L62-L68' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/straight.jl#L62-L68' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>setα0!(s::Turn, α0′)
 </pre></div>
 
 
 <p>Set the starting angle of a turn.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L75-L81' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/turn.jl#L75-L81' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.p1' href='#Devices.Paths.p1'>#</a>
 <strong><code>Devices.Paths.p1</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>p1{T}(s::Segment{T})
@@ -654,13 +654,13 @@ end
 
 
 <p>Return the last point in a segment (calculated).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L241-L247' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L241-L247' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>p1(p::Path)
 </pre></div>
 
 
 <p>Last point of a path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L420-L426' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L420-L426' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.α1' href='#Devices.Paths.α1'>#</a>
 <strong><code>Devices.Paths.α1</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>α1(s::Segment)
@@ -668,13 +668,13 @@ end
 
 
 <p>Return the last angle in a segment (calculated).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L259-L265' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L259-L265' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>α1(p::Path)
 </pre></div>
 
 
 <p>Last angle of a path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L390-L396' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L390-L396' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.style0' href='#Devices.Paths.style0'>#</a>
 <strong><code>Devices.Paths.style0</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>style0(p::Path)
@@ -682,7 +682,7 @@ end
 
 
 <p>Style of the first segment of a path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L435-L441' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L435-L441' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.style1' href='#Devices.Paths.style1'>#</a>
 <strong><code>Devices.Paths.style1</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>style1(p::Path)
@@ -690,7 +690,7 @@ end
 
 
 <p>Style of the last segment of a path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L450-L456' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L450-L456' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.discretestyle1' href='#Devices.Paths.discretestyle1'>#</a>
 <strong><code>Devices.Paths.discretestyle1</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>discretestyle1{T}(p::Path{T})
@@ -698,7 +698,7 @@ end
 
 
 <p>Returns the last-used discrete style in the path. If one was not used, returns <code>SimpleCornerStyle()</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L485-L492' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L485-L492' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.contstyle1' href='#Devices.Paths.contstyle1'>#</a>
 <strong><code>Devices.Paths.contstyle1</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>contstyle1(p::Path)
@@ -706,7 +706,7 @@ end
 
 
 <p>Returns the last-used discrete style in the path. If one was not used, returns <code>p.style0</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L495-L502' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L495-L502' class='documenter-source'>source</a><br></p>
 <p><a id='Path-building-1'></a></p>
 <h2 id="path-building">Path building</h2>
 <p><a id='Base.append!-Tuple{Devices.Paths.Path,Devices.Paths.Path}' href='#Base.append!-Tuple{Devices.Paths.Path,Devices.Paths.Path}'>#</a>
@@ -716,7 +716,7 @@ end
 
 
 <p>Given paths <code>p</code> and <code>p′</code>, path <code>p′</code> is appended to path <code>p</code>. The p0 and initial angle of the first segment from path <code>p′</code> is modified to match the last point and last angle of path <code>p</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L648-L656' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L648-L656' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.adjust!' href='#Devices.Paths.adjust!'>#</a>
 <strong><code>Devices.Paths.adjust!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>adjust!(p::Path, n::Integer=1)
@@ -724,7 +724,7 @@ end
 
 
 <p>Adjust a path's parametric functions starting from index <code>n</code>. Used internally whenever segments are inserted into the path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L505-L512' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L505-L512' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.attach!' href='#Devices.Paths.attach!'>#</a>
 <strong><code>Devices.Paths.attach!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span><span class="nt">attach</span><span class="o">!(</span><span class="nt">p</span><span class="o">:</span><span class="nd">:Path</span><span class="o">,</span> <span class="nt">c</span><span class="o">:</span><span class="nd">:CellReference</span><span class="o">,</span> <span class="nt">t</span><span class="o">:</span><span class="nd">:Real</span><span class="o">;</span> <span class="nt">i</span><span class="o">:</span><span class="nd">:Integer</span><span class="o">=</span><span class="nt">length</span><span class="o">(</span><span class="nt">p</span><span class="o">),</span> <span class="nt">where</span><span class="o">:</span><span class="nd">:Integer</span><span class="o">=</span><span class="nt">0</span><span class="o">)</span>
@@ -735,7 +735,16 @@ end
 <p>By default, the attachment occurs at <code>t ∈ [0,1]</code> along the most recent path segment, but a different path segment index can be specified using <code>i</code>. The reference is oriented with zero rotation if the path is pointing at 0°, otherwise it is rotated with the path.</p>
 <p>The origin of the cell reference tells the method where to place the cell <em>with respect to a coordinate system that rotates with the path</em>. Suppose the path is a straight line with angle 0°. Then an origin of <code>Point(0.,10.)</code> will put the cell at 10 above the path, or 10 to the left of the path if it turns left by 90°.</p>
 <p>The <code>where</code> option is for convenience. If <code>where == 0</code>, nothing special happens. If <code>where == -1</code>, then the point of attachment for the reference is on the leftmost edge of the waveguide (the rendered polygons; the path itself has no width). Likewise if <code>where == 1</code>, the point of attachment is on the rightmost edge. This option does not automatically rotate the cell reference, apart from what is already done as described in the first paragraph. You can think of this option as setting a special origin for the coordinate system that rotates with the path. For instance, an origin for the cell reference of <code>Point(0.,10.)</code> together with <code>where == -1</code> will put the cell at 10 above the edge of a rendered (finite width) path with angle 0°.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/contstyles/decorated.jl#L59-L87' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/contstyles/decorated.jl#L59-L87' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Paths.corner!' href='#Devices.Paths.corner!'>#</a>
+<strong><code>Devices.Paths.corner!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>corner!{T&lt;:Coordinate}(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p))
+</pre></div>
+
+
+<p>Append a sharp turn or "corner" to path <code>p</code> with angle <code>α</code>.</p>
+<p>The style chosen for this corner, if not specified, is the last <code>DiscreteStyle</code> used in the path, or <code>SimpleCornerStyle</code> if one has not been used yet.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/corner.jl#L57-L66' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.meander!' href='#Devices.Paths.meander!'>#</a>
 <strong><code>Devices.Paths.meander!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>meander!{T&lt;:Real}(p::Path{T}, len, r, straightlen, α::Real)
@@ -744,7 +753,7 @@ end
 
 <p>Alternate between going straight with length <code>straightlen</code> and turning with radius <code>r</code> and angle <code>α</code>. Each turn goes the opposite direction of the previous. The total length is <code>len</code>. Useful for making resonators.</p>
 <p>The straight and turn segments are combined into a <code>CompoundSegment</code> and appended to the path <code>p</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L706-L717' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L706-L717' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.param' href='#Devices.Paths.param'>#</a>
 <strong><code>Devices.Paths.param</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>param{T&lt;:Coordinate}(c::AbstractVector{Segment{T}})
@@ -752,7 +761,7 @@ end
 
 
 <p>Return a parametric function over the domain [0,1] that represents the compound segments.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/compound.jl#L56-L63' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/compound.jl#L56-L63' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.simplify' href='#Devices.Paths.simplify'>#</a>
 <strong><code>Devices.Paths.simplify</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>simplify(p::Path, inds::UnitRange=1:length(p))
@@ -768,7 +777,7 @@ end
 <li>You don't need to think hard about boundaries between straights and turns</li>
 </ul>
 <p>when you want a continuous styling of a very long path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L666-L680' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L666-L680' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.simplify!' href='#Devices.Paths.simplify!'>#</a>
 <strong><code>Devices.Paths.simplify!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>simplify!(p::Path, inds::UnitRange=1:length(p))
@@ -776,7 +785,7 @@ end
 
 
 <p>In-place version of <a href="./#Devices.Paths.simplify"><code>simplify</code></a>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L687-L693' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L687-L693' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.straight!' href='#Devices.Paths.straight!'>#</a>
 <strong><code>Devices.Paths.straight!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>straight!{T&lt;:Coordinate}(p::Path{T}, l::Coordinate,
@@ -785,7 +794,7 @@ end
 
 
 <p>Extend a path <code>p</code> straight by length <code>l</code> in the current direction. By default, we take the last continuous style in the path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/straight.jl#L73-L81' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/straight.jl#L73-L81' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.turn!' href='#Devices.Paths.turn!'>#</a>
 <strong><code>Devices.Paths.turn!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>turn!{T&lt;:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p))
@@ -793,7 +802,7 @@ end
 
 
 <p>Turn a path <code>p</code> by angle <code>α</code> with a turning radius <code>r</code> in the current direction. Positive angle turns left.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L87-L94' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/turn.jl#L87-L94' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>turn!{T&lt;:Coordinate}(p::Path{T}, s::String, r::Coordinate,
     sty::ContinuousStyle=contstyle1(p))
 </pre></div>
@@ -806,7 +815,7 @@ end
 <li>"lrlrllrrll": do those turns in that order</li>
 </ul>
 <p>By default, we take the last continuous style in the path.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/segments/turn.jl#L104-L117' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/segments/turn.jl#L104-L117' class='documenter-source'>source</a><br></p>
 <p><a id='Attachments-1'></a></p>
 <h2 id="attachments">Attachments</h2>
 <p>When you call <a href="./#Devices.Paths.attach!"><code>attach!</code></a>, you are defining a coordinate system local to somewhere along the target <code>Path</code>, saying that a <code>CellReference</code> should be placed at the origin of that coordinate system (or slightly away from it if you want the cell to be one one side of the path or the other). The local coordinate system will rotate as the path changes orientations. The origin of the <code>CellReference</code> corresponds how the referenced cell should be displaced with respect to the origin of the local coordinate system. This differs from the usual meaning of the origin of a <code>CellReference</code>, which is how the referenced cell should be displaced with respect to the origin of a containing <code>Cell</code>.</p>
@@ -821,19 +830,19 @@ end
 <p><a id='Devices.Paths.distance' href='#Devices.Paths.distance'>#</a>
 <strong><code>Devices.Paths.distance</code></strong> &mdash; <em>Function</em>.</p>
 <p>For a style <code>s</code> and parameteric argument <code>t</code>, returns the distance between the centers of parallel paths rendered by gdspy.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L69-L72' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L69-L72' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.extent' href='#Devices.Paths.extent'>#</a>
 <strong><code>Devices.Paths.extent</code></strong> &mdash; <em>Function</em>.</p>
 <p>For a style <code>s</code> and parameteric argument <code>t</code>, returns a distance tangential to the path specifying the lateral extent of the polygons rendered by gdspy.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L75-L78' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L75-L78' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.paths' href='#Devices.Paths.paths'>#</a>
 <strong><code>Devices.Paths.paths</code></strong> &mdash; <em>Function</em>.</p>
 <p>For a style <code>s</code> and parameteric argument <code>t</code>, returns the number of parallel paths rendered by gdspy.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L81-L84' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L81-L84' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Paths.width' href='#Devices.Paths.width'>#</a>
 <strong><code>Devices.Paths.width</code></strong> &mdash; <em>Function</em>.</p>
 <p>For a style <code>s</code> and parameteric argument <code>t</code>, returns the width of paths rendered by gdspy.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b8678f00938d0e6ef34bdc98e6af3512bc1097ab/src/paths/paths.jl#L87-L90' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/paths/paths.jl#L87-L90' class='documenter-source'>source</a><br></p>
           <aside class="copyright" role="note">
             
             Documentation built with
