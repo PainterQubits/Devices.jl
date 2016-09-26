@@ -12,7 +12,8 @@
    return a centered copy of the rectangle, possibly with floating-point coordinates if it could not
    be centered with integer coordinates. The latter will attempt to center the provided rectangle
    and throw an `InexactError()` if it was not possible. `center` will still return the center
-   of a rectangle.
+   of a rectangle, which may have floating-point coordinates even if the rectangle itself had
+   integer coordinates.
  - Made clipping and offsetting more reliable (and documented them).
  - Switched from [`AffineTransforms.jl`](https://github.com/timholy/AffineTransforms.jl)
    to [`CoordinateTransformations.jl`](https://github.com/FugroRoames/CoordinateTransformations.jl).
