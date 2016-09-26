@@ -746,7 +746,7 @@ function launch!(p::Path; extround=5, trace0=300, trace1=5,
     s1 = CPW(0.0, trace0/2+gap0)
     s2 = CPW(trace0, gap0)
     s3 = CPW(flip(t->(trace0 + t * (trace1 - trace0))),
-        flip(t->(gap0 + t * (gap1 - gap0))),1)
+        flip(t->(gap0 + t * (gap1 - gap0)))) # CHANGED
 
     if isempty(p)
         args = [extround, gap0-extround, flatlen, taperlen]

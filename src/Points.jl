@@ -9,7 +9,7 @@ import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Length, ustrip, unit
 import PyCall.PyObject
 export Point
-export Rotation, Translation, ∘, compose
+export Rotation, Translation, XReflection, YReflection, ∘, compose
 export getx, gety, lowerleft, upperright
 
 """
@@ -141,7 +141,7 @@ end
 ## Affine transformations
 
 # Translation already defined for 2D by the CoordinateTransformations package
-# Still need 2D rotation.
+# Still need 2D rotation, reflections.
 
 """
 ```
@@ -151,6 +151,46 @@ Rotation(Θ)
 Construct a rotation about the origin. Units accepted (no units ⇒ radians).
 """
 Rotation(Θ) = LinearMap(@SMatrix [cos(Θ) -sin(Θ); sin(Θ) cos(Θ)])
+
+"""
+```
+XReflection()
+```
+
+Construct a reflection about the x-axis (y-coordinate changes sign).
+
+Example:
+```jldoctest
+julia> trans = XReflection()
+LinearMap([1 0; 0 -1])
+
+julia> trans(Point(1,1))
+2-element Devices.Points.Point{Int64}:
+  1
+ -1
+```
+"""
+XReflection() = LinearMap(@SMatrix [1 0;0 -1])
+
+"""
+```
+YReflection()
+```
+
+Construct a reflection about the y-axis (x-coordinate changes sign).
+
+Example:
+```jldoctest
+julia> trans = YReflection()
+LinearMap([-1 0; 0 1])
+
+julia> trans(Point(1,1))
+2-element Devices.Points.Point{Int64}:
+ -1
+  1
+```
+"""
+YReflection() = LinearMap(@SMatrix [-1 0;0 1])
 
 extract_derivative{T<:Coordinate}(x::Point{T}) =
     Point(unit(T)*ForwardDiff.partials(ustrip(getx(x)),1),

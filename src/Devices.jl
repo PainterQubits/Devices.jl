@@ -71,10 +71,12 @@ eltype{T}(::AbstractPolygon{T}) = T
 eltype{T}(::Type{AbstractPolygon{T}}) = T
 
 include("points.jl")
-import .Points: Point, getx, gety, Rotation, Translation, ∘, compose
+import .Points: Point, getx, gety
+import .Points: Rotation, Translation, XReflection, YReflection, ∘, compose
 import .Points: lowerleft, upperright
 export Points
-export Point, getx, gety, Rotation, Translation, ∘, compose
+export Point, getx, gety
+export Rotation, Translation, XReflection, YReflection, ∘, compose
 export lowerleft, upperright
 
 # TODO: Operations on arrays of AbstractPolygons

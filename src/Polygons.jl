@@ -1,6 +1,6 @@
 module Polygons
 
-import Base: +, -, *, .*, /, ==, isapprox
+import Base: +, -, *, .*, /, ==, .+, .-, isapprox
 import Base: minimum, maximum
 import Base: convert, getindex, start, next, done
 import Base: copy, promote_rule
@@ -108,8 +108,18 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
     @eval function ($op)(r::Polygon, p::Point)
         Polygon(($dotop)(r.p, p), copy(r.properties))
     end
+    @eval function ($op)(p::Point, r::Polygon)
+        Polygon(($dotop)(p, r.p), copy(r.properties))
+    end
+    @eval function ($dotop){T<:AbstractPolygon}(r::AbstractArray{T}, p::Point)
+        map(x->($op)(x, p), r)
+    end
+    @eval function ($dotop){T<:AbstractPolygon}(p::Point, r::AbstractArray{T})
+        map(x->($op)(p, x), r)
+    end
     # @eval ($op)(p::Point, r::Polygon) = ($op)(r,p)
 end
+
 *(r::Polygon, a::Number) = Polygon(r.p .* a, copy(r.properties))
 *(a::Number, r::Polygon) = *(r,a)
 /(r::Polygon, a::Number) = Polygon(r.p ./ a, copy(r.properties))
@@ -190,8 +200,8 @@ Return a bounding `Rectangle` with no properties for an array `parr` of
 """
 function bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
     rects = map(bounds, parr)
-    ll = minimum(map(minimum, rects))
-    ur = maximum(map(maximum, rects))
+    ll = lowerleft(map(minimum, rects))
+    ur = upperright(map(maximum, rects))
     Rectangle(ll, ur)
 end
 
@@ -477,9 +487,9 @@ end
 # Find the lower-most then left-most polygon
 function uniqueray{T<:Real}(v::Vector{Point{T}})
     nopts = reinterpret(T, v)
-    yarr = slice(nopts, 2:2:length(nopts))
+    yarr = view(nopts, 2:2:length(nopts))
     miny, indy = findmin(yarr)
-    xarr = slice(nopts, (find(x->x==miny, yarr).*2).-1)
+    xarr = view(nopts, (find(x->x==miny, yarr).*2).-1)
     minx, indx = findmin(xarr)
     Ray(Point(minx,miny), Point(minx, miny-1))
 end
@@ -590,21 +600,27 @@ function interiorcuts{T}(nodeortree::Union{Clipper.PolyNode, Clipper.PolyTree},
                     end
                 end
             end
-            #
+
             # println(bestwhere)
             # println(k)
             # println(ray)
             # Since the polygon was enclosing, an intersection had to happen *somewhere*.
             if k != -1
                 w = Point{Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
+                # println(w)
                 kp1 = enclosing.v[(k+1 > length(enclosing.v)) ? 1 : k+1]
 
+                # println(enclosing.v[1:k])
+                # println(w)
+                # println(hole.v)
+                # println(enclosing.v[(k+1):end])
+
                 # Make the cut in the enclosing polygon
-                enclosing.v = [enclosing.v[1:k];
-                    w;             # could actually be enclosing.v[k]... should check for this.
+                enclosing.v = Point{Int64}[enclosing.v[1:k];
+                    [w];       # could actually be enclosing.v[k]... should check for this.
                     hole.v;
-                    hole.v[1];     # need to loop back to first point of hole
-                    w;
+                    [hole.v[1]]; # need to loop back to first point of hole
+                    [w];
                     enclosing.v[(k+1):end]]
 
                 # update the segment cache

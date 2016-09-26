@@ -40,6 +40,8 @@ Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-1
     compose
     Rotation
     Translation
+    XReflection
+    YReflection
 ```
 
 ## Clipping

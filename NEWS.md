@@ -1,3 +1,6 @@
+- v0.0.3
+ - Bug fixes.
+ - Added `XReflection` and `YReflection` transformations.
 - v0.0.2
  - Introduced GDS-II import capability. After `using FileIO`, `load` will return a dictionary
    with string keys (names of cells) and Cell values.
@@ -22,6 +25,6 @@
    [`StaticArrays.jl`](https://github.com/JuliaArrays/StaticArrays.jl) for our
    `Point` implementation. Syntax should remain largely the same. This switch was made for
    compatibility with Julia 0.5 and is an improvement.
- - Other various changes.
-
+ - Rotations are now consistently specified in radians if no unit is given.
+   Units may however be provided if you want to use degrees.
 - v0.0.1 - Initial release used to generate our first qubit.
