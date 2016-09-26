@@ -14,6 +14,7 @@
  - Made clipping and offsetting more reliable (and documented them).
  - Switched from [`AffineTransforms.jl`](https://github.com/timholy/AffineTransforms.jl)
    to [`CoordinateTransformations.jl`](https://github.com/FugroRoames/CoordinateTransformations.jl).
+   See the documentation (under Abstract polygons) for usage instructions, the syntax has changed.
  - Switched from [`FixedSizeArrays.jl`](https://github.com/SimonDanisch/FixedSizeArrays.jl) to
    [`StaticArrays.jl`](https://github.com/JuliaArrays/StaticArrays.jl) for our
    `Point` implementation.
