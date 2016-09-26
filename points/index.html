@@ -336,7 +336,7 @@
 
 
 <p>Type alias for numeric types suitable for coordinate systems.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/Devices.jl#L47-L53' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L47-L53' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.Point' href='#Devices.Points.Point'>#</a>
 <strong><code>Devices.Points.Point</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>immutable Point{T} &lt;: FieldVector{T}
@@ -347,7 +347,7 @@ end
 
 
 <p>2D Cartesian coordinate in the plane.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/points.jl#L15-L24' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L15-L24' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.getx' href='#Devices.Points.getx'>#</a>
 <strong><code>Devices.Points.getx</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>getx(p::Point)
@@ -355,7 +355,7 @@ end
 
 
 <p>Get the x-coordinate of a point. You can also use <code>p.x</code> or <code>p[1]</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/points.jl#L47-L53' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L47-L53' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.gety' href='#Devices.Points.gety'>#</a>
 <strong><code>Devices.Points.gety</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>gety(p::Point)
@@ -363,7 +363,7 @@ end
 
 
 <p>Get the y-coordinate of a point. You can also use <code>p.y</code> or <code>p[2]</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/points.jl#L56-L62' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L56-L62' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.lowerleft' href='#Devices.Points.lowerleft'>#</a>
 <strong><code>Devices.Points.lowerleft</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>lowerleft{T}(A::AbstractArray{Point{T}})
@@ -379,7 +379,7 @@ end
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/points.jl#L89-L104' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L89-L104' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.upperright' href='#Devices.Points.upperright'>#</a>
 <strong><code>Devices.Points.upperright</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>upperright{T}(A::AbstractArray{Point{T}})
@@ -395,7 +395,7 @@ end
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/811642fbd6b286c3f02c598a3f896a3377fbc8a7/src/points.jl#L112-L127' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L112-L127' class='documenter-source'>source</a><br></p>
 <p><a id='Implementation-details-1'></a></p>
 <h2 id="implementation-details">Implementation details</h2>
 <p>Points are implemented using the abstract type <code>FieldVector</code> from <a href="https://github.com/JuliaArrays/StaticArrays.jl">StaticArrays.jl</a>. This permits a fast, efficient representation of coordinates in the plane. Additionally, unlike <code>Tuple</code> objects, we can add points together, simplifying many function definitions.</p>
