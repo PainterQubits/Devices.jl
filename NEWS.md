@@ -3,7 +3,8 @@
  - Introduced sharp bends in paths via `corner!`.
  - Added unit support.
  - Made constructors for `CellArray` and `CellReference` more intuitive
-   and easier to use.
+   and easier to use. The syntax has changes slightly; more things are keyword arguments now,
+   with synonyms accepted so you don't have to remember exactly what the keyword argument was called.
  - When rectangles have integer coordinates, it is not always the case that they can be centered.
    Since `center!` implies that an object will be modified, and `center` is expected to return the
    center of a rectangle, we disambiguated by making `centered` and `centered!`. The former will
