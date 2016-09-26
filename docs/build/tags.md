@@ -15,7 +15,7 @@ qrcode!{T<:Coordinate}(a::AbstractString, c::Cell{T}; pixel::T=T(1), kwargs...)
 Renders a QR code of the string `a` with pixel size `pixel` to cell `c`. The pixel size defaults to one of whatever the cell's unit is. The lower left of the QR code will be at the origin of the cell.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/tags.jl#L32-L40' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/tags.jl#L32-L40' class='documenter-source'>source</a><br>
 
 <a id='Devices.Tags.radialcut' href='#Devices.Tags.radialcut'>#</a>
 **`Devices.Tags.radialcut`** &mdash; *Function*.
@@ -60,7 +60,7 @@ Parameters as follows, where X marks the origin and nothing above the origin is 
 ```
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/tags.jl#L67-L108' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/tags.jl#L67-L108' class='documenter-source'>source</a><br>
 
 <a id='Devices.Tags.radialstub' href='#Devices.Tags.radialstub'>#</a>
 **`Devices.Tags.radialstub`** &mdash; *Function*.
@@ -76,7 +76,7 @@ See also the documentation for `radialcut`.
 Returns a polygon for a radial stub. The polygon has to be subtracted from a ground plane, and will leave a defect in the ground plane of uniform width `t` that outlines the (metallic) radial stub. `r` refers to the radius of the actual stub, not the radius of the circular arc bounding the ground plane defect. Likewise `c` has an analogous meaning to that in `radialcut` except it refers here to the radial stub, not the ground plane defect.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/tags.jl#L125-L138' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/tags.jl#L125-L138' class='documenter-source'>source</a><br>
 
 <a id='Devices.Tags.checkerboard' href='#Devices.Tags.checkerboard'>#</a>
 **`Devices.Tags.checkerboard`** &mdash; *Function*.
@@ -92,7 +92,7 @@ Generate a checkerboard pattern suitable for contrast curve measurement, or gett
 Note that the tip radius of the Ambios XP-2 profilometer in the KNI is 2.5μm.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/tags.jl#L247-L257' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/tags.jl#L247-L257' class='documenter-source'>source</a><br>
 
 <a id='Devices.Tags.pecbasedose' href='#Devices.Tags.pecbasedose'>#</a>
 **`Devices.Tags.pecbasedose`** &mdash; *Function*.
@@ -108,7 +108,7 @@ Generate lines and spaces suitable for obtaining the base dose for BEAMER PEC (1
 To do: Modify to be more flexible for other substrates, beam energies, etc.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/tags.jl#L275-L284' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/tags.jl#L275-L284' class='documenter-source'>source</a><br>
 
 <a id='Devices.Tags.surf1d' href='#Devices.Tags.surf1d'>#</a>
 **`Devices.Tags.surf1d`** &mdash; *Function*.
@@ -122,5 +122,5 @@ surf1d(length, width, contour_fn; zbins=20, step=1., max_seg_len=1.)
 Given `length` and `width` of a rectangular patch, this generates a mesh for 3D surface PEC according to a particular contour function `contour_fn`. The meshing is done in the length direction (+y). The number of bins (layers) can be controlled with `zbins`, the maximum step change in the resist height is given by `step`, and the `max_seg_len` is the maximum segment length in the mesh.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/tags.jl#L335-L346' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/tags.jl#L335-L346' class='documenter-source'>source</a><br>
 

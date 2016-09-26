@@ -77,7 +77,7 @@ typealias Coordinate Union{Real,Length}
 Type alias for numeric types suitable for coordinate systems.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/Devices.jl#L47-L53' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/Devices.jl#L47-L53' class='documenter-source'>source</a><br>
 
 <a id='Devices.Points.Point' href='#Devices.Points.Point'>#</a>
 **`Devices.Points.Point`** &mdash; *Type*.
@@ -94,7 +94,7 @@ end
 2D Cartesian coordinate in the plane.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L15-L24' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/points.jl#L15-L24' class='documenter-source'>source</a><br>
 
 <a id='Devices.Points.getx' href='#Devices.Points.getx'>#</a>
 **`Devices.Points.getx`** &mdash; *Function*.
@@ -108,7 +108,7 @@ getx(p::Point)
 Get the x-coordinate of a point. You can also use `p.x` or `p[1]`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L47-L53' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/points.jl#L47-L53' class='documenter-source'>source</a><br>
 
 <a id='Devices.Points.gety' href='#Devices.Points.gety'>#</a>
 **`Devices.Points.gety`** &mdash; *Function*.
@@ -122,7 +122,7 @@ gety(p::Point)
 Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L56-L62' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/points.jl#L56-L62' class='documenter-source'>source</a><br>
 
 <a id='Devices.Points.lowerleft' href='#Devices.Points.lowerleft'>#</a>
 **`Devices.Points.lowerleft`** &mdash; *Function*.
@@ -145,7 +145,7 @@ julia> lowerleft([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
 ```
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L89-L104' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/points.jl#L89-L104' class='documenter-source'>source</a><br>
 
 <a id='Devices.Points.upperright' href='#Devices.Points.upperright'>#</a>
 **`Devices.Points.upperright`** &mdash; *Function*.
@@ -168,7 +168,7 @@ julia> upperright([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
 ```
 
 
-<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/6b7de71b98a4ee4bcbd137b0fc18fbb8c0b90366/src/points.jl#L112-L127' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/b265e030b50d7d4008d97446dd5b5e07e51cfca5/src/points.jl#L112-L127' class='documenter-source'>source</a><br>
 
 
 <a id='Implementation-details-1'></a>
