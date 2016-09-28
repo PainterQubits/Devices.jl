@@ -19,6 +19,22 @@ import Base: show, +, -, copy, getindex, convert
 import Devices: AbstractPolygon, Coordinate, bounds, center
 export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!, transform, name, dbscale
+export uniquename
+
+"""
+```
+uniquename(str)
+```
+
+Given string input `str`, generate a unique name that bears some resemblance
+to `str`. Useful if programmatically making Cells and all of them will
+eventually be saved into a GDS-II file. The uniqueness is expected on a per-Julia
+session basis, so if you load an existing GDS-II file and try to save unique
+cells on top of that you may get an unlucky clash.
+"""
+function uniquename(str)
+    replace(str*string(gensym()),"##","_")
+end
 
 abstract CellRef{S<:Coordinate, T}
 
@@ -46,9 +62,10 @@ type CellReference{S,T} <: CellRef{S,T}
     mag::Float64
     rot::Float64
 end
-convert{S,T}(::Type{CellReference{S,T}}, x::CellReference) =
-    CellReference(convert(T, x.cell), convert(Point{S}, x.origin),
-        x.xrefl, x.mag, x.rot)
+# problematic since the cell is copied...
+# convert{S,T}(::Type{CellReference{S,T}}, x::CellReference) =
+#     CellReference(convert(T, x.cell), convert(Point{S}, x.origin),
+#         x.xrefl, x.mag, x.rot)
 convert{S}(::Type{CellReference{S}}, x::CellReference) =
     CellReference(x.cell, convert(Point{S}, x.origin),
         x.xrefl, x.mag, x.rot)
@@ -603,10 +620,11 @@ function flatten(c::CellReference)
     a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
         @SMatrix [sgn*c.mag*cos(c.rot) -c.mag*sin(c.rot);
                   sgn*c.mag*sin(c.rot) c.mag*cos(c.rot)])
-    append!(polys, a.(c.cell.elements))
-    for r in c.cell.refs
-        append!(polys, a.(flatten(r)))
-    end
+    append!(polys, a.(flatten(c.cell)))
+    # append!(polys, a.(c.cell.elements))
+    # for r in c.cell.refs
+    #     append!(polys, a.(flatten(r)))
+    # end
     polys
 end
 
@@ -624,10 +642,11 @@ function flatten(c::CellArray)
                       sgn*c.mag*sin(c.rot) c.mag*cos(c.rot)])
     for i in 1:c.row, j in 1:c.col
         pt = (i-1) * c.deltarow + (j-1) * c.deltacol
-        append!(polys, a.(c.cell.elements .+ pt))
-        for r in c.cell.refs
-            append!(polys, a.(flatten(r) .+ pt))
-        end
+        append!(polys, a.(flatten(c.cell)))
+        # append!(polys, a.(c.cell.elements .+ pt))
+        # for r in c.cell.refs
+        #     append!(polys, a.(flatten(r) .+ pt))
+        # end
     end
     polys
 end

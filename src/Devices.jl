@@ -106,10 +106,10 @@ export clip, offset, points, layer, datatype
 
 include("cells.jl")
 import .Cells: Cell, CellArray, CellReference
-import .Cells: traverse!, order!, flatten, flatten!, transform, name
+import .Cells: traverse!, order!, flatten, flatten!, transform, name, uniquename
 export Cells
 export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!, transform, name
+export traverse!, order!, flatten, flatten!, transform, name, uniquename
 
 include("paths/paths.jl")
 # import .Paths: Path, adjust!, attach!, direction, meander!, launch!, corner!
@@ -308,14 +308,15 @@ function render!(c::Cell, seg::Paths.Corner, ::Paths.SimpleCornerStyle; kwargs..
     push!(c.elements, Polygon([p1,p2,p3,p4], Dict{Symbol,Any}(kwargs)))
 end
 
-#
+
 # function render!{T}(c::Cell{T}, segment::Paths.Segment, s::Paths.Style; kwargs...)
 #     polys = Polygon{T}[]
 #     f = segment.f
 #     g(t) = ForwardDiff.derivative(f,t)
 #
-#     for ti in
+#     for t in Paths.divs(s)
 #
+#     end
 # end
 
 """

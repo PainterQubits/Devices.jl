@@ -24,11 +24,6 @@ export pecbasedose
 export surf1d
 export interdigit
 
-function uniquename(str)
-    replace(str*string(gensym()),"##","_")
-end
-
-
 """
 ```
 qrcode!{T<:Coordinate}(a::AbstractString, c::Cell{T}; pixel::T=T(1), kwargs...)

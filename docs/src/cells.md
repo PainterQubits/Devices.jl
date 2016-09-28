@@ -69,6 +69,7 @@ display complexity.
     copy(::CellArray)
     name(::CellReference)
     name(::CellArray)
+    uniquename
 ```
 ## Resolving references
 
@@ -88,6 +89,11 @@ corresponding polygons. This operation is called "flattening."
 ```
 
 ## Miscellaneous
+
+When saving cells to disk, keep in mind that cells should have unique names.
+We don't have an automatic renaming scheme implemented to avoid clashes. To
+help with this, we provide a function [`uniquename`](@ref) to generate unique
+names based on human-readable prefixes.
 
 When saving cells to disk, there will be a tree of interdependencies and logically
 one would prefer to write the leaf nodes of the tree before any dependent cells.
