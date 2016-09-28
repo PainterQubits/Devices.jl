@@ -286,6 +286,7 @@ end
     @test_throws Unitful.DimensionError render!(c3, Rectangle(5m,10m))
     render!(c3, r)
     c2ref = CellReference(c2, Point(-10.0,0.0); mag=1.0, rot=180°)
+    @test c2ref.cell === c2
     c3ref = CellReference(c3, Point(10.0,0.0); mag=2.0, rot=90°)
     push!(c.refs, c2ref)
     push!(c2.refs, c3ref)
@@ -308,8 +309,10 @@ end
     c = Cell("main")
     c2 = Cell("rect")
     render!(c2, Rectangle(5,5))
-    push!(c.refs, CellArray(c2, Point(0,0); dc=Point(10,0), dr=Point(0,10),
-        ncols=10, nrows=10))
+    arr = CellArray(c2, Point(0,0); dc=Point(10,0), dr=Point(0,10),
+        ncols=10, nrows=10)
+    @test arr.cell === c2
+    push!(c.refs, arr)
 
     # Test bounds with cell arrays
     @test bounds(c) == Rectangle(95,95)

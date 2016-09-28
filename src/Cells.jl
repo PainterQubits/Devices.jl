@@ -103,11 +103,11 @@ type CellArray{S,T} <: CellRef{S,T}
     mag::Float64
     rot::Float64
 end
-convert{S,T}(::Type{CellArray{S,T}}, x::CellArray) =
-    CellArray(T(x.cell), convert(Point{S}, x.origin),
-                         convert(Point{S}, x.deltacol),
-                         convert(Point{S}, x.deltarow),
-                         x.col, x.row, x.xrefl, x.mag, x.rot)
+convert{S}(::Type{CellArray{S}}, x::CellArray) =
+    CellArray(x.cell, convert(Point{S}, x.origin),
+                      convert(Point{S}, x.deltacol),
+                      convert(Point{S}, x.deltarow),
+                      x.col, x.row, x.xrefl, x.mag, x.rot)
 
 """
 ```
@@ -154,10 +154,12 @@ type Cell{T<:Coordinate}
         c
     end
 end
-convert{T}(::Type{Cell{T}}, x::Cell) =
-    Cell{T}(x.name, convert(Vector{Polygon{T}}, x.elements),
-                    convert(Vector{CellRef}, x.refs),
-                    x.create)
+# Do NOT define a convert method like this or otherwise cells will
+# be copied when referenced by CellRefs!
+# convert{T}(::Type{Cell{T}}, x::Cell) =
+#     Cell{T}(x.name, convert(Vector{Polygon{T}}, x.elements),
+#                     convert(Vector{CellRef}, x.refs),
+#                     x.create)
 
 """
 ```
