@@ -1,3 +1,6 @@
+- v0.0.4
+ - Bug fixes: `CellReference` and `CellArray` were copying their referenced cells instead of retaining a reference to the original object. `flatten` for CellArrays was not using the calculated coordinate shifts.
+ - `uniquename` moved to Cells module and exported for users.
 - v0.0.3
  - Bug fixes.
  - Added `XReflection` and `YReflection` transformations.
