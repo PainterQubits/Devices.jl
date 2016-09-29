@@ -644,7 +644,7 @@ function flatten(c::CellArray)
                       sgn*c.mag*sin(c.rot) c.mag*cos(c.rot)])
     for i in 1:c.row, j in 1:c.col
         pt = (i-1) * c.deltarow + (j-1) * c.deltacol
-        append!(polys, a.(flatten(c.cell)))
+        append!(polys, a.(flatten(c.cell) .+ pt))
         # append!(polys, a.(c.cell.elements .+ pt))
         # for r in c.cell.refs
         #     append!(polys, a.(flatten(r) .+ pt))

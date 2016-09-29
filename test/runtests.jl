@@ -305,6 +305,10 @@ end
     @test bounds(c′) ≈ (bounds(c) + Point(10.0,10.0))
     @test bounds(c2ref′) ≈ (bounds(c2ref) + Point(10.,10.))
 
+    # Test `flatten!` when encountering a CellReference
+    flatten!(c)
+    @test bounds(c) == bounds(c2ref)
+
     # More setup
     c = Cell("main")
     c2 = Cell("rect")
@@ -317,7 +321,10 @@ end
     # Test bounds with cell arrays
     @test bounds(c) == Rectangle(95,95)
 
-    # TODO: Tests for `flatten`
+    # Test `flatten!` when encountering a CellArray
+    flatten!(c)
+    @test bounds(c) == Rectangle(95,95)
+
 end
 
 @testset "Paths" begin
