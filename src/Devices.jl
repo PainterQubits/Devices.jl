@@ -388,7 +388,7 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
             offset = extent(s.s, t)
             newx = offset * cos(rot2)
             newy = offset * sin(rot2)
-            ref.origin = Point(tformrotate(rot)*Array(ref.origin))
+            ref.origin = Point(Rotation(rot)(ref.origin)) #Array(ref.origin)
             ref.origin += (Point(newx,newy) + segment.f(t))
             ref.rot += rot#*180/π
         end
@@ -399,7 +399,7 @@ end
 
 include("tags.jl")
 import .Tags: qrcode!, radialstub, radialcut #, cpwlauncher #, launch!
-import .Tags: pecbasedose, checkerboard, surf1d
+import .Tags: pecbasedose, checkerboard, surf1d, interdigit
 export Tags
 export qrcode!
 export radialstub, radialcut

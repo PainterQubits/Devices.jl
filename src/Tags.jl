@@ -378,11 +378,24 @@ function surf1d(length, width, contour_fn; zbins=20, step=1., max_seg_len=1.)
     polys
 end
 
+"""
+```
+interdigit(cellname;
+    width=2., length=400., xgap=3., ygap=2., npairs=40, skiplast=true, layer=0)
+```
 
-function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40, layer=FEATURES_LAYER)
+- `width`: width of a finger
+- `xgap`: x-offset at ends of fingers
+- `ygap`: gap between fingers
+- `npairs`: number of fingers
+"""
+function interdigit(cellname; width=2, length=400, xgap=3, ygap=2, npairs=40,
+    skiplast=true, layer=0)
     c = Cell(cellname)
     for i in 1:npairs
         render!(c, Rectangle(Point(0,(i-1)*2*(width+ygap)), Point(length,(i-1)*2*(width+ygap)+width), layer=layer))
+    end
+    for i in 1:(npairs-skiplast)
         render!(c, Rectangle(Point(xgap,(2i-1)*(width+ygap)), Point(xgap+length,width+(2i-1)*(width+ygap)), layer=layer))
     end
 
