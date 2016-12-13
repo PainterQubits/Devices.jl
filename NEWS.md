@@ -1,3 +1,9 @@
+- v0.0.5
+ - Added some options to `interdigit`.
+ - `extent` is now exported from the Paths module.
+ - Bug fix: replaced old `tformrotate` with `Rotation`.
+ - Bug fix: attachments now render according to the documentation when using
+   `attach!` with `where=0`.
 - v0.0.4
  - Bug fixes: `CellReference` and `CellArray` were copying their referenced cells instead of retaining a reference to the original object. `flatten` for CellArrays was not using the calculated coordinate shifts.
  - `uniquename` moved to Cells module and exported for users.
