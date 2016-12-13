@@ -376,6 +376,7 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
 
         rot = direction(segment.f, t)
         if dir == 0
+            ref.origin = Point(Rotation(rot)(ref.origin)) #Array(ref.origin)
             ref.origin += segment.f(t)
             ref.rot += rot#*180/π
         else
