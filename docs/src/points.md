@@ -52,7 +52,7 @@ transformation. You can type the following Unicode symbols with `\degree` and
 
 ```jldoctest
 julia> aff = Rotation(90°) ∘ Translation(Point(1,2))
-AffineMap([6.12323e-17 -1.0; 1.0 6.12323e-17], (-2.0,1.0000000000000002))
+AffineMap([0.0 -1.0; 1.0 0.0], (-2.0,1.0))
 
 julia> aff(Point(0,0))
 2-element Devices.Points.Point{Float64}:

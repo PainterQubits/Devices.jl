@@ -30,7 +30,7 @@ julia> trans = Translation(10,10)
 Translation(10,10)
 
 julia> trans = Rotation(90°) ∘ trans
-AffineMap([6.12323e-17 -1.0; 1.0 6.12323e-17], [-10.0,10.0])
+AffineMap([0.0 -1.0; 1.0 0.0], [-10.0,10.0])
 
 julia> trans(r)
 Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-10.0,11.0),(-11.0,11.0),(-11.0,10.0)],Dict{Symbol,Any}())
