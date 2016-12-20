@@ -319,6 +319,9 @@ end
 #     end
 # end
 
+function render!(c::Cell, segment::Paths.Segment, s::Paths.NoRender; kwargs...)
+end
+
 """
 ```
 render!(c::Cell, segment::Paths.Segment, s::Paths.Style; kwargs...)

@@ -475,6 +475,7 @@ include("contstyles/trace.jl")
 include("contstyles/cpw.jl")
 include("contstyles/compound.jl")
 include("contstyles/decorated.jl")
+include("contstyles/norender.jl")
 include("discretestyles/simple.jl")
 include("skipstyles.jl")
 
