@@ -485,7 +485,7 @@ end
 
 """
 ```
-load(f::File{format"GDS"}; verbose=false)
+load(f::File{format"GDS"}; verbose::Bool=false, nounits::Bool=false)
 ```
 
 A dictionary of top-level cells (`Cell` objects) found in the GDS-II file is
@@ -513,8 +513,11 @@ without warning. If no ENDLIB record is present, a warning will be thrown.
 
 The content of some records are currently discarded (mainly the more obscure
 GDS-II record types, but also BGNLIB and LIBNAME).
+
+If `nounits` is true, `Cell{Float64}` objects will be returned, where 1.0
+corresponds to one micron.
 """
-function load(f::File{format"GDS"}; verbose=false)
+function load(f::File{format"GDS"}; verbose::Bool=false, nounits::Bool=false)
     cells = Dict{String, Cell}()
     open(f) do s
         # Skip over GDS-II header record
@@ -575,7 +578,7 @@ function load(f::File{format"GDS"}; verbose=false)
                 verbose && info("Token was BGNSTR")
                 # ignore creation time, modification time of structure
                 skip(s, bytes)
-                c = cell(s, dbs, verbose)
+                c = cell(s, dbs, verbose, nounits)
                 cells[c.name] = c
             elseif token == ENDLIB
                 verbose && info("Token was ENDLIB")
@@ -613,8 +616,8 @@ function load(f::File{format"GDS"}; verbose=false)
     cells
 end
 
-function cell(s, dbs, verbose)
-    c = Cell{typeof(dbs)}()
+function cell(s, dbs, verbose, nounits)
+    c = nounits ? Cell{Float64}() : Cell{typeof(dbs)}()
     while true
         bytes = ntoh(read(s, Int16)) - 4 # 2 for byte count, 2 for token
         token = ntoh(read(s, UInt16))
@@ -625,13 +628,13 @@ function cell(s, dbs, verbose)
             verbose && info("Token was STRNAME: $(c.name)")
         elseif token == BOUNDARY
             verbose && info("Token was BOUNDARY")
-            push!(c.elements, boundary(s, dbs, verbose))
+            push!(c.elements, boundary(s, dbs, verbose, nounits))
         elseif token == SREF
             verbose && info("Token was SREF")
-            push!(c.refs, sref(s, dbs, verbose))
+            push!(c.refs, sref(s, dbs, verbose, nounits))
         elseif token == AREF
             verbose && info("Token was AREF")
-            push!(c.refs, aref(s, dbs, verbose))
+            push!(c.refs, aref(s, dbs, verbose, nounits))
         elseif token == ENDSTR
             verbose && info("Token was ENDSTR")
             break
@@ -642,10 +645,11 @@ function cell(s, dbs, verbose)
     c
 end
 
-function boundary(s, dbs, verbose)
+function boundary(s, dbs, verbose, nounits)
     haseflags, hasplex, haslayer, hasdt, hasxy = false, false, false, false, false
     layer, dt = DEFAULT_LAYER, DEFAULT_DATATYPE
     local xy
+    T = nounits ? Float64 : typeof(dbs)
     while true
         bytes = ntoh(read(s, UInt16)) - 4
         token = ntoh(read(s, UInt16))
@@ -676,11 +680,17 @@ function boundary(s, dbs, verbose)
         elseif token == XY
             verbose && info("Token was XY")
             hasxy && error("Already read XY tag for this BOUNDARY tag.")
-            xy = Array{Point{typeof(dbs)}}(Int(floor(bytes / 8))-1)
+            xy = Array{Point{T}}(Int(floor(bytes / 8))-1)
             i = 1
             while i <= length(xy)
                 # TODO: warn if last point not equal to first
-                xy[i] = Point(ntoh(read(s, Int32))*dbs, ntoh(read(s, Int32))*dbs)
+                if nounits
+                    xy[i] = Point(ustrip(ntoh(read(s, Int32))*dbs |> μm),
+                                  ustrip(ntoh(read(s, Int32))*dbs |> μm))
+                else
+                    xy[i] = Point(ntoh(read(s, Int32))*dbs,
+                                  ntoh(read(s, Int32))*dbs)
+                end
                 i += 1
             end
             read(s, Int32)
@@ -698,7 +708,7 @@ function boundary(s, dbs, verbose)
     Polygon(xy; layer = layer, datatype = dt)
 end
 
-function sref(s, dbs, verbose)
+function sref(s, dbs, verbose, nounits)
     # SREF [EFLAGS] [PLEX] SNAME [<STRANS>] XY
     haseflags, hasplex, hassname, hasstrans, hasmag, hasangle, hasxy =
         false, false, false, false, false, false, false
@@ -748,7 +758,12 @@ function sref(s, dbs, verbose)
             verbose && info("Token was XY")
             hasxy && error("Already read XY tag for this SREF tag.")
             hasxy = true
-            xy = Point(ntoh(read(s, Int32))*dbs, ntoh(read(s, Int32))*dbs)
+            if nounits
+                xy = Point(ustrip(ntoh(read(s, Int32))*dbs |> μm),
+                           ustrip(ntoh(read(s, Int32))*dbs |> μm))
+            else
+                xy = Point(ntoh(read(s, Int32))*dbs, ntoh(read(s, Int32))*dbs)
+            end
         elseif token == ENDEL
             verbose && info("Token was ENDEL")
             skip(s, bytes)
@@ -773,7 +788,7 @@ function sref(s, dbs, verbose)
     CellReference(str, xy; xrefl=xrefl, mag=mag, rot=rot)
 end
 
-function aref(s, dbs, verbose)
+function aref(s, dbs, verbose, nounits)
     # AREF [EFLAGS] [PLEX] SNAME [<STRANS>] COLROW XY
     haseflags, hasplex, hassname, hasstrans, hasmag, hasangle, hascolrow, hasxy =
         false, false, false, false, false, false, false, false
@@ -828,9 +843,18 @@ function aref(s, dbs, verbose)
             verbose && info("Token was XY")
             hasxy && error("Already read XY tag for this AREF tag.")
             hasxy = true
-            o = Point(ntoh(read(s, Int32))*dbs, ntoh(read(s, Int32))*dbs)
-            ec = Point(ntoh(read(s, Int32))*dbs, ntoh(read(s, Int32))*dbs)
-            er = Point(ntoh(read(s, Int32))*dbs, ntoh(read(s, Int32))*dbs)
+            if nounits
+                o = Point(ustrip(ntoh(read(s, Int32))*dbs |> μm),
+                          ustrip(ntoh(read(s, Int32))*dbs |> μm))
+                ec = Point(ustrip(ntoh(read(s, Int32))*dbs |> μm),
+                           ustrip(ntoh(read(s, Int32))*dbs |> μm))
+                er = Point(ustrip(ntoh(read(s, Int32))*dbs |> μm),
+                           ustrip(ntoh(read(s, Int32))*dbs |> μm))
+            else
+                o = Point(ntoh(read(s, Int32))*dbs, ntoh(read(s, Int32))*dbs)
+                ec = Point(ntoh(read(s, Int32))*dbs, ntoh(read(s, Int32))*dbs)
+                er = Point(ntoh(read(s, Int32))*dbs, ntoh(read(s, Int32))*dbs)
+            end
         elseif token == ENDEL
             verbose && info("Token was ENDEL")
             skip(s, bytes)
