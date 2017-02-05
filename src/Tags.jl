@@ -269,21 +269,19 @@ end
 
 """
 ```
-pecbasedose(kwargs...)
+pecbasedose(line=0.1, space=0.1, size=200.0; kwargs...)
 ```
 
 Generate lines and spaces suitable for obtaining the base dose for BEAMER PEC
 (100 keV on Si).
-
-To do: Modify to be more flexible for other substrates, beam energies, etc.
 """
-function pecbasedose(kwargs...)
-    r = Rectangle(0.1, 200.; kwargs...)
+function pecbasedose(line=0.1, space=0.1, size=200.0; kwargs...)
+    r = Rectangle(line, size; kwargs...)
     rcell = Cell(uniquename("line"))
     render!(rcell, r, Rectangles.Plain())
 
-    a = CellArray(rcell, Point(0., 0.),
-        Point(0.2, 0.), Point(0., 0.), 1000, 1)
+    a = CellArray(rcell, Point(0., 0.); dc=Point(line+space, 0.),
+        dr=Point(0., 0.), nc=Int(floor(size/(line+space))), nr=1)
     c = Cell(uniquename("pecbasedose"))
     push!(c.refs, a)
     c
