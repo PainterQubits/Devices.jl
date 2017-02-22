@@ -1,6 +1,7 @@
 module Points
 import Devices: Coordinate
-import StaticArrays: FieldVector, @SMatrix
+import StaticArrays
+import StaticArrays: @SMatrix
 import CoordinateTransformations: LinearMap, Translation, ∘, compose
 import Clipper: IntPoint
 import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret
@@ -14,7 +15,7 @@ export getx, gety, lowerleft, upperright
 
 """
 ```
-immutable Point{T} <: FieldVector{T}
+immutable Point{T} <: StaticArrays.FieldVector{T}
     x::T
     y::T
 end
@@ -22,10 +23,13 @@ end
 
 2D Cartesian coordinate in the plane.
 """
-immutable Point{T<:Coordinate} <: FieldVector{T}
+immutable Point{T<:Coordinate} <: StaticArrays.FieldVector{T}
     x::T
     y::T
 end
+
+StaticArrays.similar_type{P<:Point, T}(::Type{P}, ::Type{T},
+    ::StaticArrays.Size{(2,)}) = Point{T}
 
 Point(x::Number, y::Number) =
     error("Cannot use `Point` with this combination of types.")

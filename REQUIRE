@@ -1,7 +1,7 @@
 julia 0.5
 PyCall
 ForwardDiff
-StaticArrays
+StaticArrays 0.3.0
 CoordinateTransformations
 FileIO
-Compat
+Compat 0.7.15

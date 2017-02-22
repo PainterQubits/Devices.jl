@@ -7,6 +7,7 @@ import ForwardDiff
 
 # This is needed in case the user has changed the default length promotion type.
 ru = promote_type(typeof(m),typeof(cm))()
+p(x,y) = Point(x,y)
 
 @testset "Points" begin
     @testset "> Point constructors" begin
@@ -171,21 +172,21 @@ end
         r1 = Rectangle(2,2)
         r2 = Rectangle(1,2)
         @test clip(Clipper.ClipTypeDifference, r1, r2)[1] ==
-            Polygon(Point{Int}[(2,2),(1,2),(1,0),(2,0)])
+            Polygon(Point{Int}[p(2,2),p(1,2),p(1,0),p(2,0)])
         @test typeof(clip(Clipper.ClipTypeDifference, r1, r2)[1]) ==
             Polygon{Int}
 
         # Rectangle{Int}, Polygon{Int} clipping
-        p2 = Polygon(Point{Int}[(0,0), (1,0), (1,2), (0,2)])
+        p2 = Polygon(Point{Int}[p(0,0), p(1,0), p(1,2), p(0,2)])
         @test clip(Clipper.ClipTypeDifference, r1, p2)[1] ==
-            Polygon(Point{Int}[(2,2),(1,2),(1,0),(2,0)])
+            Polygon(Point{Int}[p(2,2),p(1,2),p(1,0),p(2,0)])
         @test typeof(clip(Clipper.ClipTypeDifference, r1, p2)[1]) ==
             Polygon{Int}
 
         # Polygon{Int}, Polygon{Int} clipping
-        p1 = Polygon(Point{Int}[(0,0), (2,0), (2,2), (0,2)])
+        p1 = Polygon(Point{Int}[p(0,0), p(2,0), p(2,2), p(0,2)])
         @test clip(Clipper.ClipTypeDifference, p1, p2)[1] ==
-            Polygon(Point{Int}[(2,2),(1,2),(1,0),(2,0)])
+            Polygon(Point{Int}[p(2,2), p(1,2), p(1,0), p(2,0)])
         @test typeof(clip(Clipper.ClipTypeDifference, p1, p2)[1]) ==
             Polygon{Int}
 
@@ -193,21 +194,21 @@ end
         r1 = Rectangle(2.0,2.0)
         r2 = Rectangle(1.0,2.0)
         @test clip(Clipper.ClipTypeDifference, r1, r2)[1] ==
-            Polygon(Point{Float64}[(2.0,2.0),(1.0,2.0),(1.0,0.0),(2.0,0.0)])
+            Polygon(Point{Float64}[p(2.0,2.0), p(1.0,2.0), p(1.0,0.0), p(2.0,0.0)])
         @test typeof(clip(Clipper.ClipTypeDifference, r1, r2)[1]) ==
             Polygon{Float64}
 
         # Rectangle{Float64}, Polygon{Float64} clipping
-        p2 = Polygon(Point{Float64}[(0,0), (1,0), (1,2), (0,2)])
+        p2 = Polygon(Point{Float64}[p(0,0), p(1,0), p(1,2), p(0,2)])
         @test clip(Clipper.ClipTypeDifference, r1, p2)[1] ==
-            Polygon(Point{Float64}[(2,2),(1,2),(1,0),(2,0)])
+            Polygon(Point{Float64}[p(2,2), p(1,2), p(1,0), p(2,0)])
         @test typeof(clip(Clipper.ClipTypeDifference, r1, p2)[1]) ==
             Polygon{Float64}
 
         # Polygon{Float64}, Polygon{Float64} clipping
-        p1 = Polygon(Point{Float64}[(0,0), (2,0), (2,2), (0,2)])
+        p1 = Polygon(Point{Float64}[p(0,0), p(2,0), p(2,2), p(0,2)])
         @test clip(Clipper.ClipTypeDifference, p1, p2)[1] ==
-            Polygon(Point{Float64}[(2,2),(1,2),(1,0),(2,0)])
+            Polygon(Point{Float64}[p(2,2), p(1,2), p(1,0), p(2,0)])
         @test typeof(clip(Clipper.ClipTypeDifference, p1, p2)[1]) ==
             Polygon{Float64}
 
@@ -215,7 +216,7 @@ end
         # Rectangle{Int}, Polygon{Float64} clipping
         r2 = Rectangle(1,2)
         @test clip(Clipper.ClipTypeDifference, p1, r2)[1] ==
-            Polygon(Point{Float64}[(2,2),(1,2),(1,0),(2,0)])
+            Polygon(Point{Float64}[p(2,2), p(1,2), p(1,0), p(2,0)])
         @test typeof(clip(Clipper.ClipTypeDifference, p1, r2)[1]) ==
             Polygon{Float64}
     end
@@ -225,14 +226,14 @@ end
         r1 = Rectangle(2μm,2μm)
         r2 = Rectangle(1μm,2μm)
         @test clip(Clipper.ClipTypeDifference, r1, r2)[1] ==
-            Polygon(Point{typeof(1μm)}[(2μm,2μm),(1μm,2μm),(1μm,0μm),(2μm,0μm)])
+            Polygon(Point{typeof(1μm)}[p(2μm,2μm), p(1μm,2μm), p(1μm,0μm), p(2μm,0μm)])
         @test typeof(clip(Clipper.ClipTypeDifference, r1, r2)[1]) ==
             Polygon{typeof(1μm)}
 
         r1 = Rectangle(2.0μm,2.0μm)
         r2 = Rectangle(1.0μm,2.0μm)
         @test clip(Clipper.ClipTypeDifference, r1, r2)[1] ==
-            Polygon(Point{typeof(1.0μm)}[(2μm,2μm),(1μm,2μm),(1μm,0μm),(2μm,0μm)])
+            Polygon(Point{typeof(1.0μm)}[p(2μm,2μm), p(1μm,2μm), p(1μm,0μm), p(2μm,0μm)])
         @test typeof(clip(Clipper.ClipTypeDifference, r1, r2)[1]) ==
             Polygon{typeof(1.0μm)}
 
@@ -244,9 +245,9 @@ end
         s = [r1, r1+Point(0,4), r1+Point(0,8)]
         c = [Rectangle(1,10)]
         r = clip(Clipper.ClipTypeDifference, s, c)
-        @test Polygon(Point{Int}[(2,2),(1,2),(1,0),(2,0)]) in r
-        @test Polygon(Point{Int}[(2,6),(1,6),(1,4),(2,4)]) in r
-        @test Polygon(Point{Int}[(2,10),(1,10),(1,8),(2,8)]) in r
+        @test Polygon(Point{Int}[p(2,2),p(1,2),p(1,0),p(2,0)]) in r
+        @test Polygon(Point{Int}[p(2,6),p(1,6),p(1,4),p(2,4)]) in r
+        @test Polygon(Point{Int}[p(2,10),p(1,10),p(1,8),p(2,8)]) in r
         @test length(r) == 3
     end
 end
@@ -254,26 +255,25 @@ end
 @testset "Polygon offsetting" begin
     r = Rectangle(1, 1)
     @test offset(r, 1)[1] ==
-        Polygon([Point(2,2),Point(-1,2),Point(-1,-1),Point(2,-1)])
+        Polygon([p(2,2), p(-1,2), p(-1,-1), p(2,-1)])
     @test_throws DimensionError offset(r,1μm)
 
     r = Rectangle(1.0, 1.0)
     @test offset(r, 0.5)[1] ==
-        Polygon(Point{Float64}[(1.5, 1.5),(-0.5, 1.5),(-0.5, -0.5),(1.5, -0.5)])
+        Polygon([p(1.5, 1.5), p(-0.5, 1.5), p(-0.5, -0.5), p(1.5, -0.5)])
     @test_throws DimensionError offset(r, 0.5μm)
 
     r = Rectangle(1μm, 1μm)
     @test_throws DimensionError offset(r, 1)
     @test offset(r, 1μm)[1] == Polygon(
-        Point{typeof(1μm)}[(2μm, 2μm),(-1μm, 2μm),(-1μm, -1μm),(2μm, -1μm)])
+        [p(2μm, 2μm), p(-1μm, 2μm), p(-1μm, -1μm), p(2μm, -1μm)])
     @test offset(r, 5000nm)[1] == Polygon(
-        Point{typeof(1μm)}[(6μm, 6μm),(-5μm, 6μm),(-5μm, -5μm),(6μm, -5μm)])
+        [p(6μm, 6μm), p(-5μm, 6μm), p(-5μm, -5μm), p(6μm, -5μm)])
 
     r = Rectangle(1.0μm, 1.0μm)
     @test_throws DimensionError offset(r, 1.0)
     @test offset(r, 50nm)[1] ≈ Polygon(
-        Point{typeof(0.5μm)}[(1.05μm,1.05μm),(-0.05μm,1.05μm),
-                             (-0.05μm,-0.05μm),(1.05μm,-0.05μm)])
+        [p(1.05μm,1.05μm), p(-0.05μm,1.05μm), p(-0.05μm,-0.05μm), p(1.05μm,-0.05μm)])
 
 end
 
@@ -336,12 +336,12 @@ end
     end
 
     @testset "> Path segments" begin
-        p = Path(Point(0.0μm, 0.0μm))
-        @test_throws Unitful.DimensionError straight!(p, 10.0)
-        @test pathlength(p) == 0.0μm
-        straight!(p, 10μm)
-        @test pathlength(p) == 10μm
-        @test ForwardDiff.derivative(p[1].seg.f, 0.0) ≈ Point(10.0μm, 0.0μm)
+        path = Path(Point(0.0μm, 0.0μm))
+        @test_throws Unitful.DimensionError straight!(path, 10.0)
+        @test pathlength(path) == 0.0μm
+        straight!(path, 10μm)
+        @test pathlength(path) == 10μm
+        @test ForwardDiff.derivative(path[1].seg.f, 0.0) ≈ Point(10.0μm, 0.0μm)
     end
 
     # TODO: How to test `CompoundSegment` / `CompoundStyle`?
