@@ -4,6 +4,10 @@
  - Bug fix: replaced old `tformrotate` with `Rotation`.
  - Bug fix: attachments now render according to the documentation when using
    `attach!` with `where=0`.
+ - Bug fix: update to adapt to changes in StaticArrays.jl.
+ - Added `NoRender` style.
+ - Allow GDS importing without units.
+ - Modify signature of `pecbasedose` method.
 - v0.0.4
  - Bug fixes: `CellReference` and `CellArray` were copying their referenced cells instead of retaining a reference to the original object. `flatten` for CellArrays was not using the calculated coordinate shifts.
  - `uniquename` moved to Cells module and exported for users.
