@@ -18,6 +18,8 @@ install:
       sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20
       g++ --version
     fi
+  - "pip install gdspy"
+  - "pip install pyqrcode"
 julia:
   - 0.5
   - 0.6
