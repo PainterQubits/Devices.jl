@@ -93,7 +93,7 @@ Turn a path `p` by angle `α` with a turning radius `r` in the current direction
 Positive angle turns left.
 """
 function turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p))
-    dimension(T) != dimension(typeof(r)) && throw(DimensionError())
+    dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
     p0 = p1(p)
     α0 = α1(p)
     turn = Turn{T}(α, r, p0, α0)
@@ -117,7 +117,7 @@ By default, we take the last continuous style in the path.
 """
 function turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate,
         sty::ContinuousStyle=contstyle1(p))
-    dimension(T) != dimension(typeof(r)) && throw(DimensionError())
+    dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
     for ch in s
         if ch == 'l'
             α = π/2

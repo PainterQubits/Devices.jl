@@ -81,7 +81,7 @@ we take the last continuous style in the path.
 """
 function straight!{T<:Coordinate}(p::Path{T}, l::Coordinate,
         sty::Style=contstyle1(p))
-    dimension(T) != dimension(typeof(l)) && throw(DimensionError())
+    dimension(T) != dimension(typeof(l)) && throw(DimensionError(T(1),l))
     p0 = p1(p)
     α = α1(p)
     s = Straight{T}(l, p0, α)

@@ -9,7 +9,7 @@ using PyCall
 using ForwardDiff
 import CoordinateTransformations: AffineMap, LinearMap, Translation
 import Clipper
-import Clipper.orientation
+import Clipper: orientation, children, contour
 
 import Devices
 import Unitful
@@ -263,7 +263,7 @@ function clip{S<:Coordinate, T<:Coordinate}(op::Clipper.ClipType,
         pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
         pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
 
-    dimension(S) != dimension(T) && throw(Unitful.DimensionError())
+    dimension(S) != dimension(T) && throw(Unitful.DimensionError(S(1),T(1)))
     R = promote_type(S, T)
     clip(op, Polygon{R}[s], Polygon{R}[c]; pfs=pfs, pfc=pfc)
 end
@@ -332,7 +332,7 @@ function _clip{T<:Union{Int64, Unitful.Quantity{Int64}}}(op::Clipper.ClipType,
         Clipper.add_path!(c, reinterpret(Clipper.IntPoint, c0.p),
             Clipper.PolyTypeClip, true)
     end
-    result = convert(Clipper.PolyTree{Point{Int}},
+    result = convert(Clipper.PolyNode{Point{Int}},
         Clipper.execute_pt(c, op, pfs, pfc)[2])
 
     polys = interiorcuts(result, Polygon{T}[], subject[1].properties)
@@ -426,7 +426,7 @@ function offset{T<:Polygon}(s::AbstractVector{T}, delta::Coordinate;
     j::Clipper.JoinType=Clipper.JoinTypeMiter,
     e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
 
-    dimension(eltype(T)) != dimension(delta) && throw(Unitful.DimensionError())
+    dimension(eltype(T)) != dimension(delta) && throw(Unitful.DimensionError(eltype(T)(1),delta))
     S = clipperize(s)
     d = if eltype(T) <: Union{Int64, Unitful.Quantity{Int64}}
         ustrip(uconvert(unit(eltype(T)), delta))
@@ -573,8 +573,7 @@ function intersection(A::Line, B::Line, checkparallel=true)
     end
 end
 
-function interiorcuts{T}(nodeortree::Union{Clipper.PolyNode, Clipper.PolyTree},
-        outpolys::Vector{Polygon{T}}, props)
+function interiorcuts{T}(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}}, props)
     # currently assumes we have first element an enclosing polygon with
     # the rest being holes. We don't dig deep into the PolyTree...
 
@@ -582,11 +581,11 @@ function interiorcuts{T}(nodeortree::Union{Clipper.PolyNode, Clipper.PolyTree},
 
     minpt = Point(-Inf, -Inf)
 
-    for enclosing in nodeortree.children
-        segs = segments(enclosing.v)
-        for hole in enclosing.children
+    for enclosing in children(nodeortree)
+        segs = segments(contour(enclosing))
+        for hole in children(enclosing)
             # Intersect the unique ray with the line segments of the polygon.
-            ray = uniqueray(hole.v)
+            ray = uniqueray(contour(hole))
 
             # Find nearest intersection of the ray with the enclosing polygon.
             k = -1
@@ -608,32 +607,32 @@ function interiorcuts{T}(nodeortree::Union{Clipper.PolyNode, Clipper.PolyTree},
             if k != -1
                 w = Point{Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
                 # println(w)
-                kp1 = enclosing.v[(k+1 > length(enclosing.v)) ? 1 : k+1]
+                kp1 = contour(enclosing)[(k+1 > length(contour(enclosing))) ? 1 : k+1]
 
-                # println(enclosing.v[1:k])
+                # println(contour(enclosing)[1:k])
                 # println(w)
-                # println(hole.v)
-                # println(enclosing.v[(k+1):end])
+                # println(contour(hole))
+                # println(contour(enclosing)[(k+1):end])
 
                 # Make the cut in the enclosing polygon
-                enclosing.v = Point{Int64}[enclosing.v[1:k];
-                    [w];       # could actually be enclosing.v[k]... should check for this.
-                    hole.v;
-                    [hole.v[1]]; # need to loop back to first point of hole
+                enclosing.contour = Point{Int64}[contour(enclosing)[1:k];
+                    [w];       # could actually be contour(enclosing)[k]... should check for this.
+                    contour(hole);
+                    [contour(hole)[1]]; # need to loop back to first point of hole
                     [w];
-                    enclosing.v[(k+1):end]]
+                    contour(enclosing)[(k+1):end]]
 
                 # update the segment cache
                 segs = [segs[1:(k-1)];
-                    Segment(enclosing.v[k], w);
-                    Segment(w, hole.v[1]);
-                    segments(hole.v);
-                    Segment(hole.v[1], w);
+                    Segment(contour(enclosing)[k], w);
+                    Segment(w, contour(hole)[1]);
+                    segments(contour(hole));
+                    Segment(contour(hole)[1], w);
                     Segment(w, kp1);
                     segs[(k+1):end]]
             end
         end
-        push!(outpolys, Polygon(reinterpret(Point{T}, enclosing.v), props))
+        push!(outpolys, Polygon(reinterpret(Point{T}, contour(enclosing)), props))
     end
     outpolys
 end

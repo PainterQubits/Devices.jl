@@ -4,8 +4,7 @@ module Devices
 using PyCall
 using ForwardDiff
 using FileIO
-using Unitful
-import Unitful: °
+include("Units.jl")
 
 import Clipper
 import FileIO: save, load

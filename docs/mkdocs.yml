@@ -19,7 +19,7 @@ markdown_extensions:
   - fenced_code
 
 extra_javascript:
-  - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML
+  - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
   - assets/mathjaxhelper.js
 
 docs_dir: 'build'

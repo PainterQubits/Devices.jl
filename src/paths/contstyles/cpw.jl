@@ -22,7 +22,7 @@ type CPW{T} <: ContinuousStyle{T}
     divs::Int
 end
 function CPW(trace::Coordinate, gap::Coordinate)
-    dimension(trace) != dimension(gap) && throw(DimensionError())
+    dimension(trace) != dimension(gap) && throw(DimensionError(trace,gap))
     t,g = promote(float(trace), float(gap))
     CPW{typeof(t)}(x->t, x->g, 1)
 end

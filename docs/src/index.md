@@ -29,39 +29,42 @@ A [Julia](http://julialang.org) package for designing CAD files for superconduct
 
 ### Install Julia packages
 
-We use a custom version of the Clipper package, which we will need for making polygons
-compatible with GDS files.
++ `Pkg.add("Clipper")`
 
-+ `Pkg.clone("https://github.com/PainterQubits/Clipper.jl.git")`
-+ `Pkg.checkout("Clipper", "pointinpoly")`
+(We used to use a custom version of the Clipper.jl package, but thanks to upstream changes
+that is no longer necessary.) When Clipper.jl is added, it will be built to compile shared
+library / DLL files.
 
-You will need to build the package to compile shared library / DLL files.
-This should just work on Mac OS X, and should also work on Windows provided you
-install [Visual Studio Community](https://www.visualstudio.com/en-us/visual-studio-homepage-vs.aspx).
-You should make sure to check the option to install Visual-C++
-and ensure that `vcvarsall.bat` and `cl.exe` are in your
-account's PATH variable. Probably these are located in:
-`C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC` and
-`C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin`, respectively.
-
-+ `Pkg.build("Clipper")`
 + `Pkg.clone("https://github.com/PainterQubits/Devices.jl.git")`
 
-Finally, for convenience you may want to have `Devices` load up every time
-you open Julia. You can do this by adding the following to a file `.juliarc.jl`
-in the directory returned by `homedir()`:
-
-```
-using Devices, Unitful, FileIO
-using Unitful: μm, µm, nm, °, rad
-```
-
-You can then create and save CAD files with unit support as soon as Julia
-starts up. This will also enable the unqualified use of microns, nanometers,
-degrees, and radians (any other units you want to use will still need to be
-imported from Unitful).
-
 ## Quick start
+
+### Example using units
+
+```
+using Devices, FileIO
+using Devices.PreferMicrons
+
+example forthcoming
+```
+
+You can then create and save CAD files with unit support. This will also enable the
+unqualified use of the following units: `pm, nm, μm, mm, cm, dm, m, °, rad`. When adding
+length units together, if the units don't agree, the result will be in microns.
+You can *instead* do `using Devices.PreferNanometers` if you want the result to default to
+nanometers. These are your two choices at the moment, though there's nothing fundamentally
+limiting other possibilities.
+
+Note that if you'd prefer, you can add the `using` statements to a file `.juliarc.jl` in
+the directory returned by `homedir()` if you want Julia to load Devices.jl every time you
+open it.
+
+
+### Example without using units
+
+For compatibility and laziness reasons it is possible to use Devices.jl without units at
+all. If you do not provide units, all values are presumed to be in microns. Most but not all
+functionality is possible if you do not use units.
 
 ```
 using Devices, FileIO

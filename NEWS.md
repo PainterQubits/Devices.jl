@@ -1,3 +1,8 @@
+- v0.0.6
+ - Begin using `ContextUnits` from Unitful.jl 0.2 for better unit handling.
+ - Switch over to the registered Clipper.jl package now that the necessary changes have
+   been made upstream.
+ - Turn on automatic doc builds.
 - v0.0.5
  - Added some options to `interdigit`.
  - `extent` is now exported from the Paths module.

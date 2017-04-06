@@ -732,9 +732,9 @@ traversed one level at a time to find the reference (optimized for shallow
 references).
 
 Example: You want to translate (2.0,3.0) in the coordinate system of the
-referenced cell to the coordinate system of `c`.
+referenced cell `d` to the coordinate system of `c`:
 
-```jldoctest
+```
 julia> trans = transform(c,d)
 
 julia> trans(Point(2.0,3.0))

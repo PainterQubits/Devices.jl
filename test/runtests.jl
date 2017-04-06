@@ -1,41 +1,63 @@
 using Base.Test
 using Devices
 using Unitful
-import Unitful: m, cm, nm, μm, s, °, rad, DimensionError
+import Unitful: s, °, rad, DimensionError
 import Clipper
 import ForwardDiff
 
-# This is needed in case the user has changed the default length promotion type.
-ru = promote_type(typeof(m),typeof(cm))()
+const nm2μm = Devices.PreferMicrons.nm
+const nm = nm2μm
+const μm2μm = Devices.PreferMicrons.μm
+const μm = μm2μm
+const cm2μm = Devices.PreferMicrons.cm
+const m2μm = Devices.PreferMicrons.m
+const m = m2μm
+
+const nm2nm = Devices.PreferNanometers.nm
+const μm2nm = Devices.PreferNanometers.μm
+const cm2nm = Devices.PreferNanometers.cm
+const m2nm = Devices.PreferNanometers.m
+
 p(x,y) = Point(x,y)
 
 @testset "Points" begin
     @testset "> Point constructors" begin
-        @test_throws ErrorException Point(2,3m)
+        @test_throws ErrorException Point(2,3m2μm)
         @test_throws ErrorException Point(2s,3s)    # has to be a length
         @test typeof(Point(2,3)) == Point{Int}
         @test typeof(Point(2,3.)) == Point{Float64}
         @test typeof(Point(2.,3)) == Point{Float64}
-        @test typeof(Point(2m,3.0m)) == Point{typeof(3.0ru)}
-        @test typeof(Point(2m,3cm)) == Point{typeof(2ru//1)}
-        @test typeof(Point(2.0m,3cm)) == Point{typeof(2.0ru)}
+        @test typeof(Point(2m2μm,3.0m2μm)) == Point{typeof(3.0m2μm)}
+        @test typeof(Point(2m2μm,3cm2μm)) == Point{typeof(2μm2μm//1)}
+        @test typeof(Point(2.0m2μm,3cm2μm)) == Point{typeof(2.0μm2μm)}
+        @test typeof(Point(2m2nm,3.0m2nm)) == Point{typeof(3.0m2nm)}
+        @test typeof(Point(2m2nm,3cm2nm)) == Point{typeof(2nm2nm//1)}
+        @test typeof(Point(2.0m2nm,3cm2nm)) == Point{typeof(2.0nm2nm)}
     end
 
     @testset "> Point arithmetic" begin
-        @test Point(2,3) + Point(4,5) == Point(6,8)
-        @test Point(1,0) - Point(0,1) == Point(1,-1)
-        @test Point(3,3)/3 == Point(1,1)
-        @test Point(1,1)*3 == Point(3,3)
-        @test 3*Point(1,1) == Point(3,3)
-        @test Point(2m,3m) + Point(4m,5m) == Point(6m,8m)
-        @test Point(2m,3m) + Point(4cm,5cm) == Point(204ru//100,305ru//100)
-        @test Point(2.0m,3m) + Point(4cm,5cm) == Point(2.04ru,3.05ru)
+        @test Point(2,3) + Point(4,5) === Point(6,8)
+        @test Point(1,0) - Point(0,1) === Point(1,-1)
+        @test Point(3,3)/3 === Point(1.0,1.0)
+        @test Point(1,1)*3 === Point(3,3)
+        @test 3*Point(1,1) === Point(3,3)
+        @test Point(2m2μm,3m2μm) + Point(4m2μm,5m2μm) === Point(6m2μm,8m2μm)
+        @test Point(2m2μm,3m2μm) + Point(4cm2μm,5cm2μm) ===
+            Point(2040000μm2μm//1,3050000μm2μm//1)
+        @test Point(2.0m2μm,3m2μm) + Point(4cm2μm,5cm2μm) ===
+            Point(2040000.0μm2μm,3050000.0μm2μm)
+        @test Point(2m2nm,3m2nm) + Point(4m2nm,5m2nm) === Point(6m2nm,8m2nm)
+        @test Point(2m2nm,3m2nm) + Point(4cm2nm,5cm2nm) ===
+            Point(2040000000nm2nm//1,3050000000nm2nm//1)
+        @test Point(2.0m2nm,3m2nm) + Point(4cm2nm,5cm2nm) ===
+            Point(2040000000.0nm2nm,3050000000.0nm2nm)
     end
 
     @testset "> Point array arithmetic" begin
         @test [Point(1,2), Point(3,4)] .+ Point(1,1) == [Point(2,3), Point(4,5)]
         @test Point(1,1) .+ [Point(1,2), Point(3,4)] == [Point(2,3), Point(4,5)]
-        @test [Point(1,2), Point(3,4)] + [Point(1,1), Point(-1,2)] == [Point(2,3), Point(2,6)]
+        @test [Point(1,2), Point(3,4)] + [Point(1,1), Point(-1,2)] ==
+            [Point(2,3), Point(2,6)]
         @test_throws ErrorException Point(1,2) + [Point(3,4)]
         @test_throws ErrorException [Point(1,2)] + Point(3,4)
 
@@ -50,10 +72,23 @@ p(x,y) = Point(x,y)
         @test 3 .* [Point(1,3)] == [Point(3,9)]
         @test 3 * [Point(1,3)] == [Point(3,9)]
 
-        @test [Point(1m,2m)] + [Point(1cm,2cm)] == [Point(101ru//100, 202ru//100)]
-        @test [Point(1m,2m)] .+ Point(1cm,2cm) == [Point(101ru//100, 202ru//100)]
-        @test [Point(1m,2m)] - [Point(1cm,2cm)] == [Point(99ru//100, 198ru//100)]
-        @test [Point(1m,2m)] .- Point(1cm,2cm) == [Point(99ru//100, 198ru//100)]
+        @test [Point(1m2μm,2m2μm)] + [Point(1cm2μm,2cm2μm)] ==
+            [Point(101000000μm2μm//100, 202000000μm2μm//100)]
+        @test [Point(1m2μm,2m2μm)] .+ Point(1cm2μm,2cm2μm) ==
+            [Point(101000000μm2μm//100, 202000000μm2μm//100)]
+        @test [Point(1m2μm,2m2μm)] - [Point(1cm2μm,2cm2μm)] ==
+            [Point(99000000μm2μm//100, 198000000μm2μm//100)]
+        @test [Point(1m2μm,2m2μm)] .- Point(1cm2μm,2cm2μm) ==
+            [Point(99000000μm2μm//100, 198000000μm2μm//100)]
+
+        @test [Point(1m2nm,2m2nm)] + [Point(1cm2nm,2cm2nm)] ==
+            [Point(101000000000nm2nm//100, 202000000000nm2nm//100)]
+        @test [Point(1m2nm,2m2nm)] .+ Point(1cm2nm,2cm2nm) ==
+            [Point(101000000000nm2nm//100, 202000000000nm2nm//100)]
+        @test [Point(1m2nm,2m2nm)] - [Point(1cm2nm,2cm2nm)] ==
+            [Point(99000000000nm2nm//100, 198000000000nm2nm//100)]
+        @test [Point(1m2nm,2m2nm)] .- Point(1cm2nm,2cm2nm) ==
+            [Point(99000000000nm2nm//100, 198000000000nm2nm//100)]
     end
 
     @testset "> Point accessors" begin
@@ -62,7 +97,7 @@ p(x,y) = Point(x,y)
     end
 
     @testset "> Point conversion" begin
-        @test [Point(1,3), Point(2,4)] .* m == [Point(1m,3m), Point(2m,4m)]
+        @test [Point(1,3), Point(2,4)] .* m2μm == [Point(1m2μm,3m2μm), Point(2m2μm,4m2μm)]
         @test convert(Point{Float64}, Clipper.IntPoint(1,2)) == Point(1.,2.)
         @test convert(Point{Int}, Clipper.IntPoint(1,2)) == Point(1,2)
     end
@@ -83,19 +118,19 @@ end
         # width and height constructor
         @test typeof(Rectangle(1,2)) == Rectangle{Int}
         @test typeof(Rectangle(1.0,2)) == Rectangle{Float64}
-        @test typeof(Rectangle(1.0m,2.0μm)) == Rectangle{typeof(1.0*ru)}
+        @test typeof(Rectangle(1.0m2μm,2.0μm2μm)) == Rectangle{typeof(1.0*μm2μm)}
     end
 
     @testset "> Polygon construction" begin
-        @test_throws ErrorException Polygon(Point(1,2), Point(3,5), Point(4cm,7cm))
+        @test_throws ErrorException Polygon(Point(1,2), Point(3,5), Point(4cm2μm,7cm2μm))
     end
 
     @testset "> Rectangle methods" begin
         # width and height
-        @test width(Rectangle(1,2)) == 1
-        @test height(Rectangle(1,2)) == 2
-        @test width(Rectangle(1m,2m)) == 1m
-        @test height(Rectangle(1m,2m)) == 2m
+        @test width(Rectangle(1,2)) === 1
+        @test height(Rectangle(1,2)) === 2
+        @test width(Rectangle(1m,2m)) === 1m
+        @test height(Rectangle(1m,2m)) === 2m
 
         # propriety
         @test Rectangle(Point(3,3),Point(0,0)) ==
@@ -274,7 +309,6 @@ end
     @test_throws DimensionError offset(r, 1.0)
     @test offset(r, 50nm)[1] ≈ Polygon(
         [p(1.05μm,1.05μm), p(-0.05μm,1.05μm), p(-0.05μm,-0.05μm), p(1.05μm,-0.05μm)])
-
 end
 
 @testset "Cell methods" begin
