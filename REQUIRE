@@ -4,5 +4,6 @@ ForwardDiff
 StaticArrays 0.3.0
 CoordinateTransformations
 FileIO
+Clipper 0.2.2
 Unitful 0.2.2
 Compat 0.7.15
