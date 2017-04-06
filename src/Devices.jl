@@ -4,7 +4,7 @@ module Devices
 using PyCall
 using ForwardDiff
 using FileIO
-include("Units.jl")
+include("units.jl")
 
 import Clipper
 import FileIO: save, load
