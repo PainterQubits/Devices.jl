@@ -12,12 +12,15 @@ addons:
     packages:
       - g++-4.8
 sudo: required
+before_install:
+  - apt-get install libffi-dev libssl-dev
 install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
       sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20
       g++ --version
     fi
+  - "pip install requests[security]"
   - "pip install --only-binary=numpy numpy gdspy pyqrcode"
 julia:
   - 0.5
