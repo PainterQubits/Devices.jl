@@ -2,7 +2,7 @@
 language: julia
 os:
   - linux
-  - osx
+  # - osx
 env:
   - CXX=g++-4.8
 addons:
@@ -17,6 +17,7 @@ before_install:
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
       sudo apt-get -qq update
       sudo apt-get install -y libffi-dev libssl-dev
+      sudo apt-get install python-tk
     fi
 install:
   - |
