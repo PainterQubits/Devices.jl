@@ -25,7 +25,6 @@ install:
       g++ --version
     fi
   - "sudo pip install requests[security]"
-  - "sudo pip install python-tk"
   - "sudo pip install --only-binary=numpy numpy gdspy pyqrcode"
 julia:
   - 0.5
@@ -39,7 +38,7 @@ notifications:
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("Devices"); Pkg.test("Devices"; coverage=true)'
 after_success:
     # push coverage results to Coveralls
-    # - julia -e 'cd(Pkg.dir("Devices")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+    - julia -e 'cd(Pkg.dir("Devices")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
     # push coverage results to Codecov
     - julia -e 'cd(Pkg.dir("Devices")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
     - julia -e 'Pkg.add("Documenter")'
