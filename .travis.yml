@@ -13,8 +13,11 @@ addons:
       - g++-4.8
 sudo: required
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libffi-dev libssl-dev
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      sudo apt-get -qq update
+      sudo apt-get install -y libffi-dev libssl-dev
+    fi
 install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
@@ -22,11 +25,12 @@ install:
       g++ --version
     fi
   - "sudo pip install requests[security]"
+  - "sudo pip install python-tk"
   - "sudo pip install --only-binary=numpy numpy gdspy pyqrcode"
 julia:
   - 0.5
-  - 0.6
-  - nightly
+  # - 0.6
+  # - nightly
 notifications:
   email: false
 # uncomment the following lines to override the default test script
