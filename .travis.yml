@@ -5,21 +5,22 @@ os:
   # - osx
 env:
   - CXX=g++-4.8
-python:
-  - "3.6"
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - deadsnakes
     packages:
       - g++-4.8
+      - python3-pip
+      - python3.5
+      - python3.5-tk
 sudo: required
 before_install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
       sudo apt-get -qq update
       sudo apt-get install -y libffi-dev libssl-dev
-      sudo apt-get install python-tk
     fi
 install:
   - |
@@ -27,8 +28,8 @@ install:
       sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20
       g++ --version
     fi
-  - "sudo pip install requests[security]"
-  - "sudo pip install --only-binary=numpy numpy gdspy pyqrcode"
+  - "sudo pip3 install requests[security]"
+  - "sudo pip3 install --only-binary=numpy numpy gdspy pyqrcode"
 julia:
   - 0.5
   # - 0.6
