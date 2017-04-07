@@ -1,7 +1,7 @@
 """
 ```
-type CompoundStyle{T} <: ContinuousStyle{T}
-    styles::Vector{Style{T}}
+type CompoundStyle <: ContinuousStyle
+    styles::Vector{Style}
     divs::Vector{Float64}
     f::Function
 end
@@ -15,8 +15,8 @@ by the outer constructor.
 - `f`: returns tuple of style index and the `t` to use for that
 style's parametric function.
 """
-type CompoundStyle{T} <: ContinuousStyle{T}
-    styles::Vector{Style{T}}
+type CompoundStyle <: ContinuousStyle
+    styles::Vector{Style}
     divs::Vector{Float64}
     f::Function
 end
@@ -26,7 +26,7 @@ CompoundStyle{S<:Segment,T<:Style}(seg::AbstractVector{S}, sty::AbstractVector{T
 divs(s::CompoundStyle) = s.divs
 
 """
-`makedivs{T<:Real}(segments::CompoundStyle{T}, styles::CompoundStyle)`
+`makedivs{T<:Real}(segments::CompoundStyle, styles::CompoundStyle)`
 
 Returns a collection with the values of `t` to use for
 rendering a `CompoundSegment` with a `CompoundStyle`.

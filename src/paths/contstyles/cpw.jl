@@ -1,6 +1,6 @@
 """
 ```
-type CPW{T} <: ContinuousStyle{T}
+type CPW <: ContinuousStyle
     trace::Function
     gap::Function
     divs::Int
@@ -16,7 +16,7 @@ Two adjacent traces can form a coplanar waveguide.
 May need to be inverted with respect to a ground plane,
 depending on how the pattern is written.
 """
-type CPW{T} <: ContinuousStyle{T}
+type CPW <: ContinuousStyle
     trace::Function
     gap::Function
     divs::Int
@@ -24,21 +24,21 @@ end
 function CPW(trace::Coordinate, gap::Coordinate)
     dimension(trace) != dimension(gap) && throw(DimensionError(trace,gap))
     t,g = promote(float(trace), float(gap))
-    CPW{typeof(t)}(x->t, x->g, 1)
+    CPW(x->t, x->g, 1)
 end
 function CPW(trace::Function, gap::Function)
     T = promote_type(typeof(trace(0)), typeof(gap(0)))
-    CPW{T}(x->T(trace(x)), x->T(gap(x)), 100)
+    CPW(x->T(trace(x)), x->T(gap(x)), 100)
 end
 function CPW(trace::Function, gap::Coordinate, divs::Integer=100)
     T = promote_type(typeof(trace(0)), typeof(float(gap)))
-    CPW{T}(x->T(trace(x)), x->T(float(gap)), divs)
+    CPW(x->T(trace(x)), x->T(float(gap)), divs)
 end
 function CPW(trace::Coordinate, gap::Function, divs::Integer=100)
     T = promote_type(typeof(float(trace)), typeof(gap(0)))
-    CPW{T}(x->T(float(trace)), x->T(gap(x)), divs)
+    CPW(x->T(float(trace)), x->T(gap(x)), divs)
 end
-copy{T}(x::CPW{T}) = CPW{T}(x.trace, x.gap, x.divs)
+copy(x::CPW) = CPW(x.trace, x.gap, x.divs)
 
 distance(s::CPW, t) = s.gap(t)+s.trace(t)
 extent(s::CPW, t) = s.trace(t)/2 + s.gap(t)

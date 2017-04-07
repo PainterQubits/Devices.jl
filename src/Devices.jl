@@ -51,6 +51,8 @@ typealias Coordinate Union{Real,Length}
 Type alias for numeric types suitable for coordinate systems.
 """
 typealias Coordinate Union{Real,Length}
+typealias FloatCoordinate Union{AbstractFloat,Length{AbstractFloat}}
+typealias IntegerCoordinate Union{Integer,Length{Integer}}
 
 """
 ```

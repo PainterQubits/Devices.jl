@@ -364,18 +364,74 @@ end
 @testset "Paths" begin
     @testset "> Path constructors" begin
         @test typeof(Path()) == Path{Float64}
+        @test typeof(Path(0,0)) == Path{Float64}
+        @test typeof(Path(Point(0,0))) == Path{Float64}
+        @test α0(Path()) == 0.0° == 0.0 == 0.0rad
+
+        @test typeof(Path(0.0μm, 0.0μm)) == Path{typeof(1.0μm)}
+        @test typeof(Path(0.0μm, 0.0nm)) == Path{typeof(1.0μm)}
+        @test typeof(Path(0.0μm2nm, 0.0μm2nm)) == Path{typeof(1.0μm2nm)}
+        @test typeof(Path(0.0μm2nm, 0.0nm2nm)) == Path{typeof(1.0nm2nm)}
+        @test typeof(Path(0μm, 0μm)) == Path{typeof(1.0μm)}
+        @test typeof(Path(0μm, 0nm)) == Path{typeof(1.0μm)}
+        @test typeof(Path(0μm2nm, 0μm2nm)) == Path{typeof(1.0μm2nm)}
+        @test typeof(Path(0μm2nm, 0nm2nm)) == Path{typeof(1.0nm2nm)}
+
         @test typeof(Path(Point(0.0μm, 0.0μm))) == Path{typeof(1.0μm)}
+        @test typeof(Path(Point(0.0μm, 0.0nm))) == Path{typeof(1.0μm)}
+        @test typeof(Path(Point(0.0μm2nm, 0.0μm2nm))) == Path{typeof(1.0μm2nm)}
+        @test typeof(Path(Point(0.0μm2nm, 0.0nm2nm))) == Path{typeof(1.0nm2nm)}
+        @test typeof(Path(Point(0μm, 0μm))) == Path{typeof(1.0μm)}
+        @test typeof(Path(Point(0μm, 0nm))) == Path{typeof(1.0μm)}
+        @test typeof(Path(Point(0μm2nm, 0μm2nm))) == Path{typeof(1.0μm2nm)}
+        @test typeof(Path(Point(0μm2nm, 0nm2nm))) == Path{typeof(1.0nm2nm)}
+
         @test α0(Path(Point(0.0μm, 0.0μm); α0 = 90°)) == 90.0° == π*rad/2 == π/2
         @test α0(Path(Point(0.0μm, 0.0μm); α0 = π/2)) == 90.0° == π*rad/2 == π/2
+
+        @test typeof(Path(μm)) == Path{typeof(1.0μm)}
+
+        @test_throws DimensionError Path(0,0μm)
+        @test_throws DimensionError Path(0nm,0)
     end
 
     @testset "> Path segments" begin
-        path = Path(Point(0.0μm, 0.0μm))
+        path = Path(μm)
         @test_throws Unitful.DimensionError straight!(path, 10.0)
         @test pathlength(path) == 0.0μm
         straight!(path, 10μm)
         @test pathlength(path) == 10μm
         @test ForwardDiff.derivative(path[1].seg.f, 0.0) ≈ Point(10.0μm, 0.0μm)
+    end
+
+    @testset "> Path-based launchers" begin
+        # w/o units
+        pa = Path()
+        sty = launch!(pa, trace1 = 4.2, gap1 = 3.8)
+        @test isa(sty, Paths.CPW)
+        @test length(pa) == 4
+        @test sty.gap(0.0) === 3.8
+        @test sty.trace(0.0) === 4.2
+
+        # w/ units
+        pa = Path(μm)
+        sty = launch!(pa)
+        @test sty.gap(0.0) === 2.5μm
+        @test sty.trace(0.0) === 5.0μm
+
+        pa = Path(nm)
+        sty = launch!(pa)
+        @test sty.gap(0.0) === 2500.0nm
+        @test sty.trace(0.0) === 5000.0nm
+
+        pa = Path(μm)
+        sty = launch!(pa, trace1 = 4.2μm, gap1 = 3801nm)
+        @test sty.gap(0.0) === 3.801μm
+        @test sty.trace(0.0) === 4.2μm
+
+        # test dimensionerrors
+        pa = Path(μm)
+        @test_throws DimensionError launch!(pa, trace1 = 3.0)
     end
 
     # TODO: How to test `CompoundSegment` / `CompoundStyle`?

@@ -45,7 +45,8 @@ library / DLL files.
 using Devices, FileIO
 using Devices.PreferMicrons
 
-example forthcoming
+p = Path(μm)    # or Path(0μm,0μm), or Path(Point(0μm,0μm))
+style = launch!
 ```
 
 You can then create and save CAD files with unit support. This will also enable the

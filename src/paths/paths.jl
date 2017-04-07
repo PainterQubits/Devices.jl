@@ -3,7 +3,7 @@ module Paths
 using ..Points
 using ..Cells
 using Unitful
-using Unitful: Length, DimensionError, °
+using Unitful: Length, LengthUnits, DimensionError, °
 
 import Base:
     convert,
@@ -38,7 +38,7 @@ import Base:
 import Compat.String
 using ForwardDiff
 import Devices
-import Devices: bounds, cell, Coordinate
+import Devices: bounds, cell, Coordinate, FloatCoordinate
 gdspy() = Devices._gdspy
 
 export Path
@@ -134,21 +134,21 @@ abstract Style{T<:Coordinate}
 
 """
 ```
-abstract ContinuousStyle{T} <: Style{T}
+abstract ContinuousStyle <: Style
 ```
 
 Any style that applies to segments which have non-zero path length.
 """
-abstract ContinuousStyle{T} <: Style{T}
+abstract ContinuousStyle <: Style
 
 """
 ```
-abstract DiscreteStyle{T} <: Style{T}
+abstract DiscreteStyle <: Style
 ```
 
 Any style that applies to segments which have zero path length.
 """
-abstract DiscreteStyle{T} <: Style{T}
+abstract DiscreteStyle <: Style
 
 """
 ```
@@ -173,7 +173,7 @@ abstract ContinuousSegment{T} <: Segment{T}
 # doubly linked-list behavior
 type Node{T<:Coordinate}
     seg::Segment{T}
-    sty::Style{T}
+    sty::Style
     prev::Node{T}
     next::Node{T}
 
@@ -304,7 +304,7 @@ end
 type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
     α0::typeof(0.0°)
-    style0::ContinuousStyle{T}
+    style0::ContinuousStyle
     nodes::Array{Node{T},1}
 end
 ```
@@ -315,7 +315,7 @@ tuples of (`segment`, `style`).
 type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
     α0::typeof(0.0°)
-    style0::ContinuousStyle{T}
+    style0::ContinuousStyle
     nodes::Array{Node{T},1}
 
     Path() = new(Point(zero(T),zero(T)), 0.0°, Trace(T(1)), Node{T}[])
@@ -339,15 +339,35 @@ end
 
 """
 ```
-Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0))
+Path(p0::Point=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0))
+Path(p0x::Real, p0y::Real; kwargs...)
+
+Path{T<:Length}(p0::Point{T}; α0=0.0, style0::Style=Trace(1.0*unit(T)))
+Path{T<:Length}(p0x::T, p0y::T; kwargs...)
+Path(p0x::Length, p0y::Length; kwargs...)
+
+Path(u::LengthUnits; α0=0.0, style0::Style=Trace(1.0u))
 ```
 
-Convenience constructor for `Path{T}` object.
+Convenience constructors for `Path{T}` object.
 """
-function Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0);
-    α0=0.0, style0::Style=Trace(T(1)))
-    Path{T}(p0, α0, style0, Node{T}[])
+function Path(p0::Point=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0))
+    Path{Float64}(p0, α0, style0, Node{Float64}[])
 end
+Path(p0x::Real, p0y::Real; kwargs...) = Path(Point{Float64}(p0x,p0y); kwargs...)
+
+function Path{T<:Length}(p0::Point{T}; α0=0.0, style0::Style=Trace(1.0*unit(T)))
+    Path{typeof(0.0*unit(T))}(p0, α0, style0, Node{typeof(0.0*unit(T))}[])
+end
+Path{T<:Length}(p0x::T, p0y::T; kwargs...) =
+    Path(Point{typeof(0.0*unit(T))}(p0x,p0y); kwargs...)
+Path(p0x::Length, p0y::Length; kwargs...) = Path(promote(p0x,p0y)...; kwargs...)
+
+function Path(u::LengthUnits; α0=0.0, style0::Style=Trace(1.0u))
+    Path{typeof(0.0u)}(Point(0.0u,0.0u), α0, style0, Node{typeof(0.0u)}[])
+end
+
+Path(x::Coordinate, y::Coordinate; kwargs...) = throw(DimensionError(x,y))
 
 """
 ```
@@ -492,7 +512,7 @@ discretestyle1{T}(p::Path{T})
 Returns the last-used discrete style in the path. If one was not used,
 returns `SimpleCornerStyle()`.
 """
-discretestyle1{T}(p::Path{T}) = style1(p, DiscreteStyle, SimpleCornerStyle{T}())
+discretestyle1{T}(p::Path{T}) = style1(p, DiscreteStyle, SimpleCornerStyle())
 
 """
 ```
@@ -734,21 +754,39 @@ function meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
     nothing
 end
 
-function launch!(p::Path; extround=5, trace0=300, trace1=5,
-        gap0=150, gap1=2.5, flatlen=250, taperlen=250)
-    flip = f::Function->(isempty(p) ? f : t->f(1.0-t))
-    # if isempty(p)
-    #     flip(f::Function) = f
-    # else
-    #     flip(f::Function) = t->f(1.0-t)
-    # end
+const launchdefaults = Dict([
+    (:extround, 5.0),
+    (:trace0, 300.0),
+    (:trace1, 5.0),
+    (:gap0, 150.0),
+    (:gap1, 2.5),
+    (:flatlen, 250.0),
+    (:taperlen, 250.0)
+])
 
-    s0 = CPW(0.0, flip(t->(trace0/2+gap0-extround+
+launch!(p::Path{Float64}; kwargs...) = _launch!(p; launchdefaults..., kwargs...)
+
+function launch!{T<:Length}(p::Path{T}; kwargs...)
+    u = Unitful.ContextUnits(Unitful.μm, upreferred(unit(T)))
+    _launch!(p; Dict(zip(keys(launchdefaults),collect(values(launchdefaults))*u))...,
+        kwargs...)
+end
+
+function _launch!{T<:Coordinate}(p::Path{T}; kwargs...)
+    d = Dict{Symbol,T}(kwargs)
+    extround = d[:extround]
+    trace0, trace1 = d[:trace0], d[:trace1]
+    gap0, gap1 = d[:gap0], d[:gap1]
+    flatlen, taperlen = d[:flatlen], d[:taperlen]
+
+    flip = f::Function->(isempty(p) ? f : t->f(1.0-t))
+
+    s0 = CPW(zero(T), flip(t->(trace0/2+gap0-extround+
         sqrt(extround^2-(t*extround-extround)^2))))
-    s1 = CPW(0.0, trace0/2+gap0)
+    s1 = CPW(zero(T), trace0/2+gap0)
     s2 = CPW(trace0, gap0)
     s3 = CPW(flip(t->(trace0 + t * (trace1 - trace0))),
-        flip(t->(gap0 + t * (gap1 - gap0)))) # CHANGED
+        flip(t->(gap0 + t * (gap1 - gap0))))
 
     if isempty(p)
         args = [extround, gap0-extround, flatlen, taperlen]
@@ -762,10 +800,7 @@ function launch!(p::Path; extround=5, trace0=300, trace1=5,
         straight!(p, x...)
     end
 
-    # Return a style suitable for the next segment.
     CPW(trace1, gap1)
 end
-
-
 
 end
