@@ -13,7 +13,6 @@ addons:
     packages:
       - g++-4.8
       - python3-tk
-      - python3-pip
       - python3
 sudo: required
 before_install:
