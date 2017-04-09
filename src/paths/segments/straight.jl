@@ -4,47 +4,35 @@ type Straight{T} <: ContinuousSegment{T}
     l::T
     p0::Point{T}
     α0::typeof(0.0°)
-    f::Function
-    Straight(l, p0, α0) = begin
-        s = new(l, p0, α0)
-        s.f = t->(s.p0+Point(t*s.l*cos(s.α0),t*s.l*sin(s.α0)))
-        s
-    end
 end
 ```
 
 A straight line segment is parameterized by its length.
 It begins at a point `p0` with initial angle `α0`.
 
-The parametric function over `t ∈ [0,1]` describing the line segment is given by:
-
-`t -> p0 + Point(t*l*cos(α),t*l*sin(α))`
+The parametric function describing the line segment is given by
+`t -> p0 + Point(t*cos(α),t*sin(α))` where `t` is a length from 0 to `l`.
 """
 type Straight{T} <: ContinuousSegment{T}
     l::T
     p0::Point{T}
     α0::typeof(0.0°)
-    f::Function
-    Straight(l, p0, α0) = begin
-        s = new(l, p0, α0)
-        s.f = t->(s.p0+Point(t*s.l*cos(s.α0),t*s.l*sin(s.α0)))
-        s
-    end
 end
+(s::Straight)(t) = s.p0+Point(t*cos(s.α0), t*sin(s.α0))
 
 """
 ```
-Straight{T<:Coordinate}(l::T; p0::Point{T}=Point(0.0,0.0), α0=0.0°)
+Straight{T<:Coordinate}(l::T; p0::Point=Point(zero(T),zero(T)), α0=0.0°)
 ```
 
 Outer constructor for `Straight` segments.
 """
-Straight{T<:Coordinate}(l::T; p0::Point{T}=Point(0.0,0.0), α0=0.0°) =
+Straight{T<:Coordinate}(l::T; p0::Point=Point(zero(T),zero(T)), α0=0.0°) =
     Straight{T}(l, p0, α0)
 convert{T}(::Type{Straight{T}}, x::Straight) =
-    Straight(convert(T, x.l); p0=convert(Point{T}, x.p0), α0=x.α0)
+    Straight{T}(convert(T, x.l), convert(Point{T}, x.p0), x.α0)
 
-copy(s::Straight) = Straight(s.l; p0=s.p0, α0=s.α0)
+copy{T}(s::Straight{T}) = Straight{T}(s.l, s.p0, s.α0)
 pathlength(s::Straight) = s.l
 p0(s::Straight) = s.p0
 α0(s::Straight) = s.α0

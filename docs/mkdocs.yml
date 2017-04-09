@@ -17,6 +17,7 @@ markdown_extensions:
   - extra
   - tables
   - fenced_code
+  - admonition
 
 extra_javascript:
   - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
@@ -27,10 +28,10 @@ docs_dir: 'build'
 pages:
 - Home: index.md
 - Points: points.md
-- Abstract polygons: polygons.md
+- Polygons: polygons.md
 - Cells: cells.md
 - Paths: paths.md
-- For convenience: tags.md
+- Compound shapes: tags.md
 - Rendering: render.md
 - File formats: fileio.md
 - 'License': LICENSE.md

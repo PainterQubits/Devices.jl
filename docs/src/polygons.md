@@ -75,6 +75,14 @@ Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-1
     +(::Rectangle, ::Point)
 ```
 
+### Rectangle styles
+
+```@docs
+    Rectangles.Plain
+    Rectangles.Rounded
+    Rectangles.Undercut
+```
+
 ## Polygon API
 
 ```@docs
@@ -87,4 +95,10 @@ Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-1
     minimum(::Polygon)
     maximum(::Polygon)
     points(::Polygon)
+```
+
+### Polygon styles
+
+```@docs
+    Polygons.Plain
 ```

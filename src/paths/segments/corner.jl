@@ -62,7 +62,7 @@ corner!{T<:Coordinate}(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p))
 Append a sharp turn or "corner" to path `p` with angle `α`.
 
 The style chosen for this corner, if not specified, is the last `DiscreteStyle`
-used in the path, or `SimpleCornerStyle` if one has not been used yet.
+used in the path, or `SimpleTraceCorner` if one has not been used yet.
 """
 function corner!{T<:Coordinate}(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p))
     corn = Corner{T}(α)

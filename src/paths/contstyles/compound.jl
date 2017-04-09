@@ -1,72 +1,48 @@
 """
-```
-type CompoundStyle <: ContinuousStyle
-    styles::Vector{Style}
-    divs::Vector{Float64}
-    f::Function
-end
-```
-
+    type CompoundStyle <: ContinuousStyle
+        styles::Vector{Style}
+        grid::Vector{Float64}
+        f::Function
+    end
 Combines styles together, typically for use with a [`CompoundSegment`](@ref).
 
 - `styles`: Array of styles making up the object. This is shallow-copied
 by the outer constructor.
-- `divs`: An array of `t` values needed for rendering the parameteric path.
+- `grid`: An array of `t` values needed for rendering the parameteric path.
 - `f`: returns tuple of style index and the `t` to use for that
 style's parametric function.
 """
-type CompoundStyle <: ContinuousStyle
+type CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle
     styles::Vector{Style}
-    divs::Vector{Float64}
+    grid::Vector{T}
     f::Function
 end
-CompoundStyle{S<:Segment,T<:Style}(seg::AbstractVector{S}, sty::AbstractVector{T}) =
-    CompoundStyle{T.parameters[1]}(deepcopy(Array(sty)), makedivs(seg, sty), cstylef(seg))
+CompoundStyle(seg::AbstractVector, sty::AbstractVector) =
+    CompoundStyle(deepcopy(Vector{Style}(sty)), makegrid(seg, sty), cstylef(seg))
 
-divs(s::CompoundStyle) = s.divs
+grid(s::CompoundStyle) = s.grid
 
 """
-`makedivs{T<:Real}(segments::CompoundStyle, styles::CompoundStyle)`
-
+    makegrid{T<:Segment}(segments::AbstractVector{T}, styles)
 Returns a collection with the values of `t` to use for
 rendering a `CompoundSegment` with a `CompoundStyle`.
 """
-function makedivs{T<:Number}(segments::AbstractArray{Segment{T},1}, styles)
-    isempty(segments) && error("Cannot use divs with zero segments.")
+function makegrid{T<:Segment}(segments::AbstractVector{T}, styles)
+    isempty(segments) && error("Cannot use makegrid with zero segments.")
     length(segments) != length(styles) &&
         error("Must have same number of segments and styles.")
 
-    L = pathlength(segments)
-    l0 = zero(T)
-    ts = Float64[]
-    for i in 1:length(segments)
-        l1 = l0 + pathlength(segments[i])
-        # Someone who enjoys thinking about IEEE floating points,
-        # please make this less awful. It seems like the loop runs
-        # approximately powers-of-2 times.
-
-        # Start just past the boundary to pick the right style
-        offset = l0/L + eps(l0/L)
-
-        # Go almost to the next boundary
-        scale = (l1/L-offset)
-        while offset+scale*1.0 >= l1/L
-            scale -= eps(scale)
-        end
-
-        append!(ts, divs(styles[i])*scale+offset)
-        l0 = l1
-    end
-    sort!(unique(ts))
+    grid = Vector{eltype(T)}(length(segments)+1)
+    grid[1] = zero(eltype(T))
+    v = view(grid, 2:length(grid))
+    v .= pathlength.(segments)
+    cumsum!(grid,grid)
 end
 
 """
-```
-cstylef{T<:Coordinate}(seg::AbstractArray{Segment{T},1})
-```
-
+    cstylef{T<:Coordinate}(seg::AbstractArray{Segment{T},1})
 Returns the function needed for a `CompoundStyle`. The segments array is
-shallow-copied for use in the function.
+deep-copied for use in the function.
 """
 function cstylef{T<:Coordinate}(seg::AbstractArray{Segment{T},1})
     segments = deepcopy(Array(seg))
@@ -82,9 +58,9 @@ function cstylef{T<:Coordinate}(seg::AbstractArray{Segment{T},1})
     for i in 1:length(segments)
         push!(f.args[2].args, quote
             l1 = l0 + pathlength(($segments)[$i])
-            (l0/L <= t) &&
-                ($(i == length(segments) ? :(<=) : :(<))(t, l1/L)) &&
-                    return $i, (t*L-l0)/(l1-l0)
+            (l0 <= t) &&
+                ($(i == length(segments) ? :(<=) : :(<))(t, l1)) &&
+                    return $i, t-l0
             l0 = l1
         end)
     end
@@ -93,7 +69,7 @@ function cstylef{T<:Coordinate}(seg::AbstractArray{Segment{T},1})
     return eval(f)
 end
 
-for x in (:distance, :extent, :paths, :width)
+for x in (:extent, :width)
     @eval function ($x)(s::CompoundStyle, t)
         idx, teff = s.f(t)
         ($x)(s.styles[idx], teff)

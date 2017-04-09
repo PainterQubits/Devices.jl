@@ -1,8 +1,23 @@
-- v0.0.6
- - Begin using `ContextUnits` from Unitful.jl 0.2 for better unit handling.
+- v0.1.0
+ - Breaking change: `attach!` expects a value from zero to the segment length, not 0 to 1.
+   This will also be true for functions passed to `Paths.CPW` or `Paths.Trace`.
+ - Implement our own rendering algorithms. This enables continuous integration testing and
+   gives finer control on the output.
+  - Dependency on gdspy for rendering has been removed.
+ - Begin using `ContextUnits` from Unitful.jl 0.2 for better unit handling. Devices.jl
+   now defines its own length units which you can access with `using Devices.PreferMicrons`
+   or `using Devices.PreferNanometers`. The following length units are defined:
+   `fm`, `pm`, `nm`, `μm`, `mm`, `cm`, `dm`, `m`.
+ - Angle units `°`, `rad` are exported by default.
  - Switch over to the registered Clipper.jl package now that the necessary changes have
    been made upstream.
- - Turn on automatic doc builds.
+ - Turn on automatic doc builds. Documentation improved and features auto-generated graphics.
+ - QR code functionality has been removed to avoid dependency on pyqrcode. It could appear
+   again in a separate package if desired.
+ - Rename `SimpleCornerStyle` to `SimpleTraceCorner`.
+ - Added a convenience method to `attach!` for using ranges.
+ - Experimental SVG export. Cells preview in the Plots pane using the SVG renderer
+   if using Juno in Atom.
 - v0.0.5
  - Added some options to `interdigit`.
  - `extent` is now exported from the Paths module.

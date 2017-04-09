@@ -1,47 +1,51 @@
+@compat abstract type CPW <: ContinuousStyle end
+
 """
-```
-type CPW <: ContinuousStyle
-    trace::Function
-    gap::Function
-    divs::Int
-end
-```
-
-Two adjacent traces can form a coplanar waveguide.
-
-- `trace::Function`: center conductor width.
-- `gap::Function`: distance between center conductor edges and ground plane
-- `divs::Int`: number of segments to render. Increase if you see artifacts.
-
-May need to be inverted with respect to a ground plane,
-depending on how the pattern is written.
+    immutable GeneralCPW{S,T} <: CPW
+        trace::S
+        gap::T
+    end
+A CPW with variable trace and gap as a function of path length. `trace` and `gap` are
+callable.
 """
-type CPW <: ContinuousStyle
-    trace::Function
-    gap::Function
-    divs::Int
+immutable GeneralCPW{S,T} <: CPW
+    trace::S
+    gap::T
 end
+copy(x::GeneralCPW) = GeneralCPW(x.trace, x.gap)
+@inline extent(s::GeneralCPW, t) = s.trace(t)/2 + s.gap(t)
+@inline trace(s::GeneralCPW, t) = s.trace(t)
+@inline gap(s::GeneralCPW, t) = s.gap(t)
+
+"""
+    immutable SimpleCPW{T<:Coordinate} <: CPW
+        trace::T
+        gap::T
+    end
+A CPW with fixed trace and gap as a function of path length.
+"""
+immutable SimpleCPW{T<:Coordinate} <: CPW
+    trace::T
+    gap::T
+end
+copy(x::SimpleCPW) = SimpleCPW(x.trace, x.gap)
+@inline extent(s::SimpleCPW, t...) = s.trace/2 + s.gap
+@inline trace(s::SimpleCPW, t...) = s.trace
+@inline gap(s::SimpleCPW, t...) = s.gap
+
+"""
+    CPW(trace::Coordinate, gap::Coordinate)
+    CPW(trace, gap::Coordinate)
+    CPW(trace::Coordinate, gap)
+    CPW(trace, gap)
+Constructor for CPW styles. Automatically chooses `SimpleCPW` or `GeneralCPW` as
+appropriate.
+"""
 function CPW(trace::Coordinate, gap::Coordinate)
     dimension(trace) != dimension(gap) && throw(DimensionError(trace,gap))
     t,g = promote(float(trace), float(gap))
-    CPW(x->t, x->g, 1)
+    SimpleCPW(t, g)
 end
-function CPW(trace::Function, gap::Function)
-    T = promote_type(typeof(trace(0)), typeof(gap(0)))
-    CPW(x->T(trace(x)), x->T(gap(x)), 100)
-end
-function CPW(trace::Function, gap::Coordinate, divs::Integer=100)
-    T = promote_type(typeof(trace(0)), typeof(float(gap)))
-    CPW(x->T(trace(x)), x->T(float(gap)), divs)
-end
-function CPW(trace::Coordinate, gap::Function, divs::Integer=100)
-    T = promote_type(typeof(float(trace)), typeof(gap(0)))
-    CPW(x->T(float(trace)), x->T(gap(x)), divs)
-end
-copy(x::CPW) = CPW(x.trace, x.gap, x.divs)
-
-distance(s::CPW, t) = s.gap(t)+s.trace(t)
-extent(s::CPW, t) = s.trace(t)/2 + s.gap(t)
-paths(::CPW, t...) = 2
-width(s::CPW, t) = s.gap(t)
-divs(s::CPW) = linspace(0.0, 1.0, s.divs+1)
+CPW(trace, gap::Coordinate) = GeneralCPW(trace, x->float(gap))
+CPW(trace::Coordinate, gap) = GeneralCPW(x->float(trace), gap)
+CPW(trace, gap) = GeneralCPW(trace, gap)

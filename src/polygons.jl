@@ -5,7 +5,6 @@ import Base: minimum, maximum
 import Base: convert, getindex, start, next, done
 import Base: copy, promote_rule
 
-using PyCall
 using ForwardDiff
 import CoordinateTransformations: AffineMap, LinearMap, Translation
 import Clipper
@@ -18,10 +17,7 @@ import Devices: AbstractPolygon, Coordinate, bounds
 using ..Points
 using ..Rectangles
 
-gdspy() = Devices._gdspy
-
 export Polygon
-export Plain
 export points
 export clip, offset
 export layer, datatype
