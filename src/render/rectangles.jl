@@ -22,7 +22,7 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
     r.properties = merge(r.properties, d)
 
     rad = s.r
-    ll, ur = minimum(r), maximum(r)
+    ll, ur = lowerleft(r), upperright(r)
     gr = Rectangle(ll+Point(rad,rad),ur-Point(rad,rad), r.properties)
     push!(c.elements, gr)
 

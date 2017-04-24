@@ -2,10 +2,10 @@ module Rectangles
 
 using Compat
 using ..Points
-import Base: +, -, *, /, minimum, maximum, copy, ==, convert, isapprox
+import Base: +, -, *, /, copy, ==, convert, isapprox
 import Devices
 import Devices: AbstractPolygon, Coordinate
-import Devices: bounds, center, centered, centered!
+import Devices: bounds, center, centered, centered!, lowerleft, upperright
 import Unitful: ustrip
 
 export Rectangle
@@ -136,16 +136,16 @@ function centered(r::Rectangle)
 end
 
 """
-    minimum(r::Rectangle)
+    lowerleft(r::Rectangle)
 Returns the lower-left corner of a rectangle (Point object).
 """
-minimum(r::Rectangle) = r.ll
+lowerleft(r::Rectangle) = r.ll
 
 """
-    maximum(r::Rectangle)
+    upperright(r::Rectangle)
 Returns the upper-right corner of a rectangle (Point object).
 """
-maximum(r::Rectangle) = r.ur
+upperright(r::Rectangle) = r.ur
 
 for op in [:+, :-]
     @eval function ($op)(r::Rectangle, p::Point)

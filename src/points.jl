@@ -1,16 +1,19 @@
 module Points
-import Devices: PointTypes, InverseLength
+import Devices: PointTypes, InverseLength, lowerleft, upperright
 import StaticArrays
 import StaticArrays: @SMatrix
 import CoordinateTransformations: LinearMap, Translation, ∘, compose
 import Clipper: IntPoint
-import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret
+import Base: convert, *, summary, promote_rule, show, reinterpret
 import Base: scalarmin, scalarmax, isapprox
+if VERSION < v"0.6.0-pre"
+    import Base: .+, .-
+end
 import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Unitful, Length, ustrip, unit
 export Point
 export Rotation, Translation, XReflection, YReflection, ∘, compose
-export getx, gety, lowerleft, upperright
+export getx, gety
 
 """
 ```
@@ -68,32 +71,38 @@ Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 """
 @inline gety(p::Point) = p.y
 
-for f in (:.+, :.-)
-    @eval function ($f){S,T}(a::AbstractArray{Point{S}}, p::Point{T})
-        R = Base.promote_op($f, S, T)
-        Q = Base.promote_array_type($f, R, S, T)
-        b = similar(a, Point{Q})
-        for (ia, ib) in zip(eachindex(a), eachindex(b))
-            @inbounds b[ib] = ($f)(a[ia], p)
+if VERSION < v"0.6.0-pre"
+    for f in (:.+, :.-)
+        @eval function ($f){S,T}(a::AbstractArray{Point{S}}, p::Point{T})
+            R = Base.promote_op($f, S, T)
+            Q = Base.promote_array_type($f, R, S, T)
+            b = similar(a, Point{Q})
+            for (ia, ib) in zip(eachindex(a), eachindex(b))
+                @inbounds b[ib] = ($f)(a[ia], p)
+            end
+            b
         end
-        b
+        @eval function ($f){S,T}(p::Point{S}, a::AbstractArray{Point{T}})
+            R = Base.promote_op($f, S, T)
+            Q = Base.promote_array_type($f, R, S, T)
+            b = similar(a, Point{Q})
+            for (ia, ib) in zip(eachindex(a), eachindex(b))
+                @inbounds b[ib] = ($f)(p, a[ia])
+            end
+            b
+        end
     end
-    @eval function ($f){S,T}(p::Point{S}, a::AbstractArray{Point{T}})
-        R = Base.promote_op($f, S, T)
-        Q = Base.promote_array_type($f, R, S, T)
-        b = similar(a, Point{Q})
-        for (ia, ib) in zip(eachindex(a), eachindex(b))
-            @inbounds b[ib] = ($f)(p, a[ia])
-        end
-        b
+else
+    for f in (:+, :-)
+        @eval Base.broadcast{S,T}(::typeof($f), a::AbstractArray{Point{S}}, p::Point{T}) =
+            broadcast($f, a, StaticArrays.Scalar(p))
+        @eval Base.broadcast{S,T}(::typeof($f), p::Point{T}, a::AbstractArray{Point{S}}) =
+            broadcast($f, StaticArrays.Scalar(p), a)
     end
 end
 
 """
-```
-lowerleft{T}(A::AbstractArray{Point{T}})
-```
-
+    lowerleft{T}(A::AbstractArray{Point{T}})
 Returns the lower-left [`Point`](@ref) of the smallest bounding rectangle
 (with sides parallel to the x- and y-axes) that contains all points in `A`.
 
@@ -113,10 +122,7 @@ function lowerleft{T}(A::AbstractArray{Point{T}})
 end
 
 """
-```
-upperright{T}(A::AbstractArray{Point{T}})
-```
-
+    upperright{T}(A::AbstractArray{Point{T}})
 Returns the upper-right [`Point`](@ref) of the smallest bounding rectangle
 (with sides parallel to the x- and y-axes) that contains all points in `A`.
 
@@ -134,7 +140,6 @@ function upperright{T}(A::AbstractArray{Point{T}})
     @inbounds By = view(B, 2:2:length(B))
     Point(maximum(Bx), maximum(By))
 end
-
 
 function isapprox{S<:Point,T<:Point}(x::AbstractArray{S},
         y::AbstractArray{T}; kwargs...)

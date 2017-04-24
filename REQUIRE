@@ -1,9 +1,9 @@
 julia 0.5
 ForwardDiff 0.4.1
-StaticArrays 0.3.0
+StaticArrays 0.3.1
 CoordinateTransformations 0.4.1
 FileIO
 Clipper 0.2.2
 Unitful 0.2.2
-Compat 0.17.0
+Compat 0.18.0
 Hiccup 0.1.1

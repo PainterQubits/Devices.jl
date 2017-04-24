@@ -1,6 +1,6 @@
 module GDS
-import Compat.String
 
+using Compat
 using Unitful
 import Unitful: Length, fm, pm, nm, μm, m
 
@@ -59,16 +59,16 @@ const BOXTYPE      = 0x2E02
 const PLEX         = 0x2F03
 
 """
-    abstract GDSFloat <: Real
+    abstract type GDSFloat <: Real end
 Floating-point formats found in GDS-II files.
 """
-abstract GDSFloat <: Real
+@compat abstract type GDSFloat <: Real end
 
 """
     bitstype 64 GDS64 <: GDSFloat
 "8-byte (64-bit) real" format found in GDS-II files.
 """
-bitstype 64 GDS64 <: GDSFloat
+@compat primitive type GDS64 <: GDSFloat 64 end
 
 """
     bits(x::GDS64)

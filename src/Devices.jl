@@ -8,7 +8,11 @@ include("units.jl")
 import StaticArrays
 import Clipper
 import FileIO: save, load
-import Base: cell, length, show, .+, .-, eltype
+
+if VERSION < v"0.6.0-pre"
+    import Base: cell, .+, .-
+end
+import Base: length, show, eltype
 import Unitful: Length
 Unitful.@derived_dimension InverseLength inv(Unitful.𝐋)
 
@@ -40,6 +44,10 @@ export centered!, centered
 function centered! end
 function centered end
 
+export lowerleft, upperright
+function lowerleft end
+function upperright end
+
 """
     typealias Coordinate Union{Real,Length}
 Type alias for numeric types suitable for coordinate systems.
@@ -55,7 +63,7 @@ Allowed type variables for `Point{T}` types.
 @compat IntegerCoordinate = Union{Integer,Length{<:Integer}}
 
 """
-    abstract AbstractPolygon{T<:Coordinate}
+    abstract type AbstractPolygon{T<:Coordinate} end
 Anything you could call a polygon regardless of the underlying representation.
 Currently only `Rectangle` or `Polygon` are concrete subtypes, but one could
 imagine further subtypes to represent specific shapes that appear in highly
@@ -63,7 +71,7 @@ optimized pattern formats. Examples include the OASIS format (which has 25
 implementations of trapezoids) or e-beam lithography pattern files like the Raith
 GPF format.
 """
-abstract AbstractPolygon{T<:Coordinate}
+@compat abstract type AbstractPolygon{T<:Coordinate} end
 
 eltype{T}(::AbstractPolygon{T}) = T
 eltype{T}(::Type{AbstractPolygon{T}}) = T
@@ -71,20 +79,20 @@ eltype{T}(::Type{AbstractPolygon{T}}) = T
 include("points.jl")
 import .Points: Point, getx, gety
 import .Points: Rotation, Translation, XReflection, YReflection, ∘, compose
-import .Points: lowerleft, upperright
 export Points
 export Point, getx, gety
 export Rotation, Translation, XReflection, YReflection, ∘, compose
-export lowerleft, upperright
 
 # TODO: Operations on arrays of AbstractPolygons
-for (op, dotop) in [(:+, :.+), (:-, :.-)]
-    @eval function ($dotop){S<:Real, T<:Real}(a::AbstractArray{AbstractPolygon{S},1}, p::Point{T})
-        b = similar(a)
-        for (ia, ib) in zip(eachindex(a), eachindex(b))
-            @inbounds b[ib] = ($op)(a[ia], p)
+if VERSION < v"0.6.0-pre"
+    for (op, dotop) in [(:+, :.+), (:-, :.-)]
+        @eval function ($dotop){S<:Real, T<:Real}(a::AbstractArray{AbstractPolygon{S},1}, p::Point{T})
+            b = similar(a)
+            for (ia, ib) in zip(eachindex(a), eachindex(b))
+                @inbounds b[ib] = ($op)(a[ia], p)
+            end
+            b
         end
-        b
     end
 end
 

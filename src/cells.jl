@@ -1,5 +1,6 @@
 module Cells
 using Unitful
+using Compat
 import Unitful: Length, nm
 
 import StaticArrays
@@ -13,7 +14,7 @@ using ..Points
 using ..Rectangles
 using ..Polygons
 
-import Devices: AbstractPolygon, Coordinate, bounds, center
+import Devices: AbstractPolygon, Coordinate, bounds, center, lowerleft, upperright
 export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!, transform, name, dbscale
 export uniquename
@@ -30,7 +31,7 @@ function uniquename(str)
     replace(str*string(gensym()),"##","_")
 end
 
-abstract CellRef{S<:Coordinate, T}
+@compat abstract type CellRef{S<:Coordinate, T} end
 
 """
 ```
@@ -470,7 +471,7 @@ function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
 
     for el in cell.elements
         b = bounds(el)
-        mi, ma = min.(mi,minimum(b)), max.(ma,maximum(b))
+        mi, ma = min.(mi,lowerleft(b)), max.(ma,upperright(b))
     end
 
     for el in cell.refs
@@ -478,7 +479,7 @@ function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
         # We should grow to accommodate if necessary.
         br = bounds(el)
         b = Rectangle{T}(bfl(T, br.ll), bce(T, br.ur))
-        mi, ma = min.(mi,minimum(b)), max.(ma,maximum(b))
+        mi, ma = min.(mi,lowerleft(b)), max.(ma,upperright(b))
     end
 
     Rectangle(mi, ma; kwargs...)

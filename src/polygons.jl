@@ -1,16 +1,17 @@
 module Polygons
 
 import Base: +, -, *, .*, /, ==, .+, .-, isapprox
-import Base: minimum, maximum
 import Base: convert, getindex, start, next, done
 import Base: copy, promote_rule
 
+using Compat
 using ForwardDiff
 import CoordinateTransformations: AffineMap, LinearMap, Translation
 import Clipper
 import Clipper: orientation, children, contour
 
 import Devices
+import Devices: lowerleft, upperright
 import Unitful
 import Unitful: Length, dimension, unit, ustrip, uconvert
 import Devices: AbstractPolygon, Coordinate, bounds
@@ -122,23 +123,31 @@ end
 
 """
 ```
-minimum(x::Polygon)
+lowerleft(x::Polygon)
 ```
 
 Return the lower-left-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
 """
-minimum(x::Polygon) = Point(reduce(min, x.p))
+lowerleft(::Polygon)
 
 """
 ```
-maximum(x::Polygon)
+upperright(x::Polygon)
 ```
 
 Return the upper-right-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
 """
-maximum(x::Polygon) = Point(reduce(max, x.p))
+upperright(x::Polygon)
+
+if VERSION < v"0.6.0-"
+    lowerleft(x::Polygon) = Point(reduce(min, x.p))
+    upperright(x::Polygon) = Point(reduce(max, x.p))
+else
+    lowerleft(x::Polygon) = lowerleft(x.p)
+    upperright(x::Polygon) = upperright(x.p)
+end
 
 for T in (:LinearMap, :AffineMap)
     @eval (f::$T)(x::Polygon) = Polygon(f.(x.p), copy(x.properties))
@@ -184,7 +193,7 @@ bounds(p::Polygon)
 
 Return a bounding Rectangle with no properties for polygon `p`.
 """
-bounds(p::Polygon) = Rectangle(minimum(p), maximum(p))
+bounds(p::Polygon) = Rectangle(lowerleft(p), upperright(p))
 
 """
 ```
@@ -196,8 +205,8 @@ Return a bounding `Rectangle` with no properties for an array `parr` of
 """
 function bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
     rects = map(bounds, parr)
-    ll = lowerleft(map(minimum, rects))
-    ur = upperright(map(maximum, rects))
+    ll = lowerleft(map(lowerleft, rects))
+    ur = upperright(map(upperright, rects))
     Rectangle(ll, ur)
 end
 
@@ -211,10 +220,10 @@ objects.
 """
 bounds(p0::AbstractPolygon, p::AbstractPolygon...) = bounds([p0, p...])
 
-abstract Style
+@compat abstract type Style end
 
 "Plain polygon style."
-type Plain <: Style end
+immutable Plain <: Style end
 
 # Polygon promotion.
 for X in (:Real, :Length)
@@ -450,7 +459,7 @@ end
 
 ### cutting algorithm
 
-abstract D1
+@compat abstract type D1 end
 
 ab(p0, p1) = Point(gety(p1)-gety(p0), getx(p0)-getx(p1))
 

@@ -14,10 +14,6 @@ import Base:
     done,
     next,
     enumerate,
-    rest,
-    take,
-    drop,
-    cycle,
     isempty,
     empty!,
     deleteat!,
@@ -36,7 +32,8 @@ import Base:
     summary,
     dims2string
 
-import Compat.String
+import Compat.Iterators: rest, take, drop, cycle
+
 using ForwardDiff
 import Devices
 import Devices: bounds, cell, Coordinate, FloatCoordinate
