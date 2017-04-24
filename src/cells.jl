@@ -557,9 +557,9 @@ end
 
 """
     flatten{T<:Coordinate}(c::Cell{T}, name=uniquename("flatten"))
-All cell references and arrays are resolved into polygons, recursively.
-Together with the polygons already in cell `c`, an array of polygons
-(type `AbstractPolygon{T}`) is returned. The cell `c` remains unmodified.
+All cell references and arrays are resolved into polygons, recursively. A new `Cell` is
+returned containing these polygons, together with the polygons already explicitly in cell
+`c`. The cell `c` remains unmodified.
 """
 function flatten{T<:Coordinate}(c::Cell{T}, name=uniquename("flatten"))
     polys = copy(c.elements)
@@ -571,8 +571,8 @@ end
 
 """
     flatten(c::CellReference, name=uniquename("flatten"))
-Cell reference `c` is resolved into polygons, recursively. An array of polygons
-(type `AbstractPolygon`) is returned. The cell reference `c` remains unmodified.
+Cell reference `c` is resolved into polygons, recursively. A new `Cell` is returned
+containing these polygons. The cell reference `c` remains unmodified.
 """
 function flatten(c::CellReference, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
@@ -586,8 +586,8 @@ end
 
 """
     flatten(c::CellArray, name=uniquename("flatten"))
-Cell array `c` is resolved into polygons, recursively. An array of polygons
-(type `AbstractPolygon`) is returned. The cell array `c` remains unmodified.
+Cell array `c` is resolved into polygons, recursively. A new `Cell` is returned containing
+these polygons. The cell array `c` remains unmodified.
 """
 function flatten(c::CellArray, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1

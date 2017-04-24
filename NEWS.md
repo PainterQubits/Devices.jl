@@ -5,6 +5,8 @@
     and `upperright` instead.
   - Breaking change: some of the methods in 'src/tags.jl' that you probably weren't using
     anyway may have had changes to their method signatures.
+  - Breaking change: `flatten` always returns a `Cell`, never an array of `Polygon`s.
+    The behavior of `flatten!` (which modifies a `Cell`) is unchanged.
   - Implement our own rendering algorithms. This enables continuous integration testing and
     gives finer control on the output.
     - Dependency on gdspy for rendering has been removed.
