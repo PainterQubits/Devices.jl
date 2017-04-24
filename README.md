@@ -12,6 +12,6 @@ For simplified generation of device CAD files.
 ## Documentation
 
 [Stable](http://painterqubits.github.io/Devices.jl/stable) and
-[latest](https://painterqubits.github.io/Devices.jl/latest) versions available.
+[latest](https://painterqubits.github.io/Devices.jl/latest) versions available. Use "latest" until this package is officially registered.
 
-Documentation available [here](https://painterqubits.github.io/Devices.jl/).
+Old documentation available [here](https://painterqubits.github.io/Devices.jl/).
