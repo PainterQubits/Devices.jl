@@ -1,83 +1,115 @@
 # Devices.jl
 
-A [Julia](http://julialang.org) package for designing CAD files for superconducting devices.
+A [Julia](http://julialang.org) package for CAD of electronic devices, in particular
+superconducting devices operating at microwave frequencies.
 
 ## Installation
 
-### Install Python packages
-
-+ Install [gdspy](http://gdspy.readthedocs.org), which is currently used only
-  for rendering paths into polygons. If you're on a Mac, you can probably run
-  `pip install gdspy` from the command line. If you're on Windows and using
-  Anaconda for your Python installation, you can install gdspy from the conda
-  package manager. If installation fails, it may be failing because it is trying
-  to compile the Clipper library. We will use a Julia package for Clipper anyway.
-  Try installing an older version of gdspy that does not have the Clipper library:
-  `pip install 'gdspy==0.7.1' --force-reinstall` or the Windows equivalent.
-
-+ You should ensure that PyCall.jl is using the Python installation
-  into which you installed gdspy. You can do this by running the following in Julia:
-  `ENV["PYTHON"] = "path_to_python"; Pkg.build("PyCall.jl")`. Of course you should
-  replace with your actual path to Python; on Windows it may be
-  "C:\\ \\Anaconda\\ \\python.exe" for instance). If PyCall is not already installed,
-  replace `build` with `add`.
-
-+ Install [pyqrcode](https://github.com/mnooner256/pyqrcode), which is used for
-  generating QR codes: `pip install pyqrcode`. You need to do this even if
-  you don't plan on making QR codes (I'm not sure how to make it a conditional
-  dependency).
-
-### Install Julia packages
-
 + `Pkg.add("Clipper")`
 
-(We used to use a custom version of the Clipper.jl package, but thanks to upstream changes
-that is no longer necessary.) When Clipper.jl is added, it will be built to compile shared
-library / DLL files.
+When Clipper.jl is added, it will be built to compile shared library / DLL files. A
+compiler will be downloaded for you on Windows.
 
 + `Pkg.clone("https://github.com/PainterQubits/Devices.jl.git")`
 
 ## Quick start
 
-### Example using units
+Let's mock up a transmission line with two launchers and some bridges across the
+transmission line. We begin by making a cell with a rectangle in it:
 
+```@example 1
+using Devices, Devices.PreferMicrons, FileIO
+
+cr = Cell("rect", nm)
+r = centered(Rectangle(20μm,40μm))
+render!(cr, r; layer = 1)
+save("units_rectonly.svg", cr; layercolors=Dict(0=>"black",1=>"red")); nothing # hide
 ```
-using Devices, FileIO
-using Devices.PreferMicrons
+<img src="units_rectonly.svg" style="width:1in;"/>
 
-example forthcoming
+Note that when you use `Devices.PreferMicrons`, this will also enable the unqualified use
+of the following units: `pm`, `nm`, `μm`, `mm`, `cm`, `dm`, `m`, `°`, `rad`. (By unqualified
+we mean that the symbols are imported into the calling namespace and do not need to be
+prefixed with a module name.) When adding length units together, if the units don't agree,
+the result will be in microns. You can *instead* do `using` `Devices.PreferNanometers` if you
+want the result to default to nanometers. (These are your two choices at the moment, though
+there's nothing fundamentally limiting other possibilities: see `src/units.jl` for how to do
+this for other units.)
+
+When you specify the units for a `Cell`, you are specifying a database unit. Anything
+rendered into this cell will be discretized into integer multiples of the database unit.
+This means that nothing smaller than 1 nm can be represented accurately. Nonetheless,
+this is typically a satisfactory choice for superconducting devices.
+
+In another cell, we make the transmission line with some launchers on both ends:
+
+```@example 1
+p = Path(μm)
+sty = launch!(p)
+straight!(p, 500μm, sty)
+turn!(p, π/2, 150μm)
+straight!(p, 500μm)
+launch!(p)
+cp = Cell("pathonly", nm)
+render!(cp, p; layer = 0)
+save("units_pathonly.svg", cp; layercolors=Dict(0=>"black",1=>"red")); nothing # hide
+```
+<img src="units_pathonly.svg" style="width: 3in;"/>
+
+Finally, let's put bridges across the feedline:
+
+```@example 1
+turnidx = Int((length(p)+1)/2) - 1 # the first straight segment of the path
+simplify!(p, turnidx+(0:2))
+attach!(p, CellReference(cr, Point(0.0μm, 0.0μm)), (40μm):(40μm):((pathlength(p[turnidx]))-40μm), i=turnidx)
+c = Cell("decoratedpath", nm)
+render!(c, p; layer = 0)
+save("units.svg", c; layercolors=Dict(0=>"black",1=>"red")); nothing # hide
+```
+<img src="units.svg" style="width: 3in;"/>
+
+How easy was that?
+
+You can save a GDS file for e-beam lithography, or an SVG for vector graphics by using
+`save` with an appropriate extension:
+
+```jl
+save("/path/to/myoutput.gds", c)
+save("/path/to/myoutput.svg", c)
 ```
 
-You can then create and save CAD files with unit support. This will also enable the
-unqualified use of the following units: `pm, nm, μm, mm, cm, dm, m, °, rad`. When adding
-length units together, if the units don't agree, the result will be in microns.
-You can *instead* do `using Devices.PreferNanometers` if you want the result to default to
-nanometers. These are your two choices at the moment, though there's nothing fundamentally
-limiting other possibilities.
-
-Note that if you'd prefer, you can add the `using` statements to a file `.juliarc.jl` in
-the directory returned by `homedir()` if you want Julia to load Devices.jl every time you
-open it.
-
+Note that SVG support is experimental at the moment, and is not at all optimized. It is
+however used in generating the graphics you see in this documentation. If you use Juno
+for Atom, rendered cells are automatically previewed in the plot pane provided you enter
+`Devices.@junographics` at the start of your session.
 
 ### Example without using units
 
 For compatibility and laziness reasons it is possible to use Devices.jl without units at
-all. If you do not provide units, all values are presumed to be in microns. Most but not all
-functionality is possible if you do not use units.
+all. **If you do not provide units, all values are presumed to be in microns.** The syntax
+is otherwise the same:
 
-```
+```jl
 using Devices, FileIO
 
+cr = Cell("rect")
+r = centered(Rectangle(20,40))
+render!(cr, r; layer = 1)
+
 p = Path()
-style = launch!(p)
-straight!(p,500,style)
+sty = launch!(p)
+straight!(p,500,sty)
 turn!(p,π/2,150)
 straight!(p,500)
 launch!(p)
-c = Cell("main")
-render!(c, p)
-save("test.gds", c)
+cp = Cell("pathonly")
+render!(cp, p; layer = 0)
+
+turnidx = Int((length(p)+1)/2) - 1 # the first straight segment of the path
+simplify!(p, turnidx+(0:2))
+attach!(p, CellReference(cr, Point(0.0,0.0)), 40:40:((pathlength(p[turnidx]))-40), i=turnidx)
+c = Cell("decoratedpath")
+render!(c, p; layer = 0)
 ```
 
 ## Troubleshooting

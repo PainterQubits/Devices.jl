@@ -2,30 +2,24 @@ module Cells
 using Unitful
 import Unitful: Length, nm
 
-import Compat.String
-
+import StaticArrays
 import CoordinateTransformations
+import CoordinateTransformations.∘
 if isdefined(CoordinateTransformations, :transform) # is deprecated now, but...
     import CoordinateTransformations: transform
 end
-using CoordinateTransformations.∘
-using StaticArrays.@SMatrix
 
 using ..Points
 using ..Rectangles
 using ..Polygons
 
-import Base: show, +, -, copy, getindex, convert
 import Devices: AbstractPolygon, Coordinate, bounds, center
 export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!, transform, name, dbscale
 export uniquename
 
 """
-```
-uniquename(str)
-```
-
+    uniquename(str)
 Given string input `str`, generate a unique name that bears some resemblance
 to `str`. Useful if programmatically making Cells and all of them will
 eventually be saved into a GDS-II file. The uniqueness is expected on a per-Julia
@@ -66,7 +60,7 @@ end
 # convert{S,T}(::Type{CellReference{S,T}}, x::CellReference) =
 #     CellReference(convert(T, x.cell), convert(Point{S}, x.origin),
 #         x.xrefl, x.mag, x.rot)
-convert{S}(::Type{CellReference{S}}, x::CellReference) =
+Base.convert{S}(::Type{CellReference{S}}, x::CellReference) =
     CellReference(x.cell, convert(Point{S}, x.origin),
         x.xrefl, x.mag, x.rot)
 
@@ -103,7 +97,7 @@ type CellArray{S,T} <: CellRef{S,T}
     mag::Float64
     rot::Float64
 end
-convert{S}(::Type{CellArray{S}}, x::CellArray) =
+Base.convert{S}(::Type{CellArray{S}}, x::CellArray) =
     CellArray(x.cell, convert(Point{S}, x.origin),
                       convert(Point{S}, x.deltacol),
                       convert(Point{S}, x.deltarow),
@@ -154,18 +148,17 @@ type Cell{T<:Coordinate}
         c
     end
 end
+Base.copy{T}(c::Cell{T}) = Cell{T}(c.name, copy(c.elements), copy(c.refs), c.create)
+
 # Do NOT define a convert method like this or otherwise cells will
 # be copied when referenced by CellRefs!
-# convert{T}(::Type{Cell{T}}, x::Cell) =
+# Base.convert{T}(::Type{Cell{T}}, x::Cell) =
 #     Cell{T}(x.name, convert(Vector{Polygon{T}}, x.elements),
 #                     convert(Vector{CellRef}, x.refs),
 #                     x.create)
 
 """
-```
-dbscale{T}(c::Cell{T})
-```
-
+    dbscale{T}(c::Cell{T})
 Give the database scale for a cell. The database scale is the
 smallest increment of length that will be represented in the output CAD file.
 
@@ -181,10 +174,7 @@ otherwise.
 dbscale{T}(c::Cell{T}) = ifelse(T<:AbstractFloat, 1.0nm, ifelse(T<:Real, 1nm, T(1)))
 
 """
-```
-dbscale(cell::Cell...)
-```
-
+    dbscale(cell::Cell...)
 Choose an appropriate database scale for a GDSII file given [`Cell`](@ref)s of
 different types. The smallest database scale of all cells considered is returned.
 """
@@ -192,10 +182,7 @@ dbscale(c0::Cell, c1::Cell, c2::Cell...) =
     minimum([dbscale(c0); dbscale(c1); map(dbscale, collect(c2))])
 
 """
-```
-CellReference{T<:Coordinate}(x, y::Point{T}=Point(0.,0.); kwargs...
-```
-
+    CellReference{T<:Coordinate}(x, y::Point{T}=Point(0.,0.); kwargs...
 Convenience constructor for `CellReference{typeof(x), T}`.
 
 Keyword arguments can specify x-reflection, magnification, or rotation.
@@ -241,18 +228,14 @@ function CellReference{T<:Coordinate}(x, origin::Point{T}=Point(0.,0.); kwargs..
 end
 
 """
-```
-CellArray{T<:Coordinate}(x, origin::Point{T}, dc::Point{T},
-    dr::Point{T}, c::Integer, r::Integer; xrefl=false, mag=1.0, rot=0.0)
-```
-
+    CellArray{T<:Coordinate}(x, origin::Point{T}; kwargs...)
 Construct a `CellArray{T,typeof(x)}` object.
 
 Keyword arguments specify the column vector, row vector, number of columns,
 number of rows, x-reflection, magnification factor, and rotation.
-Synonyms are accepted for these keywords:
 
-- Column vector: `:deltacol`, `:dcol`, `:dc`, `:vcol`, `:colv`, `:colvec`,
+Synonyms are accepted for these keywords:
+- Column vector `dc::Point{T}`: `:deltacol`, `:dcol`, `:dc`, `:vcol`, `:colv`, `:colvec`,
   `:colvector`, `:columnv`, `:columnvec`, `:columnvector`
 - Row vector: `:deltarow`, `:drow`, `:dr`, `:vrow`, `:rv`, `:rowvec`,
   `:rowvector`
@@ -262,7 +245,6 @@ Synonyms are accepted for these keywords:
   `:xmirror`, `:mirror`
 - Magnification: `:mag`, `:magnification`, `:magnify`, `:zoom`, `:scale`
 - Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
-
 """
 function CellArray{T<:Coordinate}(x, origin::Point{T}; kwargs...)
     argdict = Dict(k=>v for (k,v) in kwargs)
@@ -337,10 +319,7 @@ function CellArray{T<:Coordinate}(x, origin::Point{T}; kwargs...)
 end
 
 """
-```
-CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T}; kwargs...)
-```
-
+    CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T}; kwargs...)
 Construct a `CellArray{T,typeof(x)}` based on ranges (probably `LinSpace` or
 `FloatRange`). `c` specifies column coordinates and `r` for the rows. Pairs from
 `c` and `r` specify the origins of the repeated cells. The extrema of the ranges
@@ -394,22 +373,22 @@ end
 
 
 """
-```
-Cell(name::AbstractString)
-```
-
-Convenience constructor for `Cell{typeof(1.0u"nm")}`.
+    Cell(name::AbstractString)
+Convenience constructor for `Cell{Float64}`.
 """
 Cell(name::AbstractString) = Cell{Float64}(name)
 
 """
-```
-Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractVector{T})
-```
+    Cell(name::AbstractString, unit::Unitful.LengthUnit)
+Convenience constructor for `Cell{typeof(1.0unit)}`.
+"""
+Cell(name::AbstractString, unit::Unitful.LengthUnit) = Cell{typeof(1.0unit)}("name")
 
+"""
+    Cell{T}(name::AbstractString, elements::AbstractVector{Polygon{T}})
 Convenience constructor for `Cell{T}`.
 """
-Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractVector{T}) =
+Cell{T}(name::AbstractString, elements::AbstractVector{Polygon{T}}) =
     Cell{T}(name, elements)
 
 # """
@@ -426,49 +405,37 @@ Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractVector{T}) =
 #     Cell{T}(name, elements, refs)
 
 # Don't print out everything in the cell, it is a mess that way.
-show(io::IO, c::Cell) = print(io,
+Base.show(io::IO, c::Cell) = print(io,
     "Cell \"$(c.name)\" with $(length(c.elements)) els, $(length(c.refs)) refs")
 
 """
-```
-copy(x::CellReference)
-```
-
+    copy(x::CellReference)
 Creates a shallow copy of `x` (does not copy the referenced cell).
 """
-copy(x::CellReference) = CellReference(x.cell, x.origin,
+Base.copy(x::CellReference) = CellReference(x.cell, x.origin,
     xrefl=x.xrefl, mag=x.mag, rot=x.rot)
 
 """
-```
-copy(x::CellArray)
-```
-
+    copy(x::CellArray)
 Creates a shallow copy of `x` (does not copy the arrayed cell).
 """
-copy(x::CellArray) = CellArray(x.cell, x.origin, x.deltacol, x.deltarow,
+Base.copy(x::CellArray) = CellArray(x.cell, x.origin, x.deltacol, x.deltarow,
     x.col, x.row, x.xrefl, x.mag, x.rot)
 
 """
-```
-getindex(c::Cell, nom::AbstractString, index::Integer=1)
-```
-
+    getindex(c::Cell, nom::AbstractString, index::Integer=1)
 If `c` references a cell with name `nom`, this method will return the
 corresponding `CellReference`. If there are several references to that cell,
 then `index` specifies which one is returned (in the order they are found in
 `c.refs`). e.g. to specify an index of 2: `mycell["myreferencedcell",2]`.
 """
-function getindex(c::Cell, nom::AbstractString, index::Integer=1)
+function Base.getindex(c::Cell, nom::AbstractString, index::Integer=1)
     inds = find(x->name(x)==nom, c.refs)
     c.refs[inds[index]]
 end
 
 """
-```
-getindex(c::CellRef, nom::AbstractString, index::Integer=1)
-```
-
+    getindex(c::CellRef, nom::AbstractString, index::Integer=1)
 If the cell referenced by `c` references a cell with name `nom`, this method
 will return the corresponding `CellReference`. If there are several references
 to that cell, then `index` specifies which one is returned (in the order they
@@ -481,17 +448,15 @@ mycell["myreferencedcell"]["onedeeper"]
 mycell["myreferencedcell"].cell["onedeeper"]
 ```
 """
-function getindex(c::CellRef, nom::AbstractString, index::Integer=1)
+function Base.getindex(c::CellRef, nom::AbstractString, index::Integer=1)
     inds = find(x->name(x)==nom, c.cell.refs)
     c.cell.refs[inds[index]]
 end
 
 """
-```
-bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
-```
-
-Returns a `Rectangle` bounding box with no properties around all objects in `cell`.
+    bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
+    bounds(cell0::Cell, cell1::Cell, cell::Cell...; kwargs...)
+Returns a `Rectangle` bounding box with no properties around all objects in a cell or cells.
 """
 function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
     mi, ma = Point(typemax(T), typemax(T)), Point(typemin(T), typemin(T))
@@ -519,21 +484,20 @@ function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
     Rectangle(mi, ma; kwargs...)
 end
 
-"""
-```
-center(cell::Cell)
-```
+function bounds(cell0::Cell, cell1::Cell, cell::Cell...; kwargs...)
+    r = bounds([bounds(cell0), bounds(cell1), bounds.(cell)...])
+    Rectangle(r.ll, r.ur; kwargs...)
+end
 
+"""
+    center(cell::Cell)
 Convenience method, equivalent to `center(bounds(cell))`.
 Returns the center of the bounding box of the cell.
 """
 center(cell::Cell) = center(bounds(cell))
 
 """
-```
-bounds(ref::CellArray; kwargs...)
-```
-
+    bounds(ref::CellArray; kwargs...)
 Returns a `Rectangle` bounding box with properties specified by `kwargs...`
 around all objects in `ref`. The bounding box respects reflection, rotation, and
 magnification specified by `ref`.
@@ -554,17 +518,14 @@ function bounds{S<:Coordinate, T<:Coordinate}(
 
     sgn = ref.xrefl ? -1 : 1
     a = Translation(ref.origin) ∘ CoordinateTransformations.LinearMap(
-        @SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
+        StaticArrays.@SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
                   sgn*ref.mag*sin(ref.rot) ref.mag*cos(ref.rot)])
     c = a(mb)
     bounds(c; kwargs...)
 end
 
 """
-```
-bounds(ref::CellReference; kwargs...)
-```
-
+    bounds(ref::CellReference; kwargs...)
 Returns a `Rectangle` bounding box with properties specified by `kwargs...`
 around all objects in `ref`. The bounding box respects reflection, rotation,
 and magnification specified by `ref`.
@@ -574,117 +535,90 @@ function bounds(ref::CellReference; kwargs...)
     !isproper(b) && return b
     sgn = ref.xrefl ? -1 : 1
     a = Translation(ref.origin) ∘ CoordinateTransformations.LinearMap(
-        @SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
+        StaticArrays.@SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
                   sgn*ref.mag*sin(ref.rot) ref.mag*cos(ref.rot)])
     c = a(b)
     bounds(c; kwargs...)
 end
 
 """
-`flatten{T<:Coordinate}(c::Cell{T})`
-
-All cell references and arrays are resolved into polygons, recursively.
-Together with the polygons already in cell `c`, an array of polygons
-(type `AbstractPolygon{T}`) is returned. The cell `c` remains unmodified.
-"""
-function flatten{T<:Coordinate}(c::Cell{T})
-    polys = AbstractPolygon{T}[]
-    append!(polys, c.elements)
-    for r in c.refs
-        append!(polys, flatten(r))
-    end
-    polys
-end
-
-"""
-`flatten!(c::Cell)`
-
+    flatten!(c::Cell)
 All cell references and arrays are turned into polygons and added to cell `c`.
 The references and arrays are then removed. This "flattening" of the cell is
 recursive: references in referenced cells are flattened too. The modified cell
 is returned.
 """
 function flatten!(c::Cell)
-    c.elements = flatten(c)
+    c.elements = flatten(c).elements
     empty!(c.refs)
     c
 end
 
 """
-`flatten(c::CellReference)`
+    flatten{T<:Coordinate}(c::Cell{T}, name=uniquename("flatten"))
+All cell references and arrays are resolved into polygons, recursively.
+Together with the polygons already in cell `c`, an array of polygons
+(type `AbstractPolygon{T}`) is returned. The cell `c` remains unmodified.
+"""
+function flatten{T<:Coordinate}(c::Cell{T}, name=uniquename("flatten"))
+    polys = copy(c.elements)
+    for r in c.refs
+        append!(polys, flatten(r).elements)
+    end
+    Cell(name, polys)
+end
 
+"""
+    flatten(c::CellReference, name=uniquename("flatten"))
 Cell reference `c` is resolved into polygons, recursively. An array of polygons
 (type `AbstractPolygon`) is returned. The cell reference `c` remains unmodified.
 """
-function flatten(c::CellReference)
-    polys = AbstractPolygon[]
+function flatten(c::CellReference, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
     a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
-        @SMatrix [sgn*c.mag*cos(c.rot) -c.mag*sin(c.rot);
+        StaticArrays.@SMatrix [sgn*c.mag*cos(c.rot) -c.mag*sin(c.rot);
                   sgn*c.mag*sin(c.rot) c.mag*cos(c.rot)])
-    append!(polys, a.(flatten(c.cell)))
-    # append!(polys, a.(c.cell.elements))
-    # for r in c.cell.refs
-    #     append!(polys, a.(flatten(r)))
-    # end
-    polys
+    newcell = flatten(c.cell)
+    newpolys = a.(newcell.elements)
+    Cell(name, newpolys)
 end
 
 """
-`flatten(c::CellArray)`
-
+    flatten(c::CellArray, name=uniquename("flatten"))
 Cell array `c` is resolved into polygons, recursively. An array of polygons
 (type `AbstractPolygon`) is returned. The cell array `c` remains unmodified.
 """
-function flatten(c::CellArray)
-    polys = AbstractPolygon[]
+function flatten(c::CellArray, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
     a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
-            @SMatrix [sgn*c.mag*cos(c.rot) -c.mag*sin(c.rot);
+            StaticArrays.@SMatrix [sgn*c.mag*cos(c.rot) -c.mag*sin(c.rot);
                       sgn*c.mag*sin(c.rot) c.mag*cos(c.rot)])
-    for i in 1:c.row, j in 1:c.col
-        pt = (i-1) * c.deltarow + (j-1) * c.deltacol
-        append!(polys, a.(flatten(c.cell) .+ pt))
-        # append!(polys, a.(c.cell.elements .+ pt))
-        # for r in c.cell.refs
-        #     append!(polys, a.(flatten(r) .+ pt))
-        # end
-    end
-    polys
+    newcell = flatten(c.cell)
+    pts = [(i-1) * c.deltarow + (j-1) * c.deltacol for i in 1:c.row for j in 1:c.col]
+    newpolys = a.(newcell.elements .+ pts')
+    Cell(name, @view newpolys[:])
 end
 
 """
-```
-name(x::Cell)
-```
-
+    name(x::Cell)
 Returns the name of the cell.
 """
 name(x::Cell) = x.name
 
 """
-```
-name(x::CellArray)
-```
-
+    name(x::CellArray)
 Returns the name of the arrayed cell.
 """
 name(x::CellArray) = name(x.cell)
 
 """
-```
-name(x::CellReference)
-```
-
+    name(x::CellReference)
 Returns the name of the referenced cell.
 """
 name(x::CellReference) = name(x.cell)
 
 """
-```
-traverse!(a::AbstractArray, c::Cell, level=1)
-```
-
+    traverse!(a::AbstractArray, c::Cell, level=1)
 Given a cell, recursively traverse its references for other cells and add
 to array `a` some tuples: `(level, c)`. `level` corresponds to how deep the cell
 was found, and `c` is the found cell.
@@ -697,10 +631,7 @@ function traverse!(a::AbstractArray, c::Cell, level=1)
 end
 
 """
-```
-order!(a::AbstractArray)
-```
-
+    order!(a::AbstractArray)
 Given an array of tuples like that coming out of [`traverse!`](@ref), we
 sort by the `level`, strip the level out, and then retain unique entries.
 The aim of this function is to determine an optimal writing order when
@@ -716,10 +647,7 @@ function order!(a::AbstractArray)
 end
 
 """
-```
-transform(c::Cell, d::CellRef)
-```
-
+    transform(c::Cell, d::CellRef)
 Given a Cell `c` containing [`CellReference`](@ref) or [`CellArray`](@ref)
 `d` in its tree of references, this function returns a
 `CoordinateTransformations.AffineMap` object that lets you translate from the
@@ -741,7 +669,7 @@ julia> trans(Point(2.0,3.0))
 ```
 """
 function transform(c::Cell, d::CellRef)
-    x,y = transform(c, d, CoordinateTransformations.LinearMap(@SMatrix eye(2)))
+    x,y = transform(c, d, CoordinateTransformations.LinearMap(StaticArrays.@SMatrix eye(2)))
 
     x || error("Reference tree does not contain $d.")
     return y
@@ -754,7 +682,7 @@ function transform(c::Cell, d::CellRef, a)
             sgn = d.xrefl ? -1 : 1
             return true, a ∘ Translation(d.origin) ∘
             CoordinateTransformations.LinearMap(
-                @SMatrix [sgn*d.mag*cos(d.rot) -d.mag*sin(d.rot);
+                StaticArrays.@SMatrix [sgn*d.mag*cos(d.rot) -d.mag*sin(d.rot);
                           sgn*d.mag*sin(d.rot) d.mag*cos(d.rot)])
         end
     end
@@ -765,7 +693,7 @@ function transform(c::Cell, d::CellRef, a)
         sgn = ref.xrefl ? -1 : 1
         (x,y) = transform(ref.cell, d, a ∘ Translation(ref.origin) ∘
             CoordinateTransformations.LinearMap(
-                @SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
+                StaticArrays.@SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
                           sgn*ref.mag*sin(ref.rot) ref.mag*cos(ref.rot)]))
         # were we successful?
         if x
@@ -777,7 +705,7 @@ function transform(c::Cell, d::CellRef, a)
     return false, a
 end
 
-for op in [:+, :-]
+for op in [:(Base.:+), :(Base.:-)]
     @eval function ($op){T<:Coordinate}(r::Cell{T}, p::Point)
         n = Cell{T}(r.name, similar(r.elements), similar(r.refs))
         for (ia, ib) in zip(eachindex(r.elements), eachindex(n.elements))

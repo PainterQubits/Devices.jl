@@ -1,8 +1,8 @@
 """
 ```
-type SimpleCornerStyle{T} <: DiscreteStyle{T}
+immutable SimpleTraceCorner <: DiscreteStyle
 ```
 
 No parameters! All the required information is already in [`Corner`](@ref).
 """
-type SimpleCornerStyle{T} <: DiscreteStyle{T} end
+immutable SimpleTraceCorner <: DiscreteStyle end

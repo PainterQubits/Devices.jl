@@ -1,5 +1,3 @@
-## Cells
-
 Cells are used to logically group polygons or references to other cells
 into a single entity. They can contain references to other cells or arrays of
 other cells. They also store polygons. Here is the definition of a `Cell`:

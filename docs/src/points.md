@@ -4,10 +4,8 @@ DocTestSetup = quote
     using Unitful: °
 end
 ```
-## Summary
 
-Points live in a Cartesian coordinate system with
-`Real` or `Unitful.Length` coordinates:
+Points live in a Cartesian coordinate system with `Real` or `Unitful.Length` coordinates:
 
 ```jldoctest
 julia> Point(1,1)
@@ -63,6 +61,7 @@ julia> aff(Point(0,0))
 ## API
 
 ```@docs
+    Devices.PointTypes
     Devices.Coordinate
     Points.Point
     Points.getx
@@ -78,6 +77,3 @@ from [StaticArrays.jl](https://github.com/JuliaArrays/StaticArrays.jl).
 This permits a fast, efficient representation of
 coordinates in the plane. Additionally, unlike `Tuple` objects, we can
 add points together, simplifying many function definitions.
-
-To interface with gdspy, we simply convert the `Point` object to a `Tuple` and
-let [PyCall.jl](https://github.com/stevengj/PyCall.jl) figure out what to do.

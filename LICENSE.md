@@ -20,3 +20,12 @@ The Devices.jl package is licensed under the MIT "Expat" License:
 > CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 > TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 > SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+A modified version of `adaptive_grid` was originally from PlotUtils.jl,
+an MIT "Expat" licensed Julia package by Tom Breloff and contributors (notably
+Kristoffer Carlsson).
+
+Cadence Design Systems, Inc. holds the rights to the GDS-II format. The specification
+has been described with permission in the SPIE Handbook of Microlithography, Micromachining
+and Microfabrication, vol. 1 (accessible [here](http://www.cnf.cornell.edu/cnf_spie9.html)
+as of April 17, 2017).

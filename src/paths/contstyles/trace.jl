@@ -1,26 +1,36 @@
+@compat abstract type Trace <: ContinuousStyle end
+
 """
-```
-type Trace{T} <: ContinuousStyle{T}
-    width::Function
-    divs::Int
-end
-```
-
-Simple, single trace.
-
-- `width::Function`: trace width.
-- `divs::Int`: number of segments to render. Increase if you see artifacts.
+    immutable GeneralTrace{T} <: Trace
+        width::T
+    end
+A single trace with variable width as a function of path length. `width` is callable.
 """
-type Trace{T} <: ContinuousStyle{T}
-    width::Function
-    divs::Int
+immutable GeneralTrace{T} <: Trace
+    width::T
 end
-Trace(width::Function) = Trace{typeof(width(0.0))}(width, 100)
-Trace(width::Coordinate) = Trace{typeof(float(width))}(x->float(width), 1)
-copy{T}(x::Trace{T}) = Trace{T}(x.width, x.divs)
-divs(s::Trace) = linspace(0.0, 1.0, s.divs+1)
+copy(x::GeneralTrace) = GeneralTrace(x.width)
+@inline extent(s::GeneralTrace, t) = s.width(t)/2
+@inline width(s::GeneralTrace, t) = s.width(t)
 
-distance{T}(::Trace{T}, t) = zero(T)
-extent(s::Trace, t) = s.width(t)/2
-paths(::Trace, t...) = 1
-width(s::Trace, t) = s.width(t)
+"""
+    immutable SimpleTrace{T<:Coordinate} <: Trace
+        width::T
+    end
+A single trace with fixed width as a function of path length.
+"""
+immutable SimpleTrace{T<:Coordinate} <: Trace
+    width::T
+end
+copy(x::SimpleTrace) = Trace(x.width)
+@inline extent(s::SimpleTrace, t...) = s.width/2
+@inline width(s::SimpleTrace, t...) = s.width
+
+"""
+    Trace(width::Coordinate)
+    Trace(width)
+Constructor for Trace styles. Automatically chooses `SimpleTrace` or `GeneralTrace` as
+appropriate.
+"""
+Trace(width) = GeneralTrace(width)
+Trace(width::Coordinate) = SimpleTrace(float(width))

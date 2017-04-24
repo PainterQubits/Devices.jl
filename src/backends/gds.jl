@@ -5,6 +5,7 @@ using Unitful
 import Unitful: Length, fm, pm, nm, μm, m
 
 import Base: bswap, bits, convert, write, read
+import Devices: DEFAULT_LAYER, DEFAULT_DATATYPE, layer, datatype
 using ..Points
 import ..Rectangles: Rectangle
 import ..Polygons: Polygon
@@ -14,10 +15,6 @@ import FileIO: File, @format_str, load, save, stream, magic, skipmagic
 
 export GDS64
 export gdsbegin, gdsend, gdswrite
-
-# Used if a polygon does not specify a layer or datatype.
-const DEFAULT_LAYER = 0
-const DEFAULT_DATATYPE = 0
 
 const GDSVERSION   = UInt16(600)
 const HEADER       = 0x0002
@@ -62,29 +59,25 @@ const BOXTYPE      = 0x2E02
 const PLEX         = 0x2F03
 
 """
-`abstract GDSFloat <: Real`
-
+    abstract GDSFloat <: Real
 Floating-point formats found in GDS-II files.
 """
 abstract GDSFloat <: Real
 
 """
-`bitstype 64 GDS64 <: GDSFloat`
-
+    bitstype 64 GDS64 <: GDSFloat
 "8-byte (64-bit) real" format found in GDS-II files.
 """
 bitstype 64 GDS64 <: GDSFloat
 
 """
-`bits(x::GDS64)`
-
+    bits(x::GDS64)
 A string giving the literal bit representation of a GDS64 number.
 """
 bits(x::GDS64) = bits(reinterpret(UInt64,x))
 
 """
-`bswap(x::GDS64)`
-
+    bswap(x::GDS64)
 Byte-swap a GDS64 number. Used implicitly by `hton`, `ntoh` for endian conversion.
 """
 function bswap(x::GDS64)
@@ -92,8 +85,7 @@ function bswap(x::GDS64)
 end
 
 """
-`even(str)`
-
+    even(str)
 Pads a string with `\0` if necessary to make it have an even length.
 """
 function even(str)
@@ -157,19 +149,13 @@ end
 gdswerr(x) = error("Wrong data type for token 0x$(hex(x,4)).")
 
 """
-```
-write(s::IO, x::GDS64)
-```
-
+    write(s::IO, x::GDS64)
 Write a GDS64 number to an IO stream.
 """
 write(s::IO, x::GDS64) = write(s, reinterpret(UInt64, x))    # check for v0.5
 
 """
-```
-read(s::IO, ::Type{GDS64})
-```
-
+    read(s::IO, ::Type{GDS64})
 Read a GDS64 number from an IO stream.
 """
 read(s::IO, ::Type{GDS64}) = reinterpret(GDS64, read(s, UInt64))
@@ -243,10 +229,7 @@ function gdsbegin(io::IO, libname::String, dbunit::Length, userunit::Length,
 end
 
 """
-```
-gdswrite(io::IO, cell::Cell, dbs::Length)
-```
-
+    gdswrite(io::IO, cell::Cell, dbs::Length)
 Write a `Cell` to an IO buffer. The creation and modification date of the cell
 are written first, followed by the cell name, the polygons in the cell,
 and finally any references or arrays.
@@ -284,11 +267,8 @@ end
 p2p{T<:Length}(x::T, dbs) = Int(round(Float64(x/dbs)))
 
 """
-```
-gdswrite{T<:Real}(io::IO, el::Polygon{T}, dbs)
-gdswrite{T<:Length}(io::IO, poly::Polygon{T}, dbs)
-```
-
+    gdswrite{T<:Real}(io::IO, el::Polygon{T}, dbs)
+    gdswrite{T<:Length}(io::IO, poly::Polygon{T}, dbs)
 Write a polygon to an IO buffer. The layer and datatype are written first,
 then the boundary of the polygon is written in a 32-bit integer format with
 specified database scale.
@@ -297,11 +277,10 @@ Note that polygons without units are presumed to be in microns.
 """
 function gdswrite{T<:Length}(io::IO, poly::Polygon{T}, dbs)
     bytes = gdswrite(io, BOUNDARY)
-    props = poly.properties
-    layer = haskey(props, :layer) ? props[:layer] : DEFAULT_LAYER
-    datatype = haskey(props, :datatype) ? props[:datatype] : DEFAULT_DATATYPE
-    bytes += gdswrite(io, LAYER, layer)
-    bytes += gdswrite(io, DATATYPE, datatype)
+    lyr = layer(poly)
+    dt = datatype(poly)
+    bytes += gdswrite(io, LAYER, lyr)
+    bytes += gdswrite(io, DATATYPE, dt)
 
     xy = reinterpret(T, poly.p)          # Go from Point to sequential numbers
     xyf = map(x->p2p(x,dbs), xy)         # Divide by the scale and such
@@ -314,11 +293,8 @@ end
 gdswrite{T<:Real}(io::IO, el::Polygon{T}, dbs) = gdswrite(io, el*(1μm), dbs)
 
 """
-```
-gdswrite{T<:Real}(io::IO, ref::CellReference{T}, dbs)
-gdswrite{T<:Length}(io::IO, el::CellReference{T}, dbs)
-```
-
+    gdswrite{T<:Real}(io::IO, ref::CellReference{T}, dbs)
+    gdswrite{T<:Length}(io::IO, el::CellReference{T}, dbs)
 Write a [`CellReference`](@ref) to an IO buffer. The name of the referenced cell
 is written first. Reflection, magnification, and rotation info are written next.
 Finally, the origin of the cell reference is written.
@@ -343,10 +319,7 @@ function gdswrite{T<:Real}(io::IO, ref::CellReference{T}, dbs)
 end
 
 """
-```
-gdswrite(io::IO, a::CellArray, dbs)
-```
-
+    gdswrite(io::IO, a::CellArray, dbs)
 Write a [`CellArray`](@ref) to an IO buffer. The name of the referenced cell is
 written first. Reflection, magnification, and rotation info are written next.
 After that the number of columns and rows are written. Finally, the origin,
@@ -382,10 +355,7 @@ function gdswrite{T<:Real}(io::IO, a::CellArray{T}, dbs)
 end
 
 """
-```
-strans(io::IO, ref)
-```
-
+    strans(io::IO, ref)
 Writes bytes to the IO stream (if needed) to encode x-reflection, magnification,
 and rotation settings of a reference or array. Returns the number of bytes written.
 """
@@ -427,28 +397,22 @@ end
 gdsend(io::IO) = gdswrite(io, ENDLIB)
 
 """
-```
-save(::Union{AbstractString,IO}, cell0::Cell{T}, cell::Cell...)
-
-save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
-name="GDSIILIB", userunit=1μm, modify=now(), acc=now(),
-verbose=false)`
-```
-
+    save(::Union{AbstractString,IO}, cell0::Cell{T}, cell::Cell...)
+    save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
+        name="GDSIILIB", userunit=1μm, modify=now(), acc=now(),
+        verbose=false)
 This bottom method is implicitly called when you use the convenient syntax of
 the top method: `save("/path/to/my.gds", cells_i_want_to_save...)`
 
-The `name` keyword argument is used for the internal library name of the GDS-II
-file and is probably inconsequential for modern workflows.
-
-The `userunit` keyword sets what 1.0 corresponds to when viewing this file in
-graphical GDS editors with inferior unit support.
-
-The `modify` and `acc` keywords correspond to the date of last modification and
-the date of last accession. It would be unusual to have this differ from `now()`.
-
-The `verbose` keyword argument allows you to monitor the output of [`traverse!`](@ref)
-and [`order!`](@ref) if something funny is happening while saving.
+Keyword arguments include:
+  - `name`: used for the internal library name of the GDS-II file and probably
+    inconsequential for modern workflows.
+  - `userunit`: sets what 1.0 corresponds to when viewing this file in graphical GDS editors
+    with inferior unit support.
+  - `modify`: date of last modification.
+  - `acc`: date of last accession. It would be unusual to have this differ from `now()`.
+  - `verbose`: monitor the output of [`traverse!`](@ref) and [`order!`](@ref) to see if
+    something funny is happening while saving.
 """
 function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
         name="GDSIILIB", userunit=1μm, modify=now(), acc=now(), verbose=false)
@@ -484,10 +448,7 @@ function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
 end
 
 """
-```
-load(f::File{format"GDS"}; verbose::Bool=false, nounits::Bool=false)
-```
-
+    load(f::File{format"GDS"}; verbose::Bool=false, nounits::Bool=false)
 A dictionary of top-level cells (`Cell` objects) found in the GDS-II file is
 returned. The dictionary keys are the cell names. The other cells in the GDS-II
 file are retained by `CellReference` or `CellArray` objects held by the
@@ -647,7 +608,7 @@ end
 
 function boundary(s, dbs, verbose, nounits)
     haseflags, hasplex, haslayer, hasdt, hasxy = false, false, false, false, false
-    layer, dt = DEFAULT_LAYER, DEFAULT_DATATYPE
+    lyr, dt = DEFAULT_LAYER, DEFAULT_DATATYPE
     local xy
     T = nounits ? Float64 : typeof(dbs)
     while true
@@ -670,7 +631,7 @@ function boundary(s, dbs, verbose, nounits)
         elseif token == LAYER
             verbose && info("Token was LAYER")
             haslayer && error("Already read LAYER tag for this BOUNDARY tag.")
-            layer = Int(ntoh(read(s, Int16)))
+            lyr = Int(ntoh(read(s, Int16)))
             haslayer = true
         elseif token == DATATYPE
             verbose && info("Token was DATATYPE")
@@ -705,7 +666,7 @@ function boundary(s, dbs, verbose, nounits)
 
     verbose && !haslayer && warn("Did not read LAYER tag.")
     verbose && !hasdt && warn("Did not read DATATYPE tag.")
-    Polygon(xy; layer = layer, datatype = dt)
+    Polygon(xy; layer = lyr, datatype = dt)
 end
 
 function sref(s, dbs, verbose, nounits)
@@ -882,7 +843,7 @@ function aref(s, dbs, verbose, nounits)
 end
 
 function sname(s, bytes)
-    by = readbytes(s, bytes)
+    by = read(s, bytes)
     str = convert(String, by)
     if str[end] == '\0'
         str = str[1:(end-1)]

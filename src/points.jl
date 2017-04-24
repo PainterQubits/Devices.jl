@@ -1,5 +1,5 @@
 module Points
-import Devices: Coordinate
+import Devices: PointTypes, InverseLength
 import StaticArrays
 import StaticArrays: @SMatrix
 import CoordinateTransformations: LinearMap, Translation, ∘, compose
@@ -7,8 +7,7 @@ import Clipper: IntPoint
 import Base: convert, .+, .-, *, summary, promote_rule, show, reinterpret
 import Base: scalarmin, scalarmax, isapprox
 import ForwardDiff: ForwardDiff, extract_derivative
-import Unitful: Length, ustrip, unit
-import PyCall.PyObject
+import Unitful: Unitful, Length, ustrip, unit
 export Point
 export Rotation, Translation, XReflection, YReflection, ∘, compose
 export getx, gety, lowerleft, upperright
@@ -23,7 +22,7 @@ end
 
 2D Cartesian coordinate in the plane.
 """
-immutable Point{T<:Coordinate} <: StaticArrays.FieldVector{T}
+immutable Point{T<:PointTypes} <: StaticArrays.FieldVector{T}
     x::T
     y::T
 end
@@ -34,12 +33,15 @@ StaticArrays.similar_type{P<:Point, T}(::Type{P}, ::Type{T},
 Point(x::Number, y::Number) =
     error("Cannot use `Point` with this combination of types.")
 Point(x::Length, y::Length) = Point{promote_type(typeof(x),typeof(y))}(x,y)
+Point(x::InverseLength, y::InverseLength) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 Point(x::Real, y::Real) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 
 convert{T<:Real}(::Type{Point{T}}, x::IntPoint) = Point{T}(x.X, x.Y)
 promote_rule{S<:Real,T<:Real}(::Type{Point{S}}, ::Type{Point{T}}) =
     Point{promote_type(S,T)}
 promote_rule{S<:Length,T<:Length}(::Type{Point{S}}, ::Type{Point{T}}) =
+    Point{promote_type(S,T)}
+promote_rule{S<:InverseLength,T<:InverseLength}(::Type{Point{S}}, ::Type{Point{T}}) =
     Point{promote_type(S,T)}
 show(io::IO, p::Point) = print(io, "(",string(getx(p)),",",string(gety(p)),")")
 
@@ -65,9 +67,6 @@ gety(p::Point)
 Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 """
 @inline gety(p::Point) = p.y
-
-# For use with gdspy
-PyObject(p::Point) = PyObject((getx(p), gety(p)))
 
 for f in (:.+, :.-)
     @eval function ($f){S,T}(a::AbstractArray{Point{S}}, p::Point{T})
@@ -196,8 +195,11 @@ julia> trans(Point(1,1))
 """
 YReflection() = LinearMap(@SMatrix [-1 0;0 1])
 
-extract_derivative{T<:Coordinate}(x::Point{T}) =
+extract_derivative{T}(x::Point{T}) =
     Point(unit(T)*ForwardDiff.partials(ustrip(getx(x)),1),
           unit(T)*ForwardDiff.partials(ustrip(gety(x)),1))
 
+ustrip{T}(p::Point{T}) = Point(ustrip(getx(p)), ustrip(gety(p)))
+ustrip{T<:Length}(v::AbstractArray{Point{T}}) = reinterpret(Point{Unitful.numtype(T)}, v)
+ustrip{T}(v::AbstractArray{Point{T}}) = v  #TODO good?
 end

@@ -1,6 +1,6 @@
-type SkipDiscrete{T} <: DiscreteStyle{T} end
-type SkipContinuous{T} <: ContinuousStyle{T} end
+type SkipDiscrete <: DiscreteStyle end
+type SkipContinuous <: ContinuousStyle end
 
 type SkipRendering <: Style end
-convert{T}(::Type{ContinuousStyle{T}}, x::SkipRendering) = SkipContinuous{T}()
-convert{T}(::Type{DiscreteStyle{T}}, x::SkipRendering) = SkipDiscrete{T}()
+convert(::Type{ContinuousStyle}, x::SkipRendering) = SkipContinuous()
+convert(::Type{DiscreteStyle}, x::SkipRendering) = SkipDiscrete()

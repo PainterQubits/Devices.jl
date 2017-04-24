@@ -1,9 +1,10 @@
 module Paths
-
+using Compat
 using ..Points
 using ..Cells
 using Unitful
-using Unitful: Length, DimensionError, °
+using Unitful: Length, LengthUnits, DimensionError, °
+import StaticArrays
 
 import Base:
     convert,
@@ -38,8 +39,7 @@ import Base:
 import Compat.String
 using ForwardDiff
 import Devices
-import Devices: bounds, cell, Coordinate
-gdspy() = Devices._gdspy
+import Devices: bounds, cell, Coordinate, FloatCoordinate
 
 export Path
 
@@ -48,12 +48,10 @@ export adjust!,
     attach!,
     corner!,
     direction,
-    extent,
     launch!,
     meander!,
     next,
     nodes,
-    param,
     pathf,
     pathlength,
     previous,
@@ -68,93 +66,43 @@ export adjust!,
     undecorated
 
 """
-For a style `s` and parameteric argument `t`, returns the distance
-between the centers of parallel paths rendered by gdspy.
-"""
-function distance end
-
-"""
+    extent(s,t)
 For a style `s` and parameteric argument `t`, returns a distance tangential
-to the path specifying the lateral extent of the polygons rendered by gdspy.
+to the path specifying the lateral extent of the polygons rendered.
 """
 function extent end
 
 """
-For a style `s` and parameteric argument `t`, returns the number of parallel
-paths rendered by gdspy.
-"""
-function paths end
-
-"""
+    width(s,t)
 For a style `s` and parameteric argument `t`, returns the width
-of paths rendered by gdspy.
+of paths rendered.
 """
 function width end
 
 """
-```
-direction(p::Function, t)
-```
-
-For some parameteric function `p(t)↦Point(x(t),y(t))`, returns the angle at
-which the path is pointing for a given `t`.
-"""
-function direction(p::Function, t)
-    z = zero(getx(p(0)))
-    f′ = ForwardDiff.derivative(p, t)
-    fx′,fy′ = getx(f′),gety(f′)
-    if !(fx′ ≈ z)
-        atan(fy′/fx′)
-    else
-        if fy′ > z
-            π/2
-        elseif fy′ < z
-            -π/2
-        else
-            error("Could not determine last angle.")
-        end
-    end
-end
-
-"""
-```
-abstract Style{T<:Coordinate}
-```
-
+    abstract Style{T<:FloatCoordinate}
 How to render a given path segment. All styles should implement the following
 methods:
 
- - `distance`
  - `extent`
- - `paths`
  - `width`
- - `divs`
 """
-abstract Style{T<:Coordinate}
+@compat abstract type Style end
 
 """
-```
-abstract ContinuousStyle{T} <: Style{T}
-```
-
+    abstract type ContinuousStyle <: Style end
 Any style that applies to segments which have non-zero path length.
 """
-abstract ContinuousStyle{T} <: Style{T}
+@compat abstract type ContinuousStyle <: Style end
 
 """
-```
-abstract DiscreteStyle{T} <: Style{T}
-```
-
+    abstract type DiscreteStyle <: Style end
 Any style that applies to segments which have zero path length.
 """
-abstract DiscreteStyle{T} <: Style{T}
+@compat abstract type DiscreteStyle <: Style end
 
 """
-```
-abstract Segment{T<:Coordinate}
-```
-
+    abstract type Segment{T<:Coordinate} end
 Path segment in the plane. All Segment objects should have the implement
 the following methods:
 
@@ -165,15 +113,35 @@ the following methods:
 - `setα0!`
 - `α1`
 """
-abstract Segment{T<:Coordinate}
+@compat abstract type Segment{T<:Coordinate} end
+@inline Base.eltype{T}(::Segment{T}) = T
+@inline Base.eltype{T}(::Type{Segment{T}}) = T
 
-abstract DiscreteSegment{T} <: Segment{T}
-abstract ContinuousSegment{T} <: Segment{T}
+Base.zero{T}(::Segment{T}) = zero(T)        # TODO: remove and fix for 0.6 only versions
+Base.zero{T}(::Type{Segment{T}}) = zero(T)
+
+"""
+    curvature(s, t)
+Returns the curvature of a function `t->Point(x(t),y(t))` at `t`. The result will have units
+of inverse length if units were used for the segment. The result can be interpreted as the
+inverse radius of a circle with the same curvature.
+"""
+curvature
+
+# Used only to get dispatch to work right with ForwardDiff.jl.
+immutable Curv{T} s::T end
+(s::Curv)(t) = ForwardDiff.derivative(s.s,t)
+curvature(s, t) = ForwardDiff.derivative(Curv(s), t)
+
+@compat abstract type DiscreteSegment{T} <: Segment{T} end
+@compat abstract type ContinuousSegment{T} <: Segment{T} end
+
+Base.zero{T}(::Type{ContinuousSegment{T}}) = zero(T)
 
 # doubly linked-list behavior
 type Node{T<:Coordinate}
     seg::Segment{T}
-    sty::Style{T}
+    sty::Style
     prev::Node{T}
     next::Node{T}
 
@@ -184,14 +152,49 @@ type Node{T<:Coordinate}
     end
     Node(a,b,c,d) = new(a,b,c,d)
 end
-Node{T}(a::Segment{T}, b::Style) = Node{T}(a,b)
 
+"""
+    Node{T}(a::Segment{T}, b::Style)
+Create a node with segment `a` and style `b`.
+"""
+Node{T}(a::Segment{T}, b::Style) = Node{T}(a,b)
+@inline Base.eltype{T}(::Node{T}) = T
+@inline Base.eltype{T}(::Type{Node{T}}) = T
+
+"""
+    previous(x::Node)
+Return the node before `x` in a doubly linked list.
+"""
 previous(x::Node) = x.prev
+
+"""
+    next(x::Node)
+Return the node after `x` in a doubly linked list.
+"""
 next(x::Node) = x.next
 
+"""
+    segment(x::Node)
+Return the segment associated with node `x`.
+"""
 segment(x::Node) = x.seg
+
+"""
+    style(x::Node)
+Return the style associated with node `x`.
+"""
 style(x::Node) = x.sty
+
+"""
+    setsegment!(x::Node, s::Segment)
+Set the segment associated with node `x` to `s`.
+"""
 setsegment!(x::Node, s::Segment) = x.seg = s
+
+"""
+    setstyle!(x::Node, s::Style)
+Set the style associated with node `x` to `s`.
+"""
 setstyle!(x::Node, s::Style) = x.sty = s
 
 function deepcopy_internal(x::Style, stackdict::ObjectIdDict)
@@ -231,61 +234,42 @@ end
 # end
 
 """
-```
-p0{T}(s::Segment{T})
-```
+    direction(s, t)
+Returns the angle at which some function `t->Point(x(t),y(t))` is pointing.
+"""
+function direction(s, t)
+    f′ = ForwardDiff.derivative(s, t)
+    fx′,fy′ = getx(f′),gety(f′)
+    angle(Complex(fx′,fy′))
+end
 
+"""
+    p0{T}(s::Segment{T})
 Return the first point in a segment (calculated).
 """
-p0{T}(s::Segment{T}) = s.f(0.0)::Point{T}
+p0{T}(s::Segment{T}) = s(zero(T))::Point{T}
 
 """
-```
-p1{T}(s::Segment{T})
-```
-
+    p1{T}(s::Segment{T})
 Return the last point in a segment (calculated).
 """
-p1{T}(s::Segment{T}) = s.f(1.0)::Point{T}
+p1{T}(s::Segment{T}) = s(pathlength(s))::Point{T}
 
 """
-```
-α0(s::Segment)
-```
-
+    α0(s::Segment)
 Return the first angle in a segment (calculated).
 """
-α0(s::Segment) = direction(s.f, 0.0)
+α0{T}(s::Segment{T}) = direction(s, zero(T))
 
 """
-```
-α1(s::Segment)
-```
-
+    α1(s::Segment)
 Return the last angle in a segment (calculated).
 """
-α1(s::Segment) = direction(s.f, 1.0)
+α1(s::Segment) = direction(s, pathlength(s))
 
 function setα0p0!(s::Segment, angle, p::Point)
     setα0!(s, angle)
     setp0!(s, p)
-end
-
-"""
-```
-pathlength{T}(s::Segment{T}, verbose::Bool=false)
-```
-
-Return the length of a segment (calculated).
-"""
-function pathlength{T}(s::Segment{T}, verbose::Bool=false)
-    path = s.f
-    ds(t) = ustrip(sqrt(dot(ForwardDiff.derivative(s.f, t),
-                            ForwardDiff.derivative(s.f, t))))
-    val, err = quadgk(ds, 0.0, 1.0)
-    verbose && info("Integration estimate: $val")
-    verbose && info("Error upper bound estimate: $err")
-    val * unit(T)
 end
 
 show(io::IO, s::Segment) = print(io, summary(s))
@@ -300,28 +284,26 @@ function deepcopy_internal(x::Segment, stackdict::ObjectIdDict)
 end
 
 """
-```
-type Path{T<:Coordinate} <: AbstractVector{Node{T}}
-    p0::Point{T}
-    α0::typeof(0.0°)
-    style0::ContinuousStyle{T}
-    nodes::Array{Node{T},1}
-end
-```
-
+    type Path{T<:Coordinate} <: AbstractVector{Node{T}}
+        p0::Point{T}
+        α0::typeof(0.0°)
+        style0::ContinuousStyle
+        nodes::Array{Node{T},1}
+    end
 Type for abstracting an arbitrary styled path in the plane. Iterating returns
-tuples of (`segment`, `style`).
+[`Paths.Node`](@ref) objects, essentially
 """
 type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
     α0::typeof(0.0°)
-    style0::ContinuousStyle{T}
+    style0::ContinuousStyle
     nodes::Array{Node{T},1}
 
     Path() = new(Point(zero(T),zero(T)), 0.0°, Trace(T(1)), Node{T}[])
     Path(a,b,c,d) = new(a,b,c,d)
 end
-
+@inline Base.eltype{T}(::Path{T}) = T
+@inline Base.eltype{T}(::Type{Path{T}}) = T
 nodes(p::Path) = p.nodes
 
 dims2string(p::Path) = isempty(p) ? "0-dimensional" :
@@ -339,45 +321,55 @@ end
 
 """
 ```
-Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0))
+Path(p0::Point=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0))
+Path(p0x::Real, p0y::Real; kwargs...)
+
+Path{T<:Length}(p0::Point{T}; α0=0.0, style0::Style=Trace(1.0*unit(T)))
+Path{T<:Length}(p0x::T, p0y::T; kwargs...)
+Path(p0x::Length, p0y::Length; kwargs...)
+
+Path(u::LengthUnits; α0=0.0, style0::Style=Trace(1.0u))
 ```
 
-Convenience constructor for `Path{T}` object.
+Convenience constructors for `Path{T}` object.
 """
-function Path{T<:Coordinate}(p0::Point{T}=Point(0.0,0.0);
-    α0=0.0, style0::Style=Trace(T(1)))
-    Path{T}(p0, α0, style0, Node{T}[])
+function Path(p0::Point=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0))
+    Path{Float64}(p0, α0, style0, Node{Float64}[])
+end
+Path(p0x::Real, p0y::Real; kwargs...) = Path(Point{Float64}(p0x,p0y); kwargs...)
+
+function Path{T<:Length}(p0::Point{T}; α0=0.0, style0::Style=Trace(1.0*unit(T)))
+    Path{typeof(0.0*unit(T))}(p0, α0, style0, Node{typeof(0.0*unit(T))}[])
+end
+Path{T<:Length}(p0x::T, p0y::T; kwargs...) =
+    Path(Point{typeof(0.0*unit(T))}(p0x,p0y); kwargs...)
+Path(p0x::Length, p0y::Length; kwargs...) = Path(promote(p0x,p0y)...; kwargs...)
+
+function Path(u::LengthUnits; α0=0.0, style0::Style=Trace(1.0u))
+    Path{typeof(0.0u)}(Point(0.0u,0.0u), α0, style0, Node{typeof(0.0u)}[])
 end
 
-"""
-```
-pathlength(p::Path)
-```
+Path(x::Coordinate, y::Coordinate; kwargs...) = throw(DimensionError(x,y))
 
+"""
+    pathlength(p::Path)
+    pathlength{T}(array::AbstractArray{Node{T}})
+    pathlength{T<:Segment}(array::AbstractArray{T})
+    pathlength(node::Node)
 Physical length of a path. Note that `length` will return the number of
 segments in a path, not the physical length of the path.
 """
+function pathlength end
+
 pathlength(p::Path) = pathlength(nodes(p))
-
-"""
-```
-pathlength(p::AbstractArray)
-```
-
-Total physical length of segments.
-"""
 pathlength{T}(array::AbstractArray{Node{T}}) =
     mapreduce(pathlength, +, zero(T), array)
-pathlength{T}(array::AbstractArray{Segment{T}}) =
+pathlength{T<:Segment}(array::AbstractArray{T}) =
     mapreduce(pathlength, +, zero(T), array)
-
 pathlength(node::Node) = pathlength(segment(node))
 
 """
-```
-α0(p::Path)
-```
-
+    α0(p::Path)
 First angle of a path.
 """
 function α0(p::Path)
@@ -389,10 +381,7 @@ function α0(p::Path)
 end
 
 """
-```
-α1(p::Path)
-```
-
+    α1(p::Path)
 Last angle of a path.
 """
 function α1(p::Path)
@@ -404,10 +393,7 @@ function α1(p::Path)
 end
 
 """
-```
-p0(p::Path)
-```
-
+    p0(p::Path)
 First point of a path.
 """
 function p0(p::Path)
@@ -419,10 +405,7 @@ function p0(p::Path)
 end
 
 """
-```
-p1(p::Path)
-```
-
+    p1(p::Path)
 Last point of a path.
 """
 function p1(p::Path)
@@ -434,10 +417,7 @@ function p1(p::Path)
 end
 
 """
-```
-style0(p::Path)
-```
-
+    style0(p::Path)
 Style of the first segment of a path.
 """
 function style0(p::Path)
@@ -449,10 +429,7 @@ function style0(p::Path)
 end
 
 """
-```
-style1(p::Path)
-```
-
+    style1(p::Path)
 Style of the last segment of a path.
 """
 style1(p::Path) = style1(p, Style, p.style0)
@@ -485,30 +462,21 @@ include("segments/corner.jl")
 include("segments/compound.jl")
 
 """
-```
-discretestyle1{T}(p::Path{T})
-```
-
+    discretestyle1{T}(p::Path{T})
 Returns the last-used discrete style in the path. If one was not used,
-returns `SimpleCornerStyle()`.
+returns `SimpleTraceCorner()`.
 """
-discretestyle1{T}(p::Path{T}) = style1(p, DiscreteStyle, SimpleCornerStyle{T}())
+discretestyle1{T}(p::Path{T}) = style1(p, DiscreteStyle, SimpleTraceCorner())
 
 """
-```
-contstyle1(p::Path)
-```
-
+    contstyle1(p::Path)
 Returns the last-used discrete style in the path. If one was not used,
 returns `p.style0`.
 """
 contstyle1(p::Path) = style1(p, ContinuousStyle, p.style0)
 
 """
-```
-adjust!(p::Path, n::Integer=1)
-```
-
+    adjust!(p::Path, n::Integer=1)
 Adjust a path's parametric functions starting from index `n`.
 Used internally whenever segments are inserted into the path.
 """
@@ -648,10 +616,7 @@ function insert!(p::Path, i::Integer, segsty0::Node, segsty::Node...)
 end
 
 """
-```
-append!(p::Path, p′::Path)
-```
-
+    append!(p::Path, p′::Path)
 Given paths `p` and `p′`, path `p′` is appended to path `p`.
 The p0 and initial angle of the first segment from path `p′` is
 modified to match the last point and last angle of path `p`.
@@ -666,10 +631,7 @@ function append!(p::Path, p′::Path)
 end
 
 """
-```
-simplify(p::Path, inds::UnitRange=1:length(p))
-```
-
+    simplify(p::Path, inds::UnitRange=1:length(p))
 At `inds`, segments of a path are turned into a `CompoundSegment` and
 styles of a path are turned into a `CompoundStyle`. The method returns a tuple,
 `(segment, style)`.
@@ -687,10 +649,7 @@ function simplify(p::Path, inds::UnitRange=1:length(p))
 end
 
 """
-```
-simplify!(p::Path, inds::UnitRange=1:length(p))
-```
-
+    simplify!(p::Path, inds::UnitRange=1:length(p))
 In-place version of [`simplify`](@ref).
 """
 function simplify!(p::Path, inds::UnitRange=1:length(p))
@@ -706,10 +665,7 @@ end
 # end
 
 """
-```
-meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
-```
-
+    meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
 Alternate between going straight with length `straightlen` and turning
 with radius `r` and angle `α`. Each turn goes the opposite direction of the
 previous. The total length is `len`. Useful for making resonators.
@@ -734,38 +690,53 @@ function meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
     nothing
 end
 
-function launch!(p::Path; extround=5, trace0=300, trace1=5,
-        gap0=150, gap1=2.5, flatlen=250, taperlen=250)
-    flip = f::Function->(isempty(p) ? f : t->f(1.0-t))
-    # if isempty(p)
-    #     flip(f::Function) = f
-    # else
-    #     flip(f::Function) = t->f(1.0-t)
-    # end
+const launchdefaults = Dict([
+    (:extround, 5.0),
+    (:trace0, 300.0),
+    (:trace1, 10.0),
+    (:gap0, 150.0),
+    (:gap1, 6.0),
+    (:flatlen, 250.0),
+    (:taperlen, 250.0)
+])
 
-    s0 = CPW(0.0, flip(t->(trace0/2+gap0-extround+
-        sqrt(extround^2-(t*extround-extround)^2))))
-    s1 = CPW(0.0, trace0/2+gap0)
-    s2 = CPW(trace0, gap0)
-    s3 = CPW(flip(t->(trace0 + t * (trace1 - trace0))),
-        flip(t->(gap0 + t * (gap1 - gap0)))) # CHANGED
+@compat launch!(p::Path{<:Real}; kwargs...) = _launch!(p; launchdefaults..., kwargs...)
 
-    if isempty(p)
-        args = [extround, gap0-extround, flatlen, taperlen]
-        styles = Style[s0, s1, s2, s3]
-    else
-        args = [taperlen, flatlen, gap0-extround, extround]
-        styles = Style[s3, s2, s1, s0]
-    end
-
-    for x in zip(args,styles)
-        straight!(p, x...)
-    end
-
-    # Return a style suitable for the next segment.
-    CPW(trace1, gap1)
+function launch!{T<:Length}(p::Path{T}; kwargs...)
+    u = Unitful.ContextUnits(Unitful.μm, upreferred(unit(T)))
+    _launch!(p; Dict(zip(keys(launchdefaults),collect(values(launchdefaults))*u))...,
+        kwargs...)
 end
 
+function _launch!{T<:Coordinate}(p::Path{T}; kwargs...)
+    d = Dict{Symbol,T}(kwargs)
+    extround = d[:extround]
+    trace0, trace1 = d[:trace0], d[:trace1]
+    gap0, gap1 = d[:gap0], d[:gap1]
+    flatlen, taperlen = d[:flatlen], d[:taperlen]
 
+    y = isempty(p)
+    s0 = Trace(t->2*(trace0/2 + gap0 - extround + sqrt(extround^2 - (t - extround * y)^2)))
+    s1 = Trace(trace0+2*gap0)
+    s2 = CPW(trace0, gap0)
+
+    u,v = ifelse(y, (trace0, trace1), (trace1, trace0))
+    w,x = ifelse(y, (gap0, gap1), (gap1, gap0))
+    s3 = CPW(t->(u + t / taperlen * (v - u)), t->(w + t / taperlen * (x - w)))
+
+    if y
+        args = (extround, gap0-extround, flatlen, taperlen)
+        styles = (s0, s1, s2, s3)
+    else
+        args = (taperlen, flatlen, gap0-extround, extround)
+        styles = (s3, s2, s1, s0)
+    end
+
+    for (a,b) in zip(args,styles)
+        straight!(p, a, b)
+    end
+
+    CPW(trace1, gap1)
+end
 
 end

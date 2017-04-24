@@ -1,16 +1,14 @@
 module Rectangles
 
+using Compat
 using ..Points
 import Base: +, -, *, /, minimum, maximum, copy, ==, convert, isapprox
 import Devices
 import Devices: AbstractPolygon, Coordinate
 import Devices: bounds, center, centered, centered!
-gdspy() = Devices._gdspy
+import Unitful: ustrip
 
 export Rectangle
-export Plain
-export Rounded
-export Undercut
 export height
 export width
 export isproper
@@ -49,20 +47,14 @@ end
 Rectangle{T}(ll::Point{T}, ur::Point{T}, dict) = Rectangle{T}(ll,ur,dict)
 
 """
-```
-Rectangle(ll::Point, ur::Point; kwargs...)
-```
-
+    Rectangle(ll::Point, ur::Point; kwargs...)
 Convenience constructor for `Rectangle` objects.
 """
 Rectangle(ll::Point, ur::Point; kwargs...) =
     Rectangle(promote(ll, ur)..., Dict{Symbol,Any}(kwargs))
 
 """
-```
-Rectangle(width, height, kwargs...)
-```
-
+    Rectangle(width, height, kwargs...)
 Constructs `Rectangle` objects by specifying the width and height rather than
 the lower-left and upper-right corners.
 
@@ -89,28 +81,19 @@ isapprox(r1::Rectangle, r2::Rectangle) =
         (r1.properties == r2.properties)
 
 """
-```
-width(r::Rectangle)
-```
-
+    width(r::Rectangle)
 Return the width of a rectangle.
 """
 width(r::Rectangle) = getx(r.ur)-getx(r.ll)
 
 """
-```
-height(r::Rectangle)
-```
-
+    height(r::Rectangle)
 Return the height of a rectangle.
 """
 height(r::Rectangle) = gety(r.ur)-gety(r.ll)
 
 """
-```
-isproper(r::Rectangle)
-```
-
+    isproper(r::Rectangle)
 Returns `true` if the rectangle has a non-zero size. Otherwise, returns `false`.
 Note that the upper-right and lower-left corners are enforced to be the `ur`
 and `ll` fields of a `Rectangle` by the inner constructor.
@@ -118,28 +101,19 @@ and `ll` fields of a `Rectangle` by the inner constructor.
 isproper(r::Rectangle) = r.ur != r.ll
 
 """
-```
-bounds(r::Rectangle)
-```
-
+    bounds(r::Rectangle)
 No-op (just returns `r`).
 """
 bounds(r::Rectangle) = r
 
 """
-```
-center(r::Rectangle)
-```
-
+    center(r::Rectangle)
 Returns a [`Point`](@ref) corresponding to the center of the rectangle.
 """
 center(r::Rectangle) = (r.ur+r.ll)/2
 
 """
-```
-centered!(r::Rectangle)
-```
-
+    centered!(r::Rectangle)
 Centers a rectangle. Will throw an `InexactError()` if
 the rectangle cannot be centered with integer coordinates.
 """
@@ -151,10 +125,7 @@ function centered!(r::Rectangle)
 end
 
 """
-```
-centered(r::Rectangle)
-```
-
+    centered(r::Rectangle)
 Centers a copy of `r`, with promoted coordinates if necessary.
 This function will not throw an `InexactError()`, even if `r` had integer
 coordinates.
@@ -165,19 +136,13 @@ function centered(r::Rectangle)
 end
 
 """
-```
-minimum(r::Rectangle)
-```
-
+    minimum(r::Rectangle)
 Returns the lower-left corner of a rectangle (Point object).
 """
 minimum(r::Rectangle) = r.ll
 
 """
-```
-maximum(r::Rectangle)
-```
-
+    maximum(r::Rectangle)
 Returns the upper-right corner of a rectangle (Point object).
 """
 maximum(r::Rectangle) = r.ur
@@ -201,57 +166,48 @@ Translate a rectangle by `p`.
 /(r::Rectangle, a::Real) = Rectangle(/(r.ll,a), /(r.ur,a), r.properties)
 
 """
-```
-abstract Style
-```
-
+    abstract Style
 Implement new rectangle drawing styles by subtyping this.
 """
-abstract Style
+@compat abstract type Style end
 
 """
-```
-type Plain <: Style end
-```
-
+    immutable Plain <: Style end
 Plain rectangle style. Use this if you are fond for the simpler times when
 rectangles were just rectangles.
 """
-type Plain <: Style end
+immutable Plain <: Style end
 
 """
-```
-type Rounded{T<:Coordinate} <: Style
-    r::T
-end
-```
-
+    immutable Rounded{T<:Coordinate} <: Style
+        r::T
+    end
 Rounded rectangle style. All corners are rounded off with a given radius `r`.
 The bounding box of the unstyled rectangle should remain unaffected.
+
 """
-type Rounded{T<:Coordinate} <: Style
+immutable Rounded{T<:Coordinate} <: Style
     r::T
 end
 
 """
-```
-type Undercut{T<:Coordinate} <: Style
-    ucl::T
-    uct::T
-    ucr::T
-    ucb::T
-end
-```
-
+    immutable Undercut{T<:Coordinate} <: Style
+        ucl::T
+        uct::T
+        ucr::T
+        ucb::T
+    end
 Undercut rectangles. In each direction around a rectangle (left, top, right,
 bottom) an undercut is rendered on a different layer.
 """
-type Undercut{T<:Coordinate} <: Style
+immutable Undercut{T<:Coordinate} <: Style
     ucl::T
     uct::T
     ucr::T
     ucb::T
 end
 Undercut{T<:Coordinate}(uc::T) = Undercut{T}(uc,uc,uc,uc)
+
+ustrip(r::Rectangle) = Rectangle(ustrip(r.ll), ustrip(r.ur), copy(r.properties))
 
 end
