@@ -153,18 +153,18 @@ function grating!{T}(c::Cell{T}, line, space, size; kwargs...)
 end
 
 """
-    interdigit!{T}(c::Cell{T}, width, length, xgap, ygap, npairs::Integer,
+    interdigit!{T}(c::Cell{T}, width, length, fingergap, fingeroffset, npairs::Integer,
         skiplast=true; kwargs...)
 Creates interdigitated fingers, e.g. for a lumped element capacitor.
   - `width`: finger width
   - `length`: finger length
-  - `xgap`: x-offset at ends of fingers
+  - `fingeroffset`: x-offset at ends of fingers
   - `fingergap`: gap between fingers
   - `npairs`: number of fingers
   - `skiplast`: should we skip the last finger, leaving an odd number?
 """
 function interdigit!{T}(c::Cell{T}, width, length, fingergap, fingeroffset, npairs::Integer,
-        skiplast; kwargs...)
+        skiplast=true; kwargs...)
     for i in 1:npairs
         render!(c, Rectangle(Point(zero(T), (i-1) * 2 * (width + fingergap)),
             Point(length, (i-1) * 2 * (width + fingergap) + width); kwargs...))

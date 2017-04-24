@@ -3,8 +3,8 @@
     This will also be true for functions passed to `Paths.CPW` or `Paths.Trace`.
   - Breaking change: `minimum` and `maximum` no longer defined for polygons; use `lowerleft`
     and `upperright` instead.
-  - Breaking change: some of the methods in 'src/tags.jl' that you probably weren't using
-    anyway may have had changes to their method signatures.
+  - Breaking change: some of the methods in `src/tags.jl` may have had changes to their
+    method signatures.
   - Breaking change: `flatten` always returns a `Cell`, never an array of `Polygon`s.
     The behavior of `flatten!` (which modifies a `Cell`) is unchanged.
   - Implement our own rendering algorithms. This enables continuous integration testing and
