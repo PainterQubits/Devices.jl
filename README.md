@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/PainterQubits/Devices.jl.svg?branch=master)](https://travis-ci.org/PainterQubits/Devices.jl)
 [![codecov.io](http://codecov.io/github/PainterQubits/Devices.jl/coverage.svg?branch=master)](http://codecov.io/github/PainterQubits/Devices.jl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/PainterQubits/Devices.jl/badge.svg?branch=master)](https://coveralls.io/github/PainterQubits/Devices.jl?branch=master)
 
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://painterqubits.github.io/Devices.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://painterqubits.github.io/Devices.jl/latest)
