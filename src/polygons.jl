@@ -9,6 +9,7 @@ using ForwardDiff
 import CoordinateTransformations: AffineMap, LinearMap, Translation
 import Clipper
 import Clipper: orientation, children, contour
+import StaticArrays
 
 import Devices
 import Devices: lowerleft, upperright
@@ -105,16 +106,23 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
     @eval function ($op)(r::Polygon, p::Point)
         Polygon(($dotop)(r.p, p), copy(r.properties))
     end
+    @eval @compat function ($op)(r::Polygon, p::StaticArrays.Scalar{<:Point})
+        Polygon(($dotop)(r.p, p), copy(r.properties))
+    end
     @eval function ($op)(p::Point, r::Polygon)
         Polygon(($dotop)(p, r.p), copy(r.properties))
     end
-    @eval function ($dotop){T<:AbstractPolygon}(r::AbstractArray{T}, p::Point)
-        map(x->($op)(x, p), r)
+    @eval @compat function ($op)(p::StaticArrays.Scalar{<:Point}, r::Polygon)
+        Polygon(($dotop)(p, r.p), copy(r.properties))
     end
-    @eval function ($dotop){T<:AbstractPolygon}(p::Point, r::AbstractArray{T})
-        map(x->($op)(p, x), r)
+    if VERSION < v"0.6.0-pre"
+        @eval function ($dotop){T<:AbstractPolygon}(r::AbstractArray{T}, p::Point)
+            map(x->($op)(x, p), r)
+        end
+        @eval function ($dotop){T<:AbstractPolygon}(p::Point, r::AbstractArray{T})
+            map(x->($op)(p, x), r)
+        end
     end
-    # @eval ($op)(p::Point, r::Polygon) = ($op)(r,p)
 end
 
 *(r::Polygon, a::Number) = Polygon(r.p .* a, copy(r.properties))

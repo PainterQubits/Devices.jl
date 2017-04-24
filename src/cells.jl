@@ -596,7 +596,8 @@ function flatten(c::CellArray, name=uniquename("flatten"))
                       sgn*c.mag*sin(c.rot) c.mag*cos(c.rot)])
     newcell = flatten(c.cell)
     pts = [(i-1) * c.deltarow + (j-1) * c.deltacol for i in 1:c.row for j in 1:c.col]
-    newpolys = a.(newcell.elements .+ pts')
+    pts2 = reinterpret(StaticArrays.Scalar{eltype(pts)}, pts, (1,length(pts)))
+    newpolys = a.(newcell.elements .+ pts2) # add each point in pts to each polygon
     Cell(name, @view newpolys[:])
 end
 
