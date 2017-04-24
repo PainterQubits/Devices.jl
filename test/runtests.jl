@@ -812,5 +812,81 @@ end
     end
 end
 
+@testset "Compound shapes" begin
+    @testset "Checkerboard" begin
+        c = Cell("main")
+        checkerboard!(c, 20.0, 2, false, layer=0)
+        @test length(c.refs) == 2
+        flatten!(c)
+        @test points(c.elements[1]) ≈ [
+            p(0.0,0.0),
+            p(20.0,0.0),
+            p(20.0,20.0),
+            p(0.0,20.0)
+        ]
+        @test points(c.elements[2]) ≈ [
+            p(20.0,20.0),
+            p(40.0,20.0),
+            p(40.0,40.0),
+            p(20.0,40.0)
+        ]
+
+        c = Cell("main", nm)
+        checkerboard!(c, 20μm, 2, true, layer=0)
+        @test length(c.refs) == 2
+        flatten!(c)
+        @test points(c.elements[1]) ≈ [
+            p(0.0nm,20000.0nm),
+            p(20000.0nm,20000.0nm),
+            p(20000.0nm,40000.0nm),
+            p(0.0nm,40000.0nm)
+        ]
+        @test points(c.elements[2]) ≈ [
+            p(20000.0nm,0.0nm),
+            p(40000.0nm,0.0nm),
+            p(40000.0nm,20000.0nm),
+            p(20000.0nm,20000.0nm)
+        ]
+    end
+
+    @testset "Grating" begin
+        c = Cell("main", nm)
+        grating!(c, 100nm, 100nm, 20μm)
+        flatten!(c)
+        @test length(c.elements) == 100
+        @test points(c.elements[1]) ≈ [
+            p(0.0nm,0.0nm),
+            p(100.0nm,0.0nm),
+            p(100.0nm,20000.0nm),
+            p(0.0nm,20000.0nm)
+        ]
+    end
+
+    @testset "IDC" begin
+        c = Cell("main", nm)
+        interdigit!(c, 1μm, 10μm, 1μm, 1μm, 2, true)
+        flatten!(c)
+        @test length(c.elements) == 3
+        @test points(c.elements[1]) ≈ [
+            p(0.0nm,0.0nm),
+            p(10000.0nm,0.0nm),
+            p(10000.0nm,1000.0nm),
+            p(0.0nm,1000.0nm)
+        ]
+        @test points(c.elements[2]) ≈ [
+            p(0.0nm,4000.0nm),
+            p(10000.0nm,4000.0nm),
+            p(10000.0nm,5000.0nm),
+            p(0.0nm,5000.0nm)
+        ]
+        @test points(c.elements[3]) ≈ [
+            p(1000.0nm,2000.0nm),
+            p(11000.0nm,2000.0nm),
+            p(11000.0nm,3000.0nm),
+            p(1000.0nm,3000.0nm)
+        ]
+    end
+end
+
 # TODO: How to test GDS import?
 # TODO: How to test GDS export? diff with known good result files?
