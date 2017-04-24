@@ -340,7 +340,7 @@
 <li><code>rows</code>: number of rows == number of columns</li>
 <li><code>alt</code>: the square nearest <code>Point(zero(T), zero(T))</code> is filled (unfilled) if <code>false</code> (<code>true</code>). Use this to create a full tiling of the checkerboard, if you wish.</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ab4dbb7d26da69da47cdcfa833cd89c69b89b2bc/src/tags.jl#L108-L116' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/c9c73c31cdd8df57a852b2f55f94083c15e4695f/src/tags.jl#L108-L116' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">checkerboard!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -356,7 +356,7 @@
 
 
 <p>Generate a square grating suitable e.g. for obtaining the base dose for PEC.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ab4dbb7d26da69da47cdcfa833cd89c69b89b2bc/src/tags.jl#L139-L142' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/c9c73c31cdd8df57a852b2f55f94083c15e4695f/src/tags.jl#L139-L142' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">grating!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">100</span><span class="n">nm</span><span class="p">,</span> <span class="mi">100</span><span class="n">nm</span><span class="p">,</span> <span class="mi">5</span><span class="n">μm</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
@@ -380,7 +380,7 @@
 <li><code>npairs</code>: number of fingers</li>
 <li><code>skiplast</code>: should we skip the last finger, leaving an odd number?</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ab4dbb7d26da69da47cdcfa833cd89c69b89b2bc/src/tags.jl#L155-L165' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/c9c73c31cdd8df57a852b2f55f94083c15e4695f/src/tags.jl#L155-L165' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">interdigit!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">1</span><span class="n">μm</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">1</span><span class="n">μm</span><span class="p">,</span> <span class="mi">3</span><span class="n">μm</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">true</span><span class="p">;</span> <span class="n">layer</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>
@@ -424,7 +424,7 @@
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ab4dbb7d26da69da47cdcfa833cd89c69b89b2bc/src/tags.jl#L21-L59' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/c9c73c31cdd8df57a852b2f55f94083c15e4695f/src/tags.jl#L21-L59' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">radialcut!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">90</span><span class="n">°</span><span class="p">,</span> <span class="mi">5</span><span class="n">μm</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -440,7 +440,7 @@
 
 <p>See also the documentation for <code>radialcut!</code>.</p>
 <p>Returns a polygon for a radial stub. The polygon has to be subtracted from a ground plane, and will leave a defect in the ground plane of uniform width <code>t</code> that outlines the (metallic) radial stub. <code>r</code> refers to the radius of the actual stub, not the radius of the circular arc bounding the ground plane defect. Likewise <code>h</code> has an analogous meaning to that in <code>radialcut!</code> except it refers here to the radial stub, not the ground plane defect.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ab4dbb7d26da69da47cdcfa833cd89c69b89b2bc/src/tags.jl#L76-L86' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/c9c73c31cdd8df57a852b2f55f94083c15e4695f/src/tags.jl#L76-L86' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">radialstub!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">90</span><span class="n">°</span><span class="p">,</span> <span class="mi">5</span><span class="n">μm</span><span class="p">,</span> <span class="mi">1</span><span class="n">μm</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
