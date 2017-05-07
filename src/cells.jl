@@ -383,7 +383,7 @@ Cell(name::AbstractString) = Cell{Float64}(name)
     Cell(name::AbstractString, unit::Unitful.LengthUnit)
 Convenience constructor for `Cell{typeof(1.0unit)}`.
 """
-Cell(name::AbstractString, unit::Unitful.LengthUnit) = Cell{typeof(1.0unit)}("name")
+Cell(name::AbstractString, unit::Unitful.LengthUnits) = Cell{typeof(1.0unit)}(name)
 
 """
     Cell{T}(name::AbstractString, elements::AbstractVector{Polygon{T}})
