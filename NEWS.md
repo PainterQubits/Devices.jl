@@ -1,5 +1,6 @@
 - v0.1.1
   - Bug fix: `Cell(::AbstractString, ::Unitful.LengthUnits)` method was broken.
+  - Bug fix: `meander!` works again, method signature changed a bit.
 - v0.1.0
   - Breaking change: `attach!` expects a value from zero to the segment length, not 0 to 1.
     This will also be true for functions passed to `Paths.CPW` or `Paths.Trace`.

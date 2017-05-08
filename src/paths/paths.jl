@@ -662,7 +662,7 @@ end
 # end
 
 """
-    meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
+    meander!(p::Path, len, straightlen, r, α)
 Alternate between going straight with length `straightlen` and turning
 with radius `r` and angle `α`. Each turn goes the opposite direction of the
 previous. The total length is `len`. Useful for making resonators.
@@ -670,21 +670,19 @@ previous. The total length is `len`. Useful for making resonators.
 The straight and turn segments are combined into a `CompoundSegment` and
 appended to the path `p`.
 """
-function meander!{T<:Real}(p::Path{T}, len, r, straightlen, α::Real)
-    ratio = len/(straightlen+r*α)
-    nsegs = Int(ceil(ratio))
+function meander!(p::Path, len, straightlen, r, α)
+    unit = straightlen + r*α
+    ratio = len/unit
+    fl = floor(ratio)
+    nsegs = Int(fl)
+    rem = (ratio-fl)*unit
 
-    p′ = Path{T}(style1(p))
-    for pm in take(cycle([1.0,-1.0]), nsegs)
-        straight!(p′, straightlen)
-        turn!(p′, pm*α, r)     # alternates left and right
+    for pm in take(cycle((1,-1)), nsegs)
+        straight!(p, straightlen, style1(p))
+        turn!(p, pm*α, r, style1(p))           # alternates left and right
     end
-    simplify!(p′)
-
-    fn = p′.segments[1].f
-    p′.segments[1].f = t->fn(t*ratio/ceil(ratio))
-    append!(p, p′)
-    nothing
+    straight!(p, rem)
+    p
 end
 
 const launchdefaults = Dict([
