@@ -81,7 +81,7 @@ function param(c::AbstractVector)
         g = ($c)[1]
         h = ($c)[end]
         g′ = ForwardDiff.derivative(g, zero(L))
-        h′ = ForwardDiff.derivative(h, L)
+        h′ = ForwardDiff.derivative(h, pathlength(h))
         D0x, D0y = getx(g′), gety(g′)
         D1x, D1y = getx(h′), gety(h′)
         a0,a = p0(($c)[1]), p1(($c)[end])
