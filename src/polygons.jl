@@ -27,6 +27,9 @@ export layer, datatype
 clipper() = Devices._clip
 coffset() = Devices._coffset
 
+@inline unsafe_round(x::Unitful.Quantity) = round(ustrip(x))*unit(x)
+@inline unsafe_round(x::Number) = round(x)
+
 const PCSCALE = float(2^31)
 
 """
@@ -354,7 +357,7 @@ end
 # Clipperize methods prepare an array for being operated upon by the Clipper lib
 function clipperize{T<:Polygon}(A::AbstractVector{T})
     Int64like{T}(x::Point{T}) = convert(Point{typeof(1::Int64*unit(T))},x)
-    [Polygon(Int64like.([round.(y) for y in (points(Polygon(x)) .* PCSCALE)]),
+    [Polygon(Int64like.([unsafe_round.(y) for y in (points(Polygon(x)) .* PCSCALE)]),
         x.properties) for x in A]
 end
 clipperize{T<:Union{Int64, Unitful.Quantity{Int64}}}(
