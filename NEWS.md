@@ -5,6 +5,9 @@
     generating the simplified path function (field `f` of a `CompoundSegment`). For inputs
     to `f` greater than the path (or segment) length, the expected behavior is to continue
     in a straight line at the angle obtained at the end of the path (or segment).
+  - `NoRender(x)` can take a parameter specifying a fake "width" for attachments.
+  - Fixed promotion logic with `Rectangles.Undercut` when different units were passed in.
+  - Loosened signature of a `CellArray` constructor method.
 - v0.1.0
   - Breaking change: `attach!` expects a value from zero to the segment length, not 0 to 1.
     This will also be true for functions passed to `Paths.CPW` or `Paths.Trace`.

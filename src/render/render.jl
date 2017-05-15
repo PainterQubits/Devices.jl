@@ -36,3 +36,4 @@ end
 
 # skip rendering
 function render!(c::Cell, seg::Paths.Segment, s::Paths.NoRender; kwargs...) end
+function render!(c::Cell, seg::Paths.Segment, s::Paths.SimpleNoRender; kwargs...) end

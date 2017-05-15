@@ -19,6 +19,11 @@ export Cell, CellArray, CellReference
 export traverse!, order!, flatten, flatten!, transform, name, dbscale
 export uniquename
 
+@inline unsafe_floor(x::Unitful.Quantity) = floor(Unitful.ustrip(x))*Unitful.unit(x)
+@inline unsafe_floor(x::Number) = floor(x)
+@inline unsafe_ceil(x::Unitful.Quantity)  = ceil(Unitful.ustrip(x))*Unitful.unit(x)
+@inline unsafe_ceil(x::Number) = ceil(x)
+
 """
     uniquename(str)
 Given string input `str`, generate a unique name that bears some resemblance
@@ -320,8 +325,8 @@ function CellArray{T<:Coordinate}(x, origin::Point{T}; kwargs...)
 end
 
 """
-    CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T}; kwargs...)
-Construct a `CellArray{T,typeof(x)}` based on ranges (probably `LinSpace` or
+    CellArray(x, c::Range, r::Range; kwargs...)
+Construct a `CellArray` based on ranges (probably `LinSpace` or
 `FloatRange`). `c` specifies column coordinates and `r` for the rows. Pairs from
 `c` and `r` specify the origins of the repeated cells. The extrema of the ranges
 therefore do not specify the extrema of the resulting `CellArray`'s bounding box;
@@ -336,7 +341,7 @@ with synonyms allowed:
 - Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
 
 """
-function CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T}; kwargs...)
+function CellArray(x, c::Range, r::Range; kwargs...)
     argdict = Dict(k=>v for (k,v) in kwargs)
     xreflkeys = [:xrefl, :xreflection, :refl, :reflect,
                  :xreflect, :xmirror, :mirror]
@@ -367,10 +372,11 @@ function CellArray{T<:Coordinate}(x, c::Range{T}, r::Range{T}; kwargs...)
         end
     end
 
-    CellArray{T, typeof(x)}(x, Point(first(c),first(r)),
-        Point(step(c),zero(step(c))), Point(zero(step(r)), step(r)),
+    CellArray{promote_type(eltype(c),eltype(r)), typeof(x)}(x, Point(first(c), first(r)),
+        Point(step(c), zero(step(c))), Point(zero(step(r)), step(r)),
         length(c), length(r), xrefl, mag, rot)
 end
+
 
 
 """
@@ -461,9 +467,9 @@ Returns a `Rectangle` bounding box with no properties around all objects in a ce
 """
 function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
     mi, ma = Point(typemax(T), typemax(T)), Point(typemin(T), typemin(T))
-    bfl{S<:Integer}(::Type{S}, x) = floor(x)
+    bfl{S<:Integer}(::Type{S}, x) = unsafe_floor(x)
     bfl(S,x) = x
-    bce{S<:Integer}(::Type{S}, x) = ceil(x)
+    bce{S<:Integer}(::Type{S}, x) = unsafe_ceil(x)
     bce(S,x) = x
 
     isempty(cell.elements) && isempty(cell.refs) &&
@@ -471,7 +477,8 @@ function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
 
     for el in cell.elements
         b = bounds(el)
-        mi, ma = min.(mi,lowerleft(b)), max.(ma,upperright(b))
+        mi = Point(min(mi.x, lowerleft(b).x), min(mi.y, lowerleft(b).y))
+        ma = Point(max(ma.x, upperright(b).x), max(ma.y, upperright(b).y))
     end
 
     for el in cell.refs
@@ -479,7 +486,8 @@ function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
         # We should grow to accommodate if necessary.
         br = bounds(el)
         b = Rectangle{T}(bfl(T, br.ll), bce(T, br.ur))
-        mi, ma = min.(mi,lowerleft(b)), max.(ma,upperright(b))
+        mi = Point(min(mi.x, lowerleft(b).x), min(mi.y, lowerleft(b).y))
+        ma = Point(max(ma.x, upperright(b).x), max(ma.y, upperright(b).y))
     end
 
     Rectangle(mi, ma; kwargs...)

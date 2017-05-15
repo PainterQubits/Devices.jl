@@ -206,6 +206,7 @@ immutable Undercut{T<:Coordinate} <: Style
     ucr::T
     ucb::T
 end
+Undercut(a,b,c,d) = Undercut(promote(a,b,c,d)...)
 Undercut{T<:Coordinate}(uc::T) = Undercut{T}(uc,uc,uc,uc)
 
 ustrip(r::Rectangle) = Rectangle(ustrip(r.ll), ustrip(r.ur), copy(r.properties))
