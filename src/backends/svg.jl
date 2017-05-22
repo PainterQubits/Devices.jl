@@ -60,7 +60,7 @@ function Base.reprmime(::MIME"image/svg+xml", c0::Cell; options...)
         fillcolor(opt, layer(p))) for p in g0.elements), "")
 
     join([xmlstring,
-        "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" $vp $wh>\n"
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" $vp $wh>\n",
         polys,
         "</svg>\n"],"")
 end
