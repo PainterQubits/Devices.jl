@@ -8,5 +8,5 @@ function render!(c::Cell, seg::Paths.Corner, ::Paths.SimpleTraceCorner; kwargs..
     p3 = p2 + ex*Point(cos(seg.α0),sin(seg.α0))
     p4 = p3 + ex*Point(cos(seg.α0+seg.α), sin(seg.α0+seg.α))
 
-    push!(c.elements, Polygon([p1,p2,p3,p4], Dict{Symbol,Any}(kwargs)))
+    render!(c, Polygon([p1,p2,p3,p4]); kwargs...)
 end

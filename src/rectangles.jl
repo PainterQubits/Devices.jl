@@ -4,7 +4,7 @@ using Compat
 using ..Points
 import Base: +, -, *, /, copy, ==, convert, isapprox
 import Devices
-import Devices: AbstractPolygon, Coordinate
+import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
 import Devices: bounds, center, centered, centered!, lowerleft, upperright
 import Unitful: ustrip
 
@@ -154,88 +154,61 @@ Translate a rectangle by `p`.
 /(r::Rectangle, a::Real) = Rectangle(/(r.ll,a), /(r.ur,a))
 
 """
-    abstract Rectangles.Style
-Implement new rectangle drawing styles by subtyping this.
+    abstract Rectangles.Style{T<:Meta}
+Implement new rectangle drawing styles by subtyping this. Must have a `meta::Meta` field.
 """
-@compat abstract type Style end
+@compat abstract type Style{T<:Meta} end
 
 """
-    immutable Plain <: Rectangles.Style
-        layer::Int
-        datatype::Int
-        Plain() = new(0,0)
-        Plain(a,b) = new(a,b)
+    immutable Plain{T} <: Rectangles.Style{T}
+        meta::T
     end
 Plain rectangle style. Use this if you are fond for the simpler times when
 rectangles were just rectangles.
 """
-immutable Plain <: Style
-    layer::Int
-    datatype::Int
-    Plain() = new(0,0)
-    Plain(a) = new(a,0)
-    Plain(a,b) = new(a,b)
+immutable Plain{T} <: Style{T}
+    meta::T
 end
+Plain() = Plain(GDSMeta())
 
 """
-    immutable Rounded{T<:Coordinate} <: Rectangles.Style
-        r::T
-        layer::Int
-        datatype::Int
-        Plain(r) = new(r,0,0)
-        Plain(r,a) = new(r,a,0)
-        Plain(r,a,b) = new(r,a,b)
+    immutable Rounded{S<:Coordinate,T} <: Rectangles.Style{T}
+        r::S
+        meta::T
     end
 Rounded rectangle style. All corners are rounded off with a given radius `r`.
 The bounding box of the unstyled rectangle should remain unaffected.
 
 """
-immutable Rounded{T<:Coordinate} <: Style
-    r::T
-    layer::Int
-    datatype::Int
-    Plain(r) = new(r,0,0)
-    Plain(r,a) = new(r,a,0)
-    Plain(r,a,b) = new(r,a,b)
+immutable Rounded{S<:Coordinate,T} <: Style{T}
+    r::S
+    meta::T
 end
+Rounded(r) = Rounded(r, GDSMeta())
+Rounded(r, meta) = Rounded(r, meta)
 
 """
-    immutable Undercut{T<:Coordinate} <: Rectangles.Style
-        ucl::T
-        uct::T
-        ucr::T
-        ucb::T
-        layer::Int
-        uclayer::Int
-        datatype::Int
-        ucdatatype::Int
+    immutable Undercut{S<:Coordinate,T} <: Rectangles.Style{T}
+        ucl::S
+        uct::S
+        ucr::S
+        ucb::S
+        meta::T
+        undercut_meta::T
     end
 Undercut rectangles. In each direction around a rectangle (left, top, right, bottom) an
 undercut is rendered on .
 """
-immutable Undercut{T<:Coordinate} <: Style
-    ucl::T
-    uct::T
-    ucr::T
-    ucb::T
-    layer::Int
-    uclayer::Int
-    datatype::Int
-    ucdatatype::Int
-    Undercut(a,b,c,d) = new(a,b,c,d,0,1,0,0)
-    Undercut(a,b,c,d,e,f) = new(a,b,c,d,e,f,0,0)
-    Undercut(a,b,c,d,e,f,g,h) = new(a,b,c,d,e,f,g,h)
+immutable Undercut{S<:Coordinate,T} <: Style{T}
+    ucl::S
+    uct::S
+    ucr::S
+    ucb::S
+    meta::T
+    undercut_meta::T
 end
-Undercut(ucl, uct, ucr, ucb) = Undercut(promote(ucl, uct, ucr, ucb)...)
-Undercut(ucl, uct, ucr, ucb, layer, uclayer) =
-    Undercut(promote(ucl, uct, ucr, ucb)..., layer, uclayer)
-Undercut(ucl, uct, ucr, ucb, layer, uclayer, datatype, ucdatatype) =
-    Undercut(promote(ucl, uct, ucr, ucb)..., layer, uclayer, datatype, ucdatatype)
-
-Undercut{T<:Coordinate}(uc::T) = Undercut{T}(uc, uc, uc, uc)
-Undercut{T<:Coordinate}(uc::T, layer, uclayer) = Undercut{T}(uc, uc, uc, uc, layer, uclayer)
-Undercut{T<:Coordinate}(uc::T, layer, uclayer, datatype, ucdatatype) =
-    Undercut{T}(uc, uc, uc, uc, layer, uclayer, datatype, ucdatatype)
+Undercut{T<:Meta}(ucl, uct, ucr, ucb, meta::T=GDSMeta(), undercut_meta::T=GDSMeta()) =
+    Undercut(promote(ucl, uct, ucr, ucb)..., meta, undercut_meta)
 
 ustrip(r::Rectangle) = Rectangle(ustrip(r.ll), ustrip(r.ur))
 

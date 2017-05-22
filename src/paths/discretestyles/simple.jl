@@ -1,8 +1,7 @@
 """
-```
-immutable SimpleTraceCorner <: DiscreteStyle
-```
-
-No parameters! All the required information is already in [`Corner`](@ref).
+    immutable SimpleTraceCorner{T} <: DiscreteStyle{T}
 """
-immutable SimpleTraceCorner <: DiscreteStyle end
+immutable SimpleTraceCorner{T} <: DiscreteStyle{T}
+    meta::T
+end
+SimpleTraceCorner() = SimpleTraceCorner(GDSMeta())

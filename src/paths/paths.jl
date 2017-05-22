@@ -36,7 +36,8 @@ import Compat.Iterators: rest, take, drop, cycle
 
 using ForwardDiff
 import Devices
-import Devices: bounds, cell, Coordinate, FloatCoordinate
+import Devices: Coordinate, FloatCoordinate, GDSMeta, Meta
+import Devices: bounds, cell
 
 export Path
 
@@ -77,26 +78,26 @@ of paths rendered.
 function width end
 
 """
-    abstract Style{T<:FloatCoordinate}
+    abstract type Style{T<:Meta} end
 How to render a given path segment. All styles should implement the following
 methods:
 
  - `extent`
  - `width`
 """
-@compat abstract type Style end
+@compat abstract type Style{T<:Meta} end
 
 """
-    abstract type ContinuousStyle <: Style end
+    abstract type ContinuousStyle{T} <: Style{T} end
 Any style that applies to segments which have non-zero path length.
 """
-@compat abstract type ContinuousStyle <: Style end
+@compat abstract type ContinuousStyle{T} <: Style{T} end
 
 """
-    abstract type DiscreteStyle <: Style end
+    abstract type DiscreteStyle{T} <: Style{T} end
 Any style that applies to segments which have zero path length.
 """
-@compat abstract type DiscreteStyle <: Style end
+@compat abstract type DiscreteStyle{T} <: Style{T} end
 
 """
     abstract type Segment{T<:Coordinate} end
@@ -449,9 +450,8 @@ include("contstyles/trace.jl")
 include("contstyles/cpw.jl")
 include("contstyles/compound.jl")
 include("contstyles/decorated.jl")
-include("contstyles/norender.jl")
 include("discretestyles/simple.jl")
-include("skipstyles.jl")
+include("norender.jl")
 
 include("segments/straight.jl")
 include("segments/turn.jl")

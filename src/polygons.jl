@@ -12,17 +12,16 @@ import Clipper: orientation, children, contour
 import StaticArrays
 
 import Devices
-import Devices: lowerleft, upperright
+import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
+import Devices: bounds, lowerleft, upperright
 import Unitful
 import Unitful: Length, dimension, unit, ustrip, uconvert
-import Devices: AbstractPolygon, Coordinate, bounds
 using ..Points
 using ..Rectangles
 
 export Polygon
 export points
 export clip, offset
-export layer, datatype
 
 clipper() = Devices._clip
 coffset() = Devices._coffset
@@ -174,13 +173,18 @@ Return a bounding `Rectangle` for several `AbstractPolygon` objects.
 """
 bounds(p0::AbstractPolygon, p::AbstractPolygon...) = bounds([p0, p...])
 
-@compat abstract type Style end
+@compat abstract type Style{T<:Meta} end
 
 """
-    immutable Plain <: Style
+    immutable Plain{T} <: Polygons.Style{T}
+        meta::T
+    end
 Plain polygon style.
 """
-immutable Plain <: Style end
+immutable Plain{T} <: Style{T}
+    meta::T
+end
+Plain() = Plain(GDSMeta())
 
 # Polygon promotion.
 for X in (:Real, :Length)

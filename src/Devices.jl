@@ -95,6 +95,18 @@ if VERSION < v"0.6.0-pre"
         end
     end
 end
+# 
+# function layer end
+# function datatype end
+
+@compat abstract type Meta end
+immutable GDSMeta <: Meta
+    layer::Int
+    datatype::Int
+    GDSMeta() = new(DEFAULT_LAYER, DEFAULT_DATATYPE)
+    GDSMeta(l) = new(l, DEFAULT_DATATYPE)
+    GDSMeta(l,d) = new(l,d)
+end
 
 include("rectangles.jl")
 import .Rectangles: Rectangle, height, width, isproper
