@@ -36,9 +36,8 @@ const PCSCALE = float(2^31)
 ```
 type Polygon{T} <: AbstractPolygon{T}
     p::Array{Point{T},1}
-    properties::Dict{Symbol, Any}
-    Polygon(x,y) = new(x,y)
-    Polygon(x) = new(x, Dict{Symbol, Any}())
+    Polygon(x) = new(x)
+    Polygon(x::AbstractPolygon) = convert(Polygon{T}, x)
 end
 ```
 
@@ -47,76 +46,53 @@ at the end (although this is true for the GDS format).
 """
 type Polygon{T} <: AbstractPolygon{T}
     p::Array{Point{T},1}
-    properties::Dict{Symbol, Any}
-    Polygon(x,y) = new(x,y)
-    Polygon(x) = new(x, Dict{Symbol, Any}())
+    Polygon(x) = new(x)
     Polygon(x::AbstractPolygon) = convert(Polygon{T}, x)
 end
 
 """
-```
-Polygon(p0::Point, p1::Point, p2::Point, p3::Point...; kwargs...)
-```
-
+    Polygon(p0::Point, p1::Point, p2::Point, p3::Point...)
 Convenience constructor for a `Polygon{T}` object.
 """
-Polygon(p0::Point, p1::Point, p2::Point, p3::Point...; kwargs...) =
-    Polygon([p0, p1, p2, p3...]; kwargs...)
+Polygon(p0::Point, p1::Point, p2::Point, p3::Point...) = Polygon([p0, p1, p2, p3...])
 
 """
-```
-Polygon{T}(parr::AbstractArray{Point{T},1}; kwargs...)
-```
-
+    Polygon{T}(parr::AbstractVector{Point{T}})
 Convenience constructor for a `Polygon{T}` object.
 """
-Polygon{T}(parr::AbstractVector{Point{T}}; kwargs...) =
-    Polygon{T}(parr, Dict{Symbol,Any}(kwargs))
-Polygon{T}(parr::AbstractVector{Point{T}}, dict) =
-    Polygon{T}(parr, dict)
+Polygon{T}(parr::AbstractVector{Point{T}}) = Polygon{T}(parr)
 
-Polygon(parr::AbstractVector{Point}; kwargs...) =
-    error("Polygon creation failed. Perhaps you mixed units and unitless numbers?")
+Polygon(parr::AbstractVector{Point}) =
+    error("polygon creation failed. Perhaps you mixed units and unitless numbers?")
 
-==(p1::Polygon, p2::Polygon) =
-    (p1.p == p2.p) && (p1.properties == p2.properties)
-isapprox(p1::Polygon, p2::Polygon) =
-    isapprox(p1.p, p2.p) && (p1.properties == p2.properties)
-
-layer(p::Polygon) = p.properties[:layer]
-datatype(p::Polygon) = p.properties[:datatype]
-copy(p::Polygon) = Polygon(copy(p.p), copy(p.properties))
+==(p1::Polygon, p2::Polygon) = (p1.p == p2.p)
+isapprox(p1::Polygon, p2::Polygon) = isapprox(p1.p, p2.p)
+copy(p::Polygon) = Polygon(copy(p.p))
 
 """
-```
-points(x::Polygon)
-```
-
+    points(x::Polygon)
 Returns the array of `Point` objects defining the polygon.
 """
 points(x::Polygon) = x.p
 
 """
-```
-points{T}(x::Rectangle{T})
-```
-
+    points{T}(x::Rectangle{T})
 Returns the array of `Point` objects defining the rectangle.
 """
 points{T}(x::Rectangle{T}) = points(convert(Polygon{T}, x))
 
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
     @eval function ($op)(r::Polygon, p::Point)
-        Polygon(($dotop)(r.p, p), copy(r.properties))
+        Polygon(($dotop)(r.p, p))
     end
     @eval @compat function ($op)(r::Polygon, p::StaticArrays.Scalar{<:Point})
-        Polygon(($dotop)(r.p, p), copy(r.properties))
+        Polygon(($dotop)(r.p, p))
     end
     @eval function ($op)(p::Point, r::Polygon)
-        Polygon(($dotop)(p, r.p), copy(r.properties))
+        Polygon(($dotop)(p, r.p))
     end
     @eval @compat function ($op)(p::StaticArrays.Scalar{<:Point}, r::Polygon)
-        Polygon(($dotop)(p, r.p), copy(r.properties))
+        Polygon(($dotop)(p, r.p))
     end
     if VERSION < v"0.6.0-pre"
         @eval function ($dotop){T<:AbstractPolygon}(r::AbstractArray{T}, p::Point)
@@ -128,25 +104,19 @@ for (op, dotop) in [(:+, :.+), (:-, :.-)]
     end
 end
 
-*(r::Polygon, a::Number) = Polygon(r.p .* a, copy(r.properties))
+*(r::Polygon, a::Number) = Polygon(r.p .* a)
 *(a::Number, r::Polygon) = *(r,a)
-/(r::Polygon, a::Number) = Polygon(r.p ./ a, copy(r.properties))
+/(r::Polygon, a::Number) = Polygon(r.p ./ a)
 
 """
-```
-lowerleft(x::Polygon)
-```
-
+    lowerleft(x::Polygon)
 Return the lower-left-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
 """
 lowerleft(::Polygon)
 
 """
-```
-upperright(x::Polygon)
-```
-
+    upperright(x::Polygon)
 Return the upper-right-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
 """
@@ -161,58 +131,35 @@ else
 end
 
 for T in (:LinearMap, :AffineMap)
-    @eval (f::$T)(x::Polygon) = Polygon(f.(x.p), copy(x.properties))
+    @eval (f::$T)(x::Polygon) = Polygon(f.(x.p))
     @eval (f::$T)(x::Rectangle) = f(convert(Polygon, x))
 end
 
-(f::Translation)(x::Polygon) = Polygon(f.(x.p), copy(x.properties))
-(f::Translation)(x::Rectangle) = Rectangle(f(x.ll), f(x.ur), copy(x.properties))
+(f::Translation)(x::Polygon) = Polygon(f.(x.p))
+(f::Translation)(x::Rectangle) = Rectangle(f(x.ll), f(x.ur))
 
-"""
-```
-convert{T}(::Type{Polygon{T}}, s::Rectangle)
-```
-
-Convert a Rectangle into a Polygon (explicitly keep all points).
-"""
 function convert{T}(::Type{Polygon{T}}, s::Rectangle)
     ll = convert(Point{T}, s.ll)
     ur = convert(Point{T}, s.ur)
     lr = Point(T(getx(ur)), T(gety(ll)))
     ul = Point(T(getx(ll)), T(gety(ur)))
-    Polygon{T}(Point{T}[ll,lr,ur,ul], copy(s.properties))
+    Polygon{T}(Point{T}[ll,lr,ur,ul])
 end
-
 convert{T}(::Type{Polygon}, s::Rectangle{T}) = convert(Polygon{T}, s)
 convert{T}(::Type{AbstractPolygon{T}}, s::Rectangle) = convert(Rectangle{T}, s)
-
-"""
-```
-convert{T}(::Type{Polygon{T}}, p::Polygon)
-```
-
-Convert between types of polygons.
-"""
 function convert{T}(::Type{Polygon{T}}, p::Polygon)
-    Polygon{T}(convert(Array{Point{T},1}, p.p), copy(p.properties))
+    Polygon{T}(convert(Array{Point{T},1}, p.p))
 end
 
 """
-```
-bounds(p::Polygon)
-```
-
-Return a bounding Rectangle with no properties for polygon `p`.
+    bounds(p::Polygon)
+Return a bounding Rectangle for polygon `p`.
 """
 bounds(p::Polygon) = Rectangle(lowerleft(p), upperright(p))
 
 """
-```
-bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
-```
-
-Return a bounding `Rectangle` with no properties for an array `parr` of
-`AbstractPolygon` objects.
+    bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
+Return a bounding `Rectangle` for an array `parr` of `AbstractPolygon` objects.
 """
 function bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
     rects = map(bounds, parr)
@@ -222,18 +169,17 @@ function bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
 end
 
 """
-```
-bounds(p0::AbstractPolygon, p::AbstractPolygon...)
-```
-
-Return a bounding `Rectangle` with no properties for several `AbstractPolygon`
-objects.
+    bounds(p0::AbstractPolygon, p::AbstractPolygon...)
+Return a bounding `Rectangle` for several `AbstractPolygon` objects.
 """
 bounds(p0::AbstractPolygon, p::AbstractPolygon...) = bounds([p0, p...])
 
 @compat abstract type Style end
 
-"Plain polygon style."
+"""
+    immutable Plain <: Style
+Plain polygon style.
+"""
 immutable Plain <: Style end
 
 # Polygon promotion.
@@ -351,14 +297,14 @@ function _clip{T<:Union{Int64, Unitful.Quantity{Int64}}}(op::Clipper.ClipType,
     result = convert(Clipper.PolyNode{Point{Int}},
         Clipper.execute_pt(c, op, pfs, pfc)[2])
 
-    polys = interiorcuts(result, Polygon{T}[], subject[1].properties)
+    polys = interiorcuts(result, Polygon{T}[])
 end
 
 # Clipperize methods prepare an array for being operated upon by the Clipper lib
 function clipperize{T<:Polygon}(A::AbstractVector{T})
     Int64like{T}(x::Point{T}) = convert(Point{typeof(1::Int64*unit(T))},x)
-    [Polygon(Int64like.([unsafe_round.(y) for y in (points(Polygon(x)) .* PCSCALE)]),
-        x.properties) for x in A]
+    [Polygon(Int64like.([unsafe_round.(y) for y in (points(Polygon(x)) .* PCSCALE)]))
+        for x in A]
 end
 clipperize{T<:Union{Int64, Unitful.Quantity{Int64}}}(
     A::AbstractVector{Polygon{T}}) = A
@@ -366,12 +312,10 @@ clipperize{T<:Union{Int64, Unitful.Quantity{Int64}}}(
 # Declipperize methods are used to get back to the original type.
 function declipperize(A, T)
     united(p) = reinterpret(Point{typeof(1*unit(T))}, p.p)
-    [Polygon{T}(convert(Vector{Point{T}}, united(p)) ./ PCSCALE,
-        copy(p.properties)) for p in A]
+    [Polygon{T}(convert(Vector{Point{T}}, united(p)) ./ PCSCALE) for p in A]
 end
 function declipperize{T<:Union{Int64, Unitful.Quantity{Int64}}}(A, S::Type{T})
-    [Polygon{T}(reinterpret(Point{typeof(1*unit(T))}, p.p),
-        copy(p.properties)) for p in A]
+    [Polygon{T}(reinterpret(Point{typeof(1*unit(T))}, p.p)) for p in A]
 end
 
 """
@@ -464,8 +408,7 @@ function _offset{T<:Union{Int64, Unitful.Quantity{Int64}}}(
         Clipper.add_path!(c, reinterpret(Clipper.IntPoint, s0.p), j, e)
     end
     result = Clipper.execute(c, Float64(delta)) #TODO: fix in clipper
-    [Polygon(reinterpret(Point{Int64}, p), copy(s[1].properties))
-        for p in result]
+    [Polygon(reinterpret(Point{Int64}, p)) for p in result]
 end
 
 ### cutting algorithm
@@ -589,7 +532,7 @@ function intersection(A::Line, B::Line, checkparallel=true)
     end
 end
 
-function interiorcuts{T}(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}}, props)
+function interiorcuts{T}(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}})
     # currently assumes we have first element an enclosing polygon with
     # the rest being holes. We don't dig deep into the PolyTree...
 
@@ -648,7 +591,7 @@ function interiorcuts{T}(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{
                     segs[(k+1):end]]
             end
         end
-        push!(outpolys, Polygon(reinterpret(Point{T}, contour(enclosing)), props))
+        push!(outpolys, Polygon(reinterpret(Point{T}, contour(enclosing))))
     end
     outpolys
 end

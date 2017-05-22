@@ -110,18 +110,6 @@ export Polygons
 export Polygon
 export clip, offset, points
 
-function layer(polygon)
-    props = polygon.properties
-    haskey(props, :layer) && return props[:layer]
-    return DEFAULT_LAYER
-end
-
-function datatype(polygon)
-    props = polygon.properties
-    haskey(props, :datatype) && return props[:datatype]
-    return DEFAULT_DATATYPE
-end
-
 include("cells.jl")
 import .Cells: Cell, CellArray, CellReference
 import .Cells: traverse!, order!, flatten, flatten!, transform, name, uniquename

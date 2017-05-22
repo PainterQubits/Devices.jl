@@ -1,12 +1,9 @@
 """
-    render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
-    render!(c::Cell, r::Polygon, s::Polygons.Plain; kwargs...)
+    render!(c::Cell, r::Polygon, s::Polygons.Style = Polygons.Plain(0,0))
 Render a polygon `r` to cell `c`, defaulting to plain styling. Currently there is no other
 Polygon rendering style implemented.
 """
-function render!(c::Cell, r::Polygon, s::Polygons.Style=Polygons.Plain(); kwargs...)
-    d = Dict(kwargs)
-    r.properties = merge(r.properties, d)
-    push!(c.elements, r)
+function render!(c::Cell, r::Polygon, s::Polygons.Style = Polygons.Plain(0,0))
+    push!(c.polygons, CellPolygon(r, layer(s), datatype(s)))
     c
 end

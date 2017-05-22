@@ -24,6 +24,14 @@ export uniquename
 @inline unsafe_ceil(x::Unitful.Quantity)  = ceil(Unitful.ustrip(x))*Unitful.unit(x)
 @inline unsafe_ceil(x::Number) = ceil(x)
 
+immutable CellPolygon{T}
+    polygon::Polygon{T}
+    layer::Int
+    datatype::Int
+end
+layer(p::CellPolygon) = p.layer
+datatype(p::CellPolygon) = p.datatype
+
 """
     uniquename(str)
 Given string input `str`, generate a unique name that bears some resemblance
@@ -139,7 +147,7 @@ to add references, push them to `refs` field.
 """
 type Cell{T<:Coordinate}
     name::String
-    elements::Vector{Polygon{T}}
+    elements::Vector{CellPolygon{T}}
     refs::Vector{CellRef}
     create::DateTime
     Cell(x,y,z,t) = new(x, y, z, t)
@@ -461,11 +469,11 @@ function Base.getindex(c::CellRef, nom::AbstractString, index::Integer=1)
 end
 
 """
-    bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
-    bounds(cell0::Cell, cell1::Cell, cell::Cell...; kwargs...)
-Returns a `Rectangle` bounding box with no properties around all objects in a cell or cells.
+    bounds{T<:Coordinate}(cell::Cell{T})
+    bounds(cell0::Cell, cell1::Cell, cell::Cell...)
+Returns a `Rectangle` bounding box around all objects in a cell or cells.
 """
-function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
+function bounds{T<:Coordinate}(cell::Cell{T})
     mi, ma = Point(typemax(T), typemax(T)), Point(typemin(T), typemin(T))
     bfl{S<:Integer}(::Type{S}, x) = unsafe_floor(x)
     bfl(S,x) = x
@@ -473,7 +481,7 @@ function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
     bce(S,x) = x
 
     isempty(cell.elements) && isempty(cell.refs) &&
-        return Rectangle(mi, ma; kwargs...)
+        return Rectangle(mi, ma)
 
     for el in cell.elements
         b = bounds(el)
@@ -490,12 +498,12 @@ function bounds{T<:Coordinate}(cell::Cell{T}; kwargs...)
         ma = Point(max(ma.x, upperright(b).x), max(ma.y, upperright(b).y))
     end
 
-    Rectangle(mi, ma; kwargs...)
+    Rectangle(mi, ma)
 end
 
-function bounds(cell0::Cell, cell1::Cell, cell::Cell...; kwargs...)
+function bounds(cell0::Cell, cell1::Cell, cell::Cell...)
     r = bounds([bounds(cell0), bounds(cell1), bounds.(cell)...])
-    Rectangle(r.ll, r.ur; kwargs...)
+    Rectangle(r.ll, r.ur)
 end
 
 """
@@ -506,15 +514,13 @@ Returns the center of the bounding box of the cell.
 center(cell::Cell) = center(bounds(cell))
 
 """
-    bounds(ref::CellArray; kwargs...)
-Returns a `Rectangle` bounding box with properties specified by `kwargs...`
-around all objects in `ref`. The bounding box respects reflection, rotation, and
-magnification specified by `ref`.
+    bounds(ref::CellArray)
+Returns a `Rectangle` bounding box around all objects in `ref`. The bounding box respects
+reflection, rotation, and magnification specified by `ref`.
 
 Please do rewrite this method when feeling motivated... it is very inefficient.
 """
-function bounds{S<:Coordinate, T<:Coordinate}(
-        ref::CellArray{T, Cell{S}}; kwargs...)
+function bounds{S<:Coordinate, T<:Coordinate}(ref::CellArray{T, Cell{S}})
     b = bounds(ref.cell)::Rectangle{S}
     !isproper(b) && return b
 
@@ -530,16 +536,15 @@ function bounds{S<:Coordinate, T<:Coordinate}(
         StaticArrays.@SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
                   sgn*ref.mag*sin(ref.rot) ref.mag*cos(ref.rot)])
     c = a(mb)
-    bounds(c; kwargs...)
+    bounds(c)
 end
 
 """
-    bounds(ref::CellReference; kwargs...)
-Returns a `Rectangle` bounding box with properties specified by `kwargs...`
-around all objects in `ref`. The bounding box respects reflection, rotation,
-and magnification specified by `ref`.
+    bounds(ref::CellReference)
+Returns a `Rectangle` bounding box around all objects in `ref`. The bounding box respects
+reflection, rotation, and magnification specified by `ref`.
 """
-function bounds(ref::CellReference; kwargs...)
+function bounds(ref::CellReference)
     b = bounds(ref.cell)
     !isproper(b) && return b
     sgn = ref.xrefl ? -1 : 1
@@ -547,7 +552,7 @@ function bounds(ref::CellReference; kwargs...)
         StaticArrays.@SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
                   sgn*ref.mag*sin(ref.rot) ref.mag*cos(ref.rot)])
     c = a(b)
-    bounds(c; kwargs...)
+    bounds(c)
 end
 
 """
@@ -626,6 +631,19 @@ name(x::CellArray) = name(x.cell)
 Returns the name of the referenced cell.
 """
 name(x::CellReference) = name(x.cell)
+
+"""
+    layers(x::Cell)
+Returns the layers of elements in cell `x` as a set. Does *not* return the layers
+in referenced or arrayed cells.
+"""
+function layers(x::Cell)
+    layers = Set{Int}()
+    for el in elements(x)
+        push!(layers, layer(el))
+    end
+    layers
+end
 
 """
     traverse!(a::AbstractArray, c::Cell, level=1)

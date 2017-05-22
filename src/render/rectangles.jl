@@ -1,55 +1,44 @@
 """
-    render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)
-    render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)
-    render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
-    render!(c::Cell, r::Rectangle, s::Rectangles.Undercut;
-        layer=0, uclayer=0, kwargs...)
+    render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain())
+    render!(c::Cell, r::Rectangle, ::Rectangles.Plain)
+    render!(c::Cell, r::Rectangle, s::Rectangles.Rounded)
+    render!(c::Cell, r::Rectangle, s::Rectangles.Undercut)
 Render a rectangle `r` to cell `c`, defaulting to plain styling.
 """
-function render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain(); kwargs...)
-    render!(c, r, s; kwargs...)
-end
-
-function render!(c::Cell, r::Rectangle, ::Rectangles.Plain; kwargs...)
-    d = Dict(kwargs)
-    r.properties = merge(r.properties, d)
-    push!(c.elements, r)
+function render!(c::Cell, r::Rectangle, s::Rectangles.Style=Rectangles.Plain())
+    render!(c, r, s)
     c
 end
 
-function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded; kwargs...)
-    d = Dict(kwargs)
-    r.properties = merge(r.properties, d)
-
-    rad = s.r
-    ll, ur = lowerleft(r), upperright(r)
-    gr = Rectangle(ll+Point(rad,rad),ur-Point(rad,rad), r.properties)
-    push!(c.elements, gr)
-
-    p = Path(ll+Point(rad,rad/2), style0=Paths.Trace(s.r)) #0.0, Paths.Trace(s.r))
-    straight!(p, width(r)-2*rad)
-    turn!(p, π/2, rad/2)
-    straight!(p, height(r)-2*rad)
-    turn!(p, π/2, rad/2)
-    straight!(p, width(r)-2*rad)
-    turn!(p, π/2, rad/2)
-    straight!(p, height(r)-2*rad)
-    turn!(p, π/2, rad/2)
-    render!(c, p; r.properties...)
+function render!(c::Cell, r::Rectangle, s::Rectangles.Plain)
+    push!(c.elements, CellPolygon(r, layer(s), datatype(s)))
+    c
 end
 
-function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut;
-    layer=0, uclayer=0, kwargs...)
+function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded)
+    rad = s.r
+    ll, ur = lowerleft(r), upperright(r)
+    gr = Rectangle(ll+Point(rad,rad), ur-Point(rad,rad))
+    push!(c.elements, CellPolygon(gr, layer(s), datatype(s)))
 
-    r.properties = merge(r.properties, Dict(kwargs))
-    r.properties[:layer] = layer
-    push!(c.elements, r)
+    p = Path(ll + Point(rad,rad/2), style0 = Paths.Trace(s.r))
+    straight!(p, width(r) - 2*rad)
+    turn!(p, π/2, rad/2)
+    straight!(p, height(r) - 2*rad)
+    turn!(p, π/2, rad/2)
+    straight!(p, width(r) - 2*rad)
+    turn!(p, π/2, rad/2)
+    straight!(p, height(r) - 2*rad)
+    turn!(p, π/2, rad/2)
+    render!(c, CellPolygon(p, layer(s), datatype(s)))
+    c
+end
 
-    ucr = Rectangle(r.ll-Point(s.ucl,s.ucb),
-        r.ur+Point(s.ucr,s.uct), Dict(kwargs))
+function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut)
+    push!(c.elements, CellPolygon(r, layer(s), datatype(s)))
+
+    ucr = Rectangle(r.ll - Point(s.ucl,s.ucb), r.ur + Point(s.ucr,s.uct))
     ucp = clip(Clipper.ClipTypeDifference, ucr, r)[1]
-    ucp.properties[:layer] = uclayer
-    push!(c.elements, ucp)
-
+    push!(c.elements, CellPolygon(ucp, s.uclayer, s.ucdatatype))
     c
 end
