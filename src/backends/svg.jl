@@ -54,14 +54,15 @@ function Base.reprmime(::MIME"image/svg+xml", c0::Cell; options...)
     wh = haskey(opt, :width)? "width=\"$(opt[:width])\" " : "width=\"$(width(bnd))\" "
     wh *= haskey(opt, :height)? "height=\"$(opt[:height])\" " : "height=\"$(height(bnd))\" "
 
-    str = xmlstring
-    str *= "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" $vp $wh>\n"
-    for p in g0.elements
-        d = Dict(:points=>svgify(XReflection().(ustrip(points(p)))),
-            :fill=>fillcolor(opt, layer(p)))
-        str *= closedtag("polygon", d)
-    end
-    str *= "</svg>\n"
+    xrefl = XReflection()
+    polys = join((polygon(
+        svgify(xrefl.(ustrip(points(p)))),
+        fillcolor(opt, layer(p))) for p in g0.elements), "")
+
+    join([xmlstring,
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" $vp $wh>\n"
+        polys,
+        "</svg>\n"],"")
 end
 
 Base.show(io, mime::MIME"image/svg+xml", c0::Cell; options...) =
@@ -99,21 +100,12 @@ function load(f::File{format"SVG"})
     # end
 end
 
-function closedtag(t::String, d::Dict)
-    out = "<" * t * " "
-    for (k,v) in d
-        out *= "$k=\"$v\" "
-    end
-    out *= "/>\n"
-end
+@inline polygon(points, fill) =
+    string("<polygon points=\"", points, "\" fill=\"", fill, "\" />\n")
 
 function svgify(pts)
     isempty(pts) && return ""
-    str = "$(getx(pts[1])),$(gety(pts[1]))"
-    for p in pts[2:end]
-        str*=" $(getx(p)),$(gety(p))"
-    end
-    str
+    join((string(Int(round(getx(p))), ",", Int(round(gety(p)))) for p in pts), " ")
 end
 
 end
