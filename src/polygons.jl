@@ -83,8 +83,8 @@ Polygon(parr::AbstractVector{Point}; kwargs...) =
 isapprox(p1::Polygon, p2::Polygon) =
     isapprox(p1.p, p2.p) && (p1.properties == p2.properties)
 
-layer(p::Polygon) = p.properties[:layer]
-datatype(p::Polygon) = p.properties[:datatype]
+layer(p::Polygon) = haskey(p.properties, :layer) ? p.properties[:layer] : Devices.DEFAULT_LAYER
+datatype(p::Polygon) = haskey(p.properties, :datatype) ? p.properties[:datatype] : Devices.DEFAULT_DATATYPE
 copy(p::Polygon) = Polygon(copy(p.p), copy(p.properties))
 
 """

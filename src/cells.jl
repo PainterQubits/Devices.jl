@@ -16,7 +16,7 @@ using ..Polygons
 
 import Devices: AbstractPolygon, Coordinate, bounds, center, lowerleft, upperright
 export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!, transform, name, dbscale
+export traverse!, order!, flatten, flatten!, transform, name, dbscale, layers
 export uniquename
 
 @inline unsafe_floor(x::Unitful.Quantity) = floor(Unitful.ustrip(x))*Unitful.unit(x)
@@ -626,6 +626,19 @@ name(x::CellArray) = name(x.cell)
 Returns the name of the referenced cell.
 """
 name(x::CellReference) = name(x.cell)
+
+"""
+    layers(x::Cell)
+Returns the layers of elements in cell `x` as a set. Does *not* return the layers
+in referenced or arrayed cells.
+"""
+function layers(x::Cell)
+    layers = Set{Int}()
+    for el in x.elements
+        push!(layers, layer(el))
+    end
+    layers
+end
 
 """
     traverse!(a::AbstractArray, c::Cell, level=1)
