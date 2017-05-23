@@ -16,7 +16,7 @@ using ..Polygons
 
 import Devices: AbstractPolygon, Coordinate, bounds, center, lowerleft, upperright
 export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!, transform, name, dbscale
+export traverse!, order!, flatten, flatten!, transform, name, dbscale, layers
 export uniquename
 
 @inline unsafe_floor(x::Unitful.Quantity) = floor(Unitful.ustrip(x))*Unitful.unit(x)
@@ -639,7 +639,7 @@ in referenced or arrayed cells.
 """
 function layers(x::Cell)
     layers = Set{Int}()
-    for el in elements(x)
+    for el in x.elements
         push!(layers, layer(el))
     end
     layers

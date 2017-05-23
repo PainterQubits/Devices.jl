@@ -40,28 +40,32 @@ function fillcolor(options, layer)
     return "rgb(0,0,0)"
 end
 
-# TODO: Illustrator handles viewBox poorly. Is there a way the SVG can look nice in
-#       all viewers, i.e. am I doing something wrong?
 # TODO: Find a package for writing xml tags nicely and use that instead
-# TODO: don't just flatten everything. preserve cell structure in svg format.
+# TODO: don't just presume we flatten everything. preserve cell structure in svg format.
 #       <defs>, <symbol>, <use> tags for arrays, cell references?
 function Base.reprmime(::MIME"image/svg+xml", c0::Cell; options...)
     opt = Dict{Symbol,Any}(options)
-    g0 = flatten(c0)
-    bnd = ustrip(bounds(g0))
+    bnd = ustrip(bounds(c0))
 
-    vp = "viewBox=\"$(getx(bnd.ll)) -$(gety(bnd.ur)) $(width(bnd)) $(height(bnd))\" "
-    wh = haskey(opt, :width)? "width=\"$(opt[:width])\" " : "width=\"$(width(bnd))\" "
-    wh *= haskey(opt, :height)? "height=\"$(opt[:height])\" " : "height=\"$(height(bnd))\" "
+    vp = "viewBox=\"0 0 $(Int(round(width(bnd)))) $(Int(round(height(bnd))))\" "
+    wh = haskey(opt, :width)? "width=\"$(opt[:width])\" " : ""
+    wh *= haskey(opt, :height)? "height=\"$(opt[:height])\" " : ""
 
-    xrefl = XReflection()
-    polys = join((polygon(
-        svgify(xrefl.(ustrip(points(p)))),
-        fillcolor(opt, layer(p))) for p in g0.elements), "")
+    ly = collect(layers(c0))
+    trans = Translation(0, bnd.ur.y) ∘ XReflection()
+    data = join([group_tag(fillcolor(opt, l), join(
+                (
+                    polygon_tag(
+                        svgify(
+                            trans.(ustrip(points(p))),
+                        )
+                    ) for p in c0.elements[layer.(c0.elements) .== l]
+                ), "")
+            ) for l in ly[sortperm(ly)]], "")
 
     join([xmlstring,
         "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" $vp $wh>\n",
-        polys,
+        data,
         "</svg>\n"],"")
 end
 
@@ -100,8 +104,8 @@ function load(f::File{format"SVG"})
     # end
 end
 
-@inline polygon(points, fill) =
-    string("<polygon points=\"", points, "\" fill=\"", fill, "\" />\n")
+@inline group_tag(fill, polys) = string("<g fill=\"", fill, "\" >\n", polys, "</g>\n")
+@inline polygon_tag(points) = string("<polygon points=\"", points, "\" />\n")
 
 function svgify(pts)
     isempty(pts) && return ""

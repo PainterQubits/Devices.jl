@@ -95,7 +95,7 @@ if VERSION < v"0.6.0-pre"
         end
     end
 end
-# 
+#
 # function layer end
 # function datatype end
 
@@ -124,10 +124,10 @@ export clip, offset, points
 
 include("cells.jl")
 import .Cells: Cell, CellArray, CellReference
-import .Cells: traverse!, order!, flatten, flatten!, transform, name, uniquename
+import .Cells: traverse!, order!, flatten, flatten!, transform, name, uniquename, layers
 export Cells
 export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!, transform, name, uniquename
+export traverse!, order!, flatten, flatten!, transform, name, uniquename, layers
 
 include("utils.jl")
 include("paths/paths.jl")
