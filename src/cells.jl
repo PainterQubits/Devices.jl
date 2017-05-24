@@ -5,7 +5,7 @@ import Unitful: Length, nm
 
 import StaticArrays
 import CoordinateTransformations
-import CoordinateTransformations.∘
+import CoordinateTransformations: ∘, LinearMap, AffineMap, Translation
 if isdefined(CoordinateTransformations, :transform) # is deprecated now, but...
     import CoordinateTransformations: transform
 end
@@ -14,8 +14,9 @@ using ..Points
 using ..Rectangles
 using ..Polygons
 
-import Devices: AbstractPolygon, Coordinate, bounds, center, lowerleft, upperright
-export Cell, CellArray, CellReference
+import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
+import Devices: bounds, center, lowerleft, upperright, points, layer, datatype
+export Cell, CellArray, CellReference, CellPolygon
 export traverse!, order!, flatten, flatten!, transform, name, dbscale, layers
 export uniquename
 
@@ -24,13 +25,41 @@ export uniquename
 @inline unsafe_ceil(x::Unitful.Quantity)  = ceil(Unitful.ustrip(x))*Unitful.unit(x)
 @inline unsafe_ceil(x::Number) = ceil(x)
 
-immutable CellPolygon{T}
-    polygon::Polygon{T}
-    layer::Int
-    datatype::Int
+immutable CellPolygon{S,T<:Meta}
+    polygon::Polygon{S}
+    meta::T
 end
-layer(p::CellPolygon) = p.layer
-datatype(p::CellPolygon) = p.datatype
+CellPolygon{S<:Coordinate, T<:Meta}(p::AbstractPolygon{S}, m::T) = CellPolygon{S,T}(p,m)
+Base.copy(r::CellPolygon) = CellPolygon(r.polygon, r.meta)
+Base.convert{S<:Coordinate, T<:Meta}(::Type{CellPolygon{S,T}}, p::CellPolygon) =
+    CellPolygon{S,T}(p.polygon, p.meta)
+Base.:*(r::CellPolygon, a::Number) = CellPolygon(r.polygon * a, r.meta)
+Base.:*(a::Number, r::CellPolygon) = CellPolygon(a * r.polygon, r.meta)
+Base.:/(r::CellPolygon, a::Number) = CellPolygon(r.polygon / a, r.meta)
+Base.:(==)(p1::CellPolygon, p2::CellPolygon) =
+    p1.polygon == p2.polygon && p1.meta == p2.meta
+for op in (:(Base.:+), :(Base.:-))
+    @eval function ($op)(r::CellPolygon, p::Point)
+        CellPolygon(($op)(r.polygon, p), r.meta)
+    end
+    @eval @compat function ($op)(r::CellPolygon, p::StaticArrays.Scalar{<:Point})
+        CellPolygon(($op)(r.polygon, p), r.meta)
+    end
+    @eval function ($op)(p::Point, r::CellPolygon)
+        CellPolygon(($op)(p, r.polygon), r.meta)
+    end
+    @eval @compat function ($op)(p::StaticArrays.Scalar{<:Point}, r::CellPolygon)
+        CellPolygon(($op)(p, r.polygon), r.meta)
+    end
+end
+for op in (:bounds, :lowerleft, :orientation, :points, :upperright)
+    @eval ($op)(r::CellPolygon) = ($op)(r.polygon)
+end
+Base.isapprox(c1::CellPolygon, c2::CellPolygon) =
+    c1.meta == c2.meta && isapprox(c1.polygon, c2.polygon)
+for T in (:LinearMap, :AffineMap, :Translation)
+    @eval (f::$T)(x::CellPolygon) = CellPolygon(f(x.polygon), x.meta)
+end
 
 """
     uniquename(str)
@@ -119,9 +148,9 @@ Base.convert{S}(::Type{CellArray{S}}, x::CellArray) =
 
 """
 ```
-type Cell{T<:Coordinate}
+type Cell{S<:Coordinate, T<:Meta}
     name::String
-    elements::Vector{Polygon{T}}
+    elements::Vector{CellPolygon{S,T}}
     refs::Vector{CellRef}
     create::DateTime
     Cell(x,y,z,t) = new(x, y, z, t)
@@ -145,24 +174,24 @@ currently implemented it mirrors the notion of cells in GDS-II files.
 To add elements, push them to `elements` field (or use `render!`);
 to add references, push them to `refs` field.
 """
-type Cell{T<:Coordinate}
+type Cell{S<:Coordinate, T<:Meta}
     name::String
-    elements::Vector{CellPolygon{T}}
+    elements::Vector{CellPolygon{S,T}}
     refs::Vector{CellRef}
     create::DateTime
     Cell(x,y,z,t) = new(x, y, z, t)
     Cell(x,y,z) = new(x, y, z, now())
     Cell(x,y) = new(x, y, CellRef[], now())
-    Cell(x) = new(x, Polygon{T}[], CellRef[], now())
+    Cell(x) = new(x, CellPolygon{S,T}[], CellRef[], now())
     Cell() = begin
         c = new()
-        c.elements = Polygon{T}[]
+        c.elements = CellPolygon{S,T}[]
         c.refs = CellRef[]
         c.create = now()
         c
     end
 end
-Base.copy{T}(c::Cell{T}) = Cell{T}(c.name, copy(c.elements), copy(c.refs), c.create)
+Base.copy{S,T}(c::Cell{S,T}) = Cell{S,T}(c.name, copy(c.elements), copy(c.refs), c.create)
 
 # Do NOT define a convert method like this or otherwise cells will
 # be copied when referenced by CellRefs!
@@ -391,33 +420,20 @@ end
     Cell(name::AbstractString)
 Convenience constructor for `Cell{Float64}`.
 """
-Cell(name::AbstractString) = Cell{Float64}(name)
+Cell(name::AbstractString) = Cell{Float64, GDSMeta}(name)
 
 """
     Cell(name::AbstractString, unit::Unitful.LengthUnit)
 Convenience constructor for `Cell{typeof(1.0unit)}`.
 """
-Cell(name::AbstractString, unit::Unitful.LengthUnits) = Cell{typeof(1.0unit)}(name)
+Cell(name::AbstractString, unit::Unitful.LengthUnits) = Cell{typeof(1.0unit), GDSMeta}(name)
 
 """
-    Cell{T}(name::AbstractString, elements::AbstractVector{Polygon{T}})
-Convenience constructor for `Cell{T}`.
+    Cell{S,T}(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}})
+Convenience constructor for `Cell{S,T}`.
 """
-Cell{T}(name::AbstractString, elements::AbstractVector{Polygon{T}}) =
-    Cell{T}(name, elements)
-
-# """
-# ```
-# Cell{T<:AbstractPolygon}(name::AbstractString, elements::AbstractArray{T,1},
-#     refs::AbstractArray{CellReference,1})
-# ```
-#
-# Convenience constructor for `Cell{T}`.
-# """
-# Cell{T<:AbstractPolygon}(name::AbstractString,
-#     elements::AbstractArray{T,1},
-#     refs::AbstractArray{CellRef{T},1}) =
-#     Cell{T}(name, elements, refs)
+Cell{S,T}(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}}) =
+    Cell{S,T}(name, elements)
 
 # Don't print out everything in the cell, it is a mess that way.
 Base.show(io::IO, c::Cell) = print(io,
@@ -520,7 +536,7 @@ reflection, rotation, and magnification specified by `ref`.
 
 Please do rewrite this method when feeling motivated... it is very inefficient.
 """
-function bounds{S<:Coordinate, T<:Coordinate}(ref::CellArray{T, Cell{S}})
+function bounds{S<:Coordinate, T<:Coordinate, U<:Meta}(ref::CellArray{T, Cell{S,U}})
     b = bounds(ref.cell)::Rectangle{S}
     !isproper(b) && return b
 
@@ -569,12 +585,12 @@ function flatten!(c::Cell)
 end
 
 """
-    flatten{T<:Coordinate}(c::Cell{T}, name=uniquename("flatten"))
+    flatten(c::Cell, name=uniquename("flatten"))
 All cell references and arrays are resolved into polygons, recursively. A new `Cell` is
 returned containing these polygons, together with the polygons already explicitly in cell
 `c`. The cell `c` remains unmodified.
 """
-function flatten{T<:Coordinate}(c::Cell{T}, name=uniquename("flatten"))
+function flatten(c::Cell, name=uniquename("flatten"))
     polys = copy(c.elements)
     for r in c.refs
         append!(polys, flatten(r).elements)
@@ -733,9 +749,9 @@ function transform(c::Cell, d::CellRef, a)
     return false, a
 end
 
-for op in [:(Base.:+), :(Base.:-)]
-    @eval function ($op){T<:Coordinate}(r::Cell{T}, p::Point)
-        n = Cell{T}(r.name, similar(r.elements), similar(r.refs))
+for op in (:(Base.:+), :(Base.:-))
+    @eval function ($op){S<:Coordinate,T<:Meta}(r::Cell{S,T}, p::Point)
+        n = Cell{S,T}(r.name, similar(r.elements), similar(r.refs))
         for (ia, ib) in zip(eachindex(r.elements), eachindex(n.elements))
             @inbounds n.elements[ib] = ($op)(r.elements[ia], p)
         end

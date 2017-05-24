@@ -34,7 +34,6 @@ Lower-left and upper-right are guaranteed to be such by the inner constructor.
 type Rectangle{T} <: AbstractPolygon{T}
     ll::Point{T}
     ur::Point{T}
-    Rectangle(ll,ur) = Rectangle(ll,ur)
     function Rectangle(a,b)
         # Ensure ll is lower-left, ur is upper-right.
         ll = Point(a.<=b) .* a + Point(b.<=a) .* b
@@ -42,7 +41,7 @@ type Rectangle{T} <: AbstractPolygon{T}
         new(ll,ur)
     end
 end
-Rectangle{T}(ll::Point{T}, ur::Point{T}) = Rectangle{T}(ll,ur)
+Rectangle{T<:Coordinate}(ll::Point{T}, ur::Point{T}) = Rectangle{T}(ll,ur)
 
 """
     Rectangle(ll::Point, ur::Point)

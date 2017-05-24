@@ -107,6 +107,8 @@ immutable GDSMeta <: Meta
     GDSMeta(l) = new(l, DEFAULT_DATATYPE)
     GDSMeta(l,d) = new(l,d)
 end
+@inline layer(x::GDSMeta) = x.layer
+@inline datatype(x::GDSMeta) = x.datatype
 
 include("rectangles.jl")
 import .Rectangles: Rectangle, height, width, isproper
@@ -123,7 +125,7 @@ export Polygon
 export clip, offset, points
 
 include("cells.jl")
-import .Cells: Cell, CellArray, CellReference
+import .Cells: Cell, CellArray, CellReference, CellPolygon
 import .Cells: traverse!, order!, flatten, flatten!, transform, name, uniquename, layers
 export Cells
 export Cell, CellArray, CellReference
