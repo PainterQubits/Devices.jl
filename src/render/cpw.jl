@@ -1,4 +1,4 @@
-function render!(c::Cell, f, len, s::Paths.CPW; kwargs...)
+function render!(c::Cell, f, len, s::Paths.CPW, meta::Meta; kwargs...)
     bnds = (zero(len), len)
 
     g = (t,sgn1,sgn2)->begin
@@ -15,11 +15,11 @@ function render!(c::Cell, f, len, s::Paths.CPW; kwargs...)
     ppts = [g.(ppgrid,  1,  1); @view (g.(pmgrid,  1, -1))[end:-1:1]]
     mpts = [g.(mmgrid, -1, -1); @view (g.(mpgrid, -1,  1))[end:-1:1]]
 
-    render!(c, Polygon(ppts), s)
-    render!(c, Polygon(mpts), s)
+    render!(c, Polygon(ppts), Polygons.Plain(), meta)
+    render!(c, Polygon(mpts), Polygons.Plain(), meta)
 end
 
-function render!{T}(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleCPW)
+function render!{T}(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleCPW, meta::Meta)
     dir = direction(segment, zero(T))
     dp = dir+π/2
 
@@ -39,6 +39,6 @@ function render!{T}(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleCPW)
     a,b = segment(zero(T)),segment(pathlength(segment))
     origins = StaticArrays.@SVector [a,b,b,a]
 
-    render!(c, Polygon(origins .+ extents_p .* tangents), s)
-    render!(c, Polygon(origins .- extents_m .* tangents), s)
+    render!(c, Polygon(origins .+ extents_p .* tangents), Polygons.Plain(), meta)
+    render!(c, Polygon(origins .- extents_m .* tangents), Polygons.Plain(), meta)
 end

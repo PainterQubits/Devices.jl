@@ -1,4 +1,4 @@
-function render!(c::Cell, seg::Paths.Corner, ::Paths.SimpleTraceCorner; kwargs...)
+function render!(c::Cell, seg::Paths.Corner, ::Paths.SimpleTraceCorner, meta::Meta)
     sgn = ifelse(seg.α >= 0.0°, 1, -1)
     ∠A = seg.α0+sgn*π/2
     p = Point(cos(∠A),sin(∠A))
@@ -8,5 +8,5 @@ function render!(c::Cell, seg::Paths.Corner, ::Paths.SimpleTraceCorner; kwargs..
     p3 = p2 + ex*Point(cos(seg.α0),sin(seg.α0))
     p4 = p3 + ex*Point(cos(seg.α0+seg.α), sin(seg.α0+seg.α))
 
-    render!(c, Polygon([p1,p2,p3,p4]); kwargs...)
+    render!(c, Polygon([p1,p2,p3,p4]), Polygons.Plain(), meta)
 end

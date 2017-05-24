@@ -1,12 +1,13 @@
 """
-```
-render!(c::Cell, p::Path; kwargs...)
-```
-
+    render!(c::Cell, p::Path; kwargs...)
 Render a path `p` to a cell `c`.
 """
-function render!{T}(c::Cell, p::Path{T}; kwargs...)
+function render!{T}(c::Cell, p::Path{T}; layer = DEFAULT_LAYER, datatype = DEFAULT_DATATYPE,
+        kwargs...)
+    render!(c, p, GDSMeta(layer, datatype); kwargs...)
+end
 
+function render!{T}(c::Cell, p::Path{T}, meta::Meta; kwargs...)
     inds = find(map(x->isa(x, Paths.Corner), segment.(nodes(p))))
     segs = []
 
@@ -26,7 +27,7 @@ function render!{T}(c::Cell, p::Path{T}; kwargs...)
     adjust!(p)
 
     for node in p
-        render!(c, segment(node), style(node); kwargs...)
+        render!(c, segment(node), style(node), meta; kwargs...)
     end
 
     # Restore corner positions

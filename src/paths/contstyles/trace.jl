@@ -1,42 +1,38 @@
-@compat abstract type Trace{T} <: ContinuousStyle{T} end
+@compat abstract type Trace <: ContinuousStyle end
 
 """
-    immutable GeneralTrace{S,T} <: Trace{T}
-        width::S
-        meta::T
+    immutable GeneralTrace{T} <: Trace
+        width::T
     end
 A single trace with variable width as a function of path length. `width` is callable.
 """
-immutable GeneralTrace{S,T} <: Trace{T}
-    width::S
-    meta::T
+immutable GeneralTrace{T} <: Trace
+    width::T
 end
-GeneralTrace(width, meta::Meta=GDSMeta()) = GeneralTrace(width, meta)
-copy(x::GeneralTrace) = GeneralTrace(x.width, x.meta)
+GeneralTrace(width) = GeneralTrace(width)
+copy(x::GeneralTrace) = GeneralTrace(x.width)
 @inline extent(s::GeneralTrace, t) = s.width(t)/2
 @inline width(s::GeneralTrace, t) = s.width(t)
 
 """
-    immutable SimpleTrace{S<:Coordinate,T} <: Trace{T}
-        width::S
-        meta::T
+    immutable SimpleTrace{T<:Coordinate} <: Trace
+        width::T
     end
 A single trace with fixed width as a function of path length.
 """
-immutable SimpleTrace{S<:Coordinate,T} <: Trace{T}
-    width::S
-    meta::T
+immutable SimpleTrace{T<:Coordinate} <: Trace
+    width::T
 end
-SimpleTrace(width, meta::Meta=GDSMeta()) = SimpleTrace(width, meta)
+SimpleTrace(width) = SimpleTrace(width)
 copy(x::SimpleTrace) = Trace(x.width)
 @inline extent(s::SimpleTrace, t...) = s.width/2
 @inline width(s::SimpleTrace, t...) = s.width
 
 """
-    Trace(width, meta::Meta=GDSMeta())
-    Trace(width::Coordinate, meta::Meta=GDSMeta())
+    Trace(width)
+    Trace(width::Coordinate)
 Constructor for Trace styles. Automatically chooses `SimpleTrace` or `GeneralTrace` as
 appropriate.
 """
-Trace(width, meta::Meta=GDSMeta()) = GeneralTrace(width, meta)
-Trace(width::Coordinate, meta::Meta=GDSMeta()) = SimpleTrace(float(width), meta)
+Trace(width) = GeneralTrace(width)
+Trace(width::Coordinate) = SimpleTrace(float(width))

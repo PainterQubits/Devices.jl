@@ -114,10 +114,10 @@ or getting the base dose for PEC.
   - `alt`: the square nearest `Point(zero(T), zero(T))` is filled (unfilled) if `false`
     (`true`). Use this to create a full tiling of the checkerboard, if you wish.
 """
-function checkerboard!{T}(c::Cell{T}, pixsize, rows::Integer, alt; kwargs...)
-    r = Rectangle(pixsize, pixsize; kwargs...)
-    rcell = Cell{T}(uniquename("checkerboard"))
-    render!(rcell, r, Rectangles.Plain())
+function checkerboard!{T,S}(c::Cell{T,S}, pixsize, rows::Integer, alt; kwargs...)
+    r = Rectangle(pixsize, pixsize)
+    rcell = Cell{T,S}(uniquename("checkerboard"))
+    render!(rcell, r, Rectangles.Plain(); kwargs...)
 
     r1 = Int(ceil(rows/2))
     r2 = Int(floor(rows/2))
@@ -140,10 +140,10 @@ end
     grating!{T}(c::Cell{T}, line, space, size; kwargs...)
 Generate a square grating suitable e.g. for obtaining the base dose for PEC.
 """
-function grating!{T}(c::Cell{T}, line, space, size; kwargs...)
-    r = Rectangle(line, size; kwargs...)
-    rcell = Cell{T}(uniquename("grating"))
-    render!(rcell, r, Rectangles.Plain())
+function grating!{T,S}(c::Cell{T,S}, line, space, size; kwargs...)
+    r = Rectangle(line, size)
+    rcell = Cell{T,S}(uniquename("grating"))
+    render!(rcell, r, Rectangles.Plain(); kwargs...)
 
     a = CellArray(rcell, Point(zero(T), zero(T)); dc=Point(line+space, zero(T)),
         dr=Point(zero(T), zero(T)), nc=Int(floor(NoUnits(size/(line+space)))), nr=1)
@@ -163,15 +163,15 @@ Creates interdigitated fingers, e.g. for a lumped element capacitor.
   - `npairs`: number of fingers
   - `skiplast`: should we skip the last finger, leaving an odd number?
 """
-function interdigit!{T}(c::Cell{T}, width, length, fingergap, fingeroffset, npairs::Integer,
-        skiplast=true; kwargs...)
+function interdigit!{T,S}(c::Cell{T,S}, width, length, fingergap, fingeroffset,
+        npairs::Integer, skiplast=true; kwargs...)
     for i in 1:npairs
         render!(c, Rectangle(Point(zero(T), (i-1) * 2 * (width + fingergap)),
-            Point(length, (i-1) * 2 * (width + fingergap) + width); kwargs...))
+            Point(length, (i-1) * 2 * (width + fingergap) + width)); kwargs...)
     end
     for i in 1:(npairs-skiplast)
         render!(c, Rectangle(Point(fingeroffset, (2i-1) * (width + fingergap)),
-            Point(fingeroffset + length, width + (2i-1) * (width + fingergap)); kwargs...))
+            Point(fingeroffset + length, width + (2i-1) * (width + fingergap))); kwargs...)
     end
     c
 end

@@ -78,26 +78,26 @@ of paths rendered.
 function width end
 
 """
-    abstract type Style{T<:Meta} end
+    abstract type Style end
 How to render a given path segment. All styles should implement the following
 methods:
 
  - `extent`
  - `width`
 """
-@compat abstract type Style{T<:Meta} end
+@compat abstract type Style end
 
 """
-    abstract type ContinuousStyle{T} <: Style{T} end
+    abstract type ContinuousStyle <: Style end
 Any style that applies to segments which have non-zero path length.
 """
-@compat abstract type ContinuousStyle{T} <: Style{T} end
+@compat abstract type ContinuousStyle <: Style end
 
 """
-    abstract type DiscreteStyle{T} <: Style{T} end
+    abstract type DiscreteStyle <: Style end
 Any style that applies to segments which have zero path length.
 """
-@compat abstract type DiscreteStyle{T} <: Style{T} end
+@compat abstract type DiscreteStyle <: Style end
 
 """
     abstract type Segment{T<:Coordinate} end

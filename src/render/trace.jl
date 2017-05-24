@@ -1,4 +1,4 @@
-function render!(c::Cell, f, len, s::Paths.Trace; kwargs...)
+function render!(c::Cell, f, len, s::Paths.Trace, meta::Meta; kwargs...)
     bnds = (zero(len), len)
 
     g = (t,sgn)->begin
@@ -11,10 +11,10 @@ function render!(c::Cell, f, len, s::Paths.Trace; kwargs...)
 
     pts = [g.(pgrid, 1); @view (g.(mgrid, -1))[end:-1:1]]
 
-    render!(c, Polygon(pts), s)
+    render!(c, Polygon(pts), Polygons.Plain(), meta)
 end
 
-function render!{T}(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleTrace)
+function render!{T}(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleTrace, meta::Meta)
     dir = direction(segment, zero(T))
     dp, dm = dir+π/2, dir-π/2
 
@@ -28,5 +28,5 @@ function render!{T}(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleTrace)
     a,b = segment(zero(T)), segment(pathlength(segment))
     origins = StaticArrays.@SVector [a,b,b,a]
 
-    render!(c, Polygon(origins .+ tangents), s)
+    render!(c, Polygon(origins .+ tangents), Polygons.Plain(), meta)
 end

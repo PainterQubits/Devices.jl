@@ -1,18 +1,18 @@
 immutable NoRender <: Style end
-immutable NoRenderDiscrete{T} <: DiscreteStyle{T} end
-immutable NoRenderContinuous{T} <: ContinuousStyle{T} end
+immutable NoRenderDiscrete <: DiscreteStyle end
+immutable NoRenderContinuous <: ContinuousStyle end
 
 """
-    immutable SimpleNoRender{S,T} <: ContinuousStyle{T}
-        width::S
+    immutable SimpleNoRender{T} <: ContinuousStyle
+        width::T
     end
 A style that inhibits path rendering, but pretends to have a finite width for
 [`Paths.attach!`](@ref).
 """
-immutable SimpleNoRender{S,T} <: ContinuousStyle{T}
-    width::S
+immutable SimpleNoRender{T} <: ContinuousStyle
+    width::T
 end
-SimpleNoRender{S<:Coordinate}(x::S) = SimpleNoRender{S,GDSMeta}(x)
+SimpleNoRender{T<:Coordinate}(x::T) = SimpleNoRender{T}(x)
 
 copy(x::NoRender) = NoRender()
 copy{T<:NoRenderDiscrete}(x::T) = T()
@@ -25,7 +25,6 @@ copy(x::SimpleNoRender) = SimpleNoRender(x.width)
 
 # The idea here is that the user should be able to specify NoRender() for either continuous
 # or discrete styles, or NoRender(width) for SimpleNoRender.
-convert{T}(::Type{DiscreteStyle{T}}, x::NoRender) = NoRenderDiscrete{T}()
-convert{T}(::Type{ContinuousStyle{T}}, x::NoRender) = NoRenderContinuous{T}()
-convert{T,U}(::Type{ContinuousStyle{T}}, x::SimpleNoRender{U}) = SimpleNoRender{U,T}(x.width)
+convert(::Type{DiscreteStyle}, x::NoRender) = NoRenderDiscrete()
+convert(::Type{ContinuousStyle}, x::NoRender) = NoRenderContinuous()
 NoRender(width::Coordinate) = SimpleNoRender(float(width))

@@ -527,11 +527,11 @@ end
     end
 
     @testset "Decorations" begin
-        csub = Cell{typeof(1.0nm)}("sub")
+        csub = Cell("sub", nm)
         render!(csub, centered!(Rectangle(10nm,10nm)))
         cref = CellReference(csub, Point(0.0μm, 0.0μm))
 
-        c = Cell{typeof(1.0nm)}("main")
+        c = Cell("main", nm)
         pa = Path(μm, style0=Paths.NoRender())
         straight!(pa, 20.0μm)
         turn!(pa, π/2, 20.0μm)
@@ -567,7 +567,7 @@ end
         ]
 
         cref = CellReference(csub, Point(0.0μm, 10.0μm))
-        c = Cell{typeof(1.0nm)}("main")
+        c = Cell("main", nm)
         setstyle!(pa[1], Paths.Trace(1μm))
         attach!(pa, cref, linspace(0μm, pathlength(pa), 3), location=-1)
         render!(c, pa)
@@ -610,7 +610,7 @@ end
             p(19.666907860084994,    3.6691600159882842),
             p(0.10395584540887973,  -0.4890738003669028)]
 
-        c = Cell{typeof(1.0pm)}("main")
+        c = Cell("main", pm)
         pa = Path(μm, α0=12°)
         straight!(pa, 20000nm)
         render!(c,pa)
@@ -638,7 +638,7 @@ end
             p(20.5,  0.5)
         ]
 
-        c = Cell{typeof(1.0μm)}("main")
+        c = Cell("main", μm)
         pa = Path(μm)
         straight!(pa, 20.0μm)
         corner!(pa, π/2)
@@ -679,7 +679,7 @@ end
             p(1.1435142994976764, -5.379811804035931)
         ]
 
-        c = Cell{typeof(1.0pm)}("main")
+        c = Cell("main", pm)
         pa = Path(μm, α0=12°, style0=Paths.CPW(5.0μm, 3000nm))
         straight!(pa, 20000nm)
         render!(c,pa)
@@ -707,7 +707,7 @@ end
         turn!(pa, π/2, 5.0)
         render!(c, pa)
 
-        c = Cell{typeof(1.0nm)}("main")
+        c = Cell("main", nm)
         pa = Path(μm)
         turn!(pa, π/2, 20.0μm)
         render!(c, pa)
@@ -748,7 +748,7 @@ end
             p(6.79678973526781e-15,  -11.0)
         ]
 
-        c = Cell{typeof(1.0nm)}("main")
+        c = Cell("main", nm)
         pa = Path(μm)
         turn!(pa, π/2, 50.0μm, Paths.CPW(10.0μm, 6.0μm))
         render!(c, pa, grid_step=500.0μm, max_change=90°)

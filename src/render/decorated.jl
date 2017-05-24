@@ -1,6 +1,6 @@
 """
 ```
-render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)
+render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle, meta::Meta; kwargs...)
 ```
 
 Render a `segment` with decorated style `s` to cell `c`.
@@ -10,7 +10,7 @@ by this method, which is why they are shallow copied in the
 
 This method draws the decorations before the path itself is drawn.
 """
-function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwargs...)
+function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle, meta::Meta; kwargs...)
     for (t, dir, cref) in zip(s.ts, s.dirs, s.refs)
         (dir < -1 || dir > 1) && error("Invalid direction in $s.")
 
@@ -37,5 +37,5 @@ function render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle; kwarg
         end
         push!(c.refs, ref)
     end
-    render!(c, segment, undecorated(s); kwargs...)
+    render!(c, segment, undecorated(s), meta; kwargs...)
 end
