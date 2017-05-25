@@ -16,6 +16,7 @@ import Base: length, show, eltype
 import Unitful: Length
 Unitful.@derived_dimension InverseLength inv(Unitful.𝐋)
 
+export GDSMeta
 export render!
 
 # Used if a polygon does not specify a layer or datatype.
@@ -109,27 +110,27 @@ immutable GDSMeta <: Meta
 end
 @inline layer(x::GDSMeta) = x.layer
 @inline datatype(x::GDSMeta) = x.datatype
+if VERSION < v"0.6.0-pre"
+    Base.size(::GDSMeta) = ()
+end
 
 include("rectangles.jl")
 import .Rectangles: Rectangle, height, width, isproper
-export Rectangles
-export Rectangle
-export height
-export width
-export isproper
+export Rectangles, Rectangle
+export height, isproper, width
 
 include("polygons.jl")
 import .Polygons: Polygon, clip, offset, points
-export Polygons
-export Polygon
+export Polygons, Polygon
 export clip, offset, points
 
 include("cells.jl")
-import .Cells: Cell, CellArray, CellReference, CellPolygon
-import .Cells: traverse!, order!, flatten, flatten!, transform, name, uniquename, layers
-export Cells
-export Cell, CellArray, CellReference
-export traverse!, order!, flatten, flatten!, transform, name, uniquename, layers
+import .Cells: Cell, CellArray, CellPolygon, CellReference
+import .Cells: elements, flatten, flatten!, layers, meta, name, order!, polygon, transform
+import .Cells: traverse!, uniquename
+export Cells, Cell, CellArray, CellPolygon, CellReference
+export elements, flatten, flatten!, layers, meta, name, order!, polygon, transform
+export traverse!, uniquename
 
 include("utils.jl")
 include("paths/paths.jl")

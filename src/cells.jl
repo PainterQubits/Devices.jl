@@ -17,7 +17,7 @@ using ..Polygons
 import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
 import Devices: bounds, center, lowerleft, upperright, points, layer, datatype
 export Cell, CellArray, CellReference, CellPolygon
-export traverse!, order!, flatten, flatten!, transform, name, dbscale, layers
+export dbscale, flatten, flatten!, layers, meta, name, order!, polygon, transform, traverse!
 export uniquename
 
 @inline unsafe_floor(x::Unitful.Quantity) = floor(Unitful.ustrip(x))*Unitful.unit(x)
@@ -60,6 +60,8 @@ Base.isapprox(c1::CellPolygon, c2::CellPolygon) =
 for T in (:LinearMap, :AffineMap, :Translation)
     @eval (f::$T)(x::CellPolygon) = CellPolygon(f(x.polygon), x.meta)
 end
+@inline polygon(x::CellPolygon) = x.polygon
+@inline meta(x::CellPolygon) = x.meta
 
 """
     uniquename(str)
@@ -570,6 +572,13 @@ function bounds(ref::CellReference)
     c = a(b)
     bounds(c)
 end
+
+"""
+    elements(c::Cell)
+Returns the `CellPolygon` objects in the cell, which are `Polygon`s with metadata such as
+layer, datatype, etc.
+"""
+elements(c::Cell) = c.elements
 
 """
     flatten!(c::Cell)
