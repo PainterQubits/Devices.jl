@@ -5,7 +5,7 @@ using Unitful
 import Unitful: Length, fm, pm, nm, μm, m
 
 import Base: bswap, bits, convert, write, read
-import Devices: DEFAULT_LAYER, DEFAULT_DATATYPE, layer, datatype
+import Devices: DEFAULT_LAYER, DEFAULT_DATATYPE, layer, datatype, points
 using ..Points
 import ..Rectangles: Rectangle
 import ..Polygons: Polygon
@@ -267,22 +267,22 @@ end
 p2p{T<:Length}(x::T, dbs) = Int(round(Float64(x/dbs)))
 
 """
-    gdswrite{T<:Real}(io::IO, el::Polygon{T}, dbs)
-    gdswrite{T<:Length}(io::IO, poly::Polygon{T}, dbs)
+    gdswrite{T<:Real}(io::IO, el::CellPolygon{T}, dbs)
+    gdswrite{T<:Length}(io::IO, poly::CellPolygon{T}, dbs)
 Write a polygon to an IO buffer. The layer and datatype are written first,
 then the boundary of the polygon is written in a 32-bit integer format with
 specified database scale.
 
 Note that polygons without units are presumed to be in microns.
 """
-function gdswrite{T<:Length}(io::IO, poly::Polygon{T}, dbs)
+function gdswrite{T<:Length}(io::IO, poly::CellPolygon{T}, dbs)
     bytes = gdswrite(io, BOUNDARY)
     lyr = layer(poly)
     dt = datatype(poly)
     bytes += gdswrite(io, LAYER, lyr)
     bytes += gdswrite(io, DATATYPE, dt)
 
-    xy = reinterpret(T, poly.p)          # Go from Point to sequential numbers
+    xy = reinterpret(T, points(poly))          # Go from Point to sequential numbers
     xyf = map(x->p2p(x,dbs), xy)         # Divide by the scale and such
     xyInt = convert(Array{Int32,1}, xyf) # Convert to Int32
     # TODO: check if polygon is closed already
@@ -290,7 +290,7 @@ function gdswrite{T<:Length}(io::IO, poly::Polygon{T}, dbs)
     bytes += gdswrite(io, XY, xyInt)
     bytes += gdswrite(io, ENDEL)
 end
-gdswrite{T<:Real}(io::IO, el::Polygon{T}, dbs) = gdswrite(io, el*(1μm), dbs)
+gdswrite{T<:Real}(io::IO, el::CellPolygon{T}, dbs) = gdswrite(io, el*(1μm), dbs)
 
 """
     gdswrite{T<:Real}(io::IO, ref::CellReference{T}, dbs)

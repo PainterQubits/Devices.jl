@@ -503,7 +503,7 @@ function adjust!(p::Path, n::Integer=1)
         end
     end
 
-    function updateα0p0!{T}(n::Node{T}; α0=0.0°, p0=Point(zero(T),zero(T)))
+    function updateα0p0!{T}(n::Node{T}, α0, p0)
         if previous(n) == n # first node
             setα0p0!(segment(n), α0, p0)
         else
@@ -513,10 +513,10 @@ function adjust!(p::Path, n::Integer=1)
         end
     end
 
-    for j in 1:length(p)
+    for j in n:length(p)
         updatell!(p,j)
         updatefields!(p[j])
-        updateα0p0!(p[j]; α0=p.α0, p0=p.p0)
+        updateα0p0!(p[j], p.α0, p.p0)
     end
 end
 

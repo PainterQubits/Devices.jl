@@ -62,6 +62,8 @@ for T in (:LinearMap, :AffineMap, :Translation)
 end
 @inline polygon(x::CellPolygon) = x.polygon
 @inline meta(x::CellPolygon) = x.meta
+@inline layer(x::CellPolygon) = layer(x.meta)
+@inline datatype(x::CellPolygon) = datatype(x.meta)
 
 """
     uniquename(str)
@@ -445,8 +447,7 @@ Base.show(io::IO, c::Cell) = print(io,
     copy(x::CellReference)
 Creates a shallow copy of `x` (does not copy the referenced cell).
 """
-Base.copy(x::CellReference) = CellReference(x.cell, x.origin,
-    xrefl=x.xrefl, mag=x.mag, rot=x.rot)
+Base.copy(x::CellReference) = CellReference(x.cell, x.origin, x.xrefl, x.mag, x.rot)
 
 """
     copy(x::CellArray)

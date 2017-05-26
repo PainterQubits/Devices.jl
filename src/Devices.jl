@@ -17,7 +17,7 @@ import Unitful: Length
 Unitful.@derived_dimension InverseLength inv(Unitful.𝐋)
 
 export GDSMeta
-export render!
+export datatype, layer, render!
 
 # Used if a polygon does not specify a layer or datatype.
 const DEFAULT_LAYER = 0

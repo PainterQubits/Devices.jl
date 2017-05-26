@@ -8,7 +8,7 @@ function render!{T}(c::Cell, p::Path{T}; layer = DEFAULT_LAYER, datatype = DEFAU
 end
 
 function render!{T}(c::Cell, p::Path{T}, meta::Meta; kwargs...)
-    inds = find(map(x->isa(x, Paths.Corner), segment.(nodes(p))))
+    inds = find(x->isa(segment(x), Paths.Corner), nodes(p))
     segs = []
 
     # Adjust the path so corners, when rendered with finite extent,
@@ -23,8 +23,7 @@ function render!{T}(c::Cell, p::Path{T}, meta::Meta; kwargs...)
         cornertweaks!(cornernode, prevseg, previous)
         cornertweaks!(cornernode, nextseg, next)
     end
-
-    adjust!(p)
+    !isempty(inds) && adjust!(p)
 
     for node in p
         render!(c, segment(node), style(node), meta; kwargs...)
@@ -35,7 +34,7 @@ function render!{T}(c::Cell, p::Path{T}, meta::Meta; kwargs...)
         setsegment!(next(p[i]), pop!(segs))
         setsegment!(previous(p[i]), pop!(segs))
     end
-    adjust!(p)
+    !isempty(inds) && adjust!(p)
 
     return c
 end

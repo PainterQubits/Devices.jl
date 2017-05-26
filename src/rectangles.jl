@@ -5,7 +5,7 @@ using ..Points
 import Base: +, -, *, /, copy, ==, convert, isapprox
 import Devices
 import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
-import Devices: bounds, center, centered, centered!, lowerleft, upperright
+import Devices: bounds, center, centered, lowerleft, upperright
 import Unitful: ustrip
 
 export Rectangle
@@ -15,10 +15,9 @@ export isproper
 
 """
 ```
-type Rectangle{T} <: AbstractPolygon{T}
+immutable Rectangle{T} <: AbstractPolygon{T}
     ll::Point{T}
     ur::Point{T}
-    Rectangle(ll,ur) = Rectangle(ll,ur)
     function Rectangle(a,b)
         # Ensure ll is lower-left, ur is upper-right.
         ll = Point(a.<=b) .* a + Point(b.<=a) .* b
@@ -31,7 +30,7 @@ end
 A rectangle, defined by opposing lower-left and upper-right corner coordinates.
 Lower-left and upper-right are guaranteed to be such by the inner constructor.
 """
-type Rectangle{T} <: AbstractPolygon{T}
+immutable Rectangle{T} <: AbstractPolygon{T}
     ll::Point{T}
     ur::Point{T}
     function Rectangle(a,b)
@@ -101,18 +100,6 @@ bounds(r::Rectangle) = r
 Returns a [`Point`](@ref) corresponding to the center of the rectangle.
 """
 center(r::Rectangle) = (r.ur + r.ll) / 2
-
-"""
-    centered!(r::Rectangle)
-Centers a rectangle. Will throw an `InexactError()` if
-the rectangle cannot be centered with integer coordinates.
-"""
-function centered!(r::Rectangle)
-    c = center(r)
-    r.ll -= c
-    r.ur -= c
-    r
-end
 
 """
     centered(r::Rectangle)
@@ -208,6 +195,8 @@ immutable Undercut{S<:Coordinate,T} <: Style{T}
 end
 Undercut{T<:Meta}(ucl, uct, ucr, ucb, meta::T=GDSMeta(), undercut_meta::T=GDSMeta()) =
     Undercut(promote(ucl, uct, ucr, ucb)..., meta, undercut_meta)
+Undercut{S<:Coordinate,T<:Meta}(a::S, b::S, c::S, d::S, e::T, f::T) =
+    Undercut{S,T}(a,b,c,d,e,f)
 
 ustrip(r::Rectangle) = Rectangle(ustrip(r.ll), ustrip(r.ur))
 

@@ -1,6 +1,8 @@
 - v0.2.0
   - Redesign rendering pipeline. GDS-II layer and datatype are captured by a `GDSMeta`
     object which is retained by the various rendering styles.
+  - Rectangles are now `immutable`, so `centered!` has been removed.
+  - Polygons are now `immutable`.
   - Bug fix: `Cell(::AbstractString, ::Unitful.LengthUnits)` method was broken.
   - Bug fix: `meander!` works again, method signature changed a bit.
   - Bug fix: in `CompoundSegment` (such as obtained using `simplify!`), there was a bug with

@@ -30,11 +30,11 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded, meta::Meta)
     c
 end
 
-function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut, meta::Meta)
-    push!(c.elements, CellPolygon(r, meta))
+function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut)
+    push!(c.elements, CellPolygon(r, s.meta))
 
     ucr = Rectangle(r.ll - Point(s.ucl, s.ucb), r.ur + Point(s.ucr, s.uct))
     ucp = clip(Clipper.ClipTypeDifference, ucr, r)[1]
-    push!(c.elements, CellPolygon(ucp, meta))
+    push!(c.elements, CellPolygon(ucp, s.undercut_meta))
     c
 end

@@ -33,8 +33,8 @@ const PCSCALE = float(2^31)
 
 """
 ```
-type Polygon{T} <: AbstractPolygon{T}
-    p::Array{Point{T},1}
+immutable Polygon{T} <: AbstractPolygon{T}
+    p::Vector{Point{T}}
     Polygon(x) = new(x)
     Polygon(x::AbstractPolygon) = convert(Polygon{T}, x)
 end
@@ -43,8 +43,8 @@ end
 Polygon defined by list of coordinates. The first point should not be repeated
 at the end (although this is true for the GDS format).
 """
-type Polygon{T} <: AbstractPolygon{T}
-    p::Array{Point{T},1}
+immutable Polygon{T} <: AbstractPolygon{T}
+    p::Vector{Point{T}}
     Polygon(x) = new(x)
     Polygon(x::AbstractPolygon) = convert(Polygon{T}, x)
 end
@@ -67,8 +67,6 @@ Polygon(parr::AbstractVector{Point}) =
 ==(p1::Polygon, p2::Polygon) = (p1.p == p2.p)
 isapprox(p1::Polygon, p2::Polygon) = isapprox(p1.p, p2.p)
 copy(p::Polygon) = Polygon(copy(p.p))
-# layer(p::Polygon) = haskey(p.properties, :layer) ? p.properties[:layer] : Devices.DEFAULT_LAYER
-# datatype(p::Polygon) = haskey(p.properties, :datatype) ? p.properties[:datatype] : Devices.DEFAULT_DATATYPE
 
 """
     points(x::Polygon)
