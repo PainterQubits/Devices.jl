@@ -19,13 +19,17 @@ Unitful.@derived_dimension InverseLength inv(Unitful.𝐋)
 export GDSMeta
 export datatype, layer, render!
 
-# Used if a polygon does not specify a layer or datatype.
 const DEFAULT_LAYER = 0
 const DEFAULT_DATATYPE = 0
 
+# For help with precompiling
+global _clip = Ref(Clipper.Clip())
+global _coffset = Ref(Clipper.ClipperOffset())
+
 function __init__()
-    global const _clip = Clipper.Clip()
-    global const _coffset = Clipper.ClipperOffset()
+    # To ensure no crashes
+    global _clip = Ref(Clipper.Clip())
+    global _coffset = Ref(Clipper.ClipperOffset())
 
     # The magic bytes are the GDS HEADER tag (0x0002), preceded by the number of
     # bytes in total (6 == 0x0006) for the HEADER record.
@@ -41,8 +45,7 @@ function bounds end
 export center
 function center end
 
-export centered!, centered
-function centered! end
+export centered
 function centered end
 
 export lowerleft, upperright
@@ -96,9 +99,6 @@ if VERSION < v"0.6.0-pre"
         end
     end
 end
-#
-# function layer end
-# function datatype end
 
 @compat abstract type Meta end
 immutable GDSMeta <: Meta
@@ -139,10 +139,8 @@ export Paths, Path, Segment, Style
 export α0, α1,
     adjust!,
     attach!,
-    contstyle1,
     corner!,
     direction,
-    discretestyle1,
     meander!,
     launch!,
     p0, p1,
@@ -162,10 +160,14 @@ export α0, α1,
 
 include("render/render.jl")
 
-include("tags.jl")
-import .Tags: checkerboard!, grating!, interdigit!, radialcut!, radialstub!
-export Tags
-export checkerboard!, grating!, interdigit!, radialcut!, radialstub!
+include("microwave.jl")
+import .Microwave: bandaid_hatching!, bridge!, checkerboard!, device_template!, flux_bias!,
+    grating!,
+    interdigit!, jj!, jj_top_pad!, layerpixels!, qubit!, qubit_claw!, radialcut!, radialstub!
+export Microwave
+export bandaid_hatching!, bridge!, checkerboard!, device_template!, flux_bias!, grating!,
+    interdigit!,
+    jj!, jj_top_pad!, layerpixels!, qubit!, qubit_claw!, radialcut!, radialstub!
 
 include("backends/gds.jl")
 include("backends/svg.jl")

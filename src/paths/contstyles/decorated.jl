@@ -55,22 +55,17 @@ together with `location == -1` will put the cell at 10 above the edge of a
 rendered (finite width) path with angle 0°.
 """
 function attach!(p::Path, c::CellReference, t::Coordinate;
-        i::Integer=length(p), location::Integer=0)
-    if i==0
-        sty0 = style0(p)
-        sty = decorate(sty0, eltype(p), t, location, c)
-        p.style0 = sty
-    else
-        node = p[i]
-        seg0,sty0 = segment(node), style(node)
-        sty = decorate(sty0, eltype(p), t, location, c)
-        p[i] = Node(seg0, sty)
-    end
+        i::Int=length(p), location::Int=0)
+    i==0 && error("cannot attach to an empty path.")
+    node = p[i]
+    seg0,sty0 = segment(node), style(node)
+    sty = decorate(sty0, eltype(p), t, location, c)
+    p[i] = Node(seg0, sty)
     sty
 end
 
 function attach!(p::Path, c::CellReference, t;
-        i::Integer=length(p), location=zeros(Int, length(t)))
+        i::Int=length(p), location=zeros(Int, length(t)))
     for (ti, li) in zip(t, cycle(location))
         attach!(p, c, ti; i=i, location=li)
     end

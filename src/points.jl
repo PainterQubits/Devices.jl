@@ -16,13 +16,10 @@ export Rotation, Translation, XReflection, YReflection, ∘, compose
 export getx, gety
 
 """
-```
-immutable Point{T} <: StaticArrays.FieldVector{T}
-    x::T
-    y::T
-end
-```
-
+    immutable Point{T} <: StaticArrays.FieldVector{T}
+        x::T
+        y::T
+    end
 2D Cartesian coordinate in the plane.
 """
 immutable Point{T<:PointTypes} <: StaticArrays.FieldVector{T}
@@ -54,19 +51,13 @@ function reinterpret{T,S}(::Type{T}, a::Point{S})
 end
 
 """
-```
-getx(p::Point)
-```
-
+    getx(p::Point)
 Get the x-coordinate of a point. You can also use `p.x` or `p[1]`.
 """
 @inline getx(p::Point) = p.x
 
 """
-```
-gety(p::Point)
-```
-
+    gety(p::Point)
 Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 """
 @inline gety(p::Point) = p.y
@@ -152,19 +143,13 @@ end
 # Still need 2D rotation, reflections.
 
 """
-```
-Rotation(Θ)
-```
-
+    Rotation(Θ)
 Construct a rotation about the origin. Units accepted (no units ⇒ radians).
 """
 Rotation(Θ) = LinearMap(@SMatrix [cos(Θ) -sin(Θ); sin(Θ) cos(Θ)])
 
 """
-```
-XReflection()
-```
-
+    XReflection()
 Construct a reflection about the x-axis (y-coordinate changes sign).
 
 Example:
@@ -181,10 +166,7 @@ julia> trans(Point(1,1))
 XReflection() = LinearMap(@SMatrix [1 0;0 -1])
 
 """
-```
-YReflection()
-```
-
+    YReflection()
 Construct a reflection about the y-axis (x-coordinate changes sign).
 
 Example:

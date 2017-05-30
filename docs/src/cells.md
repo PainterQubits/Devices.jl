@@ -43,7 +43,6 @@ cannot be changed for cells without units.
 
 ```@docs
     Cell(::AbstractString)
-    Cell{T<:Real}(::AbstractString, ::AbstractArray{Devices.AbstractPolygon{T},1})
     bounds{T<:Devices.Coordinate}(::Cell{T})
     center(::Cell)
     name(::Cell)

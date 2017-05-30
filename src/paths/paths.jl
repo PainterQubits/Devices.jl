@@ -284,8 +284,7 @@ end
 """
     type Path{T<:Coordinate} <: AbstractVector{Node{T}}
         p0::Point{T}
-        α0::typeof(0.0°)
-        style0::ContinuousStyle
+        α0::Float64
         nodes::Array{Node{T},1}
     end
 Type for abstracting an arbitrary styled path in the plane. Iterating returns
@@ -293,12 +292,11 @@ Type for abstracting an arbitrary styled path in the plane. Iterating returns
 """
 type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
-    α0::typeof(0.0°)
-    style0::ContinuousStyle
+    α0::Float64
     nodes::Array{Node{T},1}
 
-    Path() = new(Point(zero(T),zero(T)), 0.0°, Trace(T(1)), Node{T}[])
-    Path(a,b,c,d) = new(a,b,c,d)
+    Path() = new(Point(zero(T),zero(T)), 0.0, Node{T}[])
+    Path(a,b,c) = new(a,b,c)
 end
 @inline Base.eltype{T}(::Path{T}) = T
 @inline Base.eltype{T}(::Type{Path{T}}) = T
@@ -319,32 +317,32 @@ end
 
 """
 ```
-Path(p0::Point=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0))
+Path(p0::Point=Point(0.0,0.0); α0=0.0)
 Path(p0x::Real, p0y::Real; kwargs...)
 
-Path{T<:Length}(p0::Point{T}; α0=0.0, style0::Style=Trace(1.0*unit(T)))
+Path{T<:Length}(p0::Point{T}; α0=0.0)
 Path{T<:Length}(p0x::T, p0y::T; kwargs...)
 Path(p0x::Length, p0y::Length; kwargs...)
 
-Path(u::LengthUnits; α0=0.0, style0::Style=Trace(1.0u))
+Path(u::LengthUnits; α0=0.0)
 ```
 
 Convenience constructors for `Path{T}` object.
 """
-function Path(p0::Point=Point(0.0,0.0); α0=0.0, style0::Style=Trace(1.0))
-    Path{Float64}(p0, α0, style0, Node{Float64}[])
+function Path(p0::Point=Point(0.0,0.0); α0=0.0)
+    Path{Float64}(p0, α0, Node{Float64}[])
 end
 Path(p0x::Real, p0y::Real; kwargs...) = Path(Point{Float64}(p0x,p0y); kwargs...)
 
-function Path{T<:Length}(p0::Point{T}; α0=0.0, style0::Style=Trace(1.0*unit(T)))
-    Path{typeof(0.0*unit(T))}(p0, α0, style0, Node{typeof(0.0*unit(T))}[])
+function Path{T<:Length}(p0::Point{T}; α0=0.0)
+    Path{typeof(0.0*unit(T))}(p0, α0, Node{typeof(0.0*unit(T))}[])
 end
 Path{T<:Length}(p0x::T, p0y::T; kwargs...) =
     Path(Point{typeof(0.0*unit(T))}(p0x,p0y); kwargs...)
 Path(p0x::Length, p0y::Length; kwargs...) = Path(promote(p0x,p0y)...; kwargs...)
 
-function Path(u::LengthUnits; α0=0.0, style0::Style=Trace(1.0u))
-    Path{typeof(0.0u)}(Point(0.0u,0.0u), α0, style0, Node{typeof(0.0u)}[])
+function Path(u::LengthUnits; α0=0.0)
+    Path{typeof(0.0u)}(Point(0.0u,0.0u), α0, Node{typeof(0.0u)}[])
 end
 
 Path(x::Coordinate, y::Coordinate; kwargs...) = throw(DimensionError(x,y))
@@ -371,11 +369,8 @@ pathlength(node::Node) = pathlength(segment(node))
 First angle of a path.
 """
 function α0(p::Path)
-    if isempty(p)
-        p.α0
-    else
-        α0(segment(nodes(p)[1]))
-    end
+    isempty(p) && return p.α0
+    α0(segment(nodes(p)[1]))
 end
 
 """
@@ -383,11 +378,8 @@ end
 Last angle of a path.
 """
 function α1(p::Path)
-    if isempty(p)
-        p.α0
-    else
-        α1(segment(nodes(p)[end]))
-    end
+    isempty(p) && return p.α0
+    α1(segment(nodes(p)[end]))::Float64
 end
 
 """
@@ -395,11 +387,8 @@ end
 First point of a path.
 """
 function p0(p::Path)
-    if isempty(p)
-        p.p0
-    else
-        p0(segment(nodes(p)[1]))
-    end
+    isempty(p) && return p.p0
+    p0(segment(nodes(p)[1]))
 end
 
 """
@@ -407,11 +396,8 @@ end
 Last point of a path.
 """
 function p1(p::Path)
-    if isempty(p)
-        p.p0
-    else
-        p1(segment(nodes(p)[end]))
-    end
+    isempty(p) && return p.p0
+    p1(segment(nodes(p)[end]))
 end
 
 """
@@ -419,30 +405,24 @@ end
 Style of the first segment of a path.
 """
 function style0(p::Path)
-    if isempty(p)
-        p.style0
-    else
-        style(nodes(p)[1])
-    end
+    isempty(p) && error("path is empty, provide a style.")
+    style(nodes(p)[1])
 end
 
 """
     style1(p::Path)
 Style of the last segment of a path.
 """
-style1(p::Path) = style1(p, Style, p.style0)
+style1(p::Path) = style1(p, Style)
 
-function style1(p::Path, T, default)
-    if isempty(p)
-        default
+function style1(p::Path, T)
+    isempty(p) && error("path is empty, provide a style.")
+    A = view(nodes(p), reverse(1:length(nodes(p))))
+    i = findfirst(x->isa(style(x), T), A)
+    if i > 0
+        style(A[i])
     else
-        A = view(nodes(p), reverse(1:length(nodes(p))))
-        i = findfirst(x->isa(style(x), T), A)
-        if i > 0
-            style(A[i])
-        else
-            default
-        end
+        error("style of type $T not found.")
     end
 end
 
@@ -460,17 +440,15 @@ include("segments/compound.jl")
 
 """
     discretestyle1{T}(p::Path{T})
-Returns the last-used discrete style in the path. If one was not used,
-returns `SimpleTraceCorner()`.
+Returns the last-used discrete style in the path.
 """
-discretestyle1{T}(p::Path{T}) = style1(p, DiscreteStyle, SimpleTraceCorner())
+discretestyle1{T}(p::Path{T}) = style1(p, DiscreteStyle)
 
 """
     contstyle1(p::Path)
-Returns the last-used discrete style in the path. If one was not used,
-returns `p.style0`.
+Returns the last-used discrete style in the path.
 """
-contstyle1(p::Path) = style1(p, ContinuousStyle, p.style0)
+contstyle1(p::Path) = style1(p, ContinuousStyle)
 
 """
     adjust!(p::Path, n::Integer=1)

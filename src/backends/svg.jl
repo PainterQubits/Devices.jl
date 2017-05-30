@@ -45,13 +45,14 @@ end
 #       <defs>, <symbol>, <use> tags for arrays, cell references?
 function Base.reprmime(::MIME"image/svg+xml", c0::Cell; options...)
     opt = Dict{Symbol,Any}(options)
-    bnd = ustrip(bounds(c0))
+    c = flatten(c0)
+    bnd = ustrip(bounds(c))
 
-    vp = "viewBox=\"0 0 $(Int(round(width(bnd)))) $(Int(round(height(bnd))))\" "
+    vp = "viewBox=\"$(bnd.ll.x) 0 $(Int(round(width(bnd)))) $(Int(round(height(bnd))))\" "
     wh = haskey(opt, :width)? "width=\"$(opt[:width])\" " : ""
     wh *= haskey(opt, :height)? "height=\"$(opt[:height])\" " : ""
 
-    ly = collect(layers(c0))
+    ly = collect(layers(c))
     trans = Translation(0, bnd.ur.y) ∘ XReflection()
     data = join([group_tag(fillcolor(opt, l), join(
                 (
@@ -59,7 +60,7 @@ function Base.reprmime(::MIME"image/svg+xml", c0::Cell; options...)
                         svgify(
                             trans.(ustrip(points(p))),
                         )
-                    ) for p in c0.elements[layer.(c0.elements) .== l]
+                    ) for p in c.elements[layer.(c.elements) .== l]
                 ), "")
             ) for l in ly[sortperm(ly)]], "")
 

@@ -23,8 +23,8 @@ export Polygon
 export points
 export clip, offset
 
-clipper() = Devices._clip
-coffset() = Devices._coffset
+clipper() = (Devices._clip[])::Clipper.Clip
+coffset() = (Devices._coffset[])::Clipper.ClipperOffset
 
 @inline unsafe_round(x::Unitful.Quantity) = round(ustrip(x))*unit(x)
 @inline unsafe_round(x::Number) = round(x)
@@ -32,14 +32,11 @@ coffset() = Devices._coffset
 const PCSCALE = float(2^31)
 
 """
-```
-immutable Polygon{T} <: AbstractPolygon{T}
-    p::Vector{Point{T}}
-    Polygon(x) = new(x)
-    Polygon(x::AbstractPolygon) = convert(Polygon{T}, x)
-end
-```
-
+    immutable Polygon{T} <: AbstractPolygon{T}
+        p::Vector{Point{T}}
+        Polygon(x) = new(x)
+        Polygon(x::AbstractPolygon) = convert(Polygon{T}, x)
+    end
 Polygon defined by list of coordinates. The first point should not be repeated
 at the end (although this is true for the GDS format).
 """
@@ -198,13 +195,10 @@ end
 
 # Clipping polygons one at a time
 """
-```
-clip{S<:Coordinate, T<:Coordinate}(op::Clipper.ClipType,
-    s::AbstractPolygon{S}, c::AbstractPolygon{T};
-    pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
-```
-
+    clip{S<:Coordinate, T<:Coordinate}(op::Clipper.ClipType,
+        s::AbstractPolygon{S}, c::AbstractPolygon{T};
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
 Using the [`Clipper`](http://www.angusj.com/delphi/clipper.php) library and
 the [`Clipper.jl`](https://github.com/Voxel8/Clipper.jl) wrapper, perform
 polygon clipping. The first argument must be one of the following types :
@@ -231,18 +225,15 @@ function clip{S<:Coordinate, T<:Coordinate}(op::Clipper.ClipType,
 
     dimension(S) != dimension(T) && throw(Unitful.DimensionError(S(1),T(1)))
     R = promote_type(S, T)
-    clip(op, Polygon{R}[s], Polygon{R}[c]; pfs=pfs, pfc=pfc)
+    clip(op, Polygon{R}[s], Polygon{R}[c]; pfs=pfs, pfc=pfc)::Vector{Polygon{R}}
 end
 
 # Clipping arrays of AbstractPolygons
 """
-```
-clip{S<:AbstractPolygon, T<:AbstractPolygon}(op::Clipper.ClipType,
-    s::AbstractVector{S}, c::AbstractVector{T};
-    pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
-```
-
+    clip{S<:AbstractPolygon, T<:AbstractPolygon}(op::Clipper.ClipType,
+        s::AbstractVector{S}, c::AbstractVector{T};
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
 Perform polygon clipping. The first argument must be as listed above.
 The second and third arguments are arrays (vectors) of [`AbstractPolygon`](@ref)s.
 Keyword arguments are explained above.
@@ -254,18 +245,15 @@ function clip{S<:AbstractPolygon, T<:AbstractPolygon}(op::Clipper.ClipType,
 
     P = promote_type(eltype(eltype(s)), eltype(eltype(c)))
     clip(op, convert(Vector{Polygon{P}}, s),
-              convert(Vector{Polygon{P}}, c); pfs=pfs, pfc=pfc)
+              convert(Vector{Polygon{P}}, c); pfs=pfs, pfc=pfc)::Vector{Polygon{P}}
 end
 
 # Clipping two identically-typed arrays of <: Polygon
 """
-```
-clip{T<:Polygon}(op::Clipper.ClipType,
-    s::AbstractVector{T}, c::AbstractVector{T};
-    pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
-```
-
+    clip{T<:Polygon}(op::Clipper.ClipType,
+        s::AbstractVector{T}, c::AbstractVector{T};
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
 Perform polygon clipping. The first argument must be as listed above.
 The second and third arguments are identically-typed arrays (vectors) of
 [`Polygon{T}`](@ref) objects. Keyword arguments are explained above.
@@ -323,12 +311,9 @@ function declipperize{T<:Union{Int64, Unitful.Quantity{Int64}}}(A, S::Type{T})
 end
 
 """
-```
-offset{S<:Coordinate}(s::AbstractPolygon{S}, delta::Coordinate;
-    j::Clipper.JoinType=Clipper.JoinTypeMiter,
-    e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
-```
-
+    offset{S<:Coordinate}(s::AbstractPolygon{S}, delta::Coordinate;
+        j::Clipper.JoinType=Clipper.JoinTypeMiter,
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
 Using the [`Clipper`](http://www.angusj.com/delphi/clipper.php) library and
 the [`Clipper.jl`](https://github.com/Voxel8/Clipper.jl) wrapper, perform
 polygon offsetting.
@@ -358,12 +343,9 @@ function offset{S<:Coordinate}(s::AbstractPolygon{S}, delta::Coordinate;
 end
 
 """
-```
-offset{S<:AbstractPolygon}(subject::AbstractVector{S}, delta::Coordinate;
-    j::Clipper.JoinType=Clipper.JoinTypeMiter,
-    e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
-```
-
+    offset{S<:AbstractPolygon}(subject::AbstractVector{S}, delta::Coordinate;
+        j::Clipper.JoinType=Clipper.JoinTypeMiter,
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
 Perform polygon offsetting. The first argument is an array (vector) of
 [`AbstractPolygon`](@ref)s. The second argument is how much to offset the polygon.
 Keyword arguments explained above.
@@ -376,12 +358,9 @@ function offset{S<:AbstractPolygon}(s::AbstractVector{S}, delta::Coordinate;
 end
 
 """
-```
-offset{S<:Polygon}(s::AbstractVector{S}, delta::Coordinate;
-    j::Clipper.JoinType=Clipper.JoinTypeMiter,
-    e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
-```
-
+    offset{S<:Polygon}(s::AbstractVector{S}, delta::Coordinate;
+        j::Clipper.JoinType=Clipper.JoinTypeMiter,
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
 Perform polygon offsetting. The first argument is an array (vector) of
 [`Polygon`](@ref)s. The second argument is how much to offset the polygon.
 Keyword arguments explained above.

@@ -19,6 +19,6 @@ function render!(c::Cell, seg::Paths.CompoundSegment, s::Paths.CompoundStyle, me
         kwargs...)
     @assert length(seg.segments) == length(s.styles)
     for (se,st) in zip(seg.segments, s.styles)
-        render!(c, se, st; kwargs...)
+        render!(c, se, st, meta; kwargs...)
     end
 end

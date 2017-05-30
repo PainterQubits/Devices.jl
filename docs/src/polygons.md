@@ -24,7 +24,7 @@ An example of how to use affine transformations with polygons:
 
 ```jldoctest
 julia> r = Rectangle(1,1)
-Devices.Rectangles.Rectangle{Int64}((0,0),(1,1),Dict{Symbol,Any}())
+Devices.Rectangles.Rectangle{Int64}((0,0),(1,1))
 
 julia> trans = Translation(10,10)
 Translation(10,10)
@@ -33,7 +33,7 @@ julia> trans = Rotation(90°) ∘ trans
 AffineMap([0.0 -1.0; 1.0 0.0], [-10.0,10.0])
 
 julia> trans(r)
-Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-10.0,11.0),(-11.0,11.0),(-11.0,10.0)],Dict{Symbol,Any}())
+Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-10.0,11.0),(-11.0,11.0),(-11.0,10.0)])
 ```
 
 ```@docs
@@ -65,7 +65,6 @@ Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-1
     bounds(::Rectangle)
     center(::Rectangle)
     centered(::Rectangle)
-    centered!(::Rectangle)
     height(::Rectangle)
     isproper(::Rectangle)
     minimum(::Rectangle)

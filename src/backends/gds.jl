@@ -589,7 +589,7 @@ function cell(s, dbs, verbose, nounits)
             verbose && info("Token was STRNAME: $(c.name)")
         elseif token == BOUNDARY
             verbose && info("Token was BOUNDARY")
-            push!(c.elements, boundary(s, dbs, verbose, nounits))
+            render!(c, boundary(s, dbs, verbose, nounits)...)
         elseif token == SREF
             verbose && info("Token was SREF")
             push!(c.refs, sref(s, dbs, verbose, nounits))
@@ -666,7 +666,7 @@ function boundary(s, dbs, verbose, nounits)
 
     verbose && !haslayer && warn("Did not read LAYER tag.")
     verbose && !hasdt && warn("Did not read DATATYPE tag.")
-    Polygon(xy; layer = lyr, datatype = dt)
+    Polygon(xy), GDSMeta(lyr, dt)
 end
 
 function sref(s, dbs, verbose, nounits)

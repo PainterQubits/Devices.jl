@@ -1,10 +1,11 @@
 """
-    render!(c::Cell, r::Rectangle,  ::Rectangles.Plain)
-    render!(c::Cell, r::Rectangle, s::Rectangles.Rounded)
-    render!(c::Cell, r::Rectangle, s::Rectangles.Undercut)
+    render!(c::Cell, r::Rectangle, meta::Meta) = render!(c, p, Rectangles.Plain(), meta)
+    render!(c::Cell, r::Rectangle,  ::Rectangles.Plain, meta::Meta)
+    render!(c::Cell, r::Rectangle, s::Rectangles.Rounded, meta::Meta)
+    render!(c::Cell, r::Rectangle, s::Rectangles.Undercut, meta::Meta)
 Render a rectangle `r` to cell `c`, defaulting to plain styling.
 """
-
+render!(c::Cell, r::Rectangle, meta::Meta) = render!(c, r, Rectangles.Plain(), meta)
 
 function render!(c::Cell, r::Rectangle, ::Rectangles.Plain, meta::Meta)
     push!(c.elements, CellPolygon(r, meta))
@@ -17,8 +18,8 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded, meta::Meta)
     gr = Rectangle(ll + Point(rad,rad), ur - Point(rad,rad))
     push!(c.elements, CellPolygon(gr, meta))
 
-    p = Path(ll + Point(rad, rad/2), style0 = Paths.Trace(s.r))
-    straight!(p, width(r) - 2*rad)
+    p = Path(ll + Point(rad, rad/2))
+    straight!(p, width(r) - 2*rad, Paths.Trace(s.r))
     turn!(p, π/2, rad/2)
     straight!(p, height(r) - 2*rad)
     turn!(p, π/2, rad/2)

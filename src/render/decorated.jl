@@ -1,8 +1,5 @@
 """
-```
-render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle, meta::Meta; kwargs...)
-```
-
+    render!(c::Cell, segment::Paths.Segment, s::Paths.DecoratedStyle, meta::Meta; kwargs...)
 Render a `segment` with decorated style `s` to cell `c`.
 Cell references held by the decorated style will have their fields modified
 by this method, which is why they are shallow copied in the

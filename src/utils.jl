@@ -34,8 +34,7 @@ adapted_grid{T<:Coordinate}(f, anchors::AbstractVector{T};
         rand_factor::Real = 0.05,
         grid_step::Coordinate = 1.0 * Unitful.ContextUnits(
             ifelse(T<:Length, Unitful.μm, Unitful.NoUnits),
-            Unitful.unit(Unitful.upreferred(zero(T)))),
-        kwargs...) =
+            Unitful.unit(Unitful.upreferred(zero(T))))) =
     assemble_grids(f, anchors, max_recursions, max_change, rand_factor, grid_step)
 
 function assemble_grids(f, anchors::AbstractVector,
@@ -74,10 +73,10 @@ function make_grid(f, initial_grid, max_recursions, max_change, rand_factor)
     end
 
     n_tot_refinements = zeros(Int, n_intervals)
-
     while true
         results = zeros(typeof(f(initial_grid[1])), n_intervals)
         active = Vector{Bool}(n_intervals)
+        # derivs = [ForwardDiff.derivative(f, xs[i]) for i in 1:(2*n_intervals + 1)]
 
         for interval in 1:n_intervals
             p = 2 * interval

@@ -21,20 +21,20 @@ transmission line. We begin by making a cell with a rectangle in it:
 using Devices, Devices.PreferMicrons, FileIO
 
 cr = Cell("rect", nm)
-r = centered(Rectangle(20μm,40μm))
-render!(cr, r; layer = 1)
+r = centered(Rectangle(20μm, 40μm))
+render!(cr, r, GDSMeta(1))
 save("units_rectonly.svg", cr; layercolors=Dict(0=>"black",1=>"red")); nothing # hide
 ```
 <img src="units_rectonly.svg" style="width:1in;"/>
 
-Note that when you use `Devices.PreferMicrons`, this will also enable the unqualified use
-of the following units: `pm`, `nm`, `μm`, `mm`, `cm`, `dm`, `m`, `°`, `rad`. (By unqualified
-we mean that the symbols are imported into the calling namespace and do not need to be
-prefixed with a module name.) When adding length units together, if the units don't agree,
-the result will be in microns. You can *instead* do `using` `Devices.PreferNanometers` if you
-want the result to default to nanometers. (These are your two choices at the moment, though
-there's nothing fundamentally limiting other possibilities: see `src/units.jl` for how to do
-this for other units.)
+Note that when you use `Devices.PreferMicrons`, this will also enable the unqualified use of
+the following units: `pm`, `nm`, `μm`, `mm`, `cm`, `dm`, `m`, `°`, `rad`. (By unqualified we
+mean that the symbols are imported into the calling namespace and do not need to be prefixed
+with a module name.) When adding length units together, if the units don't agree, the result
+will be in microns. You can *instead* do `using` `Devices.PreferNanometers` if you want the
+result to default to nanometers. (These are your two choices at the moment, though there's
+nothing fundamentally limiting other possibilities: see `src/units.jl` for how to do this
+for other units.)
 
 When you specify the units for a `Cell`, you are specifying a database unit. Anything
 rendered into this cell will be discretized into integer multiples of the database unit.
@@ -51,7 +51,7 @@ turn!(p, π/2, 150μm)
 straight!(p, 500μm)
 launch!(p)
 cp = Cell("pathonly", nm)
-render!(cp, p; layer = 0)
+render!(cp, p, GDSMeta(0))
 save("units_pathonly.svg", cp; layercolors=Dict(0=>"black",1=>"red")); nothing # hide
 ```
 <img src="units_pathonly.svg" style="width: 3in;"/>
@@ -63,7 +63,7 @@ turnidx = Int((length(p)+1)/2) - 1 # the first straight segment of the path
 simplify!(p, turnidx+(0:2))
 attach!(p, CellReference(cr, Point(0.0μm, 0.0μm)), (40μm):(40μm):((pathlength(p[turnidx]))-40μm), i=turnidx)
 c = Cell("decoratedpath", nm)
-render!(c, p; layer = 0)
+render!(c, p, GDSMeta(0))
 save("units.svg", c; layercolors=Dict(0=>"black",1=>"red")); nothing # hide
 ```
 <img src="units.svg" style="width: 3in;"/>
@@ -78,10 +78,11 @@ save("/path/to/myoutput.gds", c)
 save("/path/to/myoutput.svg", c)
 ```
 
-Note that SVG support is experimental at the moment, and is not at all optimized. It is
+Note that SVG support is experimental at the moment, and is not completely optimized. It is
 however used in generating the graphics you see in this documentation. If you use Juno
 for Atom, rendered cells are automatically previewed in the plot pane provided you enter
-`Devices.@junographics` at the start of your session.
+`Devices.@junographics` at the start of your session. If you use Jupyter/IJulia, rendered
+cells are automatically returned as a result
 
 ### Example without using units
 
@@ -94,7 +95,7 @@ using Devices, FileIO
 
 cr = Cell("rect")
 r = centered(Rectangle(20,40))
-render!(cr, r; layer = 1)
+render!(cr, r, GDSMeta(1))
 
 p = Path()
 sty = launch!(p)
@@ -103,18 +104,64 @@ turn!(p,π/2,150)
 straight!(p,500)
 launch!(p)
 cp = Cell("pathonly")
-render!(cp, p; layer = 0)
+render!(cp, p, GDSMeta(0))
 
 turnidx = Int((length(p)+1)/2) - 1 # the first straight segment of the path
 simplify!(p, turnidx+(0:2))
 attach!(p, CellReference(cr, Point(0.0,0.0)), 40:40:((pathlength(p[turnidx]))-40), i=turnidx)
 c = Cell("decoratedpath")
-render!(c, p; layer = 0)
+render!(c, p, GDSMeta(0))
 ```
+
+Some caveats:
+- You cannot mix and match unitful and unitless numbers (the latter are not presumed to be
+  in microns in this case).
+- It is somewhat annoying to maintain this behavior alongside unit support, so eventually I
+  may drop support for this and require the use of units.
+
+## Performance tips
+
+Since Julia has a just-in-time compiler, the first time code is executed may take much
+longer than any other times. This means that a lot of time will be wasted repeating
+compilations if you run Devices.jl in a script like you would in other languages. For
+readability, it is best to split up your CAD code into functions that have clearly named
+inputs and perform a well-defined task. At present, for performance reasons, it is also best
+to avoid writing functions with keyword arguments (though this will be addressed in Julia
+1.0).
+
+It is also best to avoid writing statements in global scope. In other words, put most of
+your code in a function. Your CAD script should ideally look like the following:
+
+```jl
+using Devices, Devices.PreferMicrons, FileIO
+using CoordinateTransformations
+using Clipper
+
+function subroutine1()
+    # render some thing
+end
+
+function subroutine2()
+    # render some other thing
+end
+
+function main()
+    # my cad code goes here: do all of the things
+    subroutine1()
+    subroutine2()
+    save("/path/to/out.gds", ...)
+end
+
+main() # execute main() at end of script.
+```
+
+You can then `include` this file from Julia to generate your pattern. Provided you write
+your script this way, subsequent runs should be several times faster than the first if you
+`include` the file again from the same Julia session.
 
 ## Troubleshooting
 
-- If you cannot save the GDS file, try deleting any file that happens to be
-  at the target path. A corrupted file at the target path may prevent saving.
-- Decorated styles should not become part of compound styles, for now. Avoid
-  this by decorating / attaching cell references at the end.
+- If you cannot save the GDS file, try deleting any file that happens to be at the target
+  path. A corrupted file at the target path may prevent saving.
+- Decorated styles should not become part of compound styles, for now. Avoid this by
+  decorating / attaching cell references at the end.

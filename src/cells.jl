@@ -17,8 +17,8 @@ using ..Polygons
 import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
 import Devices: bounds, center, lowerleft, upperright, points, layer, datatype
 export Cell, CellArray, CellReference, CellPolygon
-export dbscale, flatten, flatten!, layers, meta, name, order!, polygon, transform, traverse!
-export uniquename
+export dbscale, elements, flatten, flatten!, layers, meta, name, order!, polygon, transform,
+    traverse!, uniquename
 
 @inline unsafe_floor(x::Unitful.Quantity) = floor(Unitful.ustrip(x))*Unitful.unit(x)
 @inline unsafe_floor(x::Number) = floor(x)
@@ -80,16 +80,13 @@ end
 @compat abstract type CellRef{S<:Coordinate, T} end
 
 """
-```
-type CellReference{S,T} <: CellRef{S,T}
-    cell::T
-    origin::Point{S}
-    xrefl::Bool
-    mag::Float64
-    rot::Float64
-end
-```
-
+    type CellReference{S,T} <: CellRef{S,T}
+        cell::T
+        origin::Point{S}
+        xrefl::Bool
+        mag::Float64
+        rot::Float64
+    end
 Reference to a `cell` positioned at `origin`, with optional x-reflection
 `xrefl`, magnification factor `mag`, and rotation angle `rot`. If an angle
 is given without units it is assumed to be in radians.
@@ -112,20 +109,17 @@ Base.convert{S}(::Type{CellReference{S}}, x::CellReference) =
         x.xrefl, x.mag, x.rot)
 
 """
-```
-type CellArray{S,T} <: CellRef{S,T}
-    cell::T
-    origin::Point{S}
-    deltacol::Point{S}
-    deltarow::Point{S}
-    col::Int
-    row::Int
-    xrefl::Bool
-    mag::Float64
-    rot::Float64
-end
-```
-
+    type CellArray{S,T} <: CellRef{S,T}
+        cell::T
+        origin::Point{S}
+        deltacol::Point{S}
+        deltarow::Point{S}
+        col::Int
+        row::Int
+        xrefl::Bool
+        mag::Float64
+        rot::Float64
+    end
 Array of `cell` starting at `origin` with `row` rows and `col` columns,
 spanned by vectors `deltacol` and `deltarow`. Optional x-reflection
 `xrefl`, magnification factor `mag`, and rotation angle `rot` for the array
@@ -151,26 +145,23 @@ Base.convert{S}(::Type{CellArray{S}}, x::CellArray) =
                       x.col, x.row, x.xrefl, x.mag, x.rot)
 
 """
-```
-type Cell{S<:Coordinate, T<:Meta}
-    name::String
-    elements::Vector{CellPolygon{S,T}}
-    refs::Vector{CellRef}
-    create::DateTime
-    Cell(x,y,z,t) = new(x, y, z, t)
-    Cell(x,y,z) = new(x, y, z, now())
-    Cell(x,y) = new(x, y, CellRef[], now())
-    Cell(x) = new(x, Polygon{T}[], CellRef[], now())
-    Cell() = begin
-        c = new()
-        c.elements = Polygon{T}[]
-        c.refs = CellRef[]
-        c.create = now()
-        c
+    type Cell{S<:Coordinate, T<:Meta}
+        name::String
+        elements::Vector{CellPolygon{S,T}}
+        refs::Vector{CellRef}
+        create::DateTime
+        Cell(x,y,z,t) = new(x, y, z, t)
+        Cell(x,y,z) = new(x, y, z, now())
+        Cell(x,y) = new(x, y, CellRef[], now())
+        Cell(x) = new(x, Polygon{T}[], CellRef[], now())
+        Cell() = begin
+            c = new()
+            c.elements = Polygon{T}[]
+            c.refs = CellRef[]
+            c.create = now()
+            c
+        end
     end
-end
-```
-
 A cell has a name and contains polygons and references to `CellArray` or
 `CellReference` objects. It also records the time of its own creation. As
 currently implemented it mirrors the notion of cells in GDS-II files.

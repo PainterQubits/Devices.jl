@@ -1,13 +1,10 @@
 """
-```
-type Turn{T} <: ContinuousSegment{T}
-    α::typeof(1.0°)
-    r::T
-    p0::Point{T}
-    α0::typeof(1.0°)
-end
-```
-
+    type Turn{T} <: ContinuousSegment{T}
+        α::typeof(1.0°)
+        r::T
+        p0::Point{T}
+        α0::typeof(1.0°)
+    end
 A circular turn is parameterized by the turn angle `α` and turning radius `r`.
 It begins at a point `p0` with initial angle `α0`.
 
@@ -23,7 +20,7 @@ type Turn{T} <: ContinuousSegment{T}
     α::typeof(1.0°)
     r::T
     p0::Point{T}
-    α0::typeof(1.0°)
+    α0::Float64
 end
 function (s::Turn)(t)
     x = ifelse(s.r == zero(s.r), typeof(s.r)(one(s.r)), s.r) # guard against div by zero
@@ -32,10 +29,7 @@ function (s::Turn)(t)
 end
 
 """
-```
-Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°)
-```
-
+    Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°)
 Outer constructor for `Turn` segments.
 """
 Turn{T<:Coordinate}(α, r::T; p0::Point=Point(zero(T),zero(T)), α0=0.0°) =
@@ -71,14 +65,11 @@ setα0!(s::Turn, α0′) = s.α0 = α0′
 
 
 """
-```
-turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p))
-```
-
+    turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=contstyle1(p))
 Turn a path `p` by angle `α` with a turning radius `r` in the current direction.
-Positive angle turns left.
+Positive angle turns left. By default, we take the last continuous style in the path.
 """
-function turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p))
+function turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=contstyle1(p))
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
     p0 = p1(p)
     α0 = α1(p)
@@ -88,11 +79,8 @@ function turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=style1(p
 end
 
 """
-```
-turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate,
-    sty::ContinuousStyle=contstyle1(p))
-```
-
+    turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate,
+        sty::ContinuousStyle=contstyle1(p))
 Turn a path `p` with direction coded by string `s`:
 
 - "l": turn by π/2 radians (left)
