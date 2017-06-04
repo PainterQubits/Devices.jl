@@ -74,7 +74,7 @@ function turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=contstyl
     p0 = p1(p)
     α0 = α1(p)
     turn = Turn{T}(α, r, p0, α0)
-    push!(p, Node(turn,sty))
+    push!(p, Node(turn, ContinuousStyle(sty)))
     nothing
 end
 

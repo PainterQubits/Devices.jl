@@ -112,7 +112,7 @@ taken to compute the size of each layer.
 end
 
 """
-    checkerboard!{T}(c::Cell{T}, pixsize, rows::Integer, alt, meta::Meta=GDSMeta(0,0))
+    checkerboard!{T}(c::Cell{T}, pixsize, rows::Integer, alt, meta::Meta=GDSMeta())
 In cell `c`, generate a checkerboard pattern suitable for contrast curve measurement,
 or getting the base dose for PEC.
   - `pixsize`: length of one side of a square
@@ -120,7 +120,7 @@ or getting the base dose for PEC.
   - `alt`: the square nearest `Point(zero(T), zero(T))` is filled (unfilled) if `false`
     (`true`). Use this to create a full tiling of the checkerboard, if you wish.
 """
-function checkerboard!{T,S}(c::Cell{T,S}, pixsize, rows::Integer, alt, meta::Meta=GDSMeta(0,0))
+function checkerboard!{T,S}(c::Cell{T,S}, pixsize, rows::Integer, alt, meta::Meta=GDSMeta())
     r = Rectangle(pixsize, pixsize)
     rcell = Cell{T,S}(uniquename("checkerboard"))
     render!(rcell, r, Rectangles.Plain(), meta)
@@ -206,10 +206,10 @@ function flux_bias!{T}(c::Cell{T}, dir, flux_over, flux_under, flux_cut, z_trace
 end
 
 """
-    grating!{T}(c::Cell{T}, line, space, size, meta::Meta=GDSMeta(0,0))
+    grating!{T}(c::Cell{T}, line, space, size, meta::Meta=GDSMeta())
 Generate a square grating suitable e.g. for obtaining the base dose for PEC.
 """
-function grating!{T,S}(c::Cell{T,S}, line, space, size, meta::Meta=GDSMeta(0,0))
+function grating!{T,S}(c::Cell{T,S}, line, space, size, meta::Meta=GDSMeta())
     r = Rectangle(line, size)
     rcell = Cell{T,S}(uniquename("grating"))
     render!(rcell, r, Rectangles.Plain(), meta)
@@ -491,18 +491,18 @@ function qubit_claw!{T}(c::Cell{T}, trace, gap, claw_width, claw_length, claw_ga
     totalWidthGap = claw_width*2 + claw_gap*4 + ground_gap*2 + qubit_width + qubit_gap*2
     totalWidth = totalWidthGap - 2*claw_gap
 
-    ground = Rectangle(Point(-totalWidthGap/2, -claw_gap),
-        Point(totalWidthGap/2, claw_gap + claw_length))
-    top = Rectangle(Point(-totalWidth/2, zero(T)),
-        Point(totalWidth/2, claw_width))
-    left = Rectangle(Point(-totalWidth/2, zero(T)),
-        Point(-totalWidth/2 + claw_width, claw_length))
-    right = Rectangle(Point(totalWidth/2 - claw_width, zero(T)),
-        Point(totalWidth/2, claw_length))
-    middle =  Rectangle(Point(-totalWidth/2 + claw_width + claw_gap, claw_width + claw_gap),
-        Point(totalWidth/2 - claw_width - claw_gap , claw_gap + claw_length))
-    readoutres = Rectangle(Point(-trace/2 - gap, -claw_gap),
-        Point(trace/2 + gap, zero(T)))
+    ground = Rectangle(Point(-claw_gap, -totalWidthGap/2),
+        Point(claw_gap + claw_length, totalWidthGap/2))
+    top = Rectangle(Point(zero(T), -totalWidth/2),
+        Point(claw_width, totalWidth/2))
+    left = Rectangle(Point(zero(T), -totalWidth/2),
+        Point(claw_length, -totalWidth/2 + claw_width))
+    right = Rectangle(Point(zero(T), totalWidth/2 - claw_width),
+        Point(claw_length, totalWidth/2))
+    middle =  Rectangle(Point(claw_width + claw_gap, -totalWidth/2 + claw_width + claw_gap),
+        Point(claw_gap + claw_length, totalWidth/2 - claw_width - claw_gap))
+    readoutres = Rectangle(Point(-claw_gap, -trace/2 - gap),
+        Point(zero(T), trace/2 + gap))
 
     gr = clip(ClipTypeDifference, [ground], [readoutres])
     g = clip(ClipTypeDifference, gr, [middle])

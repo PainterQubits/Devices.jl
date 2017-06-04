@@ -4,6 +4,7 @@
       constructors. These no longer include metadata; they are just geometry.
     - GDS-II layer and datatype are captured by a `GDSMeta` object. This is passed to
       `render!` when rendering polygons, paths, etc. to a cell.
+    - `render!` must receive a `Meta` object.
   - Rectangles are now `immutable`, so `centered!` has been removed.
   - Polygons are now `immutable`.
   - Bug fix: `Cell(::AbstractString, ::Unitful.LengthUnits)` method was broken.
@@ -15,6 +16,8 @@
   - `NoRender(x)` can take a parameter specifying a fake "width" for attachments.
   - Fixed promotion logic with `Rectangles.Undercut` when different units were passed in.
   - Loosened signature of a `CellArray` constructor method.
+  - Path `style0` keyword not supported anymore. You must specify a style the first time
+    you call `straight!` or `turn!` on a path.
   - Performance improvements.
 - v0.1.0
   - Breaking change: `attach!` expects a value from zero to the segment length, not 0 to 1.

@@ -67,19 +67,11 @@ Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-1
     centered(::Rectangle)
     height(::Rectangle)
     isproper(::Rectangle)
-    minimum(::Rectangle)
-    maximum(::Rectangle)
+    lowerleft(::Rectangle)
+    upperright(::Rectangle)
     points{T<:Real}(::Rectangle{T})
     width(::Rectangle)
     +(::Rectangle, ::Point)
-```
-
-### Rectangle styles
-
-```@docs
-    Rectangles.Plain
-    Rectangles.Rounded
-    Rectangles.Undercut
 ```
 
 ## Polygon API
@@ -91,13 +83,7 @@ Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0),(-1
     bounds(::Polygon)
     bounds{T<:Devices.AbstractPolygon}(::AbstractArray{T})
     bounds(::Devices.AbstractPolygon, ::Devices.AbstractPolygon...)
-    minimum(::Polygon)
-    maximum(::Polygon)
+    lowerleft(::Polygon)
+    upperright(::Polygon)
     points(::Polygon)
-```
-
-### Polygon styles
-
-```@docs
-    Polygons.Plain
 ```

@@ -43,9 +43,8 @@ end
 # TODO: Find a package for writing xml tags nicely and use that instead
 # TODO: don't just presume we flatten everything. preserve cell structure in svg format.
 #       <defs>, <symbol>, <use> tags for arrays, cell references?
-function Base.reprmime(::MIME"image/svg+xml", c0::Cell; options...)
+function Base.reprmime(::MIME"image/svg+xml", c::Cell; options...)
     opt = Dict{Symbol,Any}(options)
-    c = flatten(c0)
     bnd = ustrip(bounds(c))
 
     vp = "viewBox=\"$(bnd.ll.x) 0 $(Int(round(width(bnd)))) $(Int(round(height(bnd))))\" "

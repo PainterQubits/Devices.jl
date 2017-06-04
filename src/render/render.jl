@@ -13,7 +13,6 @@ render!(c::Cell, seg::Paths.Segment, s::Paths.Style, meta::Meta; kwargs...) =
     render!(c, seg, pathlength(seg), s, meta; kwargs...)
 
 # NoRender and friends
-function render!(c::Cell, seg::Paths.Segment, s::Paths.NoRender, meta::Meta; kwargs...) end
 function render!(c::Cell, seg::Paths.Segment, s::Paths.NoRenderContinuous, meta::Meta;
     kwargs...) end
 function render!(c::Cell, seg::Paths.Segment, s::Paths.NoRenderDiscrete, meta::Meta;

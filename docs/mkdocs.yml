@@ -31,7 +31,7 @@ pages:
 - Polygons: polygons.md
 - Cells: cells.md
 - Paths: paths.md
-- Compound shapes: tags.md
+- Compound shapes: shapes.md
 - Rendering: render.md
 - File formats: fileio.md
 - 'License': LICENSE.md

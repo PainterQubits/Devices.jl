@@ -166,8 +166,7 @@ A cell has a name and contains polygons and references to `CellArray` or
 `CellReference` objects. It also records the time of its own creation. As
 currently implemented it mirrors the notion of cells in GDS-II files.
 
-To add elements, push them to `elements` field (or use `render!`);
-to add references, push them to `refs` field.
+To add elements, use `render!`. To add references, push them to `refs` field.
 """
 type Cell{S<:Coordinate, T<:Meta}
     name::String

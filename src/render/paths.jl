@@ -1,8 +1,8 @@
 """
-    render!{T}(c::Cell, p::Path{T}, meta::Meta; kwargs...)
+    render!{T}(c::Cell, p::Path{T}, meta::Meta=GDSMeta(); kwargs...)
 Render a path `p` to a cell `c`.
 """
-function render!{T}(c::Cell, p::Path{T}, meta::Meta; kwargs...)
+function render!{T}(c::Cell, p::Path{T}, meta::Meta=GDSMeta(); kwargs...)
     inds = find(x->isa(segment(x), Paths.Corner), nodes(p))
     segs = []
 

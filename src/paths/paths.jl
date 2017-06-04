@@ -422,7 +422,7 @@ function style1(p::Path, T)
     if i > 0
         style(A[i])
     else
-        error("style of type $T not found.")
+        error("No $T found in the path.")
     end
 end
 

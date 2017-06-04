@@ -1,11 +1,11 @@
 """
-    render!(c::Cell, r::Rectangle, meta::Meta) = render!(c, p, Rectangles.Plain(), meta)
+    render!(c::Cell, r::Rectangle, meta::Meta=GDSMeta()) = render!(c, p, Rectangles.Plain(), meta)
     render!(c::Cell, r::Rectangle,  ::Rectangles.Plain, meta::Meta)
     render!(c::Cell, r::Rectangle, s::Rectangles.Rounded, meta::Meta)
     render!(c::Cell, r::Rectangle, s::Rectangles.Undercut, meta::Meta)
 Render a rectangle `r` to cell `c`, defaulting to plain styling.
 """
-render!(c::Cell, r::Rectangle, meta::Meta) = render!(c, r, Rectangles.Plain(), meta)
+render!(c::Cell, r::Rectangle, meta::Meta=GDSMeta()) = render!(c, r, Rectangles.Plain(), meta)
 
 function render!(c::Cell, r::Rectangle, ::Rectangles.Plain, meta::Meta)
     push!(c.elements, CellPolygon(r, meta))

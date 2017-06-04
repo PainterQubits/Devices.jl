@@ -6,7 +6,7 @@ other cells. They also store polygons. Here is the definition of a `Cell`:
     Cell
 ```
 
-The type parameter of a `Cell{T}` object is used in two ways:
+The type parameter `S` of a `Cell{S,T}` object is used in two ways:
 
 1. Determine the units of the coordinates of all polygons in a cell, as well
    as origins and offset vectors of [`CellArray`](@ref)s and
@@ -18,14 +18,14 @@ The type parameter of a `Cell{T}` object is used in two ways:
    GDS-II file represents shapes with integer coordinates. In the future,
    we intend to improve support for cells with integer coordinates.
 
-For instance, `Cell{typeof(1.0u"nm")}` specifies a cell where the database
+For instance, `Cell{typeof(1.0u"nm")}` matches a cell where the database
 unit is `nm` and polygons may have `Float64`-based coordinates (the type of
 `1.0` is `Float64`). Note that `Cell{typeof(2.0u"nm")}` does not mean the database
 unit is 2.0nm, because the returned type is the same. If that is intended,
 instead make a new unit such that one of that new unit is equal to 2nm. You can
 do this using the `@unit` macro in Unitful.
 
-For most cases, if you want to use units, `Cell{typeof(1.0u"nm")}("my_cell_name")`
+For most cases, if you want to use units, `Cell("my_cell_name", nm)`
 is a good way to construct a cell which will ultimately have all coordinates
 rounded to the nearest `nm` when exported into GDS-II. You can add polygons
 with whatever length units you want to such a cell, and the coordinates will

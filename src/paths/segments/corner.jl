@@ -57,6 +57,6 @@ used in the path.
 """
 function corner!{T<:Coordinate}(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p))
     corn = Corner{T}(α)
-    push!(p, Node(corn,sty))
+    push!(p, Node(corn, DiscreteStyle(sty)))
     nothing
 end

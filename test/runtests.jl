@@ -152,8 +152,6 @@ end
         @test !isproper(Rectangle(0,0))
 
         # centering
-        @test_throws InexactError centered!(Rectangle(1,1))
-        @test_throws InexactError centered!(Rectangle(1m,1m))
         @test centered(Rectangle(1,1)) ==
             Rectangle(Point(-0.5,-0.5), Point(0.5,0.5))
 
@@ -328,7 +326,7 @@ end
     @testset "Rectangle rendering" begin
         c3 = Cell("c3")
         r = Rectangle(5,10)
-        @test_throws Unitful.DimensionError render!(c3, Rectangle(5m,10m))
+        @test_throws Unitful.DimensionError render!(c3, Rectangle(5m,10m), GDSMeta())
     end
     #
     # @testset "Polygon rendering" begin
@@ -342,7 +340,7 @@ end
     c2 = Cell("c2")
     c3 = Cell("c3")
     r = Rectangle(5,10)
-    render!(c3, r)
+    render!(c3, r, GDSMeta())
     c2ref = CellReference(c2, Point(-10.0,0.0); mag=1.0, rot=180°)
     @test c2ref.cell === c2
     c3ref = CellReference(c3, Point(10.0,0.0); mag=2.0, rot=90°)
@@ -370,7 +368,7 @@ end
     # More setup
     c = Cell("main")
     c2 = Cell("rect")
-    render!(c2, Rectangle(5,5))
+    render!(c2, Rectangle(5,5), GDSMeta())
     arr = CellArray(c2, Point(0,0); dc=Point(10,0), dr=Point(0,10),
         ncols=10, nrows=10)
     @test arr.cell === c2
@@ -422,9 +420,9 @@ end
 
     @testset "> Path segments" begin
         pa = Path()
-        @test_throws Unitful.DimensionError straight!(pa, 10.0μm)
+        @test_throws Unitful.DimensionError straight!(pa, 10.0μm, Paths.Trace(10.0μm))
         @test pathlength(pa) == 0.0
-        straight!(pa, 10)
+        straight!(pa, 10, Paths.Trace(10))
         @test pathlength(pa) == 10
         @test pathlength(segment(pa[1])) == 10
         turn!(pa, π/2, 5.0)
@@ -440,9 +438,9 @@ end
         @test Devices.Paths.curvature(segment(pa[2]), 5π/2) ≈ Point(-0.2, 0.0)
 
         pa = Path(μm)
-        @test_throws Unitful.DimensionError straight!(pa, 10.0)
+        @test_throws Unitful.DimensionError straight!(pa, 10.0, Paths.Trace(10))
         @test pathlength(pa) == 0.0μm
-        straight!(pa, 10μm)
+        straight!(pa, 10μm, Paths.Trace(10.0μm))
         @test pathlength(pa) == 10μm
         @test pathlength(segment(pa[1])) == 10μm
         turn!(pa, π/2, 5.0μm)
@@ -490,11 +488,11 @@ end
 
     @testset "> CompoundSegment" begin
         pa = Path()
-        straight!(pa, 200.0)
+        straight!(pa, 200.0, Paths.Trace(10))
         turn!(pa, π/4, 50.0)
         straight!(pa, 200.0)
-        segs = segment.(pa)
-        f = Paths.param(segs)
+        simplify!(pa)
+        f = segment(pa[1])
         @test f(0.0) == p(0.0,0.0)
         @test f(1.0) == p(1.0,0.0)
         @test f(-1.0) == p(-1.0,0.0)
@@ -504,8 +502,6 @@ end
         g = x->ForwardDiff.derivative(f, x)
         @test g(-1.0) ≈ g(0.0) ≈ g(1.0)
         @test g(200+50*π/4+199) ≈ g(200+50*π/4+200) ≈ g(200+50*π/4+201)
-        simplify!(pa)
-
     end
 end
 
@@ -520,20 +516,20 @@ end
 @testset "Style rendering" begin
     @testset "NoRender" begin
         c = Cell("main")
-        pa = Path(α0=24.31°, style0=Paths.NoRender())
-        straight!(pa, 21.2345)
+        pa = Path(α0=24.31°)
+        straight!(pa, 21.2345, Paths.NoRender())
         render!(c, pa)
         @test isempty(c.elements)
     end
 
     @testset "Decorations" begin
         csub = Cell("sub", nm)
-        render!(csub, centered!(Rectangle(10nm,10nm)))
+        render!(csub, centered(Rectangle(10nm,10nm)), Rectangles.Plain(), GDSMeta())
         cref = CellReference(csub, Point(0.0μm, 0.0μm))
 
         c = Cell("main", nm)
-        pa = Path(μm, style0=Paths.NoRender())
-        straight!(pa, 20.0μm)
+        pa = Path(μm)
+        straight!(pa, 20.0μm, Paths.NoRender())
         turn!(pa, π/2, 20.0μm)
         straight!(pa, 20.0μm)
         simplify!(pa)
@@ -602,7 +598,7 @@ end
     @testset "Straight, SimpleTrace" begin
         c = Cell("main")
         pa = Path(α0=12°)
-        straight!(pa, 20.0)
+        straight!(pa, 20.0, Paths.Trace(1.0))
         render!(c,pa)
         @test points(c.elements[1]) == Point{Float64}[
             p(-0.10395584540887967,  0.48907380036690284),
@@ -612,7 +608,7 @@ end
 
         c = Cell("main", pm)
         pa = Path(μm, α0=12°)
-        straight!(pa, 20000nm)
+        straight!(pa, 20000nm, Paths.Trace(1.0μm))
         render!(c,pa)
         @test points(c.elements[1]) == Point{typeof(1.0pm)}[
             p(-103955.84540887967pm,   489073.80036690284pm),
@@ -625,8 +621,9 @@ end
     @testset "Corner, SimpleTraceCorner" begin
         c = Cell("main")
         pa = Path()
-        straight!(pa, 20.0)
-        corner!(pa, π/2)
+        straight!(pa, 20.0, Paths.Trace(1))
+        @test_throws ErrorException corner!(pa, π/2)
+        corner!(pa, π/2, Paths.SimpleTraceCorner())
         straight!(pa, 20.0)
         render!(c, pa)
 
@@ -635,13 +632,13 @@ end
             p(19.5,  0.5),
             p(19.5, -0.5),
             p(20.5, -0.5),
-            p(20.5,  0.5)
+            p(20.5,  0.4999999999999999)
         ]
 
         c = Cell("main", μm)
         pa = Path(μm)
-        straight!(pa, 20.0μm)
-        corner!(pa, π/2)
+        straight!(pa, 20.0μm, Paths.Trace(1.0μm))
+        corner!(pa, π/2, Paths.SimpleTraceCorner())
         straight!(pa, 20.0μm)
         render!(c, pa)
 
@@ -650,21 +647,21 @@ end
             p(19.5μm,  0.5μm),
             p(19.5μm, -0.5μm),
             p(20.5μm, -0.5μm),
-            p(20.5μm,  0.5μm)
+            p(20.5μm,  0.4999999999999999μm)
         ]
     end
 
     @testset "Straight, GeneralTrace" begin
         c = Cell("main")
-        pa = Path(style0=Paths.Trace(x->2.0*x))
-        straight!(pa, 20.0)
+        pa = Path()
+        straight!(pa, 20.0, Paths.Trace(x->2.0*x))
         render!(c,pa)
     end
 
     @testset "Straight, SimpleCPW" begin
         c = Cell("main")
-        pa = Path(α0=12°, style0=Paths.CPW(5.0,3.0))
-        straight!(pa, 20.0)
+        pa = Path(α0=12°)
+        straight!(pa, 20.0, Paths.CPW(5.0,3.0))
         render!(c,pa)
         @test points(c.elements[1]) == Point{Float64}[
             p(-1.1435142994976764, 5.379811804035931),
@@ -680,8 +677,8 @@ end
         ]
 
         c = Cell("main", pm)
-        pa = Path(μm, α0=12°, style0=Paths.CPW(5.0μm, 3000nm))
-        straight!(pa, 20000nm)
+        pa = Path(μm, α0=12°)
+        straight!(pa, 20000nm, Paths.CPW(5.0μm, 3000nm))
         render!(c,pa)
         @test points(c.elements[1]) == Point{typeof(1.0pm)}[
             p(-1.1435142994976764pm, 5.379811804035931pm),
@@ -704,12 +701,12 @@ end
     @testset "Turn, SimpleTrace" begin
         c = Cell("main")
         pa = Path()
-        turn!(pa, π/2, 5.0)
+        turn!(pa, π/2, 5.0, Paths.Trace(1))
         render!(c, pa)
 
         c = Cell("main", nm)
         pa = Path(μm)
-        turn!(pa, π/2, 20.0μm)
+        turn!(pa, π/2, 20.0μm, Paths.Trace(1μm))
         render!(c, pa)
     end
 
@@ -784,7 +781,7 @@ end
         # provided that's possible. This is done for rendering and filesize efficiency.
         c = Cell("main")
         pa = Path()
-        straight!(pa, 20.0)
+        straight!(pa, 20.0, Paths.Trace(1))
         straight!(pa, 30.0)
         simplify!(pa)
         render!(c, pa)
@@ -815,7 +812,7 @@ end
 @testset "Compound shapes" begin
     @testset "Checkerboard" begin
         c = Cell("main")
-        checkerboard!(c, 20.0, 2, false, layer=0)
+        checkerboard!(c, 20.0, 2, false)
         @test length(c.refs) == 2
         flatten!(c)
         @test points(c.elements[1]) ≈ [
@@ -832,7 +829,7 @@ end
         ]
 
         c = Cell("main", nm)
-        checkerboard!(c, 20μm, 2, true, layer=0)
+        checkerboard!(c, 20μm, 2, true)
         @test length(c.refs) == 2
         flatten!(c)
         @test points(c.elements[1]) ≈ [

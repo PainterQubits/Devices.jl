@@ -22,7 +22,7 @@ using Devices, Devices.PreferMicrons, FileIO
 
 cr = Cell("rect", nm)
 r = centered(Rectangle(20μm, 40μm))
-render!(cr, r, GDSMeta(1))
+render!(cr, r, Rectangles.Plain(), GDSMeta(1,0))
 save("units_rectonly.svg", cr; layercolors=Dict(0=>"black",1=>"red")); nothing # hide
 ```
 <img src="units_rectonly.svg" style="width:1in;"/>
@@ -40,6 +40,16 @@ When you specify the units for a `Cell`, you are specifying a database unit. Any
 rendered into this cell will be discretized into integer multiples of the database unit.
 This means that nothing smaller than 1 nm can be represented accurately. Nonetheless,
 this is typically a satisfactory choice for superconducting devices.
+
+A rectangle made with a width and height parameter will default to having its lower-left
+corner at the origin. `centered` will return a rectangle that is centered about the origin
+instead.
+
+The rectangle is then rendered into the cell. [`Rectangles.Plain()`](@ref) specifies a rendering
+style. Other examples include [`Rectangles.Rounded`](@ref) (where the corners are rounded
+off) or [`Rectangles.Undercut`](@ref). You can omit the style, in which case
+`Rectangles.Plain()` will be assumed. `GDSMeta(1)` indicates the target GDS-II layer. You
+can also specify the GDS-II datatype as a second argument, e.g. `GDSMeta(1,0)`.
 
 In another cell, we make the transmission line with some launchers on both ends:
 
@@ -64,7 +74,7 @@ simplify!(p, turnidx+(0:2))
 attach!(p, CellReference(cr, Point(0.0μm, 0.0μm)), (40μm):(40μm):((pathlength(p[turnidx]))-40μm), i=turnidx)
 c = Cell("decoratedpath", nm)
 render!(c, p, GDSMeta(0))
-save("units.svg", c; layercolors=Dict(0=>"black",1=>"red")); nothing # hide
+save("units.svg", flatten(c); layercolors=Dict(0=>"black",1=>"red")); nothing # hide
 ```
 <img src="units.svg" style="width: 3in;"/>
 
