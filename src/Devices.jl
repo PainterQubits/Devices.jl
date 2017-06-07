@@ -161,11 +161,11 @@ export α0, α1,
 include("render/render.jl")
 
 include("microwave.jl")
-import .Microwave: bandaid_hatching!, bridge!, checkerboard!, device_template!, flux_bias!,
+import .Microwave: bridge!, checkerboard!, device_template!, flux_bias!,
     grating!,
     interdigit!, jj!, jj_top_pad!, layerpixels!, qubit!, qubit_claw!, radialcut!, radialstub!
 export Microwave
-export bandaid_hatching!, bridge!, checkerboard!, device_template!, flux_bias!, grating!,
+export bridge!, checkerboard!, device_template!, flux_bias!, grating!,
     interdigit!,
     jj!, jj_top_pad!, layerpixels!, qubit!, qubit_claw!, radialcut!, radialstub!
 

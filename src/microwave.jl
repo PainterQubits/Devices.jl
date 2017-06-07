@@ -12,7 +12,6 @@ using Devices.Cells
 import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
 import Unitful: NoUnits, cm, μm, nm, ustrip, unit
 
-export bandaid_hatching!
 export bridge!
 export checkerboard!
 export device_template!
@@ -26,32 +25,6 @@ export qubit!
 export qubit_claw!
 export radialcut!
 export radialstub!
-
-"""
-    bandaid_hatching!{T}(c::Cell{T}, pix, pixpattern, ruc, uuc, undercut_meta)
-- `pix`: Size of a pixel in generating the hatching pattern. Passed to `layerpixels!`.
-- `pixpattern`: A matrix to pass to `layerpixels`, e.g. [1 1; -1 1]
-- `ruc`: Right undercut dimension
-- `uuc`: Upper undercut dimension
-- `undercut_meta`: Undercut `Meta` info.
-"""
-function bandaid_hatching!{T}(c::Cell{T}, pix, pixpattern, ruc, uuc, undercut_meta)
-    layerpixels!(c, pixpattern, pix)
-    plgs = clip(ClipTypeUnion, polygon.(elements(c)), Polygon{T}[])
-    c.elements = CellPolygon.(plgs, [meta(elements(c)[1])])
-
-    r1 = Rectangle(pix, uuc) + Point(zero(T), 2*pix-uuc)
-    r2 = Rectangle(ruc, pix) + Point(2*pix-ruc, zero(T))
-    r3 = Rectangle(ruc, uuc) + Point(2*pix-ruc, 2*pix-uuc)
-
-    plgs2 = clip(ClipTypeDifference, polygon.(elements(c)), Polygon{T}[r1,r2,r3])
-    c.elements = CellPolygon.(plgs2, [meta(elements(c)[1])])
-
-    for r in (r1, r2, r3)
-        render!(c, r, Rectangles.Plain(), undercut_meta)
-    end
-    c
-end
 
 """
     bridge!(c::Cell, steps, foot_width, foot_height, span, metas::AbstractVector{<:Meta})
@@ -144,8 +117,8 @@ end
 
 """
     device_template!{T}(d::Cell{T}, chip_meta::Meta, writeable_meta::Meta, marker_meta::Meta)
-Template for a 1cm x 1cm chip. Includes chip outline, usable area outline,
-and markers. Returns a `Cell{Float64}` object.
+In cell `c`, make a template for a 1cm x 1cm chip. Includes chip outline, usable area
+outline, and markers.
 """
 function device_template!{T}(d::Cell{T}, chip_meta::Meta, writeable_meta::Meta, marker_meta::Meta)
     # Device extents
@@ -395,7 +368,7 @@ end
 
 """
     layerpixels!{T}(c::Cell, layers::AbstractMatrix{Int}, pixsize)
-Given `layers`, a matrix of `Int`, make a bitmap of `Rectangle` where the layer
+Given `layers`, a matrix of `Int`, make a bitmap of `Rectangle` where the GDS-II layer
 corresponds to the number in the matrix. If the number is less than one, don't
 write the rectangle. All the rectangles get rendered into cell `c`. The rectangles are all
 in the first quadrant of the cell.

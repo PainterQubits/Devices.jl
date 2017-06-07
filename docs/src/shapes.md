@@ -1,6 +1,14 @@
 Examples on this page assume you have done `using Devices, Devices.PreferMicrons, FileIO`.
 
 ```@docs
+    bridge!
+```
+
+```@docs
+    device_template!
+```
+
+```@docs
     checkerboard!
 ```
 
@@ -68,12 +76,26 @@ save("fingers.svg", flatten(c)); nothing # hide
 <img src="../fingers.svg" style="width:4in;"/>
 
 ```@docs
+    layerpixels!
+```
+
+Example:
+```@example 5
+using Devices, Devices.PreferMicrons, FileIO # hide
+c = Cell("pix", nm)
+layerpixels!(c, [1 2 3; -1 2 4], 5μm)
+save("layerpixels.svg", flatten(c)); nothing # hide
+```
+<img src="../layerpixels.svg" style="width:2in;"/>
+
+
+```@docs
     qubit!
     qubit_claw!
 ```
 
 Example:
-```@example 5
+```@example 6
 using Devices, Devices.PreferMicrons, FileIO # hide
 c = Cell("main", nm)
 p = Path(μm)
@@ -101,7 +123,7 @@ save("qubit.svg", flatten(c)); nothing # hide
 ```
 
 Example:
-```@example 6
+```@example 7
 using Devices, Devices.PreferMicrons, FileIO # hide
 c = Cell("main", nm)
 radialcut!(c, 20μm, 90°, 5μm, GDSMeta(1))
@@ -114,7 +136,7 @@ save("radialcut.svg", flatten(c)); nothing # hide
 ```
 
 Example:
-```@example 7
+```@example 8
 using Devices, Devices.PreferMicrons, FileIO # hide
 c = Cell("main", nm)
 radialstub!(c, 20μm, 90°, 5μm, 1μm, GDSMeta(1))
