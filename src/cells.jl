@@ -173,12 +173,12 @@ type Cell{S<:Coordinate, T<:Meta}
     elements::Vector{CellPolygon{S,T}}
     refs::Vector{CellRef}
     create::DateTime
-    Cell(x,y,z,t) = new(x, y, z, t)
-    Cell(x,y,z) = new(x, y, z, now())
-    Cell(x,y) = new(x, y, CellRef[], now())
-    Cell(x) = new(x, CellPolygon{S,T}[], CellRef[], now())
-    Cell() = begin
-        c = new()
+    (::Type{Cell{S,T}}){S,T}(x,y,z,t) = new{S,T}(x, y, z, t)
+    (::Type{Cell{S,T}}){S,T}(x,y,z) = new{S,T}(x, y, z, now())
+    (::Type{Cell{S,T}}){S,T}(x,y) = new{S,T}(x, y, CellRef[], now())
+    (::Type{Cell{S,T}}){S,T}(x) = new{S,T}(x, CellPolygon{S,T}[], CellRef[], now())
+    (::Type{Cell{S,T}}){S,T}() = begin
+        c = new{S,T}()
         c.elements = CellPolygon{S,T}[]
         c.refs = CellRef[]
         c.create = now()

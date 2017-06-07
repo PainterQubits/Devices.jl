@@ -37,7 +37,7 @@ import Compat.Iterators: rest, take, drop, cycle
 using ForwardDiff
 import Devices
 import Devices: Coordinate, FloatCoordinate, GDSMeta, Meta
-import Devices: bounds, cell
+import Devices: bounds
 
 export Path
 
@@ -143,12 +143,12 @@ type Node{T<:Coordinate}
     prev::Node{T}
     next::Node{T}
 
-    Node(a,b) = begin
-        n = new(a,b)
+    (::Type{Node{T}}){T}(a,b) = begin
+        n = new{T}(a,b)
         n.prev = n
         n.next = n
     end
-    Node(a,b,c,d) = new(a,b,c,d)
+    (::Type{Node{T}}){T}(a,b,c,d) = new{T}(a,b,c,d)
 end
 
 """
@@ -295,8 +295,8 @@ type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     α0::Float64
     nodes::Array{Node{T},1}
 
-    Path() = new(Point(zero(T),zero(T)), 0.0, Node{T}[])
-    Path(a,b,c) = new(a,b,c)
+    (::Type{Path{T}}){T}() = new{T}(Point(zero(T),zero(T)), 0.0, Node{T}[])
+    (::Type{Path{T}}){T}(a,b,c) = new{T}(a,b,c)
 end
 @inline Base.eltype{T}(::Path{T}) = T
 @inline Base.eltype{T}(::Type{Path{T}}) = T

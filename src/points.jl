@@ -15,17 +15,26 @@ export Point
 export Rotation, Translation, XReflection, YReflection, ∘, compose
 export getx, gety
 
+if Pkg.installed("StaticArrays") < v"0.5.0"
+    immutable Point{T<:PointTypes} <: StaticArrays.FieldVector{T}
+        x::T
+        y::T
+    end
+else
+    immutable Point{T<:PointTypes} <: StaticArrays.FieldVector{2,T}
+        x::T
+        y::T
+    end
+end
+
 """
-    immutable Point{T} <: StaticArrays.FieldVector{T}
+    immutable Point{T} <: StaticArrays.FieldVector{2,T}
         x::T
         y::T
     end
 2D Cartesian coordinate in the plane.
 """
-immutable Point{T<:PointTypes} <: StaticArrays.FieldVector{T}
-    x::T
-    y::T
-end
+Point
 
 StaticArrays.similar_type{P<:Point, T}(::Type{P}, ::Type{T},
     ::StaticArrays.Size{(2,)}) = Point{T}

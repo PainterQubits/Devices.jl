@@ -23,12 +23,12 @@ path function, and are not allowed in a `CompoundSegment`.
 type CompoundSegment{T} <: ContinuousSegment{T}
     segments::Vector{Segment{T}}
 
-    CompoundSegment(segments) = begin
+    (::Type{CompoundSegment{T}}){T}(segments) = begin
         if any(x->isa(x,Corner), segments)
             error("cannot have corners in a `CompoundSegment`. You may have ",
                 "tried to simplify a path containing `Corner` objects.")
         else
-            new(deepcopy(Array(segments)))
+            new{T}(deepcopy(Array(segments)))
         end
     end
 end

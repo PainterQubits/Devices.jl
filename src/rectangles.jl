@@ -30,11 +30,11 @@ Lower-left and upper-right are guaranteed to be such by the inner constructor.
 immutable Rectangle{T} <: AbstractPolygon{T}
     ll::Point{T}
     ur::Point{T}
-    function Rectangle(a,b)
+    function (::Type{Rectangle{T}}){T}(a,b)
         # Ensure ll is lower-left, ur is upper-right.
         ll = Point(a.<=b) .* a + Point(b.<=a) .* b
         ur = Point(a.<=b) .* b + Point(b.<=a) .* a
-        new(ll,ur)
+        new{T}(ll,ur)
     end
 end
 Rectangle{T<:Coordinate}(ll::Point{T}, ur::Point{T}) = Rectangle{T}(ll,ur)

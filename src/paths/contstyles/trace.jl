@@ -9,7 +9,6 @@ A single trace with variable width as a function of path length. `width` is call
 immutable GeneralTrace{T} <: Trace
     width::T
 end
-GeneralTrace(width) = GeneralTrace(width)
 copy(x::GeneralTrace) = GeneralTrace(x.width)
 @inline extent(s::GeneralTrace, t) = s.width(t)/2
 @inline width(s::GeneralTrace, t) = s.width(t)

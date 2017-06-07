@@ -42,8 +42,8 @@ at the end (although this is true for the GDS format).
 """
 immutable Polygon{T} <: AbstractPolygon{T}
     p::Vector{Point{T}}
-    Polygon(x) = new(x)
-    Polygon(x::AbstractPolygon) = convert(Polygon{T}, x)
+    (::Type{Polygon{T}}){T}(x) = new{T}(x)
+    (::Type{Polygon{T}}){T}(x::AbstractPolygon) = convert(Polygon{T}, x)
 end
 
 """

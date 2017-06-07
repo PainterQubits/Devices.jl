@@ -18,8 +18,8 @@ type Corner{T} <: DiscreteSegment{T}
     p0::Point{T}
     α0::Float64
     extent::T
-    Corner(a) = new(a, Point(zero(T), zero(T)), 0.0, zero(T))
-    Corner(a,b,c,d) = new(a,b,c,d)
+    (::Type{Corner{T}}){T}(a) = new{T}(a, Point(zero(T), zero(T)), 0.0, zero(T))
+    (::Type{Corner{T}}){T}(a,b,c,d) = new{T}(a,b,c,d)
 end
 
 """
