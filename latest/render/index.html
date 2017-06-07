@@ -15,7 +15,7 @@
       
         <link rel="shortcut icon" href="../assets/images/favicon.png">
       
-      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.6.3">
+      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.7.3">
     
     
       
@@ -23,12 +23,12 @@
       
     
     
-      <script src="../assets/javascripts/modernizr-56ade86843.js"></script>
+      <script src="../assets/javascripts/modernizr-1df76c4e58.js"></script>
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application-e2807e330f.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application-acc56dad49.css">
       
-        <link rel="stylesheet" href="../assets/stylesheets/application-f78e5cb881.palette.css">
+        <link rel="stylesheet" href="../assets/stylesheets/application-8817cfa535.palette.css">
       
     
     
@@ -100,7 +100,7 @@
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="result">
+        <div class="md-search-result" data-md-component="result" data-md-lang-search="">
           <div class="md-search-result__meta" data-md-lang-result-none="No matching documents" data-md-lang-result-one="1 matching document" data-md-lang-result-other="# matching documents">
             Type to start searching
           </div>
@@ -112,9 +112,9 @@
 </div>
         
       </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <div class="md-header-nav__source">
-          
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
             
 
 
@@ -134,9 +134,9 @@
     </div>
   </a>
 
-          
+          </div>
         </div>
-      </div>
+      
     </div>
   </nav>
 </header>
@@ -249,7 +249,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tags/" title="Compound shapes" class="md-nav__link">
+    <a href="../shapes/" title="Compound shapes" class="md-nav__link">
       Compound shapes
     </a>
   </li>
@@ -286,6 +286,33 @@
         <li class="md-nav__item">
   <a href="#render-methods" title="Render methods" class="md-nav__link">
     Render methods
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rectangle-rendering-styles" title="Rectangle rendering styles" class="md-nav__link">
+    Rectangle rendering styles
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polygon-rendering-styles" title="Polygon rendering styles" class="md-nav__link">
+    Polygon rendering styles
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rendering-arbitrary-paths" title="Rendering arbitrary paths" class="md-nav__link">
+    Rendering arbitrary paths
   </a>
   
 </li>
@@ -346,6 +373,33 @@
     Render methods
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rectangle-rendering-styles" title="Rectangle rendering styles" class="md-nav__link">
+    Rectangle rendering styles
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polygon-rendering-styles" title="Polygon rendering styles" class="md-nav__link">
+    Polygon rendering styles
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rendering-arbitrary-paths" title="Rendering arbitrary paths" class="md-nav__link">
+    Rendering arbitrary paths
+  </a>
+  
 </li>
       
       
@@ -367,7 +421,92 @@
                 
                   <h1>Rendering</h1>
                 
-                <p>A <code>Segment</code> and <code>Style</code> together define one or more closed curves in the plane. The job of rendering is to approximate these curves by closed polygons. To enable rendering of styles along generic paths in the plane, an adaptive algorithm is used:</p>
+                <p><a id='Render-methods-1'></a></p>
+<h2 id="render-methods">Render methods</h2>
+<p><a id='Devices.render!' href='#Devices.render!'>#</a>
+<strong><code>Devices.render!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>render!(c::Cell, r::Rectangle, meta::Meta=GDSMeta()) = render!(c, p, Rectangles.Plain(), meta)
+render!(c::Cell, r::Rectangle,  ::Rectangles.Plain, meta::Meta)
+render!(c::Cell, r::Rectangle, s::Rectangles.Rounded, meta::Meta)
+render!(c::Cell, r::Rectangle, s::Rectangles.Undercut, meta::Meta)
+</pre></div>
+
+
+<p>Render a rectangle <code>r</code> to cell <code>c</code>, defaulting to plain styling.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/render/rectangles.jl#L1-L7' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span>render!(c::Cell, p::Polygon, meta::Meta=GDSMeta()) = render!(c, p, Polygons.Plain(), meta)
+render!(c::Cell, r::Polygon, s::Polygons.Style, meta::Meta)
+</pre></div>
+
+
+<p>Render a polygon <code>r</code> to cell <code>c</code>, defaulting to plain styling. Currently there is no other Polygon rendering style implemented.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/render/polygons.jl#L1-L6' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!</span><span class="p">{</span><span class="err">T</span><span class="p">}</span><span class="o">(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">p</span><span class="p">::</span><span class="nd">Path</span><span class="p">{</span><span class="err">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">meta</span><span class="p">::</span><span class="nd">Meta</span><span class="o">=</span><span class="nt">GDSMeta</span><span class="o">();</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a path <code>p</code> to a cell <code>c</code>.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/render/paths.jl#L1-L4' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">segment</span><span class="p">::</span><span class="nd">Paths</span><span class="p">.</span><span class="nc">Segment</span><span class="o">,</span> <span class="nt">s</span><span class="p">::</span><span class="nd">Paths</span><span class="p">.</span><span class="nc">DecoratedStyle</span><span class="o">,</span> <span class="nt">meta</span><span class="p">::</span><span class="nd">Meta</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Render a <code>segment</code> with decorated style <code>s</code> to cell <code>c</code>. Cell references held by the decorated style will have their fields modified by this method, which is why they are shallow copied in the <a href="../paths/#Devices.Paths.attach!"><code>Paths.attach!</code></a> function.</p>
+<p>This method draws the decorations before the path itself is drawn.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/render/decorated.jl#L1-L9' class='documenter-source'>source</a><br></p>
+<p><a id='Rectangle-rendering-styles-1'></a></p>
+<h3 id="rectangle-rendering-styles">Rectangle rendering styles</h3>
+<p><a id='Devices.Rectangles.Plain' href='#Devices.Rectangles.Plain'>#</a>
+<strong><code>Devices.Rectangles.Plain</code></strong> &mdash; <em>Type</em>.</p>
+<div class="codehilite"><pre><span></span>immutable Plain{T} &lt;: Rectangles.Style{T}
+    meta::T
+end
+</pre></div>
+
+
+<p>Plain rectangle style. Use this if you are fond for the simpler times when rectangles were just rectangles.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/rectangles.jl#L145-L151' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Rectangles.Rounded' href='#Devices.Rectangles.Rounded'>#</a>
+<strong><code>Devices.Rectangles.Rounded</code></strong> &mdash; <em>Type</em>.</p>
+<div class="codehilite"><pre><span></span>immutable Rounded{S&lt;:Coordinate,T} &lt;: Rectangles.Style{T}
+    r::S
+    meta::T
+end
+</pre></div>
+
+
+<p>Rounded rectangle style. All corners are rounded off with a given radius <code>r</code>. The bounding box of the unstyled rectangle should remain unaffected.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/rectangles.jl#L157-L165' class='documenter-source'>source</a><br></p>
+<p><a id='Devices.Rectangles.Undercut' href='#Devices.Rectangles.Undercut'>#</a>
+<strong><code>Devices.Rectangles.Undercut</code></strong> &mdash; <em>Type</em>.</p>
+<div class="codehilite"><pre><span></span>immutable Undercut{S&lt;:Coordinate,T} &lt;: Rectangles.Style{T}
+    ucl::S
+    uct::S
+    ucr::S
+    ucb::S
+    meta::T
+    undercut_meta::T
+end
+</pre></div>
+
+
+<p>Undercut rectangles. In each direction around a rectangle (left, top, right, bottom) an undercut is rendered on .</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/rectangles.jl#L173-L184' class='documenter-source'>source</a><br></p>
+<p><a id='Polygon-rendering-styles-1'></a></p>
+<h3 id="polygon-rendering-styles">Polygon rendering styles</h3>
+<p><a id='Devices.Polygons.Plain' href='#Devices.Polygons.Plain'>#</a>
+<strong><code>Devices.Polygons.Plain</code></strong> &mdash; <em>Type</em>.</p>
+<div class="codehilite"><pre><span></span>immutable Plain{T} &lt;: Polygons.Style{T}
+    meta::T
+end
+</pre></div>
+
+
+<p>Plain polygon style.</p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/polygons.jl#L175-L180' class='documenter-source'>source</a><br></p>
+<p><a id='Rendering-arbitrary-paths-1'></a></p>
+<h2 id="rendering-arbitrary-paths">Rendering arbitrary paths</h2>
+<p>A <code>Segment</code> and <code>Style</code> together define one or more closed curves in the plane. The job of rendering is to approximate these curves by closed polygons. To enable rendering of styles along generic paths in the plane, an adaptive algorithm is used when no other method is available:</p>
 <p><a id='Devices.adapted_grid' href='#Devices.adapted_grid'>#</a>
 <strong><code>Devices.adapted_grid</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>adapted_grid(f, anchors;
@@ -383,42 +522,8 @@
 <li><code>rand_factor</code>: between anchor points, <code>adapted_grid</code> will wiggle initial grid points a bit to prevent aliasing. The wiggling is sampled uniformly from the interval: <code>[-rand_factor, rand_factor]</code>, times the distance between three grid points (e.g. <code>i+1</code> and <code>i-1</code>). A random number generator is given a fixed seed every time <code>adapted_grid</code> is called, so the rendered results are deterministic.</li>
 <li><code>grid_step</code>: Step size for initial grid points. If you set this to be larger than the maximum anchor point, then the lowest resolution consistent with <code>max_change</code> is used (unless <code>f</code> has some fast variations that the algorithm might miss).</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/utils.jl#L1-L25' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/utils.jl#L1-L25' class='documenter-source'>source</a><br></p>
 <p>In some cases, custom rendering methods are implemented when it would improve performance for simple structures or when special attention is required. The rendering methods can specialize on either the <code>Segment</code> or <code>Style</code> types, or both.</p>
-<p><a id='Render-methods-1'></a></p>
-<h2 id="render-methods">Render methods</h2>
-<p><a id='Devices.render!' href='#Devices.render!'>#</a>
-<strong><code>Devices.render!</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">r</span><span class="p">::</span><span class="nd">Rectangle</span><span class="o">,</span> <span class="nt">s</span><span class="p">::</span><span class="nd">Rectangles</span><span class="p">.</span><span class="nc">Style</span><span class="o">=</span><span class="nt">Rectangles</span><span class="p">.</span><span class="nc">Plain</span><span class="o">();</span> <span class="nt">kwargs</span><span class="o">...)</span>
-<span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">r</span><span class="p">::</span><span class="nd">Rectangle</span><span class="o">,</span> <span class="p">::</span><span class="nd">Rectangles</span><span class="p">.</span><span class="nc">Plain</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-<span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">r</span><span class="p">::</span><span class="nd">Rectangle</span><span class="o">,</span> <span class="nt">s</span><span class="p">::</span><span class="nd">Rectangles</span><span class="p">.</span><span class="nc">Rounded</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-<span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">r</span><span class="p">::</span><span class="nd">Rectangle</span><span class="o">,</span> <span class="nt">s</span><span class="p">::</span><span class="nd">Rectangles</span><span class="p">.</span><span class="nc">Undercut</span><span class="o">;</span>
-    <span class="nt">layer</span><span class="o">=</span><span class="nt">0</span><span class="o">,</span> <span class="nt">uclayer</span><span class="o">=</span><span class="nt">0</span><span class="o">,</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Render a rectangle <code>r</code> to cell <code>c</code>, defaulting to plain styling.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/render/rectangles.jl#L1-L8' class='documenter-source'>source</a><br></p>
-<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">r</span><span class="p">::</span><span class="nd">Polygon</span><span class="o">,</span> <span class="nt">s</span><span class="p">::</span><span class="nd">Polygons</span><span class="p">.</span><span class="nc">Style</span><span class="o">=</span><span class="nt">Polygons</span><span class="p">.</span><span class="nc">Plain</span><span class="o">();</span> <span class="nt">kwargs</span><span class="o">...)</span>
-<span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">r</span><span class="p">::</span><span class="nd">Polygon</span><span class="o">,</span> <span class="nt">s</span><span class="p">::</span><span class="nd">Polygons</span><span class="p">.</span><span class="nc">Plain</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Render a polygon <code>r</code> to cell <code>c</code>, defaulting to plain styling. Currently there is no other Polygon rendering style implemented.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/render/polygons.jl#L1-L6' class='documenter-source'>source</a><br></p>
-<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">p</span><span class="p">::</span><span class="nd">Path</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Render a path <code>p</code> to a cell <code>c</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/render/paths.jl#L1-L7' class='documenter-source'>source</a><br></p>
-<div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">segment</span><span class="p">::</span><span class="nd">Paths</span><span class="p">.</span><span class="nc">Segment</span><span class="o">,</span> <span class="nt">s</span><span class="p">::</span><span class="nd">Paths</span><span class="p">.</span><span class="nc">DecoratedStyle</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>Render a <code>segment</code> with decorated style <code>s</code> to cell <code>c</code>. Cell references held by the decorated style will have their fields modified by this method, which is why they are shallow copied in the <a href="../paths/#Devices.Paths.attach!"><code>Paths.attach!</code></a> function.</p>
-<p>This method draws the decorations before the path itself is drawn.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/render/decorated.jl#L1-L12' class='documenter-source'>source</a><br></p>
                 
                   
                 
@@ -437,7 +542,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../tags/" title="Compound shapes" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../shapes/" title="Compound shapes" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -488,7 +593,9 @@
       
     </div>
     
-      <script src="../assets/javascripts/application-6b4ff16fa7.js"></script>
+      <script src="../assets/javascripts/application-b30566c560.js"></script>
+      
+      
       <script>app.initialize({url:{base:".."}})</script>
       
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>

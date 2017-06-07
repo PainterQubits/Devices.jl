@@ -15,7 +15,7 @@
       
         <link rel="shortcut icon" href="./assets/images/favicon.png">
       
-      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.6.3">
+      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.7.3">
     
     
       
@@ -23,12 +23,12 @@
       
     
     
-      <script src="./assets/javascripts/modernizr-56ade86843.js"></script>
+      <script src="./assets/javascripts/modernizr-1df76c4e58.js"></script>
     
     
-      <link rel="stylesheet" href="./assets/stylesheets/application-e2807e330f.css">
+      <link rel="stylesheet" href="./assets/stylesheets/application-acc56dad49.css">
       
-        <link rel="stylesheet" href="./assets/stylesheets/application-f78e5cb881.palette.css">
+        <link rel="stylesheet" href="./assets/stylesheets/application-8817cfa535.palette.css">
       
     
     
@@ -100,7 +100,7 @@
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="result">
+        <div class="md-search-result" data-md-component="result" data-md-lang-search="">
           <div class="md-search-result__meta" data-md-lang-result-none="No matching documents" data-md-lang-result-one="1 matching document" data-md-lang-result-other="# matching documents">
             Type to start searching
           </div>
@@ -112,9 +112,9 @@
 </div>
         
       </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <div class="md-header-nav__source">
-          
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
             
 
 
@@ -134,9 +134,9 @@
     </div>
   </a>
 
-          
+          </div>
         </div>
-      </div>
+      
     </div>
   </nav>
 </header>
@@ -243,6 +243,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#performance-tips" title="Performance tips" class="md-nav__link">
+    Performance tips
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshooting" title="Troubleshooting" class="md-nav__link">
     Troubleshooting
   </a>
@@ -312,7 +319,7 @@
 
 
   <li class="md-nav__item">
-    <a href="tags/" title="Compound shapes" class="md-nav__link">
+    <a href="shapes/" title="Compound shapes" class="md-nav__link">
       Compound shapes
     </a>
   </li>
@@ -402,6 +409,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#performance-tips" title="Performance tips" class="md-nav__link">
+    Performance tips
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshooting" title="Troubleshooting" class="md-nav__link">
     Troubleshooting
   </a>
@@ -443,14 +457,16 @@
 <div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">Devices</span><span class="p">,</span> <span class="n">Devices</span><span class="o">.</span><span class="n">PreferMicrons</span><span class="p">,</span> <span class="n">FileIO</span>
 
 <span class="n">cr</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;rect&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">centered</span><span class="p">(</span><span class="n">Rectangle</span><span class="p">(</span><span class="mi">20</span><span class="n">μm</span><span class="p">,</span><span class="mi">40</span><span class="n">μm</span><span class="p">))</span>
-<span class="n">render!</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">r</span><span class="p">;</span> <span class="n">layer</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">centered</span><span class="p">(</span><span class="n">Rectangle</span><span class="p">(</span><span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">40</span><span class="n">μm</span><span class="p">))</span>
+<span class="n">render!</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">Rectangles</span><span class="o">.</span><span class="n">Plain</span><span class="p">(),</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
 </pre></div>
 
 
 <p><img src="units_rectonly.svg" style="width:1in;"/></p>
 <p>Note that when you use <code>Devices.PreferMicrons</code>, this will also enable the unqualified use of the following units: <code>pm</code>, <code>nm</code>, <code>μm</code>, <code>mm</code>, <code>cm</code>, <code>dm</code>, <code>m</code>, <code>°</code>, <code>rad</code>. (By unqualified we mean that the symbols are imported into the calling namespace and do not need to be prefixed with a module name.) When adding length units together, if the units don't agree, the result will be in microns. You can <em>instead</em> do <code>using</code> <code>Devices.PreferNanometers</code> if you want the result to default to nanometers. (These are your two choices at the moment, though there's nothing fundamentally limiting other possibilities: see <code>src/units.jl</code> for how to do this for other units.)</p>
 <p>When you specify the units for a <code>Cell</code>, you are specifying a database unit. Anything rendered into this cell will be discretized into integer multiples of the database unit. This means that nothing smaller than 1 nm can be represented accurately. Nonetheless, this is typically a satisfactory choice for superconducting devices.</p>
+<p>A rectangle made with a width and height parameter will default to having its lower-left corner at the origin. <code>centered</code> will return a rectangle that is centered about the origin instead.</p>
+<p>The rectangle is then rendered into the cell. <a href="render/#Devices.Rectangles.Plain"><code>Rectangles.Plain()</code></a> specifies a rendering style. Other examples include <a href="render/#Devices.Rectangles.Rounded"><code>Rectangles.Rounded</code></a> (where the corners are rounded off) or <a href="render/#Devices.Rectangles.Undercut"><code>Rectangles.Undercut</code></a>. You can omit the style, in which case <code>Rectangles.Plain()</code> will be assumed. <code>GDSMeta(1)</code> indicates the target GDS-II layer. You can also specify the GDS-II datatype as a second argument, e.g. <code>GDSMeta(1,0)</code>.</p>
 <p>In another cell, we make the transmission line with some launchers on both ends:</p>
 <div class="codehilite"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">μm</span><span class="p">)</span>
 <span class="n">sty</span> <span class="o">=</span> <span class="n">launch!</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -459,7 +475,7 @@
 <span class="n">straight!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">500</span><span class="n">μm</span><span class="p">)</span>
 <span class="n">launch!</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 <span class="n">cp</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;pathonly&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
-<span class="n">render!</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="n">p</span><span class="p">;</span> <span class="n">layer</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">render!</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </pre></div>
 
 
@@ -469,7 +485,7 @@
 <span class="n">simplify!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">turnidx</span><span class="o">+</span><span class="p">(</span><span class="mi">0</span><span class="o">:</span><span class="mi">2</span><span class="p">))</span>
 <span class="n">attach!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">CellReference</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mf">0.0</span><span class="n">μm</span><span class="p">,</span> <span class="mf">0.0</span><span class="n">μm</span><span class="p">)),</span> <span class="p">(</span><span class="mi">40</span><span class="n">μm</span><span class="p">)</span><span class="o">:</span><span class="p">(</span><span class="mi">40</span><span class="n">μm</span><span class="p">)</span><span class="o">:</span><span class="p">((</span><span class="n">pathlength</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">turnidx</span><span class="p">]))</span><span class="o">-</span><span class="mi">40</span><span class="n">μm</span><span class="p">),</span> <span class="n">i</span><span class="o">=</span><span class="n">turnidx</span><span class="p">)</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;decoratedpath&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
-<span class="n">render!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">;</span> <span class="n">layer</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">render!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </pre></div>
 
 
@@ -481,7 +497,7 @@
 </pre></div>
 
 
-<p>Note that SVG support is experimental at the moment, and is not at all optimized. It is however used in generating the graphics you see in this documentation. If you use Juno for Atom, rendered cells are automatically previewed in the plot pane provided you enter <code>Devices.@junographics</code> at the start of your session.</p>
+<p>Note that SVG support is experimental at the moment, and is not completely optimized. It is however used in generating the graphics you see in this documentation. If you use Juno for Atom, rendered cells are automatically previewed in the plot pane provided you enter <code>Devices.@junographics</code> at the start of your session. If you use Jupyter/IJulia, rendered cells are automatically returned as a result</p>
 <p><a id='Example-without-using-units-1'></a></p>
 <h3 id="example-without-using-units">Example without using units</h3>
 <p>For compatibility and laziness reasons it is possible to use Devices.jl without units at all. <strong>If you do not provide units, all values are presumed to be in microns.</strong> The syntax is otherwise the same:</p>
@@ -489,7 +505,7 @@
 
 <span class="n">cr</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;rect&quot;</span><span class="p">)</span>
 <span class="n">r</span> <span class="o">=</span> <span class="n">centered</span><span class="p">(</span><span class="n">Rectangle</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">40</span><span class="p">))</span>
-<span class="n">render!</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">r</span><span class="p">;</span> <span class="n">layer</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">render!</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 
 <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">()</span>
 <span class="n">sty</span> <span class="o">=</span> <span class="n">launch!</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -498,16 +514,49 @@
 <span class="n">straight!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">500</span><span class="p">)</span>
 <span class="n">launch!</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 <span class="n">cp</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;pathonly&quot;</span><span class="p">)</span>
-<span class="n">render!</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="n">p</span><span class="p">;</span> <span class="n">layer</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">render!</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 
 <span class="n">turnidx</span> <span class="o">=</span> <span class="kt">Int</span><span class="p">((</span><span class="n">length</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="c"># the first straight segment of the path</span>
 <span class="n">simplify!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">turnidx</span><span class="o">+</span><span class="p">(</span><span class="mi">0</span><span class="o">:</span><span class="mi">2</span><span class="p">))</span>
 <span class="n">attach!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">CellReference</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">)),</span> <span class="mi">40</span><span class="o">:</span><span class="mi">40</span><span class="o">:</span><span class="p">((</span><span class="n">pathlength</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">turnidx</span><span class="p">]))</span><span class="o">-</span><span class="mi">40</span><span class="p">),</span> <span class="n">i</span><span class="o">=</span><span class="n">turnidx</span><span class="p">)</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;decoratedpath&quot;</span><span class="p">)</span>
-<span class="n">render!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">;</span> <span class="n">layer</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">render!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 </pre></div>
 
 
+<p>Some caveats:</p>
+<ul>
+<li>You cannot mix and match unitful and unitless numbers (the latter are not presumed to be in microns in this case).</li>
+<li>It is somewhat annoying to maintain this behavior alongside unit support, so eventually I may drop support for this and require the use of units.</li>
+</ul>
+<p><a id='Performance-tips-1'></a></p>
+<h2 id="performance-tips">Performance tips</h2>
+<p>Since Julia has a just-in-time compiler, the first time code is executed may take much longer than any other times. This means that a lot of time will be wasted repeating compilations if you run Devices.jl in a script like you would in other languages. For readability, it is best to split up your CAD code into functions that have clearly named inputs and perform a well-defined task. At present, for performance reasons, it is also best to avoid writing functions with keyword arguments (though this will be addressed in Julia 1.0).</p>
+<p>It is also best to avoid writing statements in global scope. In other words, put most of your code in a function. Your CAD script should ideally look like the following:</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">Devices</span><span class="p">,</span> <span class="n">Devices</span><span class="o">.</span><span class="n">PreferMicrons</span><span class="p">,</span> <span class="n">FileIO</span>
+<span class="k">using</span> <span class="n">CoordinateTransformations</span>
+<span class="k">using</span> <span class="n">Clipper</span>
+
+<span class="k">function</span> <span class="n">subroutine1</span><span class="p">()</span>
+    <span class="c"># render some thing</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="n">subroutine2</span><span class="p">()</span>
+    <span class="c"># render some other thing</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="n">main</span><span class="p">()</span>
+    <span class="c"># my cad code goes here: do all of the things</span>
+    <span class="n">subroutine1</span><span class="p">()</span>
+    <span class="n">subroutine2</span><span class="p">()</span>
+    <span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/out.gds&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">main</span><span class="p">()</span> <span class="c"># execute main() at end of script.</span>
+</pre></div>
+
+
+<p>You can then <code>include</code> this file from Julia to generate your pattern. Provided you write your script this way, subsequent runs should be several times faster than the first if you <code>include</code> the file again from the same Julia session.</p>
 <p><a id='Troubleshooting-1'></a></p>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <ul>
@@ -569,7 +618,9 @@
       
     </div>
     
-      <script src="./assets/javascripts/application-6b4ff16fa7.js"></script>
+      <script src="./assets/javascripts/application-b30566c560.js"></script>
+      
+      
       <script>app.initialize({url:{base:"."}})</script>
       
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>

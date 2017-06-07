@@ -15,7 +15,7 @@
       
         <link rel="shortcut icon" href="../assets/images/favicon.png">
       
-      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.6.3">
+      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.7.3">
     
     
       
@@ -23,12 +23,12 @@
       
     
     
-      <script src="../assets/javascripts/modernizr-56ade86843.js"></script>
+      <script src="../assets/javascripts/modernizr-1df76c4e58.js"></script>
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application-e2807e330f.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application-acc56dad49.css">
       
-        <link rel="stylesheet" href="../assets/stylesheets/application-f78e5cb881.palette.css">
+        <link rel="stylesheet" href="../assets/stylesheets/application-8817cfa535.palette.css">
       
     
     
@@ -100,7 +100,7 @@
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="result">
+        <div class="md-search-result" data-md-component="result" data-md-lang-search="">
           <div class="md-search-result__meta" data-md-lang-result-none="No matching documents" data-md-lang-result-one="1 matching document" data-md-lang-result-other="# matching documents">
             Type to start searching
           </div>
@@ -112,9 +112,9 @@
 </div>
         
       </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <div class="md-header-nav__source">
-          
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
             
 
 
@@ -134,9 +134,9 @@
     </div>
   </a>
 
-          
+          </div>
         </div>
-      </div>
+      
     </div>
   </nav>
 </header>
@@ -288,7 +288,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../tags/" title="Compound shapes" class="md-nav__link">
+    <a href="../shapes/" title="Compound shapes" class="md-nav__link">
       Compound shapes
     </a>
   </li>
@@ -433,7 +433,7 @@ julia&gt; aff(Point(0,0))
 
 
 <p>Allowed type variables for <code>Point{T}</code> types.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/Devices.jl#L57-L60' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/Devices.jl#L61-L64' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Coordinate' href='#Devices.Coordinate'>#</a>
 <strong><code>Devices.Coordinate</code></strong> &mdash; <em>Constant</em>.</p>
 <div class="codehilite"><pre><span></span>typealias Coordinate Union{Real,Length}
@@ -441,10 +441,10 @@ julia&gt; aff(Point(0,0))
 
 
 <p>Type alias for numeric types suitable for coordinate systems.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/Devices.jl#L51-L54' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/Devices.jl#L55-L58' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.Point' href='#Devices.Points.Point'>#</a>
 <strong><code>Devices.Points.Point</code></strong> &mdash; <em>Type</em>.</p>
-<div class="codehilite"><pre><span></span>immutable Point{T} &lt;: StaticArrays.FieldVector{T}
+<div class="codehilite"><pre><span></span>immutable Point{T} &lt;: StaticArrays.FieldVector{2,T}
     x::T
     y::T
 end
@@ -452,7 +452,7 @@ end
 
 
 <p>2D Cartesian coordinate in the plane.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/points.jl#L18-L27' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/points.jl#L30-L36' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.getx' href='#Devices.Points.getx'>#</a>
 <strong><code>Devices.Points.getx</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>getx(p::Point)
@@ -460,7 +460,7 @@ end
 
 
 <p>Get the x-coordinate of a point. You can also use <code>p.x</code> or <code>p[1]</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/points.jl#L56-L62' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/points.jl#L62-L65' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.gety' href='#Devices.Points.gety'>#</a>
 <strong><code>Devices.Points.gety</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>gety(p::Point)
@@ -468,7 +468,7 @@ end
 
 
 <p>Get the y-coordinate of a point. You can also use <code>p.y</code> or <code>p[2]</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/points.jl#L65-L71' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/points.jl#L68-L71' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.lowerleft' href='#Devices.lowerleft'>#</a>
 <strong><code>Devices.lowerleft</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>lowerleft{T}(A::AbstractArray{Point{T}})
@@ -484,19 +484,19 @@ end
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/points.jl#L104-L116' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/points.jl#L104-L116' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>lowerleft(r::Rectangle)
 </pre></div>
 
 
 <p>Returns the lower-left corner of a rectangle (Point object).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/rectangles.jl#L138-L141' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/rectangles.jl#L112-L115' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>lowerleft(x::Polygon)
 </pre></div>
 
 
 <p>Return the lower-left-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/polygons.jl#L135-L142' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/polygons.jl#L107-L111' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.upperright' href='#Devices.upperright'>#</a>
 <strong><code>Devices.upperright</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>upperright{T}(A::AbstractArray{Point{T}})
@@ -512,19 +512,19 @@ end
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/points.jl#L124-L136' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/points.jl#L124-L136' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>upperright(r::Rectangle)
 </pre></div>
 
 
 <p>Returns the upper-right corner of a rectangle (Point object).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/rectangles.jl#L144-L147' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/rectangles.jl#L118-L121' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>upperright(x::Polygon)
 </pre></div>
 
 
 <p>Return the upper-right-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/aa4564d061ee9a5114cbb90201cc17ee98210eba/src/polygons.jl#L145-L152' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/polygons.jl#L114-L118' class='documenter-source'>source</a><br></p>
 <p><a id='Implementation-details-1'></a></p>
 <h2 id="implementation-details">Implementation details</h2>
 <p>Points are implemented using the abstract type <code>FieldVector</code> from <a href="https://github.com/JuliaArrays/StaticArrays.jl">StaticArrays.jl</a>. This permits a fast, efficient representation of coordinates in the plane. Additionally, unlike <code>Tuple</code> objects, we can add points together, simplifying many function definitions.</p>
@@ -597,7 +597,9 @@ end
       
     </div>
     
-      <script src="../assets/javascripts/application-6b4ff16fa7.js"></script>
+      <script src="../assets/javascripts/application-b30566c560.js"></script>
+      
+      
       <script>app.initialize({url:{base:".."}})</script>
       
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
