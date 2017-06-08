@@ -1,6 +1,7 @@
 module Microwave
 using Compat
 import Clipper: Clipper, ClipTypeDifference, ClipTypeIntersection, ClipTypeUnion
+import StaticArrays
 import ForwardDiff
 import Devices
 import Devices: bounds, center, centered, render!
@@ -291,7 +292,7 @@ function jj!{T}(c::Cell{T}, m, b, w1, w2, w3, w4, l1, l2, l3, l4, uc, t1, Θ, ϕ
 
     # Horizontally center the shapes
     cen = center(bounds(uclip))
-    uclip .-= Point(getx(cen),zero(getx(cen)))
+    uclip .-= StaticArrays.Scalar(Point(getx(cen),zero(getx(cen))))
 
     # Render them
     for (x,y) in zip(uclip, layers)

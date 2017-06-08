@@ -65,24 +65,28 @@ Floating-point formats found in GDS-II files.
 @compat abstract type GDSFloat <: Real end
 
 """
-    bitstype 64 GDS64 <: GDSFloat
+    immutable GDS64 <: GDSFloat
+        x::UInt64
+        GDS64(x::UInt64) = new(x)
+    end
 "8-byte (64-bit) real" format found in GDS-II files.
 """
-@compat primitive type GDS64 <: GDSFloat 64 end
+immutable GDS64 <: GDSFloat
+    x::UInt64
+    GDS64(x::UInt64) = new(x)
+end
 
 """
     bits(x::GDS64)
 A string giving the literal bit representation of a GDS64 number.
 """
-bits(x::GDS64) = bits(reinterpret(UInt64,x))
+bits(x::GDS64) = bits(x.x)
 
 """
     bswap(x::GDS64)
 Byte-swap a GDS64 number. Used implicitly by `hton`, `ntoh` for endian conversion.
 """
-function bswap(x::GDS64)
-    Core.Intrinsics.box(GDS64, Base.bswap_int(Core.Intrinsics.unbox(GDS64,x)))
-end
+bswap(x::GDS64) = GDS64(Base.bswap_int(x.x))
 
 """
     even(str)
@@ -121,11 +125,11 @@ function convert{T<:AbstractFloat}(::Type{GDS64}, y::T)
         result = ((floatexp-766) >> 2) << 56
         result |= (significand << 3)
     end
-    reinterpret(GDS64, (y < 0. ? result | neg : result & pos))
+    GDS64(y < 0. ? result | neg : result & pos)
 end
 
 function convert(::Type{Float64}, y::GDS64)
-    inty   = reinterpret(UInt64, y)
+    inty   = y.x
     smask  = 0x00ffffffffffffff
     emask  = 0x7f00000000000000
     result = 0x8000000000000000 & inty
@@ -152,13 +156,13 @@ gdswerr(x) = error("Wrong data type for token 0x$(hex(x,4)).")
     write(s::IO, x::GDS64)
 Write a GDS64 number to an IO stream.
 """
-write(s::IO, x::GDS64) = write(s, reinterpret(UInt64, x))    # check for v0.5
+write(s::IO, x::GDS64) = write(s, x.x)
 
 """
     read(s::IO, ::Type{GDS64})
 Read a GDS64 number from an IO stream.
 """
-read(s::IO, ::Type{GDS64}) = reinterpret(GDS64, read(s, UInt64))
+read(s::IO, ::Type{GDS64}) = GDS64(read(s, UInt64))
 
 function gdswrite(io::IO, x::UInt16)
     (x & 0x00ff != 0x0000) && gdswerr(x)
@@ -209,19 +213,19 @@ end
 
 function gdsbegin(io::IO, libname::String, dbunit::Length, userunit::Length,
         modify::DateTime, acc::DateTime)
-    y    = UInt16(Dates.Year(modify))
-    mo   = UInt16(Dates.Month(modify))
-    d    = UInt16(Dates.Day(modify))
-    h    = UInt16(Dates.Hour(modify))
-    min  = UInt16(Dates.Minute(modify))
-    s    = UInt16(Dates.Second(modify))
+    y    = UInt16(Dates.value(Dates.Year(modify)))
+    mo   = UInt16(Dates.value(Dates.Month(modify)))
+    d    = UInt16(Dates.value(Dates.Day(modify)))
+    h    = UInt16(Dates.value(Dates.Hour(modify)))
+    min  = UInt16(Dates.value(Dates.Minute(modify)))
+    s    = UInt16(Dates.value(Dates.Second(modify)))
 
-    y1   = UInt16(Dates.Year(acc))
-    mo1  = UInt16(Dates.Month(acc))
-    d1   = UInt16(Dates.Day(acc))
-    h1   = UInt16(Dates.Hour(acc))
-    min1 = UInt16(Dates.Minute(acc))
-    s1   = UInt16(Dates.Second(acc))
+    y1   = UInt16(Dates.value(Dates.Year(acc)))
+    mo1  = UInt16(Dates.value(Dates.Month(acc)))
+    d1   = UInt16(Dates.value(Dates.Day(acc)))
+    h1   = UInt16(Dates.value(Dates.Hour(acc)))
+    min1 = UInt16(Dates.value(Dates.Minute(acc)))
+    s1   = UInt16(Dates.value(Dates.Second(acc)))
 
     gdswrite(io, BGNLIB, y,mo,d,h,min,s, y1,mo1,d1,h1,min1,s1) +
     gdswrite(io, LIBNAME, libname) +
@@ -238,20 +242,20 @@ function gdswrite(io::IO, cell::Cell, dbs::Length)
     name = even(cell.name)
     namecheck(name)
 
-    y    = UInt16(Dates.Year(cell.create))
-    mo   = UInt16(Dates.Month(cell.create))
-    d    = UInt16(Dates.Day(cell.create))
-    h    = UInt16(Dates.Hour(cell.create))
-    min  = UInt16(Dates.Minute(cell.create))
-    s    = UInt16(Dates.Second(cell.create))
+    y    = UInt16(Dates.value(Dates.Year(cell.create)))
+    mo   = UInt16(Dates.value(Dates.Month(cell.create)))
+    d    = UInt16(Dates.value(Dates.Day(cell.create)))
+    h    = UInt16(Dates.value(Dates.Hour(cell.create)))
+    min  = UInt16(Dates.value(Dates.Minute(cell.create)))
+    s    = UInt16(Dates.value(Dates.Second(cell.create)))
 
     modify = now()
-    y1   = UInt16(Dates.Year(modify))
-    mo1  = UInt16(Dates.Month(modify))
-    d1   = UInt16(Dates.Day(modify))
-    h1   = UInt16(Dates.Hour(modify))
-    min1 = UInt16(Dates.Minute(modify))
-    s1   = UInt16(Dates.Second(modify))
+    y1   = UInt16(Dates.value(Dates.Year(modify)))
+    mo1  = UInt16(Dates.value(Dates.Month(modify)))
+    d1   = UInt16(Dates.value(Dates.Day(modify)))
+    h1   = UInt16(Dates.value(Dates.Hour(modify)))
+    min1 = UInt16(Dates.value(Dates.Minute(modify)))
+    s1   = UInt16(Dates.value(Dates.Second(modify)))
 
     bytes = gdswrite(io, BGNSTR, y,mo,d,h,min,s, y1,mo1,d1,h1,min1,s1)
     bytes += gdswrite(io, STRNAME, name)

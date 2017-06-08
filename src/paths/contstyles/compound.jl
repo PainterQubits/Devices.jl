@@ -15,10 +15,20 @@ style's parametric function.
 type CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle
     styles::Vector{Style}
     grid::Vector{T}
-    f::Function
 end
+function (s::CompoundStyle)(t)
+    l0 = s.grid[1]
+    t < l0 && return 1, t - l0
+    for i in 2:(length(s.grid) - 1)
+        l1 = s.grid[i]
+        (l0 <= t) && (t < l1) && return (i-1), t-l0
+        l0 = s.grid[i]
+    end
+    return length(s.grid) - 1, t - l0
+end
+
 CompoundStyle(seg::AbstractVector, sty::AbstractVector) =
-    CompoundStyle(deepcopy(Vector{Style}(sty)), makegrid(seg, sty), cstylef(seg))
+    CompoundStyle(deepcopy(Vector{Style}(sty)), makegrid(seg, sty))
 
 grid(s::CompoundStyle) = s.grid
 
@@ -71,7 +81,7 @@ end
 
 for x in (:extent, :width)
     @eval function ($x)(s::CompoundStyle, t)
-        idx, teff = s.f(t)
+        idx, teff = s(t)
         ($x)(s.styles[idx], teff)
     end
 end
