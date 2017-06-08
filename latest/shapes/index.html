@@ -357,7 +357,7 @@
 
 
 <p>The profile of the bridge is given as <code>h(x) = H*(2 - cosh(2*cosh^(-1)(2) x/L))</code> where <code>H</code> is the height of bridge and <code>L</code> is the total span of bridge. The inverse of h(x) is taken to compute the size of each layer.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L29-L57' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L29-L57' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Microwave.device_template!' href='#Devices.Microwave.device_template!'>#</a>
 <strong><code>Devices.Microwave.device_template!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>device_template!{T}(d::Cell{T}, chip_meta::Meta, writeable_meta::Meta, marker_meta::Meta)
@@ -365,7 +365,7 @@
 
 
 <p>In cell <code>c</code>, make a template for a 1cm x 1cm chip. Includes chip outline, usable area outline, and markers.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L118-L122' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L118-L122' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Microwave.checkerboard!' href='#Devices.Microwave.checkerboard!'>#</a>
 <strong><code>Devices.Microwave.checkerboard!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>checkerboard!{T}(c::Cell{T}, pixsize, rows::Integer, alt, meta::Meta=GDSMeta())
@@ -378,7 +378,7 @@
 <li><code>rows</code>: number of rows == number of columns</li>
 <li><code>alt</code>: the square nearest <code>Point(zero(T), zero(T))</code> is filled (unfilled) if <code>false</code> (<code>true</code>). Use this to create a full tiling of the checkerboard, if you wish.</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L87-L95' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L87-L95' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">checkerboard!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
@@ -394,7 +394,7 @@
 
 
 <p>Generate a square grating suitable e.g. for obtaining the base dose for PEC.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L181-L184' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L181-L184' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">grating!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">100</span><span class="n">nm</span><span class="p">,</span> <span class="mi">100</span><span class="n">nm</span><span class="p">,</span> <span class="mi">5</span><span class="n">μm</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
@@ -418,7 +418,7 @@
 <li><code>npairs</code>: number of fingers</li>
 <li><code>skiplast</code>: should we skip the last finger, leaving an odd number?</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L197-L207' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L197-L207' class='documenter-source'>source</a><br></p>
 <p>Simple usage:</p>
 <div class="codehilite"><pre><span></span><span class="n">fingers</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;fingers&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">wide</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">fingergap</span><span class="p">,</span> <span class="n">fingeroffset</span><span class="p">,</span> <span class="n">npairs</span><span class="p">,</span> <span class="n">skiplast</span> <span class="o">=</span> <span class="mi">1</span><span class="n">μm</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">1</span><span class="n">μm</span><span class="p">,</span> <span class="mi">3</span><span class="n">μm</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">true</span>
@@ -458,7 +458,7 @@
 
 
 <p>Given <code>layers</code>, a matrix of <code>Int</code>, make a bitmap of <code>Rectangle</code> where the GDS-II layer corresponds to the number in the matrix. If the number is less than one, don't write the rectangle. All the rectangles get rendered into cell <code>c</code>. The rectangles are all in the first quadrant of the cell.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L369-L375' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L369-L375' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;pix&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">layerpixels!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">;</span> <span class="o">-</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">],</span> <span class="mi">5</span><span class="n">μm</span><span class="p">)</span>
@@ -474,7 +474,7 @@
 
 
 <p>Renders the base metal for a capacitively-shunted charge qubit into cell <code>c</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L387-L391' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L387-L391' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Microwave.qubit_claw!' href='#Devices.Microwave.qubit_claw!'>#</a>
 <strong><code>Devices.Microwave.qubit_claw!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>qubit_claw!{T}(c::Cell{T}, trace, gap, claw_width, claw_length, claw_gap, ground_gap,
@@ -483,7 +483,7 @@
 
 
 <p>Renders a "claw" into cell <code>c</code> suitable for attaching to the end of a resonator. One can wrap the claw around a capacitively-shunted charge qubit generated by <a href="./#Devices.Microwave.qubit!"><code>qubit!</code></a> for capacitive coupling between the qubit and resonator.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L454-L460' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L454-L460' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">μm</span><span class="p">)</span>
@@ -542,7 +542,7 @@
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L491-L529' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L491-L529' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">radialcut!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">90</span><span class="n">°</span><span class="p">,</span> <span class="mi">5</span><span class="n">μm</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
@@ -558,7 +558,7 @@
 
 <p>See also the documentation for <code>radialcut!</code>.</p>
 <p>Returns a polygon for a radial stub. The polygon has to be subtracted from a ground plane, and will leave a defect in the ground plane of uniform width <code>t</code> that outlines the (metallic) radial stub. <code>r</code> refers to the radius of the actual stub, not the radius of the circular arc bounding the ground plane defect. Likewise <code>h</code> has an analogous meaning to that in <code>radialcut!</code> except it refers here to the radial stub, not the ground plane defect.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e5cba03a1704c727c8bfd0cbd1c0b6ec59713edf/src/microwave.jl#L546-L556' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/70b0eca93851a5d241d4e122cf031ec648449b7f/src/microwave.jl#L546-L556' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">radialstub!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">90</span><span class="n">°</span><span class="p">,</span> <span class="mi">5</span><span class="n">μm</span><span class="p">,</span> <span class="mi">1</span><span class="n">μm</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
