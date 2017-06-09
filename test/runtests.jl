@@ -806,6 +806,22 @@ end
             p(11.816454754947033,-0.5),
             p(0,-0.5)
         ]
+
+        # Test behavior if we swap out the segment
+        c = Cell("main", nm)
+        pa = Path(μm)
+        straight!(pa, 20μm, Paths.Trace(10μm))
+        straight!(pa, 20μm, Paths.Trace(15μm))
+        straight!(pa, 20μm, Paths.Trace(20μm))
+        simplify!(pa)
+        setsegment!(pa[1], Paths.Straight(120.0μm, p(0.0μm, 0.0μm), 0.0))
+        render!(c, pa)
+        @test lowerleft(bounds(c.elements[1])) ≈ Point(0μm, -5μm)
+        @test upperright(bounds(c.elements[1])) ≈ Point(20μm, 5μm)
+        @test lowerleft(bounds(c.elements[2])) ≈ Point(20μm, -7.5μm)
+        @test upperright(bounds(c.elements[2])) ≈ Point(40μm, 7.5μm)
+        @test lowerleft(bounds(c.elements[3])) ≈ Point(40μm, -10μm)
+        @test upperright(bounds(c.elements[3])) ≈ Point(120μm, 10μm)
     end
 end
 
