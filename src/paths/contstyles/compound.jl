@@ -50,3 +50,5 @@ for x in (:extent, :width)
         ($x)(s.styles[idx], teff)
     end
 end
+
+summary(::CompoundStyle) = "Compound style"

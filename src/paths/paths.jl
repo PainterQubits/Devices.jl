@@ -271,6 +271,7 @@ function setα0p0!(s::Segment, angle, p::Point)
 end
 
 show(io::IO, s::Segment) = print(io, summary(s))
+show(io::IO, s::Style) = print(io, summary(s))
 
 function deepcopy_internal(x::Segment, stackdict::ObjectIdDict)
     if haskey(stackdict, x)

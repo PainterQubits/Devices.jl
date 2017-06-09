@@ -1,6 +1,6 @@
 
 """
-    type CompoundSegment{T} <: ContinuousSegment{T}
+    immutable CompoundSegment{T} <: ContinuousSegment{T}
         segments::Vector{Segment{T}}
 
         CompoundSegment(segments) = begin
@@ -20,7 +20,7 @@ by the compound segment.
 Note that [`Corner`](@ref)s introduce a discontinuity in the derivative of the
 path function, and are not allowed in a `CompoundSegment`.
 """
-type CompoundSegment{T} <: ContinuousSegment{T}
+immutable CompoundSegment{T} <: ContinuousSegment{T}
     segments::Vector{Segment{T}}
 
     (::Type{CompoundSegment{T}}){T}(segments) = begin
@@ -71,6 +71,7 @@ end
 CompoundSegment{T}(nodes::AbstractArray{Node{T},1}) =
     CompoundSegment{T}(map(segment, nodes))
 
+summary(s::CompoundSegment) = string(length(s.segments), " segments")
 copy{T}(s::CompoundSegment{T}) = CompoundSegment{T}(s.segments)
 pathlength{T}(s::CompoundSegment{T}) = sum(pathlength, s.segments)
 

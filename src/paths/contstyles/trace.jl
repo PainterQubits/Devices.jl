@@ -35,3 +35,6 @@ appropriate.
 """
 Trace(width) = GeneralTrace(width)
 Trace(width::Coordinate) = SimpleTrace(float(width))
+
+summary(::GeneralTrace) = "Trace with variable width"
+summary(s::SimpleTrace) = string("Trace with width ", s.width)

@@ -49,3 +49,6 @@ end
 CPW(trace, gap::Coordinate) = GeneralCPW(trace, x->float(gap))
 CPW(trace::Coordinate, gap) = GeneralCPW(x->float(trace), gap)
 CPW(trace, gap) = GeneralCPW(trace, gap)
+
+summary(::GeneralCPW) = "CPW with variable width and gap"
+summary(s::SimpleCPW) = string("CPW with width ", s.trace, " and gap ", s.gap)
