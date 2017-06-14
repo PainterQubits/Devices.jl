@@ -1,6 +1,5 @@
 using Base.Test
-using Devices
-using Unitful
+using Devices, Unitful, FileIO
 import Unitful: s, DimensionError
 import Clipper
 import ForwardDiff
@@ -901,5 +900,25 @@ end
     end
 end
 
-# TODO: How to test GDS import?
-# TODO: How to test GDS export? diff with known good result files?
+@testset "Backends" begin
+    @testset "GDS format" begin
+        s1 = Cell("sub1", nm)
+        render!(s1, Rectangle(10μm, 10μm), Rectangles.Plain(), GDSMeta(1,0))
+        s2 = Cell("sub2", nm)
+        render!(s2, Rectangle(10μm, 10μm), Rectangles.Plain(), GDSMeta(2,0))
+        main = Cell("main", nm)
+        render!(main, Rectangle(10μm, 10μm), Rectangles.Plain(), GDSMeta(0,0))
+        push!(main.refs, CellReference(s1, p(0.0μm,20.0μm)))
+        push!(main.refs, CellArray(s2, p(20.0μm, 0.0μm);
+            nrows=2, ncols=1, dc=p(0.0μm, 0.0μm), dr=p(0.0μm, 20.0μm)))
+        path = joinpath(dirname(@__FILE__), "test.gds")
+        @test save(path, main) == 454 # bytes written
+        cells = load(path)
+        @test haskey(cells, "main")
+        @test isa(cells["main"], Cell{typeof(1.0*Unitful.nm), GDSMeta})
+        @test length(cells["main"].refs) == 2
+        @test length(elements(cells["main"])) == 1
+    end
+
+    # TODO: SVG format
+end

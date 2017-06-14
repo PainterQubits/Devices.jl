@@ -5,7 +5,7 @@ using Unitful
 import Unitful: Length, fm, pm, nm, μm, m
 
 import Base: bswap, bits, convert, write, read
-import Devices: DEFAULT_LAYER, DEFAULT_DATATYPE, layer, datatype, points
+import Devices: DEFAULT_LAYER, DEFAULT_DATATYPE, GDSMeta, layer, datatype, points, render!
 using ..Points
 import ..Rectangles: Rectangle
 import ..Polygons: Polygon
@@ -582,7 +582,7 @@ function load(f::File{format"GDS"}; verbose::Bool=false, nounits::Bool=false)
 end
 
 function cell(s, dbs, verbose, nounits)
-    c = nounits ? Cell{Float64}() : Cell{typeof(dbs)}()
+    c = nounits ? Cell{Float64, GDSMeta}() : Cell{typeof(dbs), GDSMeta}()
     while true
         bytes = ntoh(read(s, Int16)) - 4 # 2 for byte count, 2 for token
         token = ntoh(read(s, UInt16))
