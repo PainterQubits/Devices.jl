@@ -34,7 +34,6 @@ function __init__()
     # The magic bytes are the GDS HEADER tag (0x0002), preceded by the number of
     # bytes in total (6 == 0x0006) for the HEADER record.
     add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02], ".gds")
-    add_format(format"SVG", (), ".svg")
 end
 
 # The following functions are imported by submodules and have methods

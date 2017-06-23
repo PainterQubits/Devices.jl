@@ -24,6 +24,7 @@ else
     immutable Point{T<:PointTypes} <: StaticArrays.FieldVector{2,T}
         x::T
         y::T
+        (::Type{Point{T}}){T}(x,y) = new{T}(x,y)
     end
 end
 
