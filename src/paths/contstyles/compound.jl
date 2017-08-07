@@ -1,5 +1,5 @@
 """
-    immutable CompoundStyle <: ContinuousStyle
+    struct CompoundStyle <: ContinuousStyle
         styles::Vector{Style}
         grid::Vector{Float64}
     end
@@ -9,7 +9,7 @@ Combines styles together, typically for use with a [`CompoundSegment`](@ref).
 by the outer constructor.
 - `grid`: An array of `t` values needed for rendering the parameteric path.
 """
-immutable CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle
+struct CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle
     styles::Vector{Style}
     grid::Vector{T}
 end

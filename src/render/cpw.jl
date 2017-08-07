@@ -19,7 +19,7 @@ function render!(c::Cell, f, len, s::Paths.CPW, meta::Meta; kwargs...)
     render!(c, Polygon(mpts), Polygons.Plain(), meta)
 end
 
-function render!{T}(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleCPW, meta::Meta)
+function render!(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleCPW, meta::Meta) where {T}
     dir = direction(segment, zero(T))
     dp = dir+π/2
 

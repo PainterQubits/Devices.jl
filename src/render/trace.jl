@@ -14,7 +14,7 @@ function render!(c::Cell, f, len, s::Paths.Trace, meta::Meta; kwargs...)
     render!(c, Polygon(pts), Polygons.Plain(), meta)
 end
 
-function render!{T}(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleTrace, meta::Meta)
+function render!(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleTrace, meta::Meta) where {T}
     dir = direction(segment, zero(T))
     dp, dm = dir+π/2, dir-π/2
 

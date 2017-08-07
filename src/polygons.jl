@@ -4,7 +4,6 @@ import Base: +, -, *, .*, /, ==, .+, .-, isapprox
 import Base: convert, getindex, start, next, done
 import Base: copy, promote_rule
 
-using Compat
 using ForwardDiff
 import CoordinateTransformations: AffineMap, LinearMap, Translation
 import Clipper
@@ -32,7 +31,7 @@ coffset() = (Devices._coffset[])::Clipper.ClipperOffset
 const PCSCALE = float(2^31)
 
 """
-    immutable Polygon{T} <: AbstractPolygon{T}
+    struct Polygon{T} <: AbstractPolygon{T}
         p::Vector{Point{T}}
         Polygon(x) = new(x)
         Polygon(x::AbstractPolygon) = convert(Polygon{T}, x)
@@ -40,7 +39,7 @@ const PCSCALE = float(2^31)
 Polygon defined by list of coordinates. The first point should not be repeated
 at the end (although this is true for the GDS format).
 """
-immutable Polygon{T} <: AbstractPolygon{T}
+struct Polygon{T} <: AbstractPolygon{T}
     p::Vector{Point{T}}
     (::Type{Polygon{T}}){T}(x) = new{T}(x)
     (::Type{Polygon{T}}){T}(x::AbstractPolygon) = convert(Polygon{T}, x)
@@ -56,7 +55,7 @@ Polygon(p0::Point, p1::Point, p2::Point, p3::Point...) = Polygon([p0, p1, p2, p3
     Polygon{T}(parr::AbstractVector{Point{T}})
 Convenience constructor for a `Polygon{T}` object.
 """
-Polygon{T}(parr::AbstractVector{Point{T}}) = Polygon{T}(parr)
+Polygon(parr::AbstractVector{Point{T}}) where {T} = Polygon{T}(parr)
 
 Polygon(parr::AbstractVector{Point}) =
     error("polygon creation failed. Perhaps you mixed units and unitless numbers?")
@@ -75,28 +74,20 @@ points(x::Polygon) = x.p
     points{T}(x::Rectangle{T})
 Returns the array of `Point` objects defining the rectangle.
 """
-points{T}(x::Rectangle{T}) = points(convert(Polygon{T}, x))
+points(x::Rectangle{T}) where {T} = points(convert(Polygon{T}, x))
 
 for (op, dotop) in [(:+, :.+), (:-, :.-)]
     @eval function ($op)(r::Polygon, p::Point)
         Polygon(($dotop)(r.p, p))
     end
-    @eval @compat function ($op)(r::Polygon, p::StaticArrays.Scalar{<:Point})
+    @eval function ($op)(r::Polygon, p::StaticArrays.Scalar{<:Point})
         Polygon(($dotop)(r.p, p))
     end
     @eval function ($op)(p::Point, r::Polygon)
         Polygon(($dotop)(p, r.p))
     end
-    @eval @compat function ($op)(p::StaticArrays.Scalar{<:Point}, r::Polygon)
+    @eval function ($op)(p::StaticArrays.Scalar{<:Point}, r::Polygon)
         Polygon(($dotop)(p, r.p))
-    end
-    if VERSION < v"0.6.0-pre"
-        @eval function ($dotop){T<:AbstractPolygon}(r::AbstractArray{T}, p::Point)
-            map(x->($op)(x, p), r)
-        end
-        @eval function ($dotop){T<:AbstractPolygon}(p::Point, r::AbstractArray{T})
-            map(x->($op)(p, x), r)
-        end
     end
 end
 
@@ -109,22 +100,14 @@ end
 Return the lower-left-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
 """
-lowerleft(::Polygon)
+lowerleft(x::Polygon) = lowerleft(x.p)
 
 """
     upperright(x::Polygon)
 Return the upper-right-most corner of a rectangle bounding polygon `x`.
 Note that this point doesn't have to be in the polygon.
 """
-upperright(x::Polygon)
-
-if VERSION < v"0.6.0-"
-    lowerleft(x::Polygon) = Point(reduce(min, x.p))
-    upperright(x::Polygon) = Point(reduce(max, x.p))
-else
-    lowerleft(x::Polygon) = lowerleft(x.p)
-    upperright(x::Polygon) = upperright(x.p)
-end
+upperright(x::Polygon) = upperright(x.p)
 
 for T in (:LinearMap, :AffineMap)
     @eval (f::$T)(x::Polygon) = Polygon(f.(x.p))
@@ -134,16 +117,16 @@ end
 (f::Translation)(x::Polygon) = Polygon(f.(x.p))
 (f::Translation)(x::Rectangle) = Rectangle(f(x.ll), f(x.ur))
 
-function convert{T}(::Type{Polygon{T}}, s::Rectangle)
+function convert(::Type{Polygon{T}}, s::Rectangle) where {T}
     ll = convert(Point{T}, s.ll)
     ur = convert(Point{T}, s.ur)
     lr = Point(T(getx(ur)), T(gety(ll)))
     ul = Point(T(getx(ll)), T(gety(ur)))
     Polygon{T}(Point{T}[ll,lr,ur,ul])
 end
-convert{T}(::Type{Polygon}, s::Rectangle{T}) = convert(Polygon{T}, s)
-convert{T}(::Type{AbstractPolygon{T}}, s::Rectangle) = convert(Rectangle{T}, s)
-function convert{T}(::Type{Polygon{T}}, p::Polygon)
+convert(::Type{Polygon}, s::Rectangle{T}) where {T} = convert(Polygon{T}, s)
+convert(::Type{AbstractPolygon{T}}, s::Rectangle) where {T} = convert(Rectangle{T}, s)
+function convert(::Type{Polygon{T}}, p::Polygon) where {T}
     Polygon{T}(convert(Array{Point{T},1}, p.p))
 end
 
@@ -157,7 +140,7 @@ bounds(p::Polygon) = Rectangle(lowerleft(p), upperright(p))
     bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
 Return a bounding `Rectangle` for an array `parr` of `AbstractPolygon` objects.
 """
-function bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
+function bounds(parr::AbstractArray{T}) where {T <: AbstractPolygon}
     rects = map(bounds, parr)
     ll = lowerleft(map(lowerleft, rects))
     ur = upperright(map(upperright, rects))
@@ -170,26 +153,26 @@ Return a bounding `Rectangle` for several `AbstractPolygon` objects.
 """
 bounds(p0::AbstractPolygon, p::AbstractPolygon...) = bounds([p0, p...])
 
-@compat abstract type Style{T<:Meta} end
+abstract type Style{T<:Meta} end
 
 """
-    immutable Plain{T} <: Polygons.Style{T}
+    struct Plain{T} <: Polygons.Style{T}
         meta::T
     end
 Plain polygon style.
 """
-immutable Plain{T} <: Style{T}
+struct Plain{T} <: Style{T}
     meta::T
 end
 Plain() = Plain(GDSMeta())
 
 # Polygon promotion.
 for X in (:Real, :Length)
-    @eval promote_rule{S<:$X,T<:$X}(::Type{Polygon{S}}, ::Type{Polygon{T}}) =
+    @eval promote_rule(::Type{Polygon{S}}, ::Type{Polygon{T}}) where {S<:$X, T<:$X} =
         Polygon{promote_type(S,T)}
-    @eval promote_rule{S<:$X,T<:$X}(::Type{Rectangle{S}}, ::Type{Polygon{T}}) =
+    @eval promote_rule(::Type{Rectangle{S}}, ::Type{Polygon{T}}) where {S<:$X, T<:$X} =
         Polygon{promote_type(S,T)}
-    @eval promote_rule{S<:$X,T<:$X}(::Type{Rectangle{S}}, ::Type{Rectangle{T}}) =
+    @eval promote_rule(::Type{Rectangle{S}}, ::Type{Rectangle{T}}) where {S<:$X, T<:$X} =
         Rectangle{promote_type(S,T)}
 end
 
@@ -218,10 +201,10 @@ for further information). These arguments may include:
 - `Clipper.PolyFillTypeEvenOdd`
 - `Clipper.PolyFillTypeNonZero`
 """
-function clip{S<:Coordinate, T<:Coordinate}(op::Clipper.ClipType,
+function clip(op::Clipper.ClipType,
         s::AbstractPolygon{S}, c::AbstractPolygon{T};
         pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where {S <: Coordinate,T <: Coordinate}
 
     dimension(S) != dimension(T) && throw(Unitful.DimensionError(S(1),T(1)))
     R = promote_type(S, T)
@@ -238,10 +221,10 @@ Perform polygon clipping. The first argument must be as listed above.
 The second and third arguments are arrays (vectors) of [`AbstractPolygon`](@ref)s.
 Keyword arguments are explained above.
 """
-function clip{S<:AbstractPolygon, T<:AbstractPolygon}(op::Clipper.ClipType,
+function clip(op::Clipper.ClipType,
     s::AbstractVector{S}, c::AbstractVector{T};
     pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
+    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where {S <: AbstractPolygon,T <: AbstractPolygon}
 
     P = promote_type(eltype(eltype(s)), eltype(eltype(c)))
     clip(op, convert(Vector{Polygon{P}}, s),
@@ -258,10 +241,10 @@ Perform polygon clipping. The first argument must be as listed above.
 The second and third arguments are identically-typed arrays (vectors) of
 [`Polygon{T}`](@ref) objects. Keyword arguments are explained above.
 """
-function clip{T<:Polygon}(op::Clipper.ClipType,
+function clip(op::Clipper.ClipType,
     s::AbstractVector{T}, c::AbstractVector{T};
     pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
+    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where {T <: Polygon}
 
     S,C = clipperize(s), clipperize(c)
     polys = _clip(op, S, C; pfs=pfs, pfc=pfc)
@@ -270,11 +253,11 @@ end
 
 # Clipping two identically-typed arrays of "Int64-based" Polygons.
 # Internal method which should not be called by user (but does the heavy lifting)
-function _clip{T<:Union{Int64, Unitful.Quantity{Int64}}}(op::Clipper.ClipType,
+function _clip(op::Clipper.ClipType,
         subject::AbstractVector{Polygon{T}},
         cl::AbstractVector{Polygon{T}}=Polygon{T}[];
         pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where {T <: Union{Int64, Unitful.Quantity{Int64}}}
 
     c = clipper()
     Clipper.clear!(c)
@@ -293,20 +276,20 @@ function _clip{T<:Union{Int64, Unitful.Quantity{Int64}}}(op::Clipper.ClipType,
 end
 
 # Clipperize methods prepare an array for being operated upon by the Clipper lib
-function clipperize{T<:Polygon}(A::AbstractVector{T})
-    Int64like{T}(x::Point{T}) = convert(Point{typeof(1::Int64*unit(T))},x)
+function clipperize(A::AbstractVector{T}) where {T <: Polygon}
+    Int64like(x::Point{T}) where {T} = convert(Point{typeof(1::Int64*unit(T))},x)
     [Polygon(Int64like.([unsafe_round.(y) for y in (points(Polygon(x)) .* PCSCALE)]))
         for x in A]
 end
-clipperize{T<:Union{Int64, Unitful.Quantity{Int64}}}(
-    A::AbstractVector{Polygon{T}}) = A
+clipperize(
+    A::AbstractVector{Polygon{T}}) where {T <: Union{Int64, Unitful.Quantity{Int64}}} = A
 
 # Declipperize methods are used to get back to the original type.
 function declipperize(A, T)
     united(p) = reinterpret(Point{typeof(1*unit(T))}, p.p)
     [Polygon{T}(convert(Vector{Point{T}}, united(p)) ./ PCSCALE) for p in A]
 end
-function declipperize{T<:Union{Int64, Unitful.Quantity{Int64}}}(A, S::Type{T})
+function declipperize(A, S::Type{T}) where {T <: Union{Int64, Unitful.Quantity{Int64}}}
     [Polygon{T}(reinterpret(Point{typeof(1*unit(T))}, p.p)) for p in A]
 end
 
@@ -335,9 +318,9 @@ and also an
 - `Clipper.EndTypeOpenRound`
 - `Clipper.EndTypeOpenButt`
 """
-function offset{S<:Coordinate}(s::AbstractPolygon{S}, delta::Coordinate;
+function offset(s::AbstractPolygon{S}, delta::Coordinate;
         j::Clipper.JoinType=Clipper.JoinTypeMiter,
-        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {S <: Coordinate}
 
     offset(Polygon{S}[s], delta; j=j, e=e)
 end
@@ -350,9 +333,9 @@ Perform polygon offsetting. The first argument is an array (vector) of
 [`AbstractPolygon`](@ref)s. The second argument is how much to offset the polygon.
 Keyword arguments explained above.
 """
-function offset{S<:AbstractPolygon}(s::AbstractVector{S}, delta::Coordinate;
+function offset(s::AbstractVector{S}, delta::Coordinate;
         j::Clipper.JoinType=Clipper.JoinTypeMiter,
-        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {S <: AbstractPolygon}
 
     offset(convert(Vector{Polygon{eltype(S)}}, s), delta; j=j, e=e)
 end
@@ -365,9 +348,9 @@ Perform polygon offsetting. The first argument is an array (vector) of
 [`Polygon`](@ref)s. The second argument is how much to offset the polygon.
 Keyword arguments explained above.
 """
-function offset{T<:Polygon}(s::AbstractVector{T}, delta::Coordinate;
+function offset(s::AbstractVector{T}, delta::Coordinate;
     j::Clipper.JoinType=Clipper.JoinTypeMiter,
-    e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
+    e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {T <: Polygon}
 
     dimension(eltype(T)) != dimension(delta) && throw(Unitful.DimensionError(eltype(T)(1),delta))
     S = clipperize(s)
@@ -380,10 +363,10 @@ function offset{T<:Polygon}(s::AbstractVector{T}, delta::Coordinate;
     declipperize(polys, eltype(T))
 end
 
-function _offset{T<:Union{Int64, Unitful.Quantity{Int64}}}(
+function _offset(
         s::AbstractVector{Polygon{T}}, delta;
         j::Clipper.JoinType=Clipper.JoinTypeMiter,
-        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {T <: Union{Int64, Unitful.Quantity{Int64}}}
 
     c = coffset()
     Clipper.clear!(c)
@@ -396,25 +379,25 @@ end
 
 ### cutting algorithm
 
-@compat abstract type D1 end
+abstract type D1 end
 
 ab(p0, p1) = Point(gety(p1)-gety(p0), getx(p0)-getx(p1))
 
-immutable Segment <: D1
+struct Segment <: D1
     p0::Point{Float64}
     p1::Point{Float64}
     ab::Point{Float64}
 end
 Segment(p0,p1) = Segment(p0, p1, ab(p0, p1))
 
-immutable Ray <: D1
+struct Ray <: D1
     p0::Point{Float64}
     p1::Point{Float64}
     ab::Point{Float64}
 end
 Ray(p0,p1) = Ray(p0, p1, ab(p0, p1))
 
-immutable Line <: D1
+struct Line <: D1
     p0::Point{Float64}
     p1::Point{Float64}
     ab::Point{Float64}
@@ -427,7 +410,7 @@ function segments(vertices)
 end
 
 # Find the lower-most then left-most polygon
-function uniqueray{T<:Real}(v::Vector{Point{T}})
+function uniqueray(v::Vector{Point{T}}) where {T <: Real}
     nopts = reinterpret(T, v)
     yarr = view(nopts, 2:2:length(nopts))
     miny, indy = findmin(yarr)
@@ -459,12 +442,12 @@ function intersects(A::Segment, B::Segment)
     end
 end
 
-function onray{T<:Real}(p::Point{T}, A::Ray)
+function onray(p::Point{T}, A::Ray) where {T <: Real}
     return (dot(A.ab, p-A.p0) ≈ 0) &&
         (dot(A.p1-A.p0, p-A.p0) >= 0)
 end
 
-function onsegment{T<:Real}(p::Point{T}, A::Segment)
+function onsegment(p::Point{T}, A::Segment) where {T <: Real}
     return (dot(A.ab, p-A.p0) ≈ 0) &&
         (dot(A.p1-A.p0, p-A.p0) >= 0) &&
         (dot(A.p0-A.p1, p-A.p1) >= 0)
@@ -515,7 +498,7 @@ function intersection(A::Line, B::Line, checkparallel=true)
     end
 end
 
-function interiorcuts{T}(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}})
+function interiorcuts(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}}) where {T}
     # currently assumes we have first element an enclosing polygon with
     # the rest being holes. We don't dig deep into the PolyTree...
 

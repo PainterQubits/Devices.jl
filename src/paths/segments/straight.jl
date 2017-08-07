@@ -1,5 +1,5 @@
 """
-    type Straight{T} <: ContinuousSegment{T}
+    mutable struct Straight{T} <: ContinuousSegment{T}
         l::T
         p0::Point{T}
         α0::typeof(0.0°)
@@ -10,7 +10,7 @@ It begins at a point `p0` with initial angle `α0`.
 The parametric function describing the line segment is given by
 `t -> p0 + Point(t*cos(α),t*sin(α))` where `t` is a length from 0 to `l`.
 """
-type Straight{T} <: ContinuousSegment{T}
+mutable struct Straight{T} <: ContinuousSegment{T}
     l::T
     p0::Point{T}
     α0::Float64
@@ -21,12 +21,12 @@ end
     Straight{T<:Coordinate}(l::T; p0::Point=Point(zero(T),zero(T)), α0=0.0°)
 Outer constructor for `Straight` segments.
 """
-Straight{T<:Coordinate}(l::T; p0::Point=Point(zero(T),zero(T)), α0=0.0°) =
+Straight(l::T; p0::Point=Point(zero(T),zero(T)), α0=0.0°) where {T <: Coordinate} =
     Straight{T}(l, p0, α0)
-convert{T}(::Type{Straight{T}}, x::Straight) =
+convert(::Type{Straight{T}}, x::Straight) where {T} =
     Straight{T}(convert(T, x.l), convert(Point{T}, x.p0), x.α0)
 
-copy{T}(s::Straight{T}) = Straight{T}(s.l, s.p0, s.α0)
+copy(s::Straight{T}) where {T} = Straight{T}(s.l, s.p0, s.α0)
 pathlength(s::Straight) = s.l
 p0(s::Straight) = s.p0
 α0(s::Straight) = s.α0
@@ -52,8 +52,8 @@ setα0!(s::Straight, α0′) = s.α0 = α0′
 Extend a path `p` straight by length `l` in the current direction. By default,
 we take the last continuous style in the path.
 """
-function straight!{T<:Coordinate}(p::Path{T}, l::Coordinate,
-        sty::Style=contstyle1(p))
+function straight!(p::Path{T}, l::Coordinate,
+        sty::Style=contstyle1(p)) where {T <: Coordinate}
     dimension(T) != dimension(typeof(l)) && throw(DimensionError(T(1),l))
     p0 = p1(p)
     α = α1(p)

@@ -1,6 +1,6 @@
 
 """
-    immutable CompoundSegment{T} <: ContinuousSegment{T}
+    struct CompoundSegment{T} <: ContinuousSegment{T}
         segments::Vector{Segment{T}}
 
         CompoundSegment(segments) = begin
@@ -20,7 +20,7 @@ by the compound segment.
 Note that [`Corner`](@ref)s introduce a discontinuity in the derivative of the
 path function, and are not allowed in a `CompoundSegment`.
 """
-immutable CompoundSegment{T} <: ContinuousSegment{T}
+struct CompoundSegment{T} <: ContinuousSegment{T}
     segments::Vector{Segment{T}}
 
     (::Type{CompoundSegment{T}}){T}(segments) = begin
@@ -34,7 +34,7 @@ immutable CompoundSegment{T} <: ContinuousSegment{T}
 end
 # Parametric function over the domain [zero(T),pathlength(c)] that represents the
 # compound segments.
-function (s::CompoundSegment{T}){T}(t)
+function (s::CompoundSegment{T})(t) where {T}
     c = s.segments
     R = promote_type(typeof(t), T)
     isempty(c) && error("cannot parameterize with zero segments.")
@@ -68,12 +68,12 @@ function (s::CompoundSegment{T}){T}(t)
     end
 end
 
-CompoundSegment{T}(nodes::AbstractArray{Node{T},1}) =
+CompoundSegment(nodes::AbstractArray{Node{T},1}) where {T} =
     CompoundSegment{T}(map(segment, nodes))
 
 summary(s::CompoundSegment) = string(length(s.segments), " segments")
-copy{T}(s::CompoundSegment{T}) = CompoundSegment{T}(s.segments)
-pathlength{T}(s::CompoundSegment{T}) = sum(pathlength, s.segments)
+copy(s::CompoundSegment{T}) where {T} = CompoundSegment{T}(s.segments)
+pathlength(s::CompoundSegment{T}) where {T} = sum(pathlength, s.segments)
 
 function setα0p0!(s::CompoundSegment, angle, p::Point)
     setα0p0!(s.segments[1], angle, p)

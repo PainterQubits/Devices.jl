@@ -1,22 +1,22 @@
-immutable NoRender <: Style end
-immutable NoRenderDiscrete <: DiscreteStyle end
-immutable NoRenderContinuous <: ContinuousStyle end
+struct NoRender <: Style end
+struct NoRenderDiscrete <: DiscreteStyle end
+struct NoRenderContinuous <: ContinuousStyle end
 
 """
-    immutable SimpleNoRender{T} <: ContinuousStyle
+    struct SimpleNoRender{T} <: ContinuousStyle
         width::T
     end
 A style that inhibits path rendering, but pretends to have a finite width for
 [`Paths.attach!`](@ref).
 """
-immutable SimpleNoRender{T} <: ContinuousStyle
+struct SimpleNoRender{T} <: ContinuousStyle
     width::T
 end
-SimpleNoRender{T<:Coordinate}(x::T) = SimpleNoRender{T}(x)
+SimpleNoRender(x::T) where {T <: Coordinate} = SimpleNoRender{T}(x)
 
 copy(x::NoRender) = NoRender()
-copy{T<:NoRenderDiscrete}(x::T) = T()
-copy{T<:NoRenderContinuous}(x::T) = T()
+copy(x::T) where {T <: NoRenderDiscrete} = T()
+copy(x::T) where {T <: NoRenderContinuous} = T()
 copy(x::SimpleNoRender) = SimpleNoRender(x.width)
 
 @inline extent(s::NoRender, t) = zero(t)

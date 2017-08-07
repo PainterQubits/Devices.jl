@@ -1,6 +1,5 @@
 module Cells
 using Unitful
-using Compat
 import Unitful: Length, nm
 
 import StaticArrays
@@ -25,13 +24,13 @@ export dbscale, elements, flatten, flatten!, layers, meta, name, order!, polygon
 @inline unsafe_ceil(x::Unitful.Quantity)  = ceil(Unitful.ustrip(x))*Unitful.unit(x)
 @inline unsafe_ceil(x::Number) = ceil(x)
 
-immutable CellPolygon{S,T<:Meta}
+struct CellPolygon{S,T<:Meta}
     polygon::Polygon{S}
     meta::T
 end
-CellPolygon{S<:Coordinate, T<:Meta}(p::AbstractPolygon{S}, m::T) = CellPolygon{S,T}(p,m)
+CellPolygon(p::AbstractPolygon{S}, m::T) where {S <: Coordinate,T <: Meta} = CellPolygon{S,T}(p,m)
 Base.copy(r::CellPolygon) = CellPolygon(r.polygon, r.meta)
-Base.convert{S<:Coordinate, T<:Meta}(::Type{CellPolygon{S,T}}, p::CellPolygon) =
+Base.convert(::Type{CellPolygon{S,T}}, p::CellPolygon) where {S <: Coordinate,T <: Meta} =
     CellPolygon{S,T}(p.polygon, p.meta)
 Base.:*(r::CellPolygon, a::Number) = CellPolygon(r.polygon * a, r.meta)
 Base.:*(a::Number, r::CellPolygon) = CellPolygon(a * r.polygon, r.meta)
@@ -42,13 +41,13 @@ for op in (:(Base.:+), :(Base.:-))
     @eval function ($op)(r::CellPolygon, p::Point)
         CellPolygon(($op)(r.polygon, p), r.meta)
     end
-    @eval @compat function ($op)(r::CellPolygon, p::StaticArrays.Scalar{<:Point})
+    @eval function ($op)(r::CellPolygon, p::StaticArrays.Scalar{<:Point})
         CellPolygon(($op)(r.polygon, p), r.meta)
     end
     @eval function ($op)(p::Point, r::CellPolygon)
         CellPolygon(($op)(p, r.polygon), r.meta)
     end
-    @eval @compat function ($op)(p::StaticArrays.Scalar{<:Point}, r::CellPolygon)
+    @eval function ($op)(p::StaticArrays.Scalar{<:Point}, r::CellPolygon)
         CellPolygon(($op)(p, r.polygon), r.meta)
     end
 end
@@ -77,10 +76,10 @@ function uniquename(str)
     replace(str*string(gensym()),"##","_")
 end
 
-@compat abstract type CellRef{S<:Coordinate, T} end
+abstract type CellRef{S<:Coordinate, T} end
 
 """
-    type CellReference{S,T} <: CellRef{S,T}
+    mutable struct CellReference{S,T} <: CellRef{S,T}
         cell::T
         origin::Point{S}
         xrefl::Bool
@@ -93,7 +92,7 @@ is given without units it is assumed to be in radians.
 
 The type variable `T` is to avoid circular definitions with `Cell`.
 """
-type CellReference{S,T} <: CellRef{S,T}
+mutable struct CellReference{S,T} <: CellRef{S,T}
     cell::T
     origin::Point{S}
     xrefl::Bool
@@ -104,12 +103,12 @@ end
 # convert{S,T}(::Type{CellReference{S,T}}, x::CellReference) =
 #     CellReference(convert(T, x.cell), convert(Point{S}, x.origin),
 #         x.xrefl, x.mag, x.rot)
-Base.convert{S}(::Type{CellReference{S}}, x::CellReference) =
+Base.convert(::Type{CellReference{S}}, x::CellReference) where {S} =
     CellReference(x.cell, convert(Point{S}, x.origin),
         x.xrefl, x.mag, x.rot)
 
 """
-    type CellArray{S,T} <: CellRef{S,T}
+    mutable struct CellArray{S,T} <: CellRef{S,T}
         cell::T
         origin::Point{S}
         deltacol::Point{S}
@@ -127,7 +126,7 @@ as a whole. If an angle is given without units it is assumed to be in radians.
 
 The type variable `T` is to avoid circular definitions with `Cell`.
 """
-type CellArray{S,T} <: CellRef{S,T}
+mutable struct CellArray{S,T} <: CellRef{S,T}
     cell::T
     origin::Point{S}
     deltacol::Point{S}
@@ -138,14 +137,14 @@ type CellArray{S,T} <: CellRef{S,T}
     mag::Float64
     rot::Float64
 end
-Base.convert{S}(::Type{CellArray{S}}, x::CellArray) =
+Base.convert(::Type{CellArray{S}}, x::CellArray) where {S} =
     CellArray(x.cell, convert(Point{S}, x.origin),
                       convert(Point{S}, x.deltacol),
                       convert(Point{S}, x.deltarow),
                       x.col, x.row, x.xrefl, x.mag, x.rot)
 
 """
-    type Cell{S<:Coordinate, T<:Meta}
+    mutable struct Cell{S<:Coordinate, T<:Meta}
         name::String
         elements::Vector{CellPolygon{S,T}}
         refs::Vector{CellRef}
@@ -168,7 +167,7 @@ currently implemented it mirrors the notion of cells in GDS-II files.
 
 To add elements, use `render!`. To add references, push them to `refs` field.
 """
-type Cell{S<:Coordinate, T<:Meta}
+mutable struct Cell{S<:Coordinate, T<:Meta}
     name::String
     elements::Vector{CellPolygon{S,T}}
     refs::Vector{CellRef}
@@ -185,7 +184,7 @@ type Cell{S<:Coordinate, T<:Meta}
         c
     end
 end
-Base.copy{S,T}(c::Cell{S,T}) = Cell{S,T}(c.name, copy(c.elements), copy(c.refs), c.create)
+Base.copy(c::Cell{S,T}) where {S,T} = Cell{S,T}(c.name, copy(c.elements), copy(c.refs), c.create)
 
 # Do NOT define a convert method like this or otherwise cells will
 # be copied when referenced by CellRefs!
@@ -208,7 +207,7 @@ The database scale of a `Cell{T<:Real}` is assumed to be `1nm` (`1.0nm` if
 `T <: AbstractFloat`) because insufficient information is provided to know
 otherwise.
 """
-dbscale{T}(c::Cell{T}) = ifelse(T<:AbstractFloat, 1.0nm, ifelse(T<:Real, 1nm, T(1)))
+dbscale(c::Cell{T}) where {T} = ifelse(T<:AbstractFloat, 1.0nm, ifelse(T<:Real, 1nm, T(1)))
 
 """
     dbscale(cell::Cell...)
@@ -230,7 +229,7 @@ Synonyms are accepted, in case you forget the "correct keyword"...
 - Magnification: `:mag`, `:magnification`, `:magnify`, `:zoom`, `:scale`
 - Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
 """
-function CellReference{T<:Coordinate}(x, origin::Point{T}=Point(0.,0.); kwargs...)
+function CellReference(x, origin::Point{T}=Point(0.,0.); kwargs...) where {T <: Coordinate}
     argdict = Dict(k=>v for (k,v) in kwargs)
     xreflkeys = [:xrefl, :xreflection, :refl, :reflect,
                     :xreflect, :xmirror, :mirror]
@@ -283,7 +282,7 @@ Synonyms are accepted for these keywords:
 - Magnification: `:mag`, `:magnification`, `:magnify`, `:zoom`, `:scale`
 - Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
 """
-function CellArray{T<:Coordinate}(x, origin::Point{T}; kwargs...)
+function CellArray(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
     argdict = Dict(k=>v for (k,v) in kwargs)
 
     dckeys = [:deltacol, :dcol, :dc, :vcol, :colv, :colvec,
@@ -426,7 +425,7 @@ Cell(name::AbstractString, unit::Unitful.LengthUnits) = Cell{typeof(1.0unit), GD
     Cell{S,T}(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}})
 Convenience constructor for `Cell{S,T}`.
 """
-Cell{S,T}(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}}) =
+Cell(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}}) where {S,T} =
     Cell{S,T}(name, elements)
 
 # Don't print out everything in the cell, it is a mess that way.
@@ -482,11 +481,11 @@ end
     bounds(cell0::Cell, cell1::Cell, cell::Cell...)
 Returns a `Rectangle` bounding box around all objects in a cell or cells.
 """
-function bounds{T<:Coordinate}(cell::Cell{T})
+function bounds(cell::Cell{T}) where {T <: Coordinate}
     mi, ma = Point(typemax(T), typemax(T)), Point(typemin(T), typemin(T))
-    bfl{S<:Integer}(::Type{S}, x) = unsafe_floor(x)
+    bfl(::Type{S}, x) where {S <: Integer} = unsafe_floor(x)
     bfl(S,x) = x
-    bce{S<:Integer}(::Type{S}, x) = unsafe_ceil(x)
+    bce(::Type{S}, x) where {S <: Integer} = unsafe_ceil(x)
     bce(S,x) = x
 
     isempty(cell.elements) && isempty(cell.refs) &&
@@ -529,7 +528,7 @@ reflection, rotation, and magnification specified by `ref`.
 
 Please do rewrite this method when feeling motivated... it is very inefficient.
 """
-function bounds{S<:Coordinate, T<:Coordinate, U<:Meta}(ref::CellArray{T, Cell{S,U}})
+function bounds(ref::CellArray{T, Cell{S,U}}) where {S <: Coordinate,T <: Coordinate,U <: Meta}
     b = bounds(ref.cell)::Rectangle{S}
     !isproper(b) && return b
 
@@ -750,7 +749,7 @@ function transform(c::Cell, d::CellRef, a)
 end
 
 for op in (:(Base.:+), :(Base.:-))
-    @eval function ($op){S<:Coordinate,T<:Meta}(r::Cell{S,T}, p::Point)
+    @eval function ($op)(r::Cell{S,T}, p::Point) where {S <: Coordinate,T <: Meta}
         n = Cell{S,T}(r.name, similar(r.elements), similar(r.refs))
         for (ia, ib) in zip(eachindex(r.elements), eachindex(n.elements))
             @inbounds n.elements[ib] = ($op)(r.elements[ia], p)
@@ -760,11 +759,11 @@ for op in (:(Base.:+), :(Base.:-))
         end
         n
     end
-    @eval function ($op){S<:Coordinate,T}(r::CellArray{S,T}, p::Point)
+    @eval function ($op)(r::CellArray{S,T}, p::Point) where {S <: Coordinate,T}
         CellArray(r.cell, ($op)(r.origin,p), r.deltacol, r.deltarow,
             r.col, r.row, r.xrefl, r.mag, r.rot)
     end
-    @eval function ($op){S<:Coordinate,T}(r::CellReference{S,T}, p::Point)
+    @eval function ($op)(r::CellReference{S,T}, p::Point) where {S <: Coordinate,T}
         CellReference(r.cell, ($op)(r.origin,p),
             xrefl=r.xrefl, mag=r.mag, rot=r.rot)
     end

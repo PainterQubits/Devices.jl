@@ -1,5 +1,5 @@
 """
-    type DecoratedStyle{T<:FloatCoordinate} <: ContinuousStyle
+    mutable struct DecoratedStyle{T<:FloatCoordinate} <: ContinuousStyle
         s::Style
         ts::Array{Float64,1}
         dirs::Array{Int,1}
@@ -7,7 +7,7 @@
     end
 Style with decorations, like structures periodically repeated along the path, etc.
 """
-type DecoratedStyle{T<:FloatCoordinate} <: ContinuousStyle
+mutable struct DecoratedStyle{T<:FloatCoordinate} <: ContinuousStyle
     s::Style
     ts::Array{T,1}
     dirs::Array{Int,1}

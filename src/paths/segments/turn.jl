@@ -1,5 +1,5 @@
 """
-    type Turn{T} <: ContinuousSegment{T}
+    mutable struct Turn{T} <: ContinuousSegment{T}
         α::typeof(1.0°)
         r::T
         p0::Point{T}
@@ -16,7 +16,7 @@ The parametric function over `t ∈ [0,1]` describing the turn is given by:
 
 `t -> cen + Point(r*cos(α0-sign(α)*π/2+α*t), r*sin(α0-sign(α)*π/2+α*t))`
 """
-type Turn{T} <: ContinuousSegment{T}
+mutable struct Turn{T} <: ContinuousSegment{T}
     α::typeof(1.0°)
     r::T
     p0::Point{T}
@@ -32,13 +32,13 @@ end
     Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°)
 Outer constructor for `Turn` segments.
 """
-Turn{T<:Coordinate}(α, r::T; p0::Point=Point(zero(T),zero(T)), α0=0.0°) =
+Turn(α, r::T; p0::Point=Point(zero(T),zero(T)), α0=0.0°) where {T <: Coordinate} =
     Turn{T}(α, r, p0, α0)
-convert{T}(::Type{Turn{T}}, x::Turn) =
+convert(::Type{Turn{T}}, x::Turn) where {T} =
     Turn{T}(x.α, T(x.r), convert(Point{T}, x.p0), x.α0)
-copy{T}(s::Turn{T}) = Turn{T}(s.α,s.r,s.p0,s.α0)
+copy(s::Turn{T}) where {T} = Turn{T}(s.α,s.r,s.p0,s.α0)
 
-pathlength{T}(s::Turn{T}) = T(abs(s.r*s.α))
+pathlength(s::Turn{T}) where {T} = T(abs(s.r*s.α))
 p0(s::Turn) = s.p0
 α0(s::Turn) = s.α0
 summary(s::Turn) = "Turn by $(s.α) with radius $(s.r)"
@@ -69,7 +69,7 @@ setα0!(s::Turn, α0′) = s.α0 = α0′
 Turn a path `p` by angle `α` with a turning radius `r` in the current direction.
 Positive angle turns left. By default, we take the last continuous style in the path.
 """
-function turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=contstyle1(p))
+function turn!(p::Path{T}, α, r::Coordinate, sty::Style=contstyle1(p)) where {T <: Coordinate}
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
     p0 = p1(p)
     α0 = α1(p)
@@ -89,8 +89,8 @@ Turn a path `p` with direction coded by string `s`:
 
 By default, we take the last continuous style in the path.
 """
-function turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate,
-        sty::ContinuousStyle=contstyle1(p))
+function turn!(p::Path{T}, s::String, r::Coordinate,
+        sty::ContinuousStyle=contstyle1(p)) where {T <: Coordinate}
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
     for ch in s
         if ch == 'l'

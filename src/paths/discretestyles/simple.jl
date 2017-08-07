@@ -1,4 +1,4 @@
 """
-    immutable SimpleTraceCorner <: DiscreteStyle
+    struct SimpleTraceCorner <: DiscreteStyle
 """
-immutable SimpleTraceCorner <: DiscreteStyle end
+struct SimpleTraceCorner <: DiscreteStyle end

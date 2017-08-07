@@ -25,16 +25,16 @@ Adapted from a contribution to PlotUtils.jl from Kristoffer Carlsson.
 """
 function adapted_grid end
 
-adapted_grid{S<:Coordinate,T<:Coordinate}(f, anchors::Tuple{S,T}; kwargs...) =
+adapted_grid(f, anchors::Tuple{S,T}; kwargs...) where {S <: Coordinate,T <: Coordinate} =
     adapted_grid(f, StaticArrays.SVector(anchors); kwargs...)
 
-adapted_grid{T<:Coordinate}(f, anchors::AbstractVector{T};
+adapted_grid(f, anchors::AbstractVector{T};
         max_recursions::Real = 7,
         max_change = 5°,
         rand_factor::Real = 0.05,
         grid_step::Coordinate = 1.0 * Unitful.ContextUnits(
             ifelse(T<:Length, Unitful.μm, Unitful.NoUnits),
-            Unitful.unit(Unitful.upreferred(zero(T))))) =
+            Unitful.unit(Unitful.upreferred(zero(T))))) where {T <: Coordinate} =
     assemble_grids(f, anchors, max_recursions, max_change, rand_factor, grid_step)
 
 function assemble_grids(f, anchors::AbstractVector,

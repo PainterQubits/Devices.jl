@@ -1,5 +1,4 @@
 module Microwave
-using Compat
 import Clipper: Clipper, ClipTypeDifference, ClipTypeIntersection, ClipTypeUnion
 import StaticArrays
 import ForwardDiff
@@ -56,7 +55,7 @@ The profile of the bridge is given as `h(x) = H*(2 - cosh(2*cosh^(-1)(2) x/L))` 
 `H` is the height of bridge and `L` is the total span of bridge. The inverse of h(x) is
 taken to compute the size of each layer.
 """
-@compat function bridge!(c::Cell, steps, foot_width, foot_height, span,
+function bridge!(c::Cell, steps, foot_width, foot_height, span,
         metas::AbstractVector{<:Meta})
     @assert length(metas) == steps + 1
 
@@ -94,7 +93,7 @@ or getting the base dose for PEC.
   - `alt`: the square nearest `Point(zero(T), zero(T))` is filled (unfilled) if `false`
     (`true`). Use this to create a full tiling of the checkerboard, if you wish.
 """
-function checkerboard!{T,S}(c::Cell{T,S}, pixsize, rows::Integer, alt, meta::Meta=GDSMeta())
+function checkerboard!(c::Cell{T,S}, pixsize, rows::Integer, alt, meta::Meta=GDSMeta()) where {T,S}
     r = Rectangle(pixsize, pixsize)
     rcell = Cell{T,S}(uniquename("checkerboard"))
     render!(rcell, r, Rectangles.Plain(), meta)
@@ -121,7 +120,7 @@ end
 In cell `c`, make a template for a 1cm x 1cm chip. Includes chip outline, usable area
 outline, and markers.
 """
-function device_template!{T}(d::Cell{T}, chip_meta::Meta, writeable_meta::Meta, marker_meta::Meta)
+function device_template!(d::Cell{T}, chip_meta::Meta, writeable_meta::Meta, marker_meta::Meta) where {T}
     # Device extents
     chip = Rectangle(1cm, 1cm)
     writeable = Rectangle(1cm, 0.7cm)
@@ -136,8 +135,8 @@ function device_template!{T}(d::Cell{T}, chip_meta::Meta, writeable_meta::Meta, 
     d
 end
 
-function flux_bias!{T}(c::Cell{T}, dir, flux_over, flux_under, flux_cut, z_trace, z_gap,
-        meta::Meta)
+function flux_bias!(c::Cell{T}, dir, flux_over, flux_under, flux_cut, z_trace, z_gap,
+        meta::Meta) where {T}
 
     mx, mn = max(flux_over, flux_under), min(flux_over, flux_under)
     if dir == "l"
@@ -183,7 +182,7 @@ end
     grating!{T}(c::Cell{T}, line, space, size, meta::Meta=GDSMeta())
 Generate a square grating suitable e.g. for obtaining the base dose for PEC.
 """
-function grating!{T,S}(c::Cell{T,S}, line, space, size, meta::Meta=GDSMeta())
+function grating!(c::Cell{T,S}, line, space, size, meta::Meta=GDSMeta()) where {T,S}
     r = Rectangle(line, size)
     rcell = Cell{T,S}(uniquename("grating"))
     render!(rcell, r, Rectangles.Plain(), meta)
@@ -206,8 +205,8 @@ Creates interdigitated fingers, e.g. for a lumped element capacitor.
   - `npairs`: number of fingers
   - `skiplast`: should we skip the last finger, leaving an odd number?
 """
-function interdigit!{T,S}(c::Cell{T,S}, width, length, fingergap, fingeroffset,
-        npairs::Integer, skiplast, meta::Meta=GDSMeta(0,0))
+function interdigit!(c::Cell{T,S}, width, length, fingergap, fingeroffset,
+        npairs::Integer, skiplast, meta::Meta=GDSMeta(0,0)) where {T,S}
     for i in 1:npairs
         render!(c, Rectangle(Point(zero(T), (i-1) * 2 * (width + fingergap)),
             Point(length, (i-1) * 2 * (width + fingergap) + width)), meta)
@@ -255,8 +254,8 @@ Other parameters:
 - `uc`: Amount of undercut to extend uniformly around the features
 in the diagram. Note that no undercut extends beyond the top & bottom of figure.
 """
-function jj!{T}(c::Cell{T}, m, b, w1, w2, w3, w4, l1, l2, l3, l4, uc, t1, Θ, ϕ,
-        jj_meta::Meta, uc_meta::Meta)
+function jj!(c::Cell{T}, m, b, w1, w2, w3, w4, l1, l2, l3, l4, uc, t1, Θ, ϕ,
+        jj_meta::Meta, uc_meta::Meta) where {T}
 
     # start drawing JJ
     r1 = Rectangle(Point(zero(T), zero(T)), Point(w1,l1-w4))
@@ -317,8 +316,8 @@ end
 - `bandage_buffer`: How far the bandaid should extend beyond the patch (ea. side)
 - `bandage_rounding`: Radius of rounded bandaid corners
 """
-function jj_top_pad!{T}(c::Cell{T}, pixcell, pixtop, pixbot, pixright, uuc, ruc, ext,
-        padh, bandage_buffer, bandage_rounding, jj_meta, uc_meta, bandage_meta)
+function jj_top_pad!(c::Cell{T}, pixcell, pixtop, pixbot, pixright, uuc, ruc, ext,
+        padh, bandage_buffer, bandage_rounding, jj_meta, uc_meta, bandage_meta) where {T}
 
     # Big contact pad
     render!(c, Rectangle(ext, padh), Rectangles.Undercut(
@@ -390,8 +389,8 @@ end
         qubit_width, qubit_gap, meta::Meta)
 Renders the base metal for a capacitively-shunted charge qubit into cell `c`.
 """
-function qubit!{T}(c::Cell{T}, qubit_length, qubit_width, qubit_gap, qubit_cap_bottom_gap,
-    gap_between_leads_for_jjs, lead_width, junc_pad_spacing, meta::Meta)
+function qubit!(c::Cell{T}, qubit_length, qubit_width, qubit_gap, qubit_cap_bottom_gap,
+    gap_between_leads_for_jjs, lead_width, junc_pad_spacing, meta::Meta) where {T}
 
     vert_extent = (qubit_cap_bottom_gap - gap_between_leads_for_jjs) / 2
 
@@ -459,8 +458,8 @@ Renders a "claw" into cell `c` suitable for attaching to the end of a resonator.
 wrap the claw around a capacitively-shunted charge qubit generated by [`qubit!`](@ref) for
 capacitive coupling between the qubit and resonator.
 """
-function qubit_claw!{T}(c::Cell{T}, trace, gap, claw_width, claw_length, claw_gap,
-        ground_gap, qubit_width, qubit_gap, meta::Meta)
+function qubit_claw!(c::Cell{T}, trace, gap, claw_width, claw_length, claw_gap,
+        ground_gap, qubit_width, qubit_gap, meta::Meta) where {T}
 
     totalWidthGap = claw_width*2 + claw_gap*4 + ground_gap*2 + qubit_width + qubit_gap*2
     totalWidth = totalWidthGap - 2*claw_gap
@@ -528,7 +527,7 @@ is part of the resulting polygon*):
                  (circular arc)
 ```
 """
-function radialcut!{T}(c::Cell{T}, r, Θ, h, meta::Meta=GDSMeta(0,0); narc::Int=197)
+function radialcut!(c::Cell{T}, r, Θ, h, meta::Meta=GDSMeta(0,0); narc::Int=197) where {T}
     p = Path(Point(h*tan(Θ/2), -h), α0=(Θ-π)/2)
     straight!(p, r-h*sec(Θ/2), Paths.Trace(r))
     turn!(p, -π/2, zero(T))
@@ -555,7 +554,7 @@ actual stub, not the radius of the circular arc bounding the ground plane defect
 Likewise `h` has an analogous meaning to that in `radialcut!` except it refers here
 to the radial stub, not the ground plane defect.
 """
-function radialstub!{T}(c::Cell{T}, r, Θ, h, t, meta::Meta=GDSMeta(0,0); narc::Int=197)
+function radialstub!(c::Cell{T}, r, Θ, h, t, meta::Meta=GDSMeta(0,0); narc::Int=197) where {T}
     # inner ring (bottom)
     pts = [Point(r*cos(α),r*sin(α)) for α in linspace(-(Θ+π)/2, (Θ-π)/2, narc)]
     # top right

@@ -1,5 +1,4 @@
 module Paths
-using Compat
 using ..Points
 using ..Cells
 using Unitful
@@ -32,7 +31,7 @@ import Base:
     summary,
     dims2string
 
-import Compat.Iterators: rest, take, drop, cycle
+import Base.Iterators: rest, take, drop, cycle
 
 using ForwardDiff
 import Devices
@@ -85,19 +84,19 @@ methods:
  - `extent`
  - `width`
 """
-@compat abstract type Style end
+abstract type Style end
 
 """
     abstract type ContinuousStyle <: Style end
 Any style that applies to segments which have non-zero path length.
 """
-@compat abstract type ContinuousStyle <: Style end
+abstract type ContinuousStyle <: Style end
 
 """
     abstract type DiscreteStyle <: Style end
 Any style that applies to segments which have zero path length.
 """
-@compat abstract type DiscreteStyle <: Style end
+abstract type DiscreteStyle <: Style end
 
 """
     abstract type Segment{T<:Coordinate} end
@@ -111,12 +110,12 @@ the following methods:
 - `setα0!`
 - `α1`
 """
-@compat abstract type Segment{T<:Coordinate} end
-@inline Base.eltype{T}(::Segment{T}) = T
-@inline Base.eltype{T}(::Type{Segment{T}}) = T
+abstract type Segment{T<:Coordinate} end
+@inline Base.eltype(::Segment{T}) where {T} = T
+@inline Base.eltype(::Type{Segment{T}}) where {T} = T
 
-Base.zero{T}(::Segment{T}) = zero(T)        # TODO: remove and fix for 0.6 only versions
-Base.zero{T}(::Type{Segment{T}}) = zero(T)
+Base.zero(::Segment{T}) where {T} = zero(T)     # TODO: remove and fix for 0.6 only versions
+Base.zero(::Type{Segment{T}}) where {T} = zero(T)
 
 """
     curvature(s, t)
@@ -127,17 +126,17 @@ inverse radius of a circle with the same curvature.
 curvature
 
 # Used only to get dispatch to work right with ForwardDiff.jl.
-immutable Curv{T} s::T end
+struct Curv{T} s::T end
 (s::Curv)(t) = ForwardDiff.derivative(s.s,t)
 curvature(s, t) = ForwardDiff.derivative(Curv(s), t)
 
-@compat abstract type DiscreteSegment{T} <: Segment{T} end
-@compat abstract type ContinuousSegment{T} <: Segment{T} end
+abstract type DiscreteSegment{T} <: Segment{T} end
+abstract type ContinuousSegment{T} <: Segment{T} end
 
-Base.zero{T}(::Type{ContinuousSegment{T}}) = zero(T)
+Base.zero(::Type{ContinuousSegment{T}}) where {T} = zero(T)
 
 # doubly linked-list behavior
-type Node{T<:Coordinate}
+mutable struct Node{T<:Coordinate}
     seg::Segment{T}
     sty::Style
     prev::Node{T}
@@ -155,9 +154,9 @@ end
     Node{T}(a::Segment{T}, b::Style)
 Create a node with segment `a` and style `b`.
 """
-Node{T}(a::Segment{T}, b::Style) = Node{T}(a,b)
-@inline Base.eltype{T}(::Node{T}) = T
-@inline Base.eltype{T}(::Type{Node{T}}) = T
+Node(a::Segment{T}, b::Style) where {T} = Node{T}(a,b)
+@inline Base.eltype(::Node{T}) where {T} = T
+@inline Base.eltype(::Type{Node{T}}) where {T} = T
 
 """
     previous(x::Node)
@@ -245,19 +244,19 @@ end
     p0{T}(s::Segment{T})
 Return the first point in a segment (calculated).
 """
-p0{T}(s::Segment{T}) = s(zero(T))::Point{T}
+p0(s::Segment{T}) where {T} = s(zero(T))::Point{T}
 
 """
     p1{T}(s::Segment{T})
 Return the last point in a segment (calculated).
 """
-p1{T}(s::Segment{T}) = s(pathlength(s))::Point{T}
+p1(s::Segment{T}) where {T} = s(pathlength(s))::Point{T}
 
 """
     α0(s::Segment)
 Return the first angle in a segment (calculated).
 """
-α0{T}(s::Segment{T}) = direction(s, zero(T))
+α0(s::Segment{T}) where {T} = direction(s, zero(T))
 
 """
     α1(s::Segment)
@@ -283,7 +282,7 @@ function deepcopy_internal(x::Segment, stackdict::ObjectIdDict)
 end
 
 """
-    type Path{T<:Coordinate} <: AbstractVector{Node{T}}
+    mutable struct Path{T<:Coordinate} <: AbstractVector{Node{T}}
         p0::Point{T}
         α0::Float64
         nodes::Array{Node{T},1}
@@ -291,7 +290,7 @@ end
 Type for abstracting an arbitrary styled path in the plane. Iterating returns
 [`Paths.Node`](@ref) objects, essentially
 """
-type Path{T<:Coordinate} <: AbstractVector{Node{T}}
+mutable struct Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
     α0::Float64
     nodes::Array{Node{T},1}
@@ -299,8 +298,8 @@ type Path{T<:Coordinate} <: AbstractVector{Node{T}}
     (::Type{Path{T}}){T}() = new{T}(Point(zero(T),zero(T)), 0.0, Node{T}[])
     (::Type{Path{T}}){T}(a,b,c) = new{T}(a,b,c)
 end
-@inline Base.eltype{T}(::Path{T}) = T
-@inline Base.eltype{T}(::Type{Path{T}}) = T
+@inline Base.eltype(::Path{T}) where {T} = T
+@inline Base.eltype(::Type{Path{T}}) where {T} = T
 nodes(p::Path) = p.nodes
 
 dims2string(p::Path) = isempty(p) ? "0-dimensional" :
@@ -335,10 +334,10 @@ function Path(p0::Point=Point(0.0,0.0); α0=0.0)
 end
 Path(p0x::Real, p0y::Real; kwargs...) = Path(Point{Float64}(p0x,p0y); kwargs...)
 
-function Path{T<:Length}(p0::Point{T}; α0=0.0)
+function Path(p0::Point{T}; α0=0.0) where {T <: Length}
     Path{typeof(0.0*unit(T))}(p0, α0, Node{typeof(0.0*unit(T))}[])
 end
-Path{T<:Length}(p0x::T, p0y::T; kwargs...) =
+Path(p0x::T, p0y::T; kwargs...) where {T <: Length} =
     Path(Point{typeof(0.0*unit(T))}(p0x,p0y); kwargs...)
 Path(p0x::Length, p0y::Length; kwargs...) = Path(promote(p0x,p0y)...; kwargs...)
 
@@ -359,9 +358,9 @@ segments in a path, not the physical length of the path.
 function pathlength end
 
 pathlength(p::Path) = pathlength(nodes(p))
-pathlength{T}(array::AbstractArray{Node{T}}) =
+pathlength(array::AbstractArray{Node{T}}) where {T} =
     mapreduce(pathlength, +, zero(T), array)
-pathlength{T<:Segment}(array::AbstractArray{T}) =
+pathlength(array::AbstractArray{T}) where {T <: Segment} =
     mapreduce(pathlength, +, zero(T), array)
 pathlength(node::Node) = pathlength(segment(node))
 
@@ -443,7 +442,7 @@ include("segments/compound.jl")
     discretestyle1{T}(p::Path{T})
 Returns the last-used discrete style in the path.
 """
-discretestyle1{T}(p::Path{T}) = style1(p, DiscreteStyle)
+discretestyle1(p::Path{T}) where {T} = style1(p, DiscreteStyle)
 
 """
     contstyle1(p::Path)
@@ -482,7 +481,7 @@ function adjust!(p::Path, n::Integer=1)
         end
     end
 
-    function updateα0p0!{T}(n::Node{T}, α0, p0)
+    function updateα0p0!(n::Node{T}, α0, p0) where {T}
         if previous(n) == n # first node
             setα0p0!(segment(n), α0, p0)
         else
@@ -674,15 +673,15 @@ const launchdefaults = Dict([
     (:taperlen, 250.0)
 ])
 
-@compat launch!(p::Path{<:Real}; kwargs...) = _launch!(p; launchdefaults..., kwargs...)
+launch!(p::Path{<:Real}; kwargs...) = _launch!(p; launchdefaults..., kwargs...)
 
-function launch!{T<:Length}(p::Path{T}; kwargs...)
+function launch!(p::Path{T}; kwargs...) where {T <: Length}
     u = Unitful.ContextUnits(Unitful.μm, upreferred(unit(T)))
     _launch!(p; Dict(zip(keys(launchdefaults),collect(values(launchdefaults))*u))...,
         kwargs...)
 end
 
-function _launch!{T<:Coordinate}(p::Path{T}; kwargs...)
+function _launch!(p::Path{T}; kwargs...) where {T <: Coordinate}
     d = Dict{Symbol,T}(kwargs)
     extround = d[:extround]
     trace0, trace1 = d[:trace0], d[:trace1]

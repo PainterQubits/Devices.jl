@@ -1,6 +1,5 @@
 module GDS
 
-using Compat
 using Unitful
 import Unitful: Length, fm, pm, nm, μm, m
 
@@ -62,16 +61,16 @@ const PLEX         = 0x2F03
     abstract type GDSFloat <: Real end
 Floating-point formats found in GDS-II files.
 """
-@compat abstract type GDSFloat <: Real end
+abstract type GDSFloat <: Real end
 
 """
-    immutable GDS64 <: GDSFloat
+    struct GDS64 <: GDSFloat
         x::UInt64
         GDS64(x::UInt64) = new(x)
     end
 "8-byte (64-bit) real" format found in GDS-II files.
 """
-immutable GDS64 <: GDSFloat
+struct GDS64 <: GDSFloat
     x::UInt64
     GDS64(x::UInt64) = new(x)
 end
@@ -100,7 +99,7 @@ function even(str)
     end
 end
 
-function convert{T<:AbstractFloat}(::Type{GDS64}, y::T)
+function convert(::Type{GDS64}, y::T) where {T <: AbstractFloat}
     !isfinite(y) && error("May we suggest you consider using ",
                           "only finite numbers in your CAD file.")
 
@@ -177,7 +176,7 @@ function gdswrite(io::IO, x::UInt16, y::Number...)
     write(io, hton(x), map(hton, y)...)
 end
 
-function gdswrite{T<:Real}(io::IO, x::UInt16, y::AbstractArray{T,1})
+function gdswrite(io::IO, x::UInt16, y::AbstractArray{T,1}) where {T <: Real}
     l = sizeof(y) + 2
     l+2 > 0xFFFF && error("Too many bytes in record for GDS-II format.")    # 7fff?
     write(io, hton(UInt16(l+2))) +
@@ -268,7 +267,7 @@ function gdswrite(io::IO, cell::Cell, dbs::Length)
     bytes += gdswrite(io, ENDSTR)
 end
 
-p2p{T<:Length}(x::T, dbs) = Int(round(Float64(x/dbs)))
+p2p(x::T, dbs) where {T <: Length} = Int(round(Float64(x/dbs)))
 
 """
     gdswrite{T<:Real}(io::IO, el::CellPolygon{T}, dbs)
@@ -279,7 +278,7 @@ specified database scale.
 
 Note that polygons without units are presumed to be in microns.
 """
-function gdswrite{T<:Length}(io::IO, poly::CellPolygon{T}, dbs)
+function gdswrite(io::IO, poly::CellPolygon{T}, dbs) where {T <: Length}
     bytes = gdswrite(io, BOUNDARY)
     lyr = layer(poly)
     dt = datatype(poly)
@@ -294,7 +293,7 @@ function gdswrite{T<:Length}(io::IO, poly::CellPolygon{T}, dbs)
     bytes += gdswrite(io, XY, xyInt)
     bytes += gdswrite(io, ENDEL)
 end
-gdswrite{T<:Real}(io::IO, el::CellPolygon{T}, dbs) = gdswrite(io, el*(1μm), dbs)
+gdswrite(io::IO, el::CellPolygon{T}, dbs) where {T <: Real} = gdswrite(io, el*(1μm), dbs)
 
 """
     gdswrite{T<:Real}(io::IO, ref::CellReference{T}, dbs)
@@ -306,7 +305,7 @@ Finally, the origin of the cell reference is written.
 Note that cell references without units on their `origin` are presumed to
 be in microns.
 """
-function gdswrite{T<:Length}(io::IO, ref::CellReference{T}, dbs)
+function gdswrite(io::IO, ref::CellReference{T}, dbs) where {T <: Length}
     bytes =  gdswrite(io, SREF)
     bytes += gdswrite(io, SNAME, even(ref.cell.name))
 
@@ -317,7 +316,7 @@ function gdswrite{T<:Length}(io::IO, ref::CellReference{T}, dbs)
     bytes += gdswrite(io, XY, x, y)
     bytes += gdswrite(io, ENDEL)
 end
-function gdswrite{T<:Real}(io::IO, ref::CellReference{T}, dbs)
+function gdswrite(io::IO, ref::CellReference{T}, dbs) where {T <: Real}
     cref = CellReference(ref.cell, ref.origin*(1μm), ref.xrefl, ref.mag, ref.rot)
     gdswrite(io, cref, dbs)
 end
@@ -332,7 +331,7 @@ column vector, and row vector are written.
 Note that cell references without units on their `origin` are presumed to
 be in microns.
 """
-function gdswrite{T<:Length}(io::IO, a::CellArray{T}, dbs)
+function gdswrite(io::IO, a::CellArray{T}, dbs) where {T <: Length}
     colrowcheck(a.col)
     colrowcheck(a.row)
 
@@ -352,7 +351,7 @@ function gdswrite{T<:Length}(io::IO, a::CellArray{T}, dbs)
     bytes += gdswrite(io, XY, x, y, cx, cy, rx, ry)
     bytes += gdswrite(io, ENDEL)
 end
-function gdswrite{T<:Real}(io::IO, a::CellArray{T}, dbs)
+function gdswrite(io::IO, a::CellArray{T}, dbs) where {T <: Real}
     car = CellArray(a.cell, a.origin*(1μm), a.deltacol*(1μm), a.deltarow*(1μm),
                     a.col, a.row, a.xrefl, a.mag, a.rot)
     gdswrite(io, car, dbs)

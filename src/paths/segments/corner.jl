@@ -1,5 +1,5 @@
 """
-    type Corner{T} <: DiscreteSegment{T}
+    mutable struct Corner{T} <: DiscreteSegment{T}
         α::Float64
         p0::Point{T}
         α0::Float64
@@ -13,7 +13,7 @@ end at `p0`, since the corner has zero path length. However, during rendering,
 neighboring segments will be tweaked slightly so that the rendered path is
 properly centered about the path function (the rendered corner has a finite width).
 """
-type Corner{T} <: DiscreteSegment{T}
+mutable struct Corner{T} <: DiscreteSegment{T}
     α::Float64
     p0::Point{T}
     α0::Float64
@@ -30,7 +30,7 @@ example. More likely, you will just use [`corner!`](@ref) rather than
 directly creating a `Corner` object.
 """
 Corner(α) = Corner{Float64}(α, Point(0.,0.), 0.0, 0.)
-copy{T}(x::Corner{T}) = Corner{T}(x.α, x.p0, x.α0, x.extent)
+copy(x::Corner{T}) where {T} = Corner{T}(x.α, x.p0, x.α0, x.extent)
 
 pathlength(::Corner) = 0
 p0(s::Corner) = s.p0
@@ -55,7 +55,7 @@ Append a sharp turn or "corner" to path `p` with angle `α`.
 The style chosen for this corner, if not specified, is the last `DiscreteStyle`
 used in the path.
 """
-function corner!{T<:Coordinate}(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p))
+function corner!(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p)) where {T <: Coordinate}
     corn = Corner{T}(α)
     push!(p, Node(corn, DiscreteStyle(sty)))
     nothing

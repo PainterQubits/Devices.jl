@@ -1,6 +1,5 @@
 module Rectangles
 
-using Compat
 using ..Points
 import Base: +, -, *, /, copy, ==, convert, isapprox
 import Devices
@@ -14,7 +13,7 @@ export width
 export isproper
 
 """
-    immutable Rectangle{T} <: AbstractPolygon{T}
+    struct Rectangle{T} <: AbstractPolygon{T}
         ll::Point{T}
         ur::Point{T}
         function Rectangle(a,b)
@@ -27,7 +26,7 @@ export isproper
 A rectangle, defined by opposing lower-left and upper-right corner coordinates.
 Lower-left and upper-right are guaranteed to be such by the inner constructor.
 """
-immutable Rectangle{T} <: AbstractPolygon{T}
+struct Rectangle{T} <: AbstractPolygon{T}
     ll::Point{T}
     ur::Point{T}
     function (::Type{Rectangle{T}}){T}(a,b)
@@ -37,7 +36,7 @@ immutable Rectangle{T} <: AbstractPolygon{T}
         new{T}(ll,ur)
     end
 end
-Rectangle{T<:Coordinate}(ll::Point{T}, ur::Point{T}) = Rectangle{T}(ll,ur)
+Rectangle(ll::Point{T}, ur::Point{T}) where {T <: Coordinate} = Rectangle{T}(ll,ur)
 
 """
     Rectangle(ll::Point, ur::Point)
@@ -58,7 +57,7 @@ stability in the constructor.
 """
 Rectangle(width, height) = Rectangle(Point(zero(width), zero(height)), Point(width, height))
 
-convert{T}(::Type{Rectangle{T}}, x::Rectangle) = Rectangle{T}(x.ll, x.ur)
+convert(::Type{Rectangle{T}}, x::Rectangle) where {T} = Rectangle{T}(x.ll, x.ur)
 
 copy(p::Rectangle) = Rectangle(p.ll, p.ur)
 
@@ -140,22 +139,22 @@ Translate a rectangle by `p`.
     abstract Rectangles.Style{T<:Meta}
 Implement new rectangle drawing styles by subtyping this. Must have a `meta::Meta` field.
 """
-@compat abstract type Style{T<:Meta} end
+abstract type Style{T<:Meta} end
 
 """
-    immutable Plain{T} <: Rectangles.Style{T}
+    struct Plain{T} <: Rectangles.Style{T}
         meta::T
     end
 Plain rectangle style. Use this if you are fond for the simpler times when
 rectangles were just rectangles.
 """
-immutable Plain{T} <: Style{T}
+struct Plain{T} <: Style{T}
     meta::T
 end
 Plain() = Plain(GDSMeta())
 
 """
-    immutable Rounded{S<:Coordinate,T} <: Rectangles.Style{T}
+    struct Rounded{S<:Coordinate,T} <: Rectangles.Style{T}
         r::S
         meta::T
     end
@@ -163,7 +162,7 @@ Rounded rectangle style. All corners are rounded off with a given radius `r`.
 The bounding box of the unstyled rectangle should remain unaffected.
 
 """
-immutable Rounded{S<:Coordinate,T} <: Style{T}
+struct Rounded{S<:Coordinate,T} <: Style{T}
     r::S
     meta::T
 end
@@ -171,7 +170,7 @@ Rounded(r) = Rounded(r, GDSMeta())
 Rounded(r, meta) = Rounded(r, meta)
 
 """
-    immutable Undercut{S<:Coordinate,T} <: Rectangles.Style{T}
+    struct Undercut{S<:Coordinate,T} <: Rectangles.Style{T}
         ucl::S
         uct::S
         ucr::S
@@ -182,7 +181,7 @@ Rounded(r, meta) = Rounded(r, meta)
 Undercut rectangles. In each direction around a rectangle (left, top, right, bottom) an
 undercut is rendered on .
 """
-immutable Undercut{S<:Coordinate,T} <: Style{T}
+struct Undercut{S<:Coordinate,T} <: Style{T}
     ucl::S
     uct::S
     ucr::S
@@ -190,9 +189,9 @@ immutable Undercut{S<:Coordinate,T} <: Style{T}
     meta::T
     undercut_meta::T
 end
-Undercut{T<:Meta}(ucl, uct, ucr, ucb, meta::T=GDSMeta(), undercut_meta::T=GDSMeta()) =
+Undercut(ucl, uct, ucr, ucb, meta::T=GDSMeta(), undercut_meta::T=GDSMeta()) where {T <: Meta} =
     Undercut(promote(ucl, uct, ucr, ucb)..., meta, undercut_meta)
-Undercut{S<:Coordinate,T<:Meta}(a::S, b::S, c::S, d::S, e::T, f::T) =
+Undercut(a::S, b::S, c::S, d::S, e::T, f::T) where {S <: Coordinate,T <: Meta} =
     Undercut{S,T}(a,b,c,d,e,f)
 
 ustrip(r::Rectangle) = Rectangle(ustrip(r.ll), ustrip(r.ur))

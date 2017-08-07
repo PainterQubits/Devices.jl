@@ -1,6 +1,5 @@
 __precompile__()
 module Devices
-using Compat
 using ForwardDiff
 using FileIO
 include("units.jl")
@@ -9,9 +8,6 @@ import StaticArrays
 import Clipper
 import FileIO: save, load
 
-if VERSION < v"0.6.0-pre"
-    import Base: cell, .+, .-
-end
 import Base: length, show, eltype
 import Unitful: Length
 Unitful.@derived_dimension InverseLength inv(Unitful.𝐋)
@@ -55,15 +51,15 @@ function upperright end
     typealias Coordinate Union{Real,Length}
 Type alias for numeric types suitable for coordinate systems.
 """
-@compat Coordinate = Union{Real,Length}
+const Coordinate = Union{Real,Length}
 
 """
     typealias PointTypes Union{Real,Length,InverseLength}
 Allowed type variables for `Point{T}` types.
 """
-@compat PointTypes = Union{Real,Length,InverseLength}
-@compat FloatCoordinate = Union{AbstractFloat,Length{<:AbstractFloat}}
-@compat IntegerCoordinate = Union{Integer,Length{<:Integer}}
+const PointTypes = Union{Real,Length,InverseLength}
+const FloatCoordinate = Union{AbstractFloat,Length{<:AbstractFloat}}
+const IntegerCoordinate = Union{Integer,Length{<:Integer}}
 
 """
     abstract type AbstractPolygon{T<:Coordinate} end
@@ -74,10 +70,10 @@ optimized pattern formats. Examples include the OASIS format (which has 25
 implementations of trapezoids) or e-beam lithography pattern files like the Raith
 GPF format.
 """
-@compat abstract type AbstractPolygon{T<:Coordinate} end
+abstract type AbstractPolygon{T<:Coordinate} end
 
-eltype{T}(::AbstractPolygon{T}) = T
-eltype{T}(::Type{AbstractPolygon{T}}) = T
+eltype(::AbstractPolygon{T}) where {T} = T
+eltype(::Type{AbstractPolygon{T}}) where {T} = T
 
 include("points.jl")
 import .Points: Point, getx, gety
@@ -86,21 +82,8 @@ export Points
 export Point, getx, gety
 export Rotation, Translation, XReflection, YReflection, ∘, compose
 
-# TODO: Operations on arrays of AbstractPolygons
-if VERSION < v"0.6.0-pre"
-    for (op, dotop) in [(:+, :.+), (:-, :.-)]
-        @eval function ($dotop){S<:Real, T<:Real}(a::AbstractArray{AbstractPolygon{S},1}, p::Point{T})
-            b = similar(a)
-            for (ia, ib) in zip(eachindex(a), eachindex(b))
-                @inbounds b[ib] = ($op)(a[ia], p)
-            end
-            b
-        end
-    end
-end
-
-@compat abstract type Meta end
-immutable GDSMeta <: Meta
+abstract type Meta end
+struct GDSMeta <: Meta
     layer::Int
     datatype::Int
     GDSMeta() = new(DEFAULT_LAYER, DEFAULT_DATATYPE)
@@ -109,9 +92,6 @@ immutable GDSMeta <: Meta
 end
 @inline layer(x::GDSMeta) = x.layer
 @inline datatype(x::GDSMeta) = x.datatype
-if VERSION < v"0.6.0-pre"
-    Base.size(::GDSMeta) = ()
-end
 
 include("rectangles.jl")
 import .Rectangles: Rectangle, height, width, isproper
