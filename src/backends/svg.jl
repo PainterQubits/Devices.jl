@@ -43,25 +43,29 @@ end
 # TODO: don't just presume we flatten everything. preserve cell structure in svg format.
 #       <defs>, <symbol>, <use> tags for arrays, cell references?
 function Base.reprmime(::MIME"image/svg+xml", c::Cell; options...)
-    opt = Dict{Symbol,Any}(options)
-    bnd = ustrip(bounds(c))
+    vp, wh = "", ""
+    data = if length(c.elements) > 0    # Don't want to fail on an empty cell
+        opt = Dict{Symbol,Any}(options)
+        bnd = ustrip(bounds(c))
 
-    vp = "viewBox=\"$(bnd.ll.x) 0 $(Int(round(width(bnd)))) $(Int(round(height(bnd))))\" "
-    wh = haskey(opt, :width)? "width=\"$(opt[:width])\" " : ""
-    wh *= haskey(opt, :height)? "height=\"$(opt[:height])\" " : ""
+        vp = "viewBox=\"$(bnd.ll.x) 0 $(Int(round(width(bnd)))) $(Int(round(height(bnd))))\" "
+        wh = haskey(opt, :width)? "width=\"$(opt[:width])\" " : ""
+        wh *= haskey(opt, :height)? "height=\"$(opt[:height])\" " : ""
 
-    ly = collect(layers(c))
-    trans = Translation(0, bnd.ur.y) ∘ XReflection()
-    data = join([group_tag(fillcolor(opt, l), join(
-                (
-                    polygon_tag(
-                        svgify(
-                            trans.(ustrip(points(p))),
-                        )
-                    ) for p in c.elements[layer.(c.elements) .== l]
-                ), "")
-            ) for l in ly[sortperm(ly)]], "")
-
+        ly = collect(layers(c))
+        trans = Translation(0, bnd.ur.y) ∘ XReflection()
+        data = join([group_tag(fillcolor(opt, l), join(
+                    (
+                        polygon_tag(
+                            svgify(
+                                trans.(ustrip(points(p))),
+                            )
+                        ) for p in c.elements[layer.(c.elements) .== l]
+                    ), "")
+                ) for l in ly[sortperm(ly)]], "")
+    else
+        data = [""]
+    end
     join([xmlstring,
         "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" $vp $wh>\n",
         data,
