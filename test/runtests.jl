@@ -918,6 +918,32 @@ end
         @test isa(cells["main"], Cell{typeof(1.0*Unitful.nm), GDSMeta})
         @test length(cells["main"].refs) == 2
         @test length(elements(cells["main"])) == 1
+
+        # Corrupt file tests: records
+        @test_warn r"unknown record type 0xffff" load(joinpath(dirname(@__FILE__),
+            "unknown_record.gds"))
+        @test_warn r"unimplemented record type 0x2202" load(joinpath(dirname(@__FILE__),
+            "unimplemented_record.gds"))
+        @test_throws ErrorException load(joinpath(dirname(@__FILE__),
+            "badbytes_record.gds"))
+        @test_warn r"did not start with a BGNLIB" load(joinpath(dirname(@__FILE__),
+            "no_bgnlib.gds"))
+        @test_warn r"end with an ENDLIB" load(joinpath(dirname(@__FILE__),
+            "no_endlib.gds"))
+
+        # Corrupt file tests: cells
+        @test_throws ErrorException load(joinpath(dirname(@__FILE__),
+            "badbytes_cell.gds"))
+        @test_throws ErrorException load(joinpath(dirname(@__FILE__),
+            "unknown_cell.gds")) # unknown token in cell (0xffff)
+        @test_throws ErrorException load(joinpath(dirname(@__FILE__),
+            "unimplemented_cell.gds")) # unimplemented token in cell (0x0c00, TEXT)
+
+        # Corrupt file tests: boundaries
+        @test_throws ErrorException load(joinpath(dirname(@__FILE__),
+            "badbytes_boundary.gds"))
+        @test_throws ErrorException load(joinpath(dirname(@__FILE__),
+            "unknown_boundary.gds")) # unknown token in boundary (0xffff)
     end
 
     # TODO: SVG format
