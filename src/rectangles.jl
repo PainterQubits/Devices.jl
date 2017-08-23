@@ -36,13 +36,13 @@ struct Rectangle{T} <: AbstractPolygon{T}
         new{T}(ll,ur)
     end
 end
-Rectangle(ll::Point{T}, ur::Point{T}) where {T <: Coordinate} = Rectangle{T}(ll,ur)
 
 """
     Rectangle(ll::Point, ur::Point)
 Convenience constructor for `Rectangle` objects.
 """
-Rectangle(ll::Point, ur::Point) = Rectangle(promote(ll, ur)...)
+Rectangle(ll::Point, ur::Point) = rectangle(promote(ll, ur)...)
+rectangle(ll::Point{T}, ur::Point{T}) where {T <: Coordinate} = Rectangle{T}(ll,ur)
 
 """
     Rectangle(width, height)
@@ -131,6 +131,11 @@ end
 Translate a rectangle by `p`.
 """ +(::Rectangle, ::Point)
 
+@doc """
+    -(r::Rectangle, p::Point)
+Translate a rectangle by `-p`.
+""" -(::Rectangle, ::Point)
+
 *(r::Rectangle, a::Real) = Rectangle(*(r.ll,a), *(r.ur,a))
 *(a::Real, r::Rectangle) = *(r,a)
 /(r::Rectangle, a::Real) = Rectangle(/(r.ll,a), /(r.ur,a))
@@ -190,8 +195,8 @@ struct Undercut{S<:Coordinate,T} <: Style{T}
     undercut_meta::T
 end
 Undercut(ucl, uct, ucr, ucb, meta::T=GDSMeta(), undercut_meta::T=GDSMeta()) where {T <: Meta} =
-    Undercut(promote(ucl, uct, ucr, ucb)..., meta, undercut_meta)
-Undercut(a::S, b::S, c::S, d::S, e::T, f::T) where {S <: Coordinate,T <: Meta} =
+    undercut(promote(ucl, uct, ucr, ucb)..., meta, undercut_meta)
+undercut(a::S, b::S, c::S, d::S, e::T, f::T) where {S <: Coordinate,T <: Meta} =
     Undercut{S,T}(a,b,c,d,e,f)
 
 ustrip(r::Rectangle) = Rectangle(ustrip(r.ll), ustrip(r.ur))

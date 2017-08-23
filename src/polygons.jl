@@ -14,7 +14,7 @@ import Devices
 import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
 import Devices: bounds, lowerleft, upperright
 import Unitful
-import Unitful: Length, dimension, unit, ustrip, uconvert
+import Unitful: Quantity, Length, dimension, unit, ustrip, uconvert
 using ..Points
 using ..Rectangles
 
@@ -22,13 +22,15 @@ export Polygon
 export points
 export clip, offset
 
+const USCALE = 1.0*Unitful.fm
+const SCALE  = 10.0^9
+
 clipper() = (Devices._clip[])::Clipper.Clip
 coffset() = (Devices._coffset[])::Clipper.ClipperOffset
 
-@inline unsafe_round(x::Unitful.Quantity) = round(ustrip(x))*unit(x)
-@inline unsafe_round(x::Number) = round(x)
+@inline unsafe_round(x::Number) = round(ustrip(x))*unit(x)
+@inline unsafe_round(x::Point) = unsafe_round.(x)
 
-const PCSCALE = float(2^31)
 
 """
     struct Polygon{T} <: AbstractPolygon{T}
@@ -178,8 +180,16 @@ end
 
 # Clipping polygons one at a time
 """
-    clip{S<:Coordinate, T<:Coordinate}(op::Clipper.ClipType,
-        s::AbstractPolygon{S}, c::AbstractPolygon{T};
+    clip(op::Clipper.ClipType, s::AbstractPolygon{S}, c::AbstractPolygon{T};
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where
+        {S <: Coordinate,T <: Coordinate}
+    clip(op::Clipper.ClipType, s::AbstractVector{A}, c::AbstractVector{B};
+        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where
+        {S, T, A <: AbstractPolygon{S}, B <: AbstractPolygon{T}}
+    clip{S<:AbstractPolygon, T<:AbstractPolygon}(op::Clipper.ClipType,
+        s::AbstractVector{S}, c::AbstractVector{T};
         pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
         pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
 Using the [`Clipper`](http://www.angusj.com/delphi/clipper.php) library and
@@ -201,100 +211,120 @@ for further information). These arguments may include:
 - `Clipper.PolyFillTypeEvenOdd`
 - `Clipper.PolyFillTypeNonZero`
 """
-function clip(op::Clipper.ClipType,
-        s::AbstractPolygon{S}, c::AbstractPolygon{T};
+function clip(op::Clipper.ClipType, s::AbstractPolygon{S}, c::AbstractPolygon{T};
         pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where {S <: Coordinate,T <: Coordinate}
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where
+        {S <: Coordinate,T <: Coordinate}
 
-    dimension(S) != dimension(T) && throw(Unitful.DimensionError(S(1),T(1)))
+    dimension(S) != dimension(T) && throw(Unitful.DimensionError(oneunit(S), oneunit(T)))
     R = promote_type(S, T)
     clip(op, Polygon{R}[s], Polygon{R}[c]; pfs=pfs, pfc=pfc)::Vector{Polygon{R}}
 end
 
 # Clipping arrays of AbstractPolygons
-"""
-    clip{S<:AbstractPolygon, T<:AbstractPolygon}(op::Clipper.ClipType,
-        s::AbstractVector{S}, c::AbstractVector{T};
-        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
-Perform polygon clipping. The first argument must be as listed above.
-The second and third arguments are arrays (vectors) of [`AbstractPolygon`](@ref)s.
-Keyword arguments are explained above.
-"""
-function clip(op::Clipper.ClipType,
-    s::AbstractVector{S}, c::AbstractVector{T};
+function clip(op::Clipper.ClipType, s::AbstractVector{A}, c::AbstractVector{B};
     pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where {S <: AbstractPolygon,T <: AbstractPolygon}
+    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where
+    {S, T, A <: AbstractPolygon{S}, B <: AbstractPolygon{T}}
 
-    P = promote_type(eltype(eltype(s)), eltype(eltype(c)))
-    clip(op, convert(Vector{Polygon{P}}, s),
-              convert(Vector{Polygon{P}}, c); pfs=pfs, pfc=pfc)::Vector{Polygon{P}}
+    dimension(S) != dimension(T) && throw(Unitful.DimensionError(oneunit(S), oneunit(T)))
+    R = promote_type(S, T)
+    clip(op, convert(Vector{Polygon{R}}, s), convert(Vector{Polygon{R}}, c);
+        pfs=pfs, pfc=pfc)::Vector{Polygon{R}}
 end
 
 # Clipping two identically-typed arrays of <: Polygon
-"""
-    clip{T<:Polygon}(op::Clipper.ClipType,
-        s::AbstractVector{T}, c::AbstractVector{T};
-        pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd)
-Perform polygon clipping. The first argument must be as listed above.
-The second and third arguments are identically-typed arrays (vectors) of
-[`Polygon{T}`](@ref) objects. Keyword arguments are explained above.
-"""
 function clip(op::Clipper.ClipType,
-    s::AbstractVector{T}, c::AbstractVector{T};
+    s::AbstractVector{Polygon{T}}, c::AbstractVector{Polygon{T}};
     pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where {T <: Polygon}
+    pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where {T}
 
-    S,C = clipperize(s), clipperize(c)
-    polys = _clip(op, S, C; pfs=pfs, pfc=pfc)
-    declipperize(polys, eltype(T))
+    sc, cc = clipperize(s), clipperize(c)
+    polys = _clip(op, sc, cc; pfs=pfs, pfc=pfc)
+    declipperize(polys, T)
 end
 
 # Clipping two identically-typed arrays of "Int64-based" Polygons.
 # Internal method which should not be called by user (but does the heavy lifting)
 function _clip(op::Clipper.ClipType,
-        subject::AbstractVector{Polygon{T}},
-        cl::AbstractVector{Polygon{T}}=Polygon{T}[];
+        s::AbstractVector{Polygon{T}}, c::AbstractVector{Polygon{T}};
         pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
-        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where {T <: Union{Int64, Unitful.Quantity{Int64}}}
+        pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where
+        {T <: Union{Int64, Unitful.Quantity{Int64}}}
 
-    c = clipper()
-    Clipper.clear!(c)
-    for s0 in subject
-        Clipper.add_path!(c, reinterpret(Clipper.IntPoint, s0.p),
+    clip = clipper()
+    Clipper.clear!(clip)
+    for s0 in s
+        Clipper.add_path!(clip, reinterpret(Clipper.IntPoint, s0.p),
             Clipper.PolyTypeSubject, true)
     end
-    for c0 in cl
-        Clipper.add_path!(c, reinterpret(Clipper.IntPoint, c0.p),
+    for c0 in c
+        Clipper.add_path!(clip, reinterpret(Clipper.IntPoint, c0.p),
             Clipper.PolyTypeClip, true)
     end
     result = convert(Clipper.PolyNode{Point{Int}},
-        Clipper.execute_pt(c, op, pfs, pfc)[2])
+        Clipper.execute_pt(clip, op, pfs, pfc)[2])
 
     polys = interiorcuts(result, Polygon{T}[])
 end
 
-# Clipperize methods prepare an array for being operated upon by the Clipper lib
-function clipperize(A::AbstractVector{T}) where {T <: Polygon}
-    Int64like(x::Point{T}) where {T} = convert(Point{typeof(1::Int64*unit(T))},x)
-    [Polygon(Int64like.([unsafe_round.(y) for y in (points(Polygon(x)) .* PCSCALE)]))
-        for x in A]
+#   Int64like(x::Point{T}) where {T}
+#   Int64like(x::Polygon{T}) where {T}
+# Converts Points or Polygons to an Int64-based representation (possibly with units).
+Int64like(x::Point{T}) where {T} = convert(Point{typeof(Int64(1) * unit(T))}, x)
+Int64like(x::Polygon{T}) where {T} = convert(Polygon{typeof(Int64(1) * unit(T))}, x)
+
+#   prescale(x::Point{<:Real})
+# Since the Clipper library works on Int64-based points, we multiply floating-point-based
+# `x` by `10.0^9` before rounding to retain high resolution. Since` 1.0` is interpreted
+# to mean `1.0 um`, this yields `fm` resolution, which is more than sufficient for most uses.
+prescale(x::Point{<:Real}) = x * SCALE  # 2^29.897...
+
+#   prescale(x::Point{<:Quantity})
+# Since the Clipper library works on Int64-based points, we unit-convert `x` to `fm` before
+# rounding to retain high resolution, which is more than sufficient for most uses.
+prescale(x::Point{<:Quantity}) = convert(Point{typeof(USCALE)}, x)
+
+#   clipperize(A::AbstractVector{Polygon{T}}) where {T}
+#   clipperize(A::AbstractVector{Polygon{T}}) where {S<:Integer, T<:Union{S, Unitful.Quantity{S}}}
+#   clipperize(A::AbstractVector{Polygon{T}}) where {T <: Union{Int64, Unitful.Quantity{Int64}}}
+# Prepare a vector of Polygons for being operated upon by the Clipper library,
+# which expects Int64-based points (Quantity{Int64} is okay after using `reinterpret`).
+function clipperize(A::AbstractVector{Polygon{T}}) where {T}
+    [Polygon(Int64like.(unsafe_round.(prescale.(points(x))))) for x in A]
 end
-clipperize(
-    A::AbstractVector{Polygon{T}}) where {T <: Union{Int64, Unitful.Quantity{Int64}}} = A
+
+# Already Integer-based, so no need to do rounding or scaling. Just convert to Int64-like.
+function clipperize(A::AbstractVector{Polygon{T}}) where
+        {S<:Integer, T<:Union{S, Unitful.Quantity{S}}}
+    return Int64like.(A)
+end
+
+# Already Int64-based, so just pass through, nothing to do here.
+function clipperize(A::AbstractVector{Polygon{T}}) where
+    {T <: Union{Int64, Unitful.Quantity{Int64}}}
+    return A
+end
+
+unscale(p::Point, ::Type{T}) where {T <: Quantity} = convert(Point{T}, p)
+unscale(p::Point, ::Type{T}) where {T} = convert(Point{T}, p ./ SCALE)
 
 # Declipperize methods are used to get back to the original type.
-function declipperize(A, T)
-    united(p) = reinterpret(Point{typeof(1*unit(T))}, p.p)
-    [Polygon{T}(convert(Vector{Point{T}}, united(p)) ./ PCSCALE) for p in A]
+function declipperize(A, ::Type{T}) where {T}
+    [Polygon{T}((x->unscale(x,T)).(points(p))) for p in A]
 end
-function declipperize(A, S::Type{T}) where {T <: Union{Int64, Unitful.Quantity{Int64}}}
-    [Polygon{T}(reinterpret(Point{typeof(1*unit(T))}, p.p)) for p in A]
+function declipperize(A, ::Type{T}) where {T <: Union{Int64, Unitful.Quantity{Int64}}}
+    [Polygon{T}(reinterpret(Point{T}, points(p))) for p in A]
 end
 
 """
     offset{S<:Coordinate}(s::AbstractPolygon{S}, delta::Coordinate;
+        j::Clipper.JoinType=Clipper.JoinTypeMiter,
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
+    offset{S<:AbstractPolygon}(subject::AbstractVector{S}, delta::Coordinate;
+        j::Clipper.JoinType=Clipper.JoinTypeMiter,
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
+    offset{S<:Polygon}(s::AbstractVector{S}, delta::Coordinate;
         j::Clipper.JoinType=Clipper.JoinTypeMiter,
         e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
 Using the [`Clipper`](http://www.angusj.com/delphi/clipper.php) library and
@@ -318,63 +348,51 @@ and also an
 - `Clipper.EndTypeOpenRound`
 - `Clipper.EndTypeOpenButt`
 """
-function offset(s::AbstractPolygon{S}, delta::Coordinate;
-        j::Clipper.JoinType=Clipper.JoinTypeMiter,
-        e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {S <: Coordinate}
+function offset end
 
-    offset(Polygon{S}[s], delta; j=j, e=e)
+function offset(s::AbstractPolygon{T}, delta::Coordinate;
+        j::Clipper.JoinType=Clipper.JoinTypeMiter,
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {T <: Coordinate}
+    dimension(T) != dimension(delta) && throw(Unitful.DimensionError(oneunit(T), delta))
+    S = promote_type(T, typeof(delta))
+    offset(Polygon{S}[s], convert(S, delta); j=j, e=e)
 end
 
-"""
-    offset{S<:AbstractPolygon}(subject::AbstractVector{S}, delta::Coordinate;
+function offset(s::AbstractVector{A}, delta::Coordinate;
         j::Clipper.JoinType=Clipper.JoinTypeMiter,
-        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
-Perform polygon offsetting. The first argument is an array (vector) of
-[`AbstractPolygon`](@ref)s. The second argument is how much to offset the polygon.
-Keyword arguments explained above.
-"""
-function offset(s::AbstractVector{S}, delta::Coordinate;
-        j::Clipper.JoinType=Clipper.JoinTypeMiter,
-        e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {S <: AbstractPolygon}
-
-    offset(convert(Vector{Polygon{eltype(S)}}, s), delta; j=j, e=e)
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {T, A <: AbstractPolygon{T}}
+    dimension(T) != dimension(delta) && throw(Unitful.DimensionError(oneunit(T), delta))
+    S = promote_type(T, typeof(delta))
+    offset(convert(Vector{Polygon{S}}, s), convert(S, delta); j=j, e=e)
 end
 
-"""
-    offset{S<:Polygon}(s::AbstractVector{S}, delta::Coordinate;
-        j::Clipper.JoinType=Clipper.JoinTypeMiter,
-        e::Clipper.EndType=Clipper.EndTypeClosedPolygon)
-Perform polygon offsetting. The first argument is an array (vector) of
-[`Polygon`](@ref)s. The second argument is how much to offset the polygon.
-Keyword arguments explained above.
-"""
-function offset(s::AbstractVector{T}, delta::Coordinate;
+prescaledelta(x::Real) = x * SCALE
+prescaledelta(x::Integer) = x
+prescaledelta(x::Length{<:Real}) = convert(typeof(USCALE), x)
+prescaledelta(x::Length{<:Integer}) = x
+
+function offset(s::AbstractVector{Polygon{T}}, delta::T;
     j::Clipper.JoinType=Clipper.JoinTypeMiter,
-    e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {T <: Polygon}
+    e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {T <: Coordinate}
 
-    dimension(eltype(T)) != dimension(delta) && throw(Unitful.DimensionError(eltype(T)(1),delta))
-    S = clipperize(s)
-    d = if eltype(T) <: Union{Int64, Unitful.Quantity{Int64}}
-        ustrip(uconvert(unit(eltype(T)), delta))
-    else
-        ustrip(uconvert(unit(eltype(T)), delta) * PCSCALE)
-    end
-    polys = _offset(S, d, j=j, e=e)
-    declipperize(polys, eltype(T))
+    sc = clipperize(s)
+    d = prescaledelta(delta)
+    polys = _offset(sc, d, j=j, e=e)
+    declipperize(polys, T)
 end
 
-function _offset(
-        s::AbstractVector{Polygon{T}}, delta;
+function _offset(s::AbstractVector{Polygon{T}}, delta;
         j::Clipper.JoinType=Clipper.JoinTypeMiter,
-        e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where {T <: Union{Int64, Unitful.Quantity{Int64}}}
+        e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where
+        {T <: Union{Int64, Unitful.Quantity{Int64}}}
 
     c = coffset()
     Clipper.clear!(c)
     for s0 in s
         Clipper.add_path!(c, reinterpret(Clipper.IntPoint, s0.p), j, e)
     end
-    result = Clipper.execute(c, Float64(delta)) #TODO: fix in clipper
-    [Polygon(reinterpret(Point{Int64}, p)) for p in result]
+    result = Clipper.execute(c, Float64(ustrip(delta))) #TODO: fix in clipper
+    [Polygon(reinterpret(Point{T}, p)) for p in result]
 end
 
 ### cutting algorithm

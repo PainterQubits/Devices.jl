@@ -266,7 +266,7 @@ end
             Polygon{Float64}
     end
 
-    @testset "> Clipping individuals w/units" begin
+    @testset "> Clipping individuals w/ units" begin
         # Rectangle{typeof(1μm)}, Rectangle{typeof(1μm)} clipping
         r1 = Rectangle(2μm,2μm)
         r2 = Rectangle(1μm,2μm)
@@ -281,8 +281,6 @@ end
             Polygon(Point{typeof(1.0μm)}[p(2μm,2μm), p(1μm,2μm), p(1μm,0μm), p(2μm,0μm)])
         @test typeof(clip(Clipper.ClipTypeDifference, r1, r2)[1]) ==
             Polygon{typeof(1.0μm)}
-
-        # MIXED UNITS do not behave ideally yet.
     end
 
     @testset "> Clipping arrays w/o units" begin
@@ -298,27 +296,162 @@ end
 end
 
 @testset "Polygon offsetting" begin
-    r = Rectangle(1, 1)
-    @test offset(r, 1)[1] ==
-        Polygon([p(2,2), p(-1,2), p(-1,-1), p(2,-1)])
-    @test_throws DimensionError offset(r,1μm)
+    @testset "Offsetting individuals w/o units" begin
+        # Int rectangle, Int delta
+        r = Rectangle(1, 1)
+        o = offset(r, 1)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(2,2), p(-1,2), p(-1,-1), p(2,-1)])
+        @test_throws DimensionError offset(r, 1μm)
 
-    r = Rectangle(1.0, 1.0)
-    @test offset(r, 0.5)[1] ==
-        Polygon([p(1.5, 1.5), p(-0.5, 1.5), p(-0.5, -0.5), p(1.5, -0.5)])
-    @test_throws DimensionError offset(r, 0.5μm)
+        # Int rectangle, Float64 delta
+        r = Rectangle(1, 1)
+        o = offset(r, 0.5)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(1.5,1.5), p(-0.5,1.5), p(-0.5,-0.5), p(1.5,-0.5)])
+        @test_throws DimensionError offset(r, 0.5μm)
 
-    r = Rectangle(1μm, 1μm)
-    @test_throws DimensionError offset(r, 1)
-    @test offset(r, 1μm)[1] == Polygon(
-        [p(2μm, 2μm), p(-1μm, 2μm), p(-1μm, -1μm), p(2μm, -1μm)])
-    @test offset(r, 5000nm)[1] == Polygon(
-        [p(6μm, 6μm), p(-5μm, 6μm), p(-5μm, -5μm), p(6μm, -5μm)])
+        # Int rectangle, Rational{Int} delta
+        r = Rectangle(1, 1)
+        o = offset(r, 1//2)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(3//2,3//2), p(-1//2,3//2), p(-1//2,-1//2), p(3//2,-1//2)])
+        @test_throws DimensionError offset(r, 1μm//2)
 
-    r = Rectangle(1.0μm, 1.0μm)
-    @test_throws DimensionError offset(r, 1.0)
-    @test offset(r, 50nm)[1] ≈ Polygon(
-        [p(1.05μm,1.05μm), p(-0.05μm,1.05μm), p(-0.05μm,-0.05μm), p(1.05μm,-0.05μm)])
+        # Float64 rectangle, Int delta
+        r = Rectangle(1.0, 1.0)
+        o = offset(r, 1)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(2.0,2.0), p(-1.0,2.0), p(-1.0,-1.0), p(2.0,-1.0)])
+        @test_throws DimensionError offset(r, 1μm)
+
+        # Float64 rectangle, Float64 delta
+        r = Rectangle(1.0, 1.0)
+        o = offset(r, 0.5)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(1.5,1.5), p(-0.5,1.5), p(-0.5,-0.5), p(1.5,-0.5)])
+        @test_throws DimensionError offset(r, 0.5μm)
+
+        # Float64 rectangle, Rational{Int} delta
+        r = Rectangle(1.0, 1.0)
+        o = offset(r, 1//2)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(1.5,1.5), p(-0.5,1.5), p(-0.5,-0.5), p(1.5,-0.5)])
+        @test_throws DimensionError offset(r, 1μm//2)
+
+        # Rational{Int} rectangle, Int delta
+        r = Rectangle(1//1, 1//1)
+        o = offset(r, 1)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(2//1,2//1), p(-1//1,2//1), p(-1//1,-1//1), p(2//1,-1//1)])
+        @test_throws DimensionError offset(r, 1μm)
+
+        # Rational{Int} rectangle, Float64 delta
+        r = Rectangle(1//1, 1//1)
+        o = offset(r, 0.5)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(1.5,1.5), p(-0.5,1.5), p(-0.5,-0.5), p(1.5,-0.5)])
+        @test_throws DimensionError offset(r, 0.5μm)
+
+        # Rational{Int} rectangle, Rational{Int} delta
+        r = Rectangle(1//1, 1//1)
+        o = offset(r, 1//2)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(3//2,3//2), p(-1//2,3//2), p(-1//2,-1//2), p(3//2,-1//2)])
+        @test_throws DimensionError offset(r, 0.5μm)
+    end
+
+    @testset "> Offsetting individuals w/ units" begin
+        # Int*μm rectangle, Int-based delta
+        r = Rectangle(1μm, 1μm)
+        o = offset(r, 1μm)
+        @test length(o) == 1
+        @test all(points(o[1]) .=== [p(2μm, 2μm), p(-1μm, 2μm), p(-1μm, -1μm), p(2μm, -1μm)])
+        o = offset(r, 5000nm)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(6μm//1, 6μm//1), p(-5μm//1, 6μm//1), p(-5μm//1, -5μm//1), p(6μm//1, -5μm//1)])
+        @test_throws DimensionError offset(r, 1)
+
+        # Int*μm rectangle, Float64-based delta
+        r = Rectangle(1μm, 1μm)
+        o = offset(r, 0.5μm)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(1.5μm,1.5μm), p(-0.5μm,1.5μm), p(-0.5μm,-0.5μm), p(1.5μm,-0.5μm)])
+        o = offset(r, 500.0nm)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(1.5μm,1.5μm), p(-0.5μm,1.5μm), p(-0.5μm,-0.5μm), p(1.5μm,-0.5μm)])
+        @test_throws DimensionError offset(r, 0.5)
+
+        # Int*μm rectangle, Rational{Int}-based delta
+        r = Rectangle(1μm, 1μm)
+        o = offset(r, 1μm//1)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(2μm//1,2μm//1), p(-1μm//1,2μm//1), p(-1μm//1,-1μm//1), p(2μm//1,-1μm//1)])
+        o = offset(r, 500nm//1)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(3μm//2,3μm//2), p(-1μm//2,3μm//2), p(-1μm//2,-1μm//2), p(3μm//2,-1μm//2)])
+        @test_throws DimensionError offset(r, 1//2)
+
+        # Float64*μm rectangle, Int-based delta
+        r = Rectangle(1.0μm, 1.0μm)
+        o = offset(r, 1μm)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(2.0μm, 2.0μm), p(-1.0μm, 2.0μm), p(-1.0μm, -1.0μm), p(2.0μm, -1.0μm)])
+        o = offset(r, 5000nm)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(6.0μm, 6.0μm), p(-5.0μm, 6.0μm), p(-5.0μm, -5.0μm), p(6.0μm, -5.0μm)])
+        @test_throws DimensionError offset(r, 1)
+
+        # Float64*μm rectangle, Float64-based delta
+        r = Rectangle(1.0μm, 1.0μm)
+        o = offset(r, 0.5μm)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(1.5μm,1.5μm), p(-0.5μm,1.5μm), p(-0.5μm,-0.5μm), p(1.5μm,-0.5μm)])
+        o = offset(r, 500.0nm)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(1.5μm,1.5μm), p(-0.5μm,1.5μm), p(-0.5μm,-0.5μm), p(1.5μm,-0.5μm)])
+        @test_throws DimensionError offset(r, 0.5)
+
+        # Float64*μm rectangle, Rational{Int}-based delta
+        r = Rectangle(1.0μm, 1.0μm)
+        o = offset(r, 1μm//2)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(1.5μm,1.5μm), p(-0.5μm,1.5μm), p(-0.5μm,-0.5μm), p(1.5μm,-0.5μm)])
+        o = offset(r, 500nm//1)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p(1.5μm,1.5μm), p(-0.5μm,1.5μm), p(-0.5μm,-0.5μm), p(1.5μm,-0.5μm)])
+        @test_throws DimensionError offset(r, 1//2)
+    end
+
+    @testset "> Some less trivial cases" begin
+        # Colliding rectangles
+        rs = [Rectangle(1μm, 1μm), Rectangle(1μm, 1μm)+Point(1μm, 1μm)]
+        o = offset(rs, 500nm)
+        @test length(o) == 1
+        @test all(points(o[1]) .===
+            [p( 3μm//2, 1μm//2), p(5μm//2, 1μm//2), p( 5μm//2,5μm//2),
+             p( 1μm//2, 5μm//2), p(1μm//2, 3μm//2), p(-1μm//2,3μm//2),
+             p(-1μm//2,-1μm//2), p(3μm//2,-1μm//2)])
+        @test_throws DimensionError offset(rs, 500)
+
+        # Disjoint rectangles
+        rs = [Rectangle(1μm,1μm), Rectangle(1μm,1μm)+Point(2μm,0μm)]
+        @test length(offset(rs, 100nm)) == 2
+
+        # A glancing blow merges the two rectangles
+        @test length(offset(rs, 500nm)) == 1
+    end
 end
 
 @testset "Polygon rendering" begin
