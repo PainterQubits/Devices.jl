@@ -2,7 +2,7 @@
 language: julia
 os:
   - linux
-  - osx
+  # - osx
 env:
   - CXX=g++-4.8
 addons:
@@ -20,9 +20,12 @@ install:
     fi
 julia:
   - 0.6
-  # - nightly
+  - nightly
 notifications:
   email: false
+matrix:
+  allow_failures:
+  - julia: nightly
 # uncomment the following lines to override the default test script
 #script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
