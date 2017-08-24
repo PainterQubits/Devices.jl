@@ -513,7 +513,41 @@ end
     flatten!(c)
     @test bounds(c) == Rectangle(95,95)
 
-    # Test push! and pop!
+    # TODO Test push! and pop!
+
+    # === Issues 17 and 18 ===
+    c = Cell("main", nm)
+    c2 = Cell("test", nm)
+    render!(c2, Rectangle(1μm, 2μm))
+    push!(c.refs, CellReference(c2))
+    flatten!(c) # just don't want it to throw an error
+    @test all(points(polygon.(elements(c))[1]) .===
+        [p(0.0nm,0.0nm), p(1000.0nm,0.0nm), p(1000.0nm,2000.0nm), p(0.0nm,2000.0nm)])
+
+    c = Cell("main", nm)
+    c2 = Cell("test", μm)
+    render!(c2, Rectangle(1μm, 2μm))
+    push!(c.refs, CellReference(c2))
+    flatten!(c)
+    @test all(points(polygon.(elements(c))[1]) .===
+        [p(0.0nm,0.0nm), p(1000.0nm,0.0nm), p(1000.0nm,2000.0nm), p(0.0nm,2000.0nm)])
+
+    c = Cell("main", nm)
+    c2 = Cell("test")
+    render!(c2, Rectangle(1, 1))
+    push!(c.refs, CellReference(c2))
+    @test_throws DimensionError flatten!(c)
+
+    c = Cell("main", nm)
+    c2 = Cell("test", nm)
+    push!(c.refs, CellReference(c2))
+    flatten!(c)
+    @test isempty(elements(c))
+
+    # GDS loading actually uses a string for the first argument, until cells are all loaded
+    @test CellReference("gdstest", Point(0.,0.)) isa CellReference{Float64, String}
+
+    # === End Issues 17 and 18 ===
 end
 
 @testset "Path basics" begin

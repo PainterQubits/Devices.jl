@@ -194,7 +194,7 @@ Base.copy(c::Cell{S,T}) where {S,T} = Cell{S,T}(c.name, copy(c.elements), copy(c
 #                     x.create)
 
 """
-    dbscale{T}(c::Cell{T})
+    dbscale(c::Cell{T}) where {T}
 Give the database scale for a cell. The database scale is the
 smallest increment of length that will be represented in the output CAD file.
 
@@ -218,8 +218,10 @@ dbscale(c0::Cell, c1::Cell, c2::Cell...) =
     minimum([dbscale(c0); dbscale(c1); map(dbscale, collect(c2))])
 
 """
-    CellReference{T<:Coordinate}(x, y::Point{T}=Point(0.,0.); kwargs...
-Convenience constructor for `CellReference{typeof(x), T}`.
+    CellReference(x::Cell{S}; kwargs...) where {S <: Coordinate}
+    CellReference(x::Cell{S}, origin::Point{T}; kwargs...) where
+        {S <: Coordinate, T <: Coordinate}
+Convenience constructor for `CellReference{T, typeof(x)}`.
 
 Keyword arguments can specify x-reflection, magnification, or rotation.
 Synonyms are accepted, in case you forget the "correct keyword"...
@@ -229,7 +231,19 @@ Synonyms are accepted, in case you forget the "correct keyword"...
 - Magnification: `:mag`, `:magnification`, `:magnify`, `:zoom`, `:scale`
 - Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
 """
-function CellReference(x, origin::Point{T}=Point(0.,0.); kwargs...) where {T <: Coordinate}
+CellReference(x::Cell{S}; kwargs...) where {S <: Coordinate} =
+    CellReference(x, Point(float(zero(S)), float(zero(S))); kwargs...)
+
+function CellReference(x::Cell{S}, origin::Point{T}; kwargs...) where
+        {S <: Coordinate, T <: Coordinate}
+    dimension(S) != dimension(T) && throw(Unitful.DimensionError(oneunit(S), oneunit(T)))
+    cref(x, origin; kwargs...)
+end
+
+CellReference(x, origin::Point{T}; kwargs...) where {T <: Coordinate} =
+    cref(x, origin; kwargs...)
+
+function cref(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
     argdict = Dict(k=>v for (k,v) in kwargs)
     xreflkeys = [:xrefl, :xreflection, :refl, :reflect,
                     :xreflect, :xmirror, :mirror]
