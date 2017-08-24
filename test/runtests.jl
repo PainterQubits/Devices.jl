@@ -586,6 +586,7 @@ end
 
     @testset "> Path segments" begin
         pa = Path()
+        @test_throws AssertionError straight!(pa, -10.0, Paths.Trace(10.0)) # Issue 11
         @test_throws Unitful.DimensionError straight!(pa, 10.0μm, Paths.Trace(10.0μm))
         @test pathlength(pa) == 0.0
         straight!(pa, 10, Paths.Trace(10))
