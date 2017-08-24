@@ -13,6 +13,7 @@ const μm = μm2μm
 const mm2μm = Devices.PreferMicrons.mm
 const mm = mm2μm
 const cm2μm = Devices.PreferMicrons.cm
+const cm = cm2μm
 const m2μm = Devices.PreferMicrons.m
 const m = m2μm
 
@@ -38,6 +39,8 @@ p(x,y) = Point(x,y)
         @test typeof(Point(2.0m2nm,3cm2nm)) == Point{typeof(2.0nm2nm)}
         @test typeof(Point(1.0/μm2μm, 1.0/nm2μm)) == Point{typeof(1.0/μm2μm)}
         @test typeof(Point(1.0/μm2nm, 1.0/nm2nm)) == Point{typeof(1.0/nm2nm)}
+        @test typeof(Point(1.0nm/μm, 1.0nm/μm)) == Point{Float64}
+        @test typeof(Point(1nm/μm, 1nm/μm)) == Point{Rational{Int}}
     end
 
     @testset "> Point arithmetic" begin
@@ -112,6 +115,17 @@ p(x,y) = Point(x,y)
         @test [Point(1,3), Point(2,4)] .* m2μm == [Point(1m2μm,3m2μm), Point(2m2μm,4m2μm)]
         @test convert(Point{Float64}, Clipper.IntPoint(1,2)) == Point(1.,2.)
         @test convert(Point{Int}, Clipper.IntPoint(1,2)) == Point(1,2)
+    end
+
+    @testset "> Point promotion" begin
+        @test promote_type(typeof(Point(1,2)), typeof(Point(1μm/nm, 1μm/nm))) ==
+            Point{Rational{Int}}
+        @test promote_type(typeof(Point(1,2)), typeof(Point(1μm/nm, 1nm/μm))) ==
+            Point{Rational{Int}}
+        @test promote_type(typeof(Point(1.0nm,2.0nm)), typeof(Point(1.0cm, 1.0cm))) ==
+            Point{typeof(1.0μm)}
+        @test promote_type(typeof(Point(1.0/nm,2.0/nm)), typeof(Point(1.0/cm, 1.0/cm))) ==
+            Point{typeof(1.0/μm)}
     end
 end
 
@@ -896,6 +910,14 @@ end
     # end
 
     @testset "Turn, SimpleCPW" begin
+        # === Issue 16 ===
+        c = Cell("temp", nm)
+        pa = Path(nm)
+        straight!(pa, 100μm, Paths.CPW(10μm, 5μm))
+        turn!(pa, -π, 20μm)
+        render!(c, pa, GDSMeta(0))
+        # === End Issue 16 ===
+
         # Test low-res rendering for simplicity
         c = Cell("main")
         pa = Path()

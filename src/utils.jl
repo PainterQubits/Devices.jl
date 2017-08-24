@@ -25,7 +25,7 @@ Adapted from a contribution to PlotUtils.jl from Kristoffer Carlsson.
 """
 function adapted_grid end
 
-adapted_grid(f, anchors::Tuple{S,T}; kwargs...) where {S <: Coordinate,T <: Coordinate} =
+adapted_grid(f, anchors::Tuple{S,T}; kwargs...) where {S <: Coordinate, T <: Coordinate} =
     adapted_grid(f, StaticArrays.SVector(anchors); kwargs...)
 
 adapted_grid(f, anchors::AbstractVector{T};

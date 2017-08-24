@@ -5,10 +5,10 @@ import StaticArrays
 import StaticArrays: @SMatrix
 import CoordinateTransformations: LinearMap, Translation, ∘, compose
 import Clipper: IntPoint
-import Base: convert, *, summary, promote_rule, show, reinterpret
+import Base: convert, *, summary, show, reinterpret
 import Base: scalarmin, scalarmax, isapprox
 import ForwardDiff: ForwardDiff, extract_derivative
-import Unitful: Unitful, Length, ustrip, unit
+import Unitful: Unitful, Length, DimensionlessQuantity, NoUnits, ustrip, unit
 
 export Point
 export Rotation, Translation, XReflection, YReflection, ∘, compose
@@ -17,7 +17,7 @@ export getx, gety
 struct Point{T<:PointTypes} <: StaticArrays.FieldVector{2,T}
     x::T
     y::T
-    (::Type{Point{T}}){T}(x,y) = new{T}(x,y)
+    Point{T}(x,y) where {T} = new{T}(x,y)
 end
 
 """
@@ -37,14 +37,18 @@ Point(x::Number, y::Number) =
 Point(x::Length, y::Length) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 Point(x::InverseLength, y::InverseLength) = Point{promote_type(typeof(x),typeof(y))}(x,y)
 Point(x::Real, y::Real) = Point{promote_type(typeof(x),typeof(y))}(x,y)
+Point(x::DimensionlessQuantity, y::DimensionlessQuantity) = Point(NoUnits(x), NoUnits(y))
 
 convert(::Type{Point{T}}, x::IntPoint) where {T <: Real} = Point{T}(x.X, x.Y)
-promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where {S <: Real,T <: Real} =
+
+const Dimless = Union{Real, DimensionlessQuantity{<:Real}}
+Base.promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where {S <: Dimless, T <: Dimless} =
     Point{promote_type(S,T)}
-promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where {S <: Length,T <: Length} =
+Base.promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where {S <: Length,T <: Length} =
     Point{promote_type(S,T)}
-promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where {S <: InverseLength,T <: InverseLength} =
-    Point{promote_type(S,T)}
+Base.promote_rule(::Type{Point{S}}, ::Type{Point{T}}) where
+    {S <: InverseLength, T <: InverseLength} =
+        Point{promote_type(S,T)}
 show(io::IO, p::Point) = print(io, "(",string(getx(p)),",",string(gety(p)),")")
 
 function reinterpret(::Type{T}, a::Point{S}) where {T,S}

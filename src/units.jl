@@ -39,7 +39,7 @@ end
 function ForwardDiff.derivative(f, x::Unitful.Length)
     ux = Unitful.ustrip(x)
     ox = one(ux)
-    r = f(Unitful.unit(x)*ForwardDiff.Dual(ux,ox)) ./ (typeof(x)(one(x)))
+    r = f(Unitful.unit(x)*ForwardDiff.Dual(ux,ox)) ./ oneunit(x)
     ForwardDiff.extract_derivative(r)
 end
 

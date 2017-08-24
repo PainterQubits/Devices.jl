@@ -9,7 +9,7 @@ import Clipper
 import FileIO: save, load
 
 import Base: length, show, eltype
-import Unitful: Length
+import Unitful: Length, DimensionlessQuantity
 Unitful.@derived_dimension InverseLength inv(Unitful.𝐋)
 
 export GDSMeta
@@ -48,16 +48,16 @@ function lowerleft end
 function upperright end
 
 """
-    typealias Coordinate Union{Real,Length}
+    Coordinate = Union{Real, Length}
 Type alias for numeric types suitable for coordinate systems.
 """
-const Coordinate = Union{Real,Length}
+const Coordinate = Union{Real, Length}
 
 """
-    typealias PointTypes Union{Real,Length,InverseLength}
+    PointTypes = Union{Real, DimensionlessQuantity, Length, InverseLength}
 Allowed type variables for `Point{T}` types.
 """
-const PointTypes = Union{Real,Length,InverseLength}
+const PointTypes = Union{Real, DimensionlessQuantity, Length, InverseLength}
 const FloatCoordinate = Union{AbstractFloat,Length{<:AbstractFloat}}
 const IntegerCoordinate = Union{Integer,Length{<:Integer}}
 
