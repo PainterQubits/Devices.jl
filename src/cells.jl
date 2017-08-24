@@ -221,7 +221,9 @@ dbscale(c0::Cell, c1::Cell, c2::Cell...) =
     CellReference(x::Cell{S}; kwargs...) where {S <: Coordinate}
     CellReference(x::Cell{S}, origin::Point{T}; kwargs...) where
         {S <: Coordinate, T <: Coordinate}
-Convenience constructor for `CellReference{T, typeof(x)}`.
+    CellReference(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
+
+Convenience constructor for `CellReference{float(T), typeof(x)}`.
 
 Keyword arguments can specify x-reflection, magnification, or rotation.
 Synonyms are accepted, in case you forget the "correct keyword"...
@@ -274,12 +276,16 @@ function cref(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
         end
     end
 
-    CellReference{T, typeof(x)}(x, origin, xrefl, mag, rot)
+    CellReference{float(T), typeof(x)}(x, float(origin), xrefl, mag, rot)
 end
 
 """
-    CellArray{T<:Coordinate}(x, origin::Point{T}; kwargs...)
-Construct a `CellArray{T,typeof(x)}` object.
+    CellArray(x::Cell{S}; kwargs...) where {S <: Coordinate}
+    CellArray(x::Cell{S}, origin::Point{T}; kwargs...) where
+        {S <: Coordinate, T <: Coordinate}
+    CellArray(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
+
+Construct a `CellArray{float(T),typeof(x)}` object.
 
 Keyword arguments specify the column vector, row vector, number of columns,
 number of rows, x-reflection, magnification factor, and rotation.
@@ -296,7 +302,19 @@ Synonyms are accepted for these keywords:
 - Magnification: `:mag`, `:magnification`, `:magnify`, `:zoom`, `:scale`
 - Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
 """
-function CellArray(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
+CellArray(x::Cell{S}; kwargs...) where {S <: Coordinate} =
+    CellArray(x, Point(float(zero(S)), float(zero(S))); kwargs...)
+
+function CellArray(x::Cell{S}, origin::Point{T}; kwargs...) where
+        {S <: Coordinate, T <: Coordinate}
+    dimension(S) != dimension(T) && throw(Unitful.DimensionError(oneunit(S), oneunit(T)))
+    carr(x, origin; kwargs...)
+end
+
+CellArray(x, origin::Point{T}; kwargs...) where {T <: Coordinate} =
+    carr(x, origin; kwargs...)
+
+function carr(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
     argdict = Dict(k=>v for (k,v) in kwargs)
 
     dckeys = [:deltacol, :dcol, :dc, :vcol, :colv, :colvec,
@@ -365,7 +383,7 @@ function CellArray(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
         end
     end
 
-    CellArray{T, typeof(x)}(x,origin,dc,dr,c,r,xrefl,mag,rot)
+    CellArray{float(T), typeof(x)}(x,float(origin),dc,dr,c,r,xrefl,mag,rot)
 end
 
 """

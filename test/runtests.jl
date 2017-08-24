@@ -548,6 +548,8 @@ end
     @test CellReference("gdstest", Point(0.,0.)) isa CellReference{Float64, String}
 
     # === End Issues 17 and 18 ===
+
+    @test_throws DimensionError CellReference(Cell("junk", nm), Point(0,0))
 end
 
 @testset "Path basics" begin
@@ -760,6 +762,18 @@ end
             p(29495.0nm, 40005.0nm),
             p(29495.0nm, 39995.0nm)
         ]
+
+        # === Issue 13 ===
+        c2 = Cell("c2", nm)
+        render!(c2, Rectangle(1μm, 1μm), GDSMeta(1))
+        const c2ref = CellReference(c2, Point(0μm,0μm))
+
+        c = Cell("c", nm)
+        ro = Path(μm, α0 = 180°)
+        straight!(ro, 10μm, Paths.Trace(0.5μm))
+        attach!(ro, c2ref, pathlength(ro))
+        render!(c, ro)
+        # === End Issue 13 ===
     end
 
     @testset "Straight, SimpleTrace" begin
