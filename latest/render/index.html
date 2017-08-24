@@ -434,27 +434,27 @@ render!(c::Cell, r::Rectangle, s::Rectangles.Undercut, meta::Meta)
 
 
 <p>Render a rectangle <code>r</code> to cell <code>c</code>, defaulting to plain styling.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e4570c47f2103cabfc24ce8e9429ddc6801accf8/src/render/rectangles.jl#L1-L7' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ced2e3d9de87440a0af9db5f371d2309f044f29b/src/render/rectangles.jl#L1-L7' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>render!(c::Cell, p::Polygon, meta::Meta=GDSMeta()) = render!(c, p, Polygons.Plain(), meta)
 render!(c::Cell, r::Polygon, s::Polygons.Style, meta::Meta)
 </pre></div>
 
 
 <p>Render a polygon <code>r</code> to cell <code>c</code>, defaulting to plain styling. Currently there is no other Polygon rendering style implemented.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e4570c47f2103cabfc24ce8e9429ddc6801accf8/src/render/polygons.jl#L1-L6' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ced2e3d9de87440a0af9db5f371d2309f044f29b/src/render/polygons.jl#L1-L6' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!</span><span class="p">{</span><span class="err">T</span><span class="p">}</span><span class="o">(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">p</span><span class="p">::</span><span class="nd">Path</span><span class="p">{</span><span class="err">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">meta</span><span class="p">::</span><span class="nd">Meta</span><span class="o">=</span><span class="nt">GDSMeta</span><span class="o">();</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Render a path <code>p</code> to a cell <code>c</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e4570c47f2103cabfc24ce8e9429ddc6801accf8/src/render/paths.jl#L1-L4' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ced2e3d9de87440a0af9db5f371d2309f044f29b/src/render/paths.jl#L1-L4' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span><span class="nt">render</span><span class="o">!(</span><span class="nt">c</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">segment</span><span class="p">::</span><span class="nd">Paths</span><span class="p">.</span><span class="nc">Segment</span><span class="o">,</span> <span class="nt">s</span><span class="p">::</span><span class="nd">Paths</span><span class="p">.</span><span class="nc">DecoratedStyle</span><span class="o">,</span> <span class="nt">meta</span><span class="p">::</span><span class="nd">Meta</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
 </pre></div>
 
 
 <p>Render a <code>segment</code> with decorated style <code>s</code> to cell <code>c</code>. Cell references held by the decorated style will have their fields modified by this method, which is why they are shallow copied in the <a href="../paths/#Devices.Paths.attach!"><code>Paths.attach!</code></a> function.</p>
 <p>This method draws the decorations before the path itself is drawn.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e4570c47f2103cabfc24ce8e9429ddc6801accf8/src/render/decorated.jl#L1-L9' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ced2e3d9de87440a0af9db5f371d2309f044f29b/src/render/decorated.jl#L1-L9' class='documenter-source'>source</a><br></p>
 <p><a id='Rectangle-rendering-styles-1'></a></p>
 <h3 id="rectangle-rendering-styles">Rectangle rendering styles</h3>
 <p><a id='Devices.Rectangles.Plain' href='#Devices.Rectangles.Plain'>#</a>
@@ -466,7 +466,7 @@ end
 
 
 <p>Plain rectangle style. Use this if you are fond for the simpler times when rectangles were just rectangles.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e4570c47f2103cabfc24ce8e9429ddc6801accf8/src/rectangles.jl#L149-L155' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ced2e3d9de87440a0af9db5f371d2309f044f29b/src/rectangles.jl#L149-L155' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Rectangles.Rounded' href='#Devices.Rectangles.Rounded'>#</a>
 <strong><code>Devices.Rectangles.Rounded</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>struct Rounded{S&lt;:Coordinate,T} &lt;: Rectangles.Style{T}
@@ -477,7 +477,7 @@ end
 
 
 <p>Rounded rectangle style. All corners are rounded off with a given radius <code>r</code>. The bounding box of the unstyled rectangle should remain unaffected.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e4570c47f2103cabfc24ce8e9429ddc6801accf8/src/rectangles.jl#L161-L169' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ced2e3d9de87440a0af9db5f371d2309f044f29b/src/rectangles.jl#L161-L169' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Rectangles.Undercut' href='#Devices.Rectangles.Undercut'>#</a>
 <strong><code>Devices.Rectangles.Undercut</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>struct Undercut{S&lt;:Coordinate,T} &lt;: Rectangles.Style{T}
@@ -492,7 +492,7 @@ end
 
 
 <p>Undercut rectangles. In each direction around a rectangle (left, top, right, bottom) an undercut is rendered on .</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e4570c47f2103cabfc24ce8e9429ddc6801accf8/src/rectangles.jl#L177-L188' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ced2e3d9de87440a0af9db5f371d2309f044f29b/src/rectangles.jl#L177-L188' class='documenter-source'>source</a><br></p>
 <p><a id='Polygon-rendering-styles-1'></a></p>
 <h3 id="polygon-rendering-styles">Polygon rendering styles</h3>
 <p><a id='Devices.Polygons.Plain' href='#Devices.Polygons.Plain'>#</a>
@@ -504,7 +504,7 @@ end
 
 
 <p>Plain polygon style.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e4570c47f2103cabfc24ce8e9429ddc6801accf8/src/polygons.jl#L160-L165' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ced2e3d9de87440a0af9db5f371d2309f044f29b/src/polygons.jl#L160-L165' class='documenter-source'>source</a><br></p>
 <p><a id='Rendering-arbitrary-paths-1'></a></p>
 <h2 id="rendering-arbitrary-paths">Rendering arbitrary paths</h2>
 <p>A <code>Segment</code> and <code>Style</code> together define one or more closed curves in the plane. The job of rendering is to approximate these curves by closed polygons. To enable rendering of styles along generic paths in the plane, an adaptive algorithm is used when no other method is available:</p>
@@ -523,7 +523,7 @@ end
 <li><code>rand_factor</code>: between anchor points, <code>adapted_grid</code> will wiggle initial grid points a bit to prevent aliasing. The wiggling is sampled uniformly from the interval: <code>[-rand_factor, rand_factor]</code>, times the distance between three grid points (e.g. <code>i+1</code> and <code>i-1</code>). A random number generator is given a fixed seed every time <code>adapted_grid</code> is called, so the rendered results are deterministic.</li>
 <li><code>grid_step</code>: Step size for initial grid points. If you set this to be larger than the maximum anchor point, then the lowest resolution consistent with <code>max_change</code> is used (unless <code>f</code> has some fast variations that the algorithm might miss).</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/e4570c47f2103cabfc24ce8e9429ddc6801accf8/src/utils.jl#L1-L25' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/tree/ced2e3d9de87440a0af9db5f371d2309f044f29b/src/utils.jl#L1-L25' class='documenter-source'>source</a><br></p>
 <p>In some cases, custom rendering methods are implemented when it would improve performance for simple structures or when special attention is required. The rendering methods can specialize on either the <code>Segment</code> or <code>Style</code> types, or both.</p>
                 
                   
