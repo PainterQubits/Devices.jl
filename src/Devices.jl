@@ -152,9 +152,9 @@ include("backends/gds.jl")
 include("backends/svg.jl")
 
 include("lcdfonts.jl")
-import .LCDFonts: lcdstring!, characters_demo, scripted_demo
+import .LCDFonts: lcdstring!, characters_demo, scripted_demo, referenced_characters_demo
 export LCDFonts
-export lcdstring!, characters_demo, scripted_demo
+export lcdstring!, characters_demo, scripted_demo, referenced_characters_demo
 
 """
     @junographics()

@@ -1,10 +1,11 @@
 module LCDFonts
 
+import Devices
 import Devices: push!, render!, GDSMeta, Meta
 
-using Devices.Rectangles
-using Devices.Points
-using Devices.Cells
+using ..Rectangles
+using ..Points
+using ..Cells
 
 using FileIO
 
@@ -14,6 +15,7 @@ import Unitful: μm, nm
 export lcdstring!
 export characters_demo
 export scripted_demo
+export referenced_characters_demo
 
 # Horizontal Pixels = 5
 # Vertical Pixels = 7 (regular) + 3 (for stems)
@@ -110,6 +112,7 @@ const lcd = Dict{String, String}(
 "'" => "01100001000100000000000000000000000"*lcd_short,
 "`" =>"01000001000001000000000000000000000"*lcd_short,
 "~" =>"00000000000100010101000100000000000"*lcd_short,
+"≈" =>"00000010001010100010010001010100010"*lcd_short,
 "." => "00000000000000000000000000110001100"*lcd_short,
 "," => "00000000000000000000000000110001100"*"001000100000000",
 "?" => "01110100010000100010001000000000100"*lcd_short,
@@ -165,8 +168,13 @@ const lcd = Dict{String, String}(
 "𝚤" => "00100000000110000100001000010100110"*lcd_short,
 " " => lcd_blank
 )
+const scripted_equation = "H=ħωσ_x+Jσ_y
 
-const scripted_equation = "H=ħωσ_x+Jσ_y\n\nc^2=a^2+b^2\n\n|Ψ>=a^†a|ψ_1>+b^†b|ψ_2>"
+c^2=a^2+b^2
+
+|Ψ>=a^†a|ψ_1>+b^†b|ψ_2>
+
+e^{𝚤π}=-1 and c_{vac}≈3x10^8 m/s"
 const test_string = string(
 "Keyboard characters:
 
@@ -182,23 +190,43 @@ Non-keyboard characters:
 
 αβγδϵηθκλμνπρστϕχψωħ
 ΩΣΞΓΠΨΔΛΘΦ
-𝚤∞÷√±∓≠≡⟂∠°∂∇†□░█\n\n",
-length(lcd), " characters supported so far.")
+𝚤∞÷√±∓≠≡≈⟂∠°∂∇†□░█\n\n",
+length(lcd), " characters supported so far.
 
-function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; meta::Meta=GDSMeta(0,0), scripting = false, linelimit = 2^32)
-    pushstr = "push!(string_cell.refs, CellReference(s_cell, Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset))))"
+Line limit demonstration (newline character not present):
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in enim vestibulum, laoreet ligula at, convallis nisl. Curabitur elit mi, luctus a semper sed, euismod sed turpis. Nunc ac arcu egestas, tristique leo vitae, pellentesque augue. Vivamus massa urna, varius quis scelerisque ac, imperdiet non magna. Curabitur id rhoncus nisl. Cras consequat vulputate mauris, sit amet congue odio. Sed posuere ullamcorper libero, id efficitur diam auctor quis. Morbi ac neque lectus. Maecenas ultrices placerat justo, id sollicitudin velit dapibus laoreet. Mauris sodales consectetur mi eget suscipit. Morbi eu rutrum turpis. In sed dolor eu purus venenatis feugiat. Maecenas lacinia dui vel consequat venenatis. Aenean viverra, quam nec tempus iaculis, velit libero laoreet ligula, id hendrerit velit lorem at velit.")
+reference_test_string = "aaaa
+bbbb
+cccc
+dddd
+eeee
+ffff
+gggg
+♇♇♇♇" # End with invalid character to test catch fallback
+
+"""
+    lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; scripting = false, linelimit = 2^32, meta::Meta=GDSMeta(0,0))
+Renders the string `str` to cell `c` in a pixelated font format.
+- `pixelsize`: dimension for the width/height of each pixel
+- `pixelspacing`: dimension for the spacing between adjacent pixels
+- `scripting`: boolean parameter for allocating special characters `^`, `_`, `{`, and `}` for superscripting and subscripting. Follows the same usage as LaTex.
+- `linelimit`: sets the maximum number of characters per line and continues on a new line if `str` is longer than `linelimit`
+- `verbose`: prints out information about the character dictionary
+"""
+function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; meta::Meta=GDSMeta(0,0), scripting = false, linelimit = 2^32, verbose = false)
     hpos = 1
     vpos = 1
     subscript = -1
     superscript = +1
+    waitforend = false
+    existing_chars = Dict{String, Devices.Cells.CellReference{}}()
     for s in str
-        offset = 0.0
         if subscript == 0
             offset = -0.3
-            subscript = -1
         elseif superscript == 0
             offset = +0.3
-            superscript = +1
+        else
+            offset = 0.0
         end
         if s == '\n' || hpos > linelimit
             vpos += 1
@@ -207,27 +235,59 @@ function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; met
             subscript = +1
         elseif s == '^' && scripting
             superscript = -1
+        elseif s == '{' && scripting
+            waitforend = true
+        elseif s == '}' && scripting
+            subscript = -1
+            superscript = +1
+            waitforend = false
         else
             s = string(s)
-            ss = get(lcd, s, s)
-            try
-                s_cell = drawlcdcell(ss, pixelsize, pixelspacing, meta)
-                push!(string_cell.refs, CellReference(s_cell, Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset))))
-            catch
-                warn("Cannot render \"", s, "\" character. Replacing with a blank character.")
-                s_cell = drawlcdcell(lcd_blank, pixelsize, pixelspacing, meta)
-                push!(string_cell.refs, CellReference(s_cell, Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset))))
+            cr = get(existing_chars, s, 0)
+            if  cr == 0
+                verbose? println("Character \"", s, "\" not found. Adding to CellReference dictionary."):nothing
+                ss = get(lcd, s, s)
+                try
+                    s_cell = (typeof(string_cell))(uniquename("lcd"))
+                    drawlcdcell!(s_cell, ss, pixelsize, pixelspacing, meta)
+                    crs = CellReference(s_cell, Point(0*pixelspacing, 0*pixelspacing))
+                    push!(string_cell.refs, crs + Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset)))
+                    existing_chars[s] = crs
+                catch
+                    warn("Cannot render \"", s, "\" character. Replacing with a blank character.")
+                    blank_catch = get(existing_chars, " ", 0)
+                    if  blank_catch == 0
+                        verbose? println("Blank character not in dictionary. Adding to it now."):nothing
+                        s_cell = (typeof(string_cell))(uniquename("lcd"))
+                        drawlcdcell!(s_cell, lcd_blank, pixelsize, pixelspacing, meta)
+                        crs = CellReference(s_cell, Point(0*pixelspacing, 0*pixelspacing))
+                        push!(string_cell.refs, crs + Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset)))
+                        existing_chars[" "] = crs
+                    else
+                        push!(string_cell.refs, blank_catch + Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset)))
+                    end
+                end
+            else
+                verbose? println("Character \"", s, "\" already in dictionary."):nothing
+                push!(string_cell.refs, cr + Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset)))
             end
             hpos += 1
         end
-        subscript -= 1
-        superscript += 1
+        if !waitforend
+            subscript -= 1
+            superscript += 1
+        end
     end
     string_cell
 end
 
-function drawlcdcell(code::String, pixelsize, pixelspacing, meta::Meta)
-    c = Cell(uniquename("lcd"), nm)
+"""
+    drawlcdcell!(c::Cell, code::String, pixelsize, pixelspacing, meta::Meta)
+Renders pixels from the codeword `code` onto a 5x10 (horizontal x vertical) grid in cell `c`.
+- `pixelsize`: dimension for the width/height of each pixel
+- `pixelspacing`: dimension for the spacing between adjacent pixels
+"""
+function drawlcdcell!(c::Cell, code::String, pixelsize, pixelspacing, meta::Meta)
     r = Rectangle(pixelsize, pixelsize) + (pixelspacing - pixelsize)/2*Point(1,1)
     idx = 1
     for row in 1:10
@@ -240,17 +300,34 @@ function drawlcdcell(code::String, pixelsize, pixelspacing, meta::Meta)
     end
     c
 end
-
-function scripted_demo(;save_path = joinpath(homedir(),"Desktop"))
+"""
+    scripted_demo(save_path = joinpath(homedir(),"Desktop"))
+Demo script for demonstrating the use of the `scripting` parameter in `lcdstring!()`.
+"""
+function scripted_demo(save_path = joinpath(homedir(),"Desktop"))
     cd(save_path)
     c = Cell("scripted", nm)
     save("scripted.gds", lcdstring!(c, scripted_equation, 1μm, 1.25μm, scripting = true))
 end
 
-function characters_demo(;save_path = joinpath(homedir(),"Desktop"))
+"""
+    characters_demo(save_path = joinpath(homedir(),"Desktop"))
+Demo script for demonstrating the avalible characters in `lcdstring!()` and the `linelimit` parameter in use.
+"""
+function characters_demo(save_path = joinpath(homedir(),"Desktop"))
     cd(save_path)
     c = Cell("characters", nm)
     save("characters.gds", lcdstring!(c, test_string, 1μm, 1.25μm, linelimit = 80))
+end
+
+"""
+    characters_demo(save_path = joinpath(homedir(),"Desktop"))
+Demo script for demonstrating the memory saving ability of keeping CellReferences for previously used characters in `lcdstring!()`.
+"""
+function referenced_characters_demo(save_path = joinpath(homedir(),"Desktop"))
+    cd(save_path)
+    c = Cell("referenced_characters", nm)
+    save("referenced_characters.gds", lcdstring!(c, reference_test_string, 1μm, 1.25μm, verbose = true))
 end
 
 end
