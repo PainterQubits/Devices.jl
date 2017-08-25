@@ -329,8 +329,7 @@ end
 """
     characters_demo(save_path = joinpath(homedir(),"Desktop","referenced_characters.gds"))
 Demo script for demonstrating the memory saving ability of keeping CellReferences for
-previously used characters in `lcdstring!()`. `flatten` can flatten the cells before saving
-(for SVG output).
+previously used characters in `lcdstring!()`.
 """
 function referenced_characters_demo(save_path =
         joinpath(homedir(),"Desktop","referenced_characters.gds"))
