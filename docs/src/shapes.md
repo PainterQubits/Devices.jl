@@ -143,3 +143,15 @@ radialstub!(c, 20μm, 90°, 5μm, 1μm, GDSMeta(1))
 save("radialstub.svg", flatten(c)); nothing # hide
 ```
 <img src="../radialstub.svg" style="width:2in;"/>
+
+
+## LCDFonts
+
+LCDFonts allows the user with `lcdstring!` to render a string which is displayed in a cell with a per character resolution of 5x10. Three functions `characters_demo`, `scripted_demo`, `referenced_characters_demo` are exported for demonstration but also serves as a test of the functionality. 
+
+```@docs
+    lcdstring!
+    characters_demo
+    scripted_demo
+    referenced_characters_demo
+```
