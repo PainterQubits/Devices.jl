@@ -1,12 +1,20 @@
 - v0.2.0
+  - `LCDFonts` module added. Try out `lcdstring!` for your text rendering needs.
   - Redesign rendering pipeline.
     - It is no longer allowed to pass keyword arguments to `Rectangle` or `Polygon`
       constructors. These no longer include metadata; they are just geometry.
     - GDS-II layer and datatype are captured by a `GDSMeta` object. This is passed to
       `render!` when rendering polygons, paths, etc. to a cell.
     - `render!` must receive a `Meta` object.
-  - Rectangles are now `immutable`, so `centered!` has been removed.
-  - Polygons are now `immutable`.
+  - Rectangles are no longer mutable, so `centered!` has been removed.
+  - Polygons are no longer mutable.
+  - Bug fixes: closed issues [11](https://github.com/PainterQubits/Devices.jl/issues/11),
+    [13](https://github.com/PainterQubits/Devices.jl/issues/13),
+    [16](https://github.com/PainterQubits/Devices.jl/issues/16),
+    [17](https://github.com/PainterQubits/Devices.jl/issues/17),
+    [18](https://github.com/PainterQubits/Devices.jl/issues/18),
+    [19](https://github.com/PainterQubits/Devices.jl/issues/19),
+    [21](https://github.com/PainterQubits/Devices.jl/issues/21).
   - Bug fix: `Cell(::AbstractString, ::Unitful.LengthUnits)` method was broken.
   - Bug fix: `meander!` works again, method signature changed a bit.
   - Bug fix: in `CompoundSegment` (such as obtained using `simplify!`), there was a bug with
