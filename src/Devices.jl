@@ -151,6 +151,11 @@ export bridge!, checkerboard!, device_template!, flux_bias!, grating!,
 include("backends/gds.jl")
 include("backends/svg.jl")
 
+include("lcdfonts.jl")
+import .LCDFonts: lcdstring!, characters_demo, scripted_demo
+export LCDFonts
+export lcdstring!, characters_demo, scripted_demo
+
 """
     @junographics()
 If you are using Juno in Atom, calling this at the start of your session will render
