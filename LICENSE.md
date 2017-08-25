@@ -1,6 +1,6 @@
 The Devices.jl package is licensed under the MIT "Expat" License:
 
-> Copyright (c) 2016: Andrew Keller.
+> Copyright (c) 2016-7: Andrew Keller, Michael Fang, and contributors.
 >
 > Permission is hereby granted, free of charge, to any person obtaining
 > a copy of this software and associated documentation files (the

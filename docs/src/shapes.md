@@ -147,7 +147,10 @@ save("radialstub.svg", flatten(c)); nothing # hide
 
 ## LCDFonts
 
-LCDFonts allows the user with `lcdstring!` to render a string which is displayed in a cell with a per character resolution of 5x10. Three functions `characters_demo`, `scripted_demo`, `referenced_characters_demo` are exported for demonstration but also serves as a test of the functionality. 
+LCDFonts allows the user with `lcdstring!` to render a string which is displayed in a cell
+with a per character resolution of 5x10. Three functions `characters_demo`, `scripted_demo`,
+`referenced_characters_demo` are exported for demonstration but also serves as a test of the
+functionality.
 
 ```@docs
     lcdstring!
@@ -155,3 +158,19 @@ LCDFonts allows the user with `lcdstring!` to render a string which is displayed
     scripted_demo
     referenced_characters_demo
 ```
+
+### Inline demonstrations
+
+```@example 9
+using Devices, FileIO # hide
+path_to_output_gds = "characters.svg" # hide
+characters_demo(path_to_output_gds, true)
+```
+<img src="../characters.svg" style="width:6in;"/>
+
+```@example 10
+using Devices, FileIO # hide
+path_to_output_gds = "scripted.svg" # hide
+scripted_demo(path_to_output_gds, true);
+```
+<img src="../scripted.svg" style="width:4in;"/>

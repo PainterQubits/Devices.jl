@@ -300,34 +300,43 @@ function drawlcdcell!(c::Cell, code::String, pixelsize, pixelspacing, meta::Meta
     end
     c
 end
+
 """
-    scripted_demo(save_path = joinpath(homedir(),"Desktop"))
+    scripted_demo(save_path = joinpath(homedir(),"Desktop","scripted.gds"), flatten = false)
 Demo script for demonstrating the use of the `scripting` parameter in `lcdstring!()`.
+`flatten` can flatten the cells before saving (for SVG output).
 """
-function scripted_demo(save_path = joinpath(homedir(),"Desktop"))
-    cd(save_path)
+function scripted_demo(save_path = joinpath(homedir(),"Desktop"), flatten = false)
     c = Cell("scripted", nm)
-    save("scripted.gds", lcdstring!(c, scripted_equation, 1μm, 1.25μm, scripting = true))
+    lcdstring!(c, scripted_equation, 1μm, 1.25μm, scripting = true)
+    flatten && flatten!(c)
+    save(save_path, c)
 end
 
 """
-    characters_demo(save_path = joinpath(homedir(),"Desktop"))
-Demo script for demonstrating the avalible characters in `lcdstring!()` and the `linelimit` parameter in use.
+    characters_demo(save_path = joinpath(homedir(),"Desktop","characters.gds"), flatten = false)
+Demo script for demonstrating the avalible characters in `lcdstring!()` and the `linelimit`
+parameter in use. `flatten` can flatten the cells before saving (for SVG output).
 """
-function characters_demo(save_path = joinpath(homedir(),"Desktop"))
-    cd(save_path)
+function characters_demo(save_path = joinpath(homedir(),"Desktop","characters.gds"),
+        flatten = false)
     c = Cell("characters", nm)
-    save("characters.gds", lcdstring!(c, test_string, 1μm, 1.25μm, linelimit = 80))
+    lcdstring!(c, test_string, 1μm, 1.25μm, linelimit = 80)
+    flatten && flatten!(c)
+    save(save_path, c)
 end
 
 """
-    characters_demo(save_path = joinpath(homedir(),"Desktop"))
-Demo script for demonstrating the memory saving ability of keeping CellReferences for previously used characters in `lcdstring!()`.
+    characters_demo(save_path = joinpath(homedir(),"Desktop","referenced_characters.gds"))
+Demo script for demonstrating the memory saving ability of keeping CellReferences for
+previously used characters in `lcdstring!()`. `flatten` can flatten the cells before saving
+(for SVG output).
 """
-function referenced_characters_demo(save_path = joinpath(homedir(),"Desktop"))
-    cd(save_path)
+function referenced_characters_demo(save_path =
+        joinpath(homedir(),"Desktop","referenced_characters.gds"))
     c = Cell("referenced_characters", nm)
-    save("referenced_characters.gds", lcdstring!(c, reference_test_string, 1μm, 1.25μm, verbose = true))
+    lcdstring!(c, reference_test_string, 1μm, 1.25μm, verbose = true)
+    save(save_path, c)
 end
 
 end
