@@ -1102,6 +1102,73 @@ end
             p(1000.0nm,3000.0nm)
         ]
     end
+
+    @testset "LCDFonts" begin
+        # bounding box tests for tall font with random pixel size and spacing (no units)
+        c = Cell("main")
+        (r1, r2) = (rand(), rand())
+        pix_size = r1*convert(Float64, π)
+        pix_spacing = r2*convert(Float64, exp(1))
+        lcdstring!(c, "█", pix_size, pix_spacing)
+        @test height(bounds(c)) ≈ pix_size + pix_spacing*9
+        @test width(bounds(c)) ≈ pix_size + pix_spacing*4
+        @test length(c.elements) == 0
+        @test length(c.refs) == 1
+        flatten!(c)
+        @test length(c.elements) == 50
+        @test length(c.refs) == 0
+        # bounding box tests for scripted fonts and random pixel size + spacing
+        c = Cell("main", nm)
+        (r1, r2) = (rand(), rand())
+        pix_size = r1*convert(Float64, π)μm
+        pix_spacing = r2*convert(Float64, exp(1))μm
+        lcdstring!(c, "█_█", pix_size, pix_spacing, scripting = true)
+        @test height(bounds(c)) ≈ pix_size + pix_spacing*9+11*pix_spacing*0.3
+        @test width(bounds(c)) ≈ pix_size + pix_spacing*10
+        @test length(c.elements) == 0
+        @test length(c.refs) == 2
+        flatten!(c)
+        @test length(c.elements) == 100
+        @test length(c.refs) == 0
+        c = Cell("main", nm)
+        (r1, r2) = (rand(), rand())
+        pix_size = r1*convert(Float64, π)μm
+        pix_spacing = r2*convert(Float64, exp(1))μm
+        lcdstring!(c, "█^{██}", pix_size, pix_spacing, scripting = true)
+        @test height(bounds(c)) ≈ pix_size + pix_spacing*9+11*pix_spacing*0.3
+        @test width(bounds(c)) ≈ pix_size + pix_spacing*16
+        @test length(c.elements) == 0
+        @test length(c.refs) == 3
+        flatten!(c)
+        @test length(c.elements) == 150
+        @test length(c.refs) == 0
+        # bounding box tests for short font with random pixel size and spacing
+        c = Cell("main", nm)
+        (r1, r2) = (rand(), rand())
+        pix_size = r1*convert(Float64, π)μm
+        pix_spacing = r2*convert(Float64, exp(1))μm
+        lcdstring!(c, "a", pix_size, pix_spacing)
+        @test height(bounds(c)) ≈ pix_size + pix_spacing*4
+        @test width(bounds(c)) ≈ pix_size + pix_spacing*4
+        flatten!(c)
+        @test length(c.elements) == 14
+        # bounding box tests with linelimit with random pixel size and spacing
+        c = Cell("main", nm)
+        (r1, r2) = (rand(), rand())
+        pix_size = r1*convert(Float64, π)μm
+        pix_spacing = r2*convert(Float64, exp(1))μm
+        ll = rand(25:35) # random line limit
+        a_string = string('a')^rand((ll+1):(ll*10)) # random string length
+        lcdstring!(c, a_string, pix_size, pix_spacing, linelimit = ll)
+        @test height(bounds(c)) ≈ pix_size+pix_spacing*4+(ceil(length(a_string)/ll)-1)*pix_spacing*11
+        @test width(bounds(c)) ≈ pix_size+ll*(pix_spacing*5)+(ll-2)*pix_spacing
+        path = joinpath(dirname(@__FILE__), "characters.gds")
+        @test characters_demo(path) == 156744 # bytes written
+        path = joinpath(dirname(@__FILE__), "referenced_characters.gds")
+        @test referenced_characters_demo(path, verbose_override = true) == 7904
+        path = joinpath(dirname(@__FILE__), "scripted.gds")
+        @test scripted_demo(path) == 28938
+    end
 end
 
 @testset "Backends" begin
