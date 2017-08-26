@@ -306,7 +306,7 @@ end
 Demo script for demonstrating the use of the `scripting` parameter in `lcdstring!()`.
 `flatten` can flatten the cells before saving (for SVG output).
 """
-function scripted_demo(save_path = joinpath(homedir(),"Desktop"), flatten = false)
+function scripted_demo(save_path = joinpath(homedir(),"Desktop", "scripted.gds"), flatten = false)
     c = Cell("scripted", nm)
     lcdstring!(c, scripted_equation, 1μm, 1.25μm, scripting = true)
     flatten && flatten!(c)
@@ -329,12 +329,12 @@ end
 """
     characters_demo(save_path = joinpath(homedir(),"Desktop","referenced_characters.gds"))
 Demo script for demonstrating the memory saving ability of keeping CellReferences for
-previously used characters in `lcdstring!()`.
+previously used characters in `lcdstring!()`. Nothing is printed if `verbose_override` is `true`.
 """
 function referenced_characters_demo(save_path =
-        joinpath(homedir(),"Desktop","referenced_characters.gds"))
+        joinpath(homedir(),"Desktop","referenced_characters.gds"); verbose_override = false)
     c = Cell("referenced_characters", nm)
-    lcdstring!(c, reference_test_string, 1μm, 1.25μm, verbose = true)
+    lcdstring!(c, reference_test_string, 1μm, 1.25μm, verbose = !verbose_override)
     save(save_path, c)
 end
 
