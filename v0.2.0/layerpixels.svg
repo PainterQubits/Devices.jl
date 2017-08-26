@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0.0 0 15000 10000"  >
+<g fill="#ffeead" >
+<polygon points="0,5000 5000,5000 5000,0 0,0" />
+</g>
+<g fill="#ffcc5c" >
+<polygon points="5000,5000 10000,5000 10000,0 5000,0" />
+<polygon points="5000,10000 10000,10000 10000,5000 5000,5000" />
+</g>
+<g fill="#ff6f69" >
+<polygon points="10000,5000 15000,5000 15000,0 10000,0" />
+</g>
+<g fill="#588c7e" >
+<polygon points="10000,10000 15000,10000 15000,5000 10000,5000" />
+</g>
+</svg>
