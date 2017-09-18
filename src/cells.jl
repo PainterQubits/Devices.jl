@@ -637,8 +637,8 @@ containing these polygons. The cell reference `c` remains unmodified.
 function flatten(c::CellReference, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
     a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
-        StaticArrays.@SMatrix [sgn*c.mag*cos(c.rot) -c.mag*sin(c.rot);
-                  sgn*c.mag*sin(c.rot) c.mag*cos(c.rot)])
+        StaticArrays.@SMatrix [c.mag*cos(c.rot) -c.mag*sgn*sin(c.rot);
+                  c.mag*sin(c.rot) c.mag*sgn*cos(c.rot)])
     newcell = flatten(c.cell)
     newpolys = a.(newcell.elements)
     Cell(name, newpolys)
@@ -652,8 +652,8 @@ these polygons. The cell array `c` remains unmodified.
 function flatten(c::CellArray, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
     a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
-            StaticArrays.@SMatrix [sgn*c.mag*cos(c.rot) -c.mag*sin(c.rot);
-                      sgn*c.mag*sin(c.rot) c.mag*cos(c.rot)])
+            StaticArrays.@SMatrix [c.mag*cos(c.rot) -c.mag*sgn*sin(c.rot);
+                      c.mag*sin(c.rot) sgn*c.mag*cos(c.rot)])
     newcell = flatten(c.cell)
     pts = [(i-1) * c.deltarow + (j-1) * c.deltacol for i in 1:c.row for j in 1:c.col]
     pts2 = reinterpret(StaticArrays.Scalar{eltype(pts)}, pts, (1,length(pts)))
