@@ -282,10 +282,9 @@ function jj!(c::Cell{T}, m, b, w1, w2, w3, w4, l1, l2, l3, l4, uc, t1, Θ, ϕ,
     # Remove undercut sticking out top and bottom
     u = clip(ClipTypeIntersection, u,
         Rectangle(Point(T(-1000000), zero(T)), Point(T(1000000),l1+b+w2+l3)))[1]
-    u = clip(ClipTypeDifference, u, r1)[1]
-    uclip = clip(ClipTypeDifference, u, p23) # could be an array
+    u = clip(ClipTypeDifference, u, p14)
+    uclip = clip(ClipTypeDifference, u, [p23]) # could be an array
     layers = fill(uc_meta, length(uclip))
-
     push!(uclip, p14, p23)
     push!(layers, jj_meta, jj_meta)
 
