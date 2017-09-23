@@ -754,22 +754,22 @@ function transform(c::Cell, d::CellRef, a)
     # look for the reference in the top level of the reference tree.
     for ref in c.refs
         if ref === d
-            sgn = d.xrefl ? -1 : 1
+            sgn = ifelse(d.xrefl, -1, 1)
             return true, a ∘ Translation(d.origin) ∘
             CoordinateTransformations.LinearMap(
-                StaticArrays.@SMatrix [sgn*d.mag*cos(d.rot) -d.mag*sin(d.rot);
-                          sgn*d.mag*sin(d.rot) d.mag*cos(d.rot)])
+                StaticArrays.@SMatrix [d.mag*cos(d.rot) -d.mag*sgn*sin(d.rot);
+                                       d.mag*sin(d.rot)  d.mag*sgn*cos(d.rot)])
         end
     end
 
     # didn't find the reference at this level.
     # we must go deeper...
     for ref in c.refs
-        sgn = ref.xrefl ? -1 : 1
+        sgn = ifelse(ref.xrefl, -1, 1)
         (x,y) = transform(ref.cell, d, a ∘ Translation(ref.origin) ∘
             CoordinateTransformations.LinearMap(
-                StaticArrays.@SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
-                          sgn*ref.mag*sin(ref.rot) ref.mag*cos(ref.rot)]))
+                StaticArrays.@SMatrix [ref.mag*cos(ref.rot) -ref.mag*sgn*sin(ref.rot);
+                                       ref.mag*sin(ref.rot)  ref.mag*sgn*cos(ref.rot)]))
         # were we successful?
         if x
             return x, y
@@ -778,6 +778,43 @@ function transform(c::Cell, d::CellRef, a)
 
     # we should have found `d` by now. report our failure
     return false, a
+end
+
+"""
+    transform(c::Cell, d::CellRef, e::CellRef, f::CellRef...)
+Given a Cell `c` containing [`CellReference`](@ref) or [`CellArray`](@ref)
+`last(f)` in its tree of references, this function returns a
+`CoordinateTransformations.AffineMap` object that lets you translate from the
+coordinate system of `last(f)` to the coordinate system of `c`. This method is needed
+when you want to specify intermediate `CellRef`s explicitly.
+
+For example, suppose for instance you have a hierarchy of cells, where cell A references
+B1 and B2, which both reference C. Schematically, it might look like this:
+
+```
+a -- b1 -- c
+  \\      /
+   \\ b2 /
+```
+
+Cell C appears in two places inside cell A, owing to the fact that it is referenced by
+both B1 and B2. If you need to get the coordinate system of C via B2, then you need to do
+`transform(cellA, cellrefB2, cellrefC)`, rather than simply `transform(cellA, cellrefC)`,
+because the latter will just take the first path to C available, via B1.
+"""
+function transform(c::Cell, d::CellRef, e::CellRef, f::CellRef...)
+    t = transform(c,d) ∘ transform(d.cell, e)
+    if length(f) == 0
+        return t
+    elseif length(f) == 1
+        return t ∘ transform(e.cell, f[1])
+    else
+        t = t ∘ transform(e.cell, f[1])
+        for i in 1:(length(f)-1)
+            t = t ∘ transform(f[i].cell, f[i+1])
+        end
+        return t
+    end
 end
 
 for op in (:(Base.:+), :(Base.:-))
