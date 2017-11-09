@@ -979,6 +979,38 @@ end
 
     end
 
+    @testset "Straight, TaperTrace" begin
+        c = Cell("main", nm)
+        pa = Path(μm)
+        straight!(pa, 50.0μm, Paths.Trace(10.0μm, 6.0μm))
+        render!(c, pa)
+        @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
+            p(0.0nm,    5000.0nm),
+            p(50000.0nm, 3000.0nm),
+            p(50000.0nm, -3000.0nm),
+            p(0.0nm, -5000.0nm)
+        ]
+    end
+
+    @testset "Straight, TaperCPW" begin
+        c = Cell("main", nm)
+        pa = Path(μm)
+        straight!(pa, 50.0μm, Paths.CPW(10.0μm, 6.0μm, 8.0μm, 2.0μm))
+        render!(c, pa)
+        @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
+            p(0.0nm,    11000.0nm),
+            p(50000.0nm, 6000.0nm),
+            p(50000.0nm, 4000.0nm),
+            p(0.0nm, 5000.0nm)
+        ]
+        @test points(c.elements[2]) ≈ Point{typeof(1.0nm)}[
+            p(0.0nm,    -5000.0nm),
+            p(50000.0nm, -4000.0nm),
+            p(50000.0nm, -6000.0nm),
+            p(0.0nm, -11000.0nm)
+        ]
+    end
+
     @testset "CompoundSegment" begin
         # CompoundSegment, CompoundStyle should render as if the path wasn't simplified,
         # provided that's possible. This is done for rendering and filesize efficiency.
