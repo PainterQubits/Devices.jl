@@ -36,3 +36,17 @@ summary(s::TaperCPW) = string("Tapered CPW with initial width ", s.trace_start,
                                " and initial gap ", s.gap_start,
                                " tapers to a final width ", s.trace_end,
                                " and final gap ", s.gap_end)
+
+struct Taper <: ContinuousStyle end
+copy(::Taper) = Taper()
+
+"""
+    Taper()
+Constructor for generic Taper style. Will automatically create tapered region
+between CPW/Trace and another CPW/Trace of different dimensions
+"""
+Taper
+
+summary(::Taper) = string("Generic tapered region constructign a linear taper ",
+                          "between the segment before and segment after its ",
+                          "place in the path")
