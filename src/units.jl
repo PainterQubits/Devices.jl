@@ -39,10 +39,10 @@ end
 function ForwardDiff.derivative(f, x::Unitful.Length)
     ux = Unitful.ustrip(x)
     ox = one(ux)
-    r = f(Unitful.unit(x)*ForwardDiff.Dual(ux,ox)) ./ oneunit(x)
-    ForwardDiff.extract_derivative(r)
+    T = typeof(ForwardDiff.Tag(nothing, typeof(ux)))
+    r = f(Unitful.unit(x)*ForwardDiff.Dual{T}(ux,ox)) ./ oneunit(x)
+    ForwardDiff.extract_derivative(T, r)
 end
 
-function ForwardDiff.extract_derivative(x::Quantity)
-    ForwardDiff.extract_derivative(Unitful.ustrip(x))*Unitful.unit(x)
-end
+ForwardDiff.extract_derivative(::Type{T}, x::Quantity) where {T} =
+    ForwardDiff.extract_derivative(T, Unitful.ustrip(x)) * Unitful.unit(x)

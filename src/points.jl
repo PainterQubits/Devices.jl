@@ -165,9 +165,9 @@ julia> trans(Point(1,1))
 """
 YReflection() = LinearMap(@SMatrix [-1 0;0 1])
 
-extract_derivative(x::Point{T}) where {T} =
-    Point(unit(T)*ForwardDiff.partials(ustrip(getx(x)),1),
-          unit(T)*ForwardDiff.partials(ustrip(gety(x)),1))
+ForwardDiff.extract_derivative(::Type{T}, x::Point{S}) where {T,S} =
+    Point(unit(S)*ForwardDiff.partials(T,ustrip(getx(x)),1),
+          unit(S)*ForwardDiff.partials(T,ustrip(gety(x)),1))
 
 ustrip(p::Point{T}) where {T} = Point(ustrip(getx(p)), ustrip(gety(p)))
 ustrip(v::AbstractArray{Point{T}}) where {T <: Length} = reinterpret(Point{Unitful.numtype(T)}, v)
