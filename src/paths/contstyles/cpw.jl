@@ -38,8 +38,9 @@ copy(x::SimpleCPW) = SimpleCPW(x.trace, x.gap)
     CPW(trace, gap::Coordinate)
     CPW(trace::Coordinate, gap)
     CPW(trace, gap)
-Constructors for CPW styles. Automatically chooses between `SimpleCPW` or
-`GeneralCPW` styles as appropriate.
+    CPW(trace_start::Coordinate, gap_start::Coordinate, trace_end::Coordinate, gap_end::Coordinate)
+Constructors for CPW styles. Automatically chooses between `SimpleCPW`,
+`GeneralCPW`, or `TaperCPW` styles as appropriate.
 """
 function CPW(trace::Coordinate, gap::Coordinate)
     dimension(trace) != dimension(gap) && throw(DimensionError(trace,gap))

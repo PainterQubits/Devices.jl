@@ -979,6 +979,38 @@ end
 
     end
 
+    @testset "Straight, TaperTrace" begin
+        c = Cell("main", nm)
+        pa = Path(μm)
+        straight!(pa, 50.0μm, Paths.Trace(10.0μm, 6.0μm))
+        render!(c, pa)
+        @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
+            p(0.0nm,    5000.0nm),
+            p(50000.0nm, 3000.0nm),
+            p(50000.0nm, -3000.0nm),
+            p(0.0nm, -5000.0nm)
+        ]
+    end
+
+    @testset "Straight, TaperCPW" begin
+        c = Cell("main", nm)
+        pa = Path(μm)
+        straight!(pa, 50.0μm, Paths.CPW(10.0μm, 6.0μm, 8.0μm, 2.0μm))
+        render!(c, pa)
+        @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
+            p(0.0nm,    11000.0nm),
+            p(50000.0nm, 6000.0nm),
+            p(50000.0nm, 4000.0nm),
+            p(0.0nm, 5000.0nm)
+        ]
+        @test points(c.elements[2]) ≈ Point{typeof(1.0nm)}[
+            p(0.0nm,    -5000.0nm),
+            p(50000.0nm, -4000.0nm),
+            p(50000.0nm, -6000.0nm),
+            p(0.0nm, -11000.0nm)
+        ]
+    end
+
     @testset "CompoundSegment" begin
         # CompoundSegment, CompoundStyle should render as if the path wasn't simplified,
         # provided that's possible. This is done for rendering and filesize efficiency.
@@ -1025,6 +1057,92 @@ end
         @test upperright(bounds(c.elements[2])) ≈ Point(40μm, 7.5μm)
         @test lowerleft(bounds(c.elements[3])) ≈ Point(40μm, -10μm)
         @test upperright(bounds(c.elements[3])) ≈ Point(120μm, 10μm)
+    end
+
+    @testset "Auto Taper" begin
+        # Generate a path with different permutations of styles and
+        # test rendering of auto taper style Taper()
+        p1 = Path(μm)
+        straight!(p1, 10μm, Paths.Trace(2.0μm))
+        # element 2, test taper between traces
+        straight!(p1, 10μm, Paths.Taper())
+        straight!(p1, 10μm, Paths.Trace(4.0μm))
+        # element 4, test taper between simple trace and hard-code taper trace
+        straight!(p1, 10μm, Paths.Taper())
+        straight!(p1, 10μm, Paths.Trace(2.0μm, 1.0μm))
+        # element 6, test taper between hard-code trace and general trace
+        straight!(p1, 10μm, Paths.Taper())
+        turn!(p1, -π/2, 10μm, Paths.Trace(2.0μm, 1.0μm))
+        turn!(p1, -π/2, 10μm, Paths.Taper())
+        straight!(p1, 10μm, Paths.Trace(2.0μm))
+        # elements 10, 11, test taper between trace and cpw
+        straight!(p1, 10μm, Paths.Taper())
+        straight!(p1, 10μm, Paths.CPW(2.0μm, 1.0μm))
+        # elements 14, 15, test taper between CPW and CPW
+        straight!(p1, 10μm, Paths.Taper())
+        straight!(p1, 10μm, Paths.CPW(4.0μm, 2.0μm))
+        # elements 18, 19, test taper between CPW and trace
+        straight!(p1, 15μm, Paths.Taper())
+        straight!(p1, 10μm, Paths.Trace(2.0μm))
+
+        c = Cell("pathonly", nm)
+        render!(c, p1, GDSMeta(0))
+
+        p(x,y) = Point(x, y)
+        @test points(c.elements[2]) == Point{typeof(1.0nm)}[
+                p(10000.0nm, 1000.0nm),
+                p(20000.0nm, 2000.0nm),
+                p(20000.0nm, -2000.0nm),
+                p(10000.0nm, -1000.0nm)
+            ]
+        @test points(c.elements[4]) == Point{typeof(1.0nm)}[
+                p(30000.0nm, 2000.0nm),
+                p(40000.0nm, 1000.0nm),
+                p(40000.0nm, -1000.0nm),
+                p(30000.0nm, -2000.0nm)
+            ]
+        @test points(c.elements[6]) == Point{typeof(1.0nm)}[
+                p(50000.0nm, 500.0nm),
+                p(60000.0nm, 1000.0nm),
+                p(60000.0nm, -1000.0nm),
+                p(50000.0nm, -500.0nm)
+            ]
+        @test points(c.elements[10]) == Point{typeof(1.0nm)}[
+                p(50000.0nm, -21000.0nm),
+                p(40000.0nm, -22000.0nm),
+                p(40000.0nm, -21000.0nm),
+                p(50000.0nm, -20000.0nm)
+            ]
+        @test points(c.elements[11]) == Point{typeof(1.0nm)}[
+                p(50000.0nm, -20000.0nm),
+                p(40000.0nm, -19000.0nm),
+                p(40000.0nm, -18000.0nm),
+                p(50000.0nm, -19000.0nm)
+            ]
+        @test points(c.elements[14]) ≈ Point{typeof(1.0nm)}[
+                p(30000.0nm, -22000.0nm),
+                p(20000.0nm, -24000.0nm),
+                p(20000.0nm, -22000.0nm),
+                p(30000.0nm, -21000.0nm)
+            ]
+        @test points(c.elements[15]) ≈ Point{typeof(1.0nm)}[
+                p(30000.0nm, -19000.0nm),
+                p(20000.0nm, -18000.0nm),
+                p(20000.0nm, -16000.0nm),
+                p(30000.0nm, -18000.0nm)
+            ]
+        @test points(c.elements[18]) ≈ Point{typeof(1.0nm)}[
+                p(10000.0nm, -24000.0nm),
+                p(-5000.0nm, -21000.0nm),
+                p(-5000.0nm, -20000.0nm),
+                p(10000.0nm, -22000.0nm)
+            ]
+        @test points(c.elements[19]) ≈ Point{typeof(1.0nm)}[
+                p(10000.0nm, -18000.0nm),
+                p(-5000.0nm, -20000.0nm),
+                p(-5000.0nm, -19000.0nm),
+                p(10000.0nm, -16000.0nm)
+            ]
     end
 end
 

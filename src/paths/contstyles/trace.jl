@@ -30,8 +30,9 @@ copy(x::SimpleTrace) = Trace(x.width)
 """
     Trace(width)
     Trace(width::Coordinate)
-Constructor for Trace styles. Automatically chooses `SimpleTrace` or `GeneralTrace` as
-appropriate.
+    Trace(width_start::Coordinate, width_end::Coordinate)
+Constructor for Trace styles. Automatically chooses `SimpleTrace`, `GeneralTrace`,
+and `TaperTrace` as appropriate.
 """
 Trace(width) = GeneralTrace(width)
 Trace(width::Coordinate) = SimpleTrace(float(width))
