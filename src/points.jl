@@ -70,9 +70,9 @@ Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 
 for f in (:+, :-)
     @eval Base.broadcast(::typeof($f), a::AbstractArray{Point{S}}, p::Point{T}) where {S,T} =
-        broadcast($f, a, StaticArrays.Scalar(p))
+        broadcast($f, a, StaticArrays.Scalar{typeof(p)}((p,)))
     @eval Base.broadcast(::typeof($f), p::Point{T}, a::AbstractArray{Point{S}}) where {S,T} =
-        broadcast($f, StaticArrays.Scalar(p), a)
+        broadcast($f, StaticArrays.Scalar{typeof(p)}((p,)), a)
 end
 
 """
