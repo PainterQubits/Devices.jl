@@ -290,7 +290,8 @@ function jj!(c::Cell{T}, m, b, w1, w2, w3, w4, l1, l2, l3, l4, uc, t1, Θ, ϕ,
 
     # Horizontally center the shapes
     cen = center(bounds(uclip))
-    uclip .-= StaticArrays.Scalar(Point(getx(cen),zero(getx(cen))))
+    p = Point(getx(cen),zero(getx(cen)))
+    uclip .-= StaticArrays.Scalar{typeof(p)}((p,))
 
     # Render them
     for (x,y) in zip(uclip, layers)

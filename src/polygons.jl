@@ -247,7 +247,7 @@ end
 # Clipping two identically-typed arrays of "Int64-based" Polygons.
 # Internal method which should not be called by user (but does the heavy lifting)
 function _clip(op::Clipper.ClipType,
-        s::AbstractVector{Polygon{T}}, c::AbstractVector{Polygon{T}};
+        s::AbstractVector{Polygon{T}}, c::AbstractVector{<:Polygon};
         pfs::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd,
         pfc::Clipper.PolyFillType=Clipper.PolyFillTypeEvenOdd) where
         {T <: Union{Int64, Unitful.Quantity{Int64}}}
