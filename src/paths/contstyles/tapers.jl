@@ -1,3 +1,10 @@
+"""
+    struct TaperTrace{T<:Coordinate} <: Trace
+        width_start::T
+        width_end::T
+    end
+A single trace with a linearly tapered width as a function of path length.
+"""
 struct TaperTrace{T<:Coordinate} <: Trace
     width_start::T
     width_end::T
@@ -11,6 +18,15 @@ function Trace(width_start::Coordinate, width_end::Coordinate)
     TaperTrace(w_s, w_e)
 end
 
+"""
+    struct TaperCPW{T<:Coordinate} <: CPW
+        trace_start::T
+        gap_start::T
+        trace_end::T
+        gap_end::T
+    end
+A CPW with a linearly tapered trace and gap as a function of path length.
+"""
 struct TaperCPW{T<:Coordinate} <: CPW
     trace_start::T
     gap_start::T
@@ -42,8 +58,9 @@ copy(::Taper) = Taper()
 
 """
     Taper()
-Constructor for generic Taper style. Will automatically create tapered region
-between CPW/Trace and another CPW/Trace of different dimensions
+Constructor for generic Taper style. Will automatically create a linearly
+tapered region between an initial `CPW` or `Trace` and an end `CPW` or `Trace`
+of different dimensions. 
 """
 Taper
 
