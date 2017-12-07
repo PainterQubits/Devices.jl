@@ -650,7 +650,7 @@ The straight and turn segments are combined into a `CompoundSegment` and
 appended to the path `p`.
 """
 function meander!(p::Path, len, straightlen, r, α)
-    unit = straightlen + r*α
+    unit = straightlen + r*abs(α)
     ratio = len/unit
     fl = floor(ratio)
     nsegs = Int(fl)
