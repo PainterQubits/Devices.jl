@@ -99,9 +99,9 @@ export Rectangles, Rectangle
 export height, isproper, width
 
 include("polygons.jl")
-import .Polygons: Polygon, clip, offset, points
+import .Polygons: Polygon, clip, offset, points, circle
 export Polygons, Polygon
-export clip, offset, points
+export clip, offset, points, circle
 
 include("cells.jl")
 import .Cells: Cell, CellArray, CellPolygon, CellReference

@@ -14,13 +14,13 @@ import Devices
 import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
 import Devices: bounds, lowerleft, upperright
 import Unitful
-import Unitful: Quantity, Length, dimension, unit, ustrip, uconvert
+import Unitful: Quantity, Length, dimension, unit, ustrip, uconvert, °
 using ..Points
 using ..Rectangles
 
 export Polygon
 export points
-export clip, offset
+export clip, offset, circle
 
 const USCALE = 1.0*Unitful.fm
 const SCALE  = 10.0^9
@@ -30,7 +30,6 @@ coffset() = (Devices._coffset[])::Clipper.ClipperOffset
 
 @inline unsafe_round(x::Number) = round(ustrip(x))*unit(x)
 @inline unsafe_round(x::Point) = unsafe_round.(x)
-
 
 """
     struct Polygon{T} <: AbstractPolygon{T}
@@ -154,6 +153,12 @@ end
 Return a bounding `Rectangle` for several `AbstractPolygon` objects.
 """
 bounds(p0::AbstractPolygon, p::AbstractPolygon...) = bounds([p0, p...])
+
+"""
+    circle(r, α=10°)
+Returns a circular `Polygon` centered about the origin with radius `r` and angular step `α`.
+"""
+circle(r, α=10°) = Polygon(r.*(a->Point(cos(a),sin(a))).(0:α:(360°-α)))
 
 abstract type Style{T<:Meta} end
 

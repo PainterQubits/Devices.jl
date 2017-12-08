@@ -55,7 +55,7 @@ we take the last continuous style in the path.
 function straight!(p::Path{T}, l::Coordinate,
         sty::Style=contstyle1(p)) where {T <: Coordinate}
     dimension(T) != dimension(typeof(l)) && throw(DimensionError(T(1),l))
-    @assert l > zero(l) "tried to go straight by zero or a negative amount."
+    @assert l >= zero(l) "tried to go straight by a negative amount."
     p0 = p1(p)
     α = α1(p)
     s = Straight{T}(l, p0, α)
