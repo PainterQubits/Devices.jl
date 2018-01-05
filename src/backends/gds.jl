@@ -410,16 +410,17 @@ function strans(io::IO, ref)
     bits = 0x0000
 
     ref.xrefl && (bits += 0x8000)
-    if ref.mag != 1.0
-        bits += 0x0004
-    end
-    if mod(ref.rot,2π) != 0.0
-        bits += 0x0002
-    end
+    # if ref.mag != 1.0
+    #     bits += 0x0004 # absolute (not relative) mag flag
+    # end
+    # if mod(ref.rot,2π) != 0.0
+    #     bits += 0x0002 # absolute (not relative) angle flag
+    # end
     bytes = 0
-    bits != 0 && (bytes += gdswrite(io, STRANS, bits))
-    bits & 0x0004 > 0 && (bytes += gdswrite(io, MAG, ref.mag))
-    bits & 0x0002 > 0 && (bytes += gdswrite(io, ANGLE, ref.rot*180/π))
+    (ref.xrefl || ref.mag != 1.0 || ref.rot != 0.0) &&
+        (bytes += gdswrite(io, STRANS, bits))
+    ref.mag != 1.0 && (bytes += gdswrite(io, MAG, ref.mag))
+    ref.rot != 0.0 && (bytes += gdswrite(io, ANGLE, ref.rot*180/π))
     bytes
 end
 
@@ -824,14 +825,14 @@ function sref(s, dbs, verbose, nounits)
     end
 
     # now validate what was read
-    if hasstrans
-        if magflag
-            hasmag || error("Missing MAG tag.")
-        end
-        if angleflag
-            hasangle || error("Missing ANGLE tag.")
-        end
-    end
+    # if hasstrans
+    #     if magflag
+    #         hasmag || error("Missing MAG tag.")
+    #     end
+    #     if angleflag
+    #         hasangle || error("Missing ANGLE tag.")
+    #     end
+    # end
     hassname || error("Missing SNAME tag.")
     hasxy || error("Missing XY tag.")
 
@@ -926,14 +927,14 @@ function aref(s, dbs, verbose, nounits)
     end
 
     # now validate what was read
-    if hasstrans
-        if magflag
-            hasmag || error("Missing MAG tag.")
-        end
-        if angleflag
-            hasangle || error("Missing ANGLE tag.")
-        end
-    end
+    # if hasstrans
+    #     if magflag
+    #         hasmag || error("Missing MAG tag.")
+    #     end
+    #     if angleflag
+    #         hasangle || error("Missing ANGLE tag.")
+    #     end
+    # end
     hassname || error("Missing SNAME tag.")
     hascolrow || error("Missing COLROW tag.")
     hasxy || error("Missing XY tag.")
