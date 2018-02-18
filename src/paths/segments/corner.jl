@@ -32,7 +32,7 @@ directly creating a `Corner` object.
 Corner(α) = Corner{Float64}(α, Point(0.,0.), 0.0, 0.)
 copy(x::Corner{T}) where {T} = Corner{T}(x.α, x.p0, x.α0, x.extent)
 
-pathlength(::Corner) = 0
+pathlength(::Corner{T}) where {T} = zero(T)
 p0(s::Corner) = s.p0
 function p1(s::Corner)
     sgn = ifelse(s.α >= 0.0, 1, -1)
