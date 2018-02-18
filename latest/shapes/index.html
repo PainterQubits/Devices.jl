@@ -23,6 +23,10 @@
       
         <meta name="lang:search.language" content="en">
       
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
         <meta name="lang:search.result.none" content="No matching documents">
       
         <meta name="lang:search.result.one" content="1 matching document">
@@ -32,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-0.17.2, mkdocs-material-2.2.6">
+      <meta name="generator" content="mkdocs-0.17.2, mkdocs-material-2.6.2">
     
     
       
@@ -40,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.6525f7f6.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.9b572555.css">
       
     
     
@@ -59,19 +63,41 @@
     
   </head>
   
-    <body>
+    <body dir="ltr">
   
     <svg class="md-svg">
       <defs>
         
         
-          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
         
       </defs>
     </svg>
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
     <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <a href="#lcdfonts" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header-nav md-grid">
@@ -107,11 +133,13 @@
             
 <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="search"></label>
-  <div class="md-search__inner">
+  <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" required placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
       <label class="md-icon md-search__icon" for="search"></label>
-      <button type="reset" class="md-icon md-search__icon" data-md-component="reset">&#xE5CD;</button>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
@@ -313,6 +341,8 @@
       
       
       
+      
+      
     </ul>
   
 </nav>
@@ -396,6 +426,8 @@
       
       
       
+      
+      
     </ul>
   
 </nav>
@@ -442,7 +474,7 @@
 
 
 <p>The profile of the bridge is given as <code>h(x) = H*(2 - cosh(2*cosh^(-1)(2) x/L))</code> where <code>H</code> is the height of bridge and <code>L</code> is the total span of bridge. The inverse of h(x) is taken to compute the size of each layer.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L29-L57' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L29-L57' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Microwave.device_template!' href='#Devices.Microwave.device_template!'>#</a>
 <strong><code>Devices.Microwave.device_template!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>device_template!{T}(d::Cell{T}, chip_meta::Meta, writeable_meta::Meta, marker_meta::Meta)
@@ -450,7 +482,7 @@
 
 
 <p>In cell <code>c</code>, make a template for a 1cm x 1cm chip. Includes chip outline, usable area outline, and markers.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L118-L122' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L118-L122' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Microwave.checkerboard!' href='#Devices.Microwave.checkerboard!'>#</a>
 <strong><code>Devices.Microwave.checkerboard!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>checkerboard!{T}(c::Cell{T}, pixsize, rows::Integer, alt, meta::Meta=GDSMeta())
@@ -463,7 +495,7 @@
 <li><code>rows</code>: number of rows == number of columns</li>
 <li><code>alt</code>: the square nearest <code>Point(zero(T), zero(T))</code> is filled (unfilled) if <code>false</code> (<code>true</code>). Use this to create a full tiling of the checkerboard, if you wish.</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L87-L95' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L87-L95' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">checkerboard!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
@@ -479,7 +511,7 @@
 
 
 <p>Generate a square grating suitable e.g. for obtaining the base dose for PEC.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L181-L184' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L181-L184' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">grating!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">100</span><span class="n">nm</span><span class="p">,</span> <span class="mi">100</span><span class="n">nm</span><span class="p">,</span> <span class="mi">5</span><span class="n">μm</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
@@ -503,7 +535,7 @@
 <li><code>npairs</code>: number of fingers</li>
 <li><code>skiplast</code>: should we skip the last finger, leaving an odd number?</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L197-L207' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L197-L207' class='documenter-source'>source</a><br></p>
 <p>Simple usage:</p>
 <div class="codehilite"><pre><span></span><span class="n">fingers</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;fingers&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">wide</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">fingergap</span><span class="p">,</span> <span class="n">fingeroffset</span><span class="p">,</span> <span class="n">npairs</span><span class="p">,</span> <span class="n">skiplast</span> <span class="o">=</span> <span class="mi">1</span><span class="n">μm</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">1</span><span class="n">μm</span><span class="p">,</span> <span class="mi">3</span><span class="n">μm</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">true</span>
@@ -543,7 +575,7 @@
 
 
 <p>Given <code>layers</code>, a matrix of <code>Int</code>, make a bitmap of <code>Rectangle</code> where the GDS-II layer corresponds to the number in the matrix. If the number is less than one, don't write the rectangle. All the rectangles get rendered into cell <code>c</code>. The rectangles are all in the first quadrant of the cell.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L369-L375' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L369-L375' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;pix&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">layerpixels!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">;</span> <span class="o">-</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">],</span> <span class="mi">5</span><span class="n">μm</span><span class="p">)</span>
@@ -559,7 +591,7 @@
 
 
 <p>Renders the base metal for a capacitively-shunted charge qubit into cell <code>c</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L387-L391' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L387-L391' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Microwave.qubit_claw!' href='#Devices.Microwave.qubit_claw!'>#</a>
 <strong><code>Devices.Microwave.qubit_claw!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>qubit_claw!{T}(c::Cell{T}, trace, gap, claw_width, claw_length, claw_gap, ground_gap,
@@ -568,7 +600,7 @@
 
 
 <p>Renders a "claw" into cell <code>c</code> suitable for attaching to the end of a resonator. One can wrap the claw around a capacitively-shunted charge qubit generated by <a href="./#Devices.Microwave.qubit!"><code>qubit!</code></a> for capacitive coupling between the qubit and resonator.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L454-L460' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L454-L460' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">μm</span><span class="p">)</span>
@@ -627,7 +659,7 @@
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L491-L529' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L491-L529' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">radialcut!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">90</span><span class="n">°</span><span class="p">,</span> <span class="mi">5</span><span class="n">μm</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
@@ -643,7 +675,7 @@
 
 <p>See also the documentation for <code>radialcut!</code>.</p>
 <p>Returns a polygon for a radial stub. The polygon has to be subtracted from a ground plane, and will leave a defect in the ground plane of uniform width <code>t</code> that outlines the (metallic) radial stub. <code>r</code> refers to the radius of the actual stub, not the radius of the circular arc bounding the ground plane defect. Likewise <code>h</code> has an analogous meaning to that in <code>radialcut!</code> except it refers here to the radial stub, not the ground plane defect.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/microwave.jl#L546-L556' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/microwave.jl#L546-L556' class='documenter-source'>source</a><br></p>
 <p>Example:</p>
 <div class="codehilite"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;main&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">radialstub!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="n">μm</span><span class="p">,</span> <span class="mi">90</span><span class="n">°</span><span class="p">,</span> <span class="mi">5</span><span class="n">μm</span><span class="p">,</span> <span class="mi">1</span><span class="n">μm</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
@@ -668,7 +700,7 @@
 <li><code>linelimit</code>: sets the maximum number of characters per line and continues on a new line if <code>str</code> is longer than <code>linelimit</code></li>
 <li><code>verbose</code>: prints out information about the character dictionary</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/lcdfonts.jl#L207-L215' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/lcdfonts.jl#L207-L215' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.LCDFonts.characters_demo' href='#Devices.LCDFonts.characters_demo'>#</a>
 <strong><code>Devices.LCDFonts.characters_demo</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>characters_demo(save_path = joinpath(homedir(),&quot;Desktop&quot;,&quot;characters.gds&quot;), flatten = false)
@@ -676,7 +708,7 @@
 
 
 <p>Demo script for demonstrating the avalible characters in <code>lcdstring!()</code> and the <code>linelimit</code> parameter in use. <code>flatten</code> can flatten the cells before saving (for SVG output).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/lcdfonts.jl#L316-L320' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/lcdfonts.jl#L316-L320' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.LCDFonts.scripted_demo' href='#Devices.LCDFonts.scripted_demo'>#</a>
 <strong><code>Devices.LCDFonts.scripted_demo</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>scripted_demo(save_path = joinpath(homedir(),&quot;Desktop&quot;,&quot;scripted.gds&quot;), flatten = false)
@@ -684,7 +716,7 @@
 
 
 <p>Demo script for demonstrating the use of the <code>scripting</code> parameter in <code>lcdstring!()</code>. <code>flatten</code> can flatten the cells before saving (for SVG output).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/lcdfonts.jl#L304-L308' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/lcdfonts.jl#L304-L308' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.LCDFonts.referenced_characters_demo' href='#Devices.LCDFonts.referenced_characters_demo'>#</a>
 <strong><code>Devices.LCDFonts.referenced_characters_demo</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>referenced_characters_demo(save_path = joinpath(homedir(),&quot;Desktop&quot;,&quot;referenced_characters.gds&quot;);
@@ -693,7 +725,7 @@
 
 
 <p>Demo script for demonstrating the memory saving ability of keeping CellReferences for previously used characters in <code>lcdstring!()</code>. Nothing is printed if <code>verbose_override</code> is <code>true</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/813f05d90163a507c2a8ec7d7d9a31e0240680ec/src/lcdfonts.jl#L329-L334' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/lcdfonts.jl#L329-L334' class='documenter-source'>source</a><br></p>
 <p><a id='Inline-demonstrations-1'></a></p>
 <h3 id="inline-demonstrations">Inline demonstrations</h3>
 <div class="codehilite"><pre><span></span><span class="n">characters_demo</span><span class="p">(</span><span class="n">path_to_output_gds</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
@@ -779,7 +811,7 @@
       
     </div>
     
-      <script src="../assets/javascripts/application.cae2244d.js"></script>
+      <script src="../assets/javascripts/application.abd7b172.js"></script>
       
       <script>app.initialize({version:"0.17.2",url:{base:".."}})</script>
       
