@@ -982,7 +982,7 @@ end
     @testset "Straight, TaperTrace" begin
         c = Cell("main", nm)
         pa = Path(μm)
-        straight!(pa, 50.0μm, Paths.Trace(10.0μm, 6.0μm))
+        straight!(pa, 50.0μm, Paths.TaperTrace(10.0μm, 6.0μm))
         render!(c, pa)
         @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
             p(0.0nm,    5000.0nm),
@@ -995,7 +995,7 @@ end
     @testset "Straight, TaperCPW" begin
         c = Cell("main", nm)
         pa = Path(μm)
-        straight!(pa, 50.0μm, Paths.CPW(10.0μm, 6.0μm, 8.0μm, 2.0μm))
+        straight!(pa, 50.0μm, Paths.TaperCPW(10.0μm, 6.0μm, 8.0μm, 2.0μm))
         render!(c, pa)
         @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
             p(0.0nm,    11000.0nm),
@@ -1069,10 +1069,10 @@ end
         straight!(p1, 10μm, Paths.Trace(4.0μm))
         # element 4, test taper between simple trace and hard-code taper trace
         straight!(p1, 10μm, Paths.Taper())
-        straight!(p1, 10μm, Paths.Trace(2.0μm, 1.0μm))
+        straight!(p1, 10μm, Paths.TaperTrace(2.0μm, 1.0μm))
         # element 6, test taper between hard-code trace and general trace
         straight!(p1, 10μm, Paths.Taper())
-        turn!(p1, -π/2, 10μm, Paths.Trace(2.0μm, 1.0μm))
+        turn!(p1, -π/2, 10μm, Paths.TaperTrace(2.0μm, 1.0μm))
         turn!(p1, -π/2, 10μm, Paths.Taper())
         straight!(p1, 10μm, Paths.Trace(2.0μm))
         # elements 10, 11, test taper between trace and cpw
