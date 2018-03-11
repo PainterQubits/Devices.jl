@@ -47,6 +47,6 @@ between CPW/Trace and another CPW/Trace of different dimensions
 """
 Taper
 
-summary(::Taper) = string("Generic tapered region constructign a linear taper ",
+summary(::Taper) = string("Generic tapered region constructing a linear taper ",
                           "between the segment before and segment after its ",
                           "place in the path")

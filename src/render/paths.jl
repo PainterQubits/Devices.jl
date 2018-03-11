@@ -73,28 +73,35 @@ function get_taper_style(prevnode, nextnode)
     prevstyle = style(prevnode)
     nextstyle = style(nextnode)
     endof_prev = pathlength(segment(prevnode))
+    # handle case of compound style (#39)
+    if prevstyle isa Paths.CompoundStyle
+        prevstyle = last(prevstyle.styles)
+    end
+    if nextstyle isa Paths.CompoundStyle
+        nextstyle = first(nextstyle.styles)
+    end
     # handle special case of tapers, set endof_prev to normalized dimensionless parameter
-    if typeof(prevstyle) <: Paths.TaperTrace || typeof(prevstyle) <: Paths.TaperCPW
+    if prevstyle isa Paths.TaperTrace || prevstyle isa Paths.TaperCPW
         endof_prev = endof_prev/endof_prev
     end
     beginof_next = zero(pathlength(segment(nextnode)))
     # handle special case of tapers, set beginof_next to normalized dimensionless parameter
-    if typeof(nextstyle) <: Paths.TaperTrace || typeof(nextstyle) <: Paths.TaperCPW
+    if nextstyle isa Paths.TaperTrace || nextstyle isa Paths.TaperCPW
         beginof_next = beginof_next/pathlength(segment(nextnode))
     end
-    if ((typeof(prevstyle) <: Paths.CPW || typeof(prevstyle) <: Paths.Trace)
-        && typeof(nextstyle) <: Paths.CPW || typeof(nextstyle) <: Paths.Trace)
+    if ((prevstyle isa Paths.CPW || prevstyle isa Paths.Trace)
+        && nextstyle isa Paths.CPW || nextstyle isa Paths.Trace)
         #special case: both ends are Traces, make a Paths.TaperTrace
-        if typeof(prevstyle) <: Paths.Trace && typeof(nextstyle) <: Paths.Trace
+        if prevstyle isa Paths.Trace && nextstyle isa Paths.Trace
             thisstyle = Paths.TaperTrace(Paths.width(prevstyle, endof_prev),
                                    Paths.width(nextstyle, beginof_next))
-        elseif typeof(prevstyle) <: Paths.Trace #previous segment is Paths.trace
+        elseif prevstyle isa Paths.Trace #previous segment is Paths.trace
             gap_start = Paths.width(prevstyle, endof_prev)/2.
             trace_end = Paths.trace(nextstyle, beginof_next)
             gap_end = Paths.gap(nextstyle, beginof_next)
             thisstyle = Paths.TaperCPW(zero(gap_start), gap_start,
                                  trace_end, gap_end)
-        elseif typeof(nextstyle) <: Paths.Trace #next segment is Paths.trace
+        elseif nextstyle isa Paths.Trace #next segment is Paths.trace
             trace_start = Paths.trace(prevstyle, endof_prev)
             gap_end = Paths.width(nextstyle, beginof_next)/2.
             gap_start = Paths.gap(prevstyle, endof_prev)

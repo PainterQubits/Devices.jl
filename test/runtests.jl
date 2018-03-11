@@ -1143,6 +1143,25 @@ end
                 p(-5000.0nm, -19000.0nm),
                 p(10000.0nm, -16000.0nm)
             ]
+
+        # Test Auto-taper compatibility with compound segments
+        p1 = Path(nm)
+        straight!(p1, 100nm, Paths.Trace(10nm))
+        straight!(p1, 100nm, Paths.Trace(10nm))
+        simplify!(p1, 1:2)
+        straight!(p1, 100nm, Paths.Taper())
+        straight!(p1, 100nm, Paths.Trace(20nm))
+        straight!(p1, 100nm, Paths.Trace(20nm))
+        simplify!(p1, 3:4)
+
+        c = Cell("pathonly", nm)
+        render!(c, p1, GDSMeta(0))
+        @test points(c.elements[3]) ≈ Point{typeof(1.0nm)}[
+                p(200.0nm,  5.0nm),
+                p(300.0nm,  10.0nm),
+                p(300.0nm, -10.0nm),
+                p(200.0nm, -5.0nm)
+            ]
     end
 end
 
