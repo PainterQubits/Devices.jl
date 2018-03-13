@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-0.17.2, mkdocs-material-2.6.2">
+      <meta name="generator" content="mkdocs-0.17.3, mkdocs-material-2.7.0">
     
     
       
@@ -44,13 +44,14 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.9b572555.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.78aab2dc.css">
       
     
     
       <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
     
     
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
       
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
@@ -486,7 +487,7 @@ end
 
 <p>A cell has a name and contains polygons and references to <code>CellArray</code> or <code>CellReference</code> objects. It also records the time of its own creation. As currently implemented it mirrors the notion of cells in GDS-II files.</p>
 <p>To add elements, use <code>render!</code>. To add references, push them to <code>refs</code> field.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L146-L169' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L146-L169' class='documenter-source'>source</a><br></p>
 <p>The type parameter <code>S</code> of a <code>Cell{S,T}</code> object is used in two ways:</p>
 <ol>
 <li>Determine the units of the coordinates of all polygons in a cell, as well as origins and offset vectors of <a href="./#Devices.Cells.CellArray"><code>CellArray</code></a>s and <a href="./#Devices.Cells.CellReference"><code>CellReference</code></a>s.</li>
@@ -504,7 +505,7 @@ end
 
 
 <p>Convenience constructor for <code>Cell{Float64}</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L444-L447' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L444-L447' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.bounds-Union{Tuple{Devices.Cells.Cell{T,T} where T<:Devices.Meta}, Tuple{T}} where T<:Union{Real, Union{Unitful.Level{L,S,Unitful.Quantity{T,Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)},U}} where S where L, Unitful.Quantity{T,Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)},U}} where U where T}' href='#Devices.bounds-Union{Tuple{Devices.Cells.Cell{T,T} where T<:Devices.Meta}, Tuple{T}} where T<:Union{Real, Union{Unitful.Level{L,S,Unitful.Quantity{T,Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)},U}} where S where L, Unitful.Quantity{T,Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)},U}} where U where T}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>bounds{T&lt;:Coordinate}(cell::Cell{T})
@@ -513,7 +514,7 @@ bounds(cell0::Cell, cell1::Cell, cell::Cell...)
 
 
 <p>Returns a <code>Rectangle</code> bounding box around all objects in a cell or cells.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L511-L515' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L511-L515' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.center-Tuple{Devices.Cells.Cell}' href='#Devices.center-Tuple{Devices.Cells.Cell}'>#</a>
 <strong><code>Devices.center</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>center(cell::Cell)
@@ -521,7 +522,7 @@ bounds(cell0::Cell, cell1::Cell, cell::Cell...)
 
 
 <p>Convenience method, equivalent to <code>center(bounds(cell))</code>. Returns the center of the bounding box of the cell.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L549-L553' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L549-L553' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Cells.name-Tuple{Devices.Cells.Cell}' href='#Devices.Cells.name-Tuple{Devices.Cells.Cell}'>#</a>
 <strong><code>Devices.Cells.name</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>name(x::Cell)
@@ -529,7 +530,7 @@ bounds(cell0::Cell, cell1::Cell, cell::Cell...)
 
 
 <p>Returns the name of the cell.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L664-L667' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L664-L667' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Cells.dbscale-Union{Tuple{Devices.Cells.Cell{T,T} where T<:Devices.Meta}, Tuple{T}} where T' href='#Devices.Cells.dbscale-Union{Tuple{Devices.Cells.Cell{T,T} where T<:Devices.Meta}, Tuple{T}} where T'>#</a>
 <strong><code>Devices.Cells.dbscale</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>dbscale(c::Cell{T}) where {T}
@@ -539,7 +540,7 @@ bounds(cell0::Cell, cell1::Cell, cell::Cell...)
 <p>Give the database scale for a cell. The database scale is the smallest increment of length that will be represented in the output CAD file.</p>
 <p>For <code>Cell{T&lt;:Length}</code>, the database scale is <code>T(1)</code>. For floating-point lengths, this means that anything after the decimal point will be rounded off. For this reason, Cell{typeof(1.0nm)} is probably the most convenient type to work with.</p>
 <p>The database scale of a <code>Cell{T&lt;:Real}</code> is assumed to be <code>1nm</code> (<code>1.0nm</code> if <code>T &lt;: AbstractFloat</code>) because insufficient information is provided to know otherwise.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L196-L209' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L196-L209' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Cells.dbscale-Tuple{Devices.Cells.Cell,Devices.Cells.Cell,Vararg{Devices.Cells.Cell,N} where N}' href='#Devices.Cells.dbscale-Tuple{Devices.Cells.Cell,Devices.Cells.Cell,Vararg{Devices.Cells.Cell,N} where N}'>#</a>
 <strong><code>Devices.Cells.dbscale</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>dbscale(cell::Cell...)
@@ -547,7 +548,7 @@ bounds(cell0::Cell, cell1::Cell, cell::Cell...)
 
 
 <p>Choose an appropriate database scale for a GDSII file given <a href="./#Devices.Cells.Cell"><code>Cell</code></a>s of different types. The smallest database scale of all cells considered is returned.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L212-L216' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L212-L216' class='documenter-source'>source</a><br></p>
 <p><a id='Referenced-and-arrayed-cells-1'></a></p>
 <h2 id="referenced-and-arrayed-cells">Referenced and arrayed cells</h2>
 <p>Cells can be arrayed or referenced within other cells for efficiency or to reduce display complexity.</p>
@@ -584,7 +585,7 @@ julia&gt; trans(Point(2.0,3.0))
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L724-L745' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L724-L745' class='documenter-source'>source</a><br></p>
 <p>In some cases it may be desirable to resolve cell references or arrays into their corresponding polygons. This operation is called "flattening."</p>
 <p><a id='Devices.Cells.flatten!' href='#Devices.Cells.flatten!'>#</a>
 <strong><code>Devices.Cells.flatten!</code></strong> &mdash; <em>Function</em>.</p>
@@ -593,7 +594,7 @@ julia&gt; trans(Point(2.0,3.0))
 
 
 <p>All cell references and arrays are turned into polygons and added to cell <code>c</code>. The references and arrays are then removed. This "flattening" of the cell is recursive: references in referenced cells are flattened too. The modified cell is returned.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L605-L611' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L605-L611' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Cells.flatten' href='#Devices.Cells.flatten'>#</a>
 <strong><code>Devices.Cells.flatten</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>flatten(c::Cell, name=uniquename(&quot;flatten&quot;))
@@ -601,19 +602,19 @@ julia&gt; trans(Point(2.0,3.0))
 
 
 <p>All cell references and arrays are resolved into polygons, recursively. A new <code>Cell</code> is returned containing these polygons, together with the polygons already explicitly in cell <code>c</code>. The cell <code>c</code> remains unmodified.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L618-L623' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L618-L623' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>flatten(c::CellReference, name=uniquename(&quot;flatten&quot;))
 </pre></div>
 
 
 <p>Cell reference <code>c</code> is resolved into polygons, recursively. A new <code>Cell</code> is returned containing these polygons. The cell reference <code>c</code> remains unmodified.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L632-L636' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L632-L636' class='documenter-source'>source</a><br></p>
 <div class="codehilite"><pre><span></span>flatten(c::CellArray, name=uniquename(&quot;flatten&quot;))
 </pre></div>
 
 
 <p>Cell array <code>c</code> is resolved into polygons, recursively. A new <code>Cell</code> is returned containing these polygons. The cell array <code>c</code> remains unmodified.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L647-L651' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L647-L651' class='documenter-source'>source</a><br></p>
 <p><a id='Miscellaneous-1'></a></p>
 <h2 id="miscellaneous">Miscellaneous</h2>
 <p>When saving cells to disk, keep in mind that cells should have unique names. We don't have an automatic renaming scheme implemented to avoid clashes. To help with this, we provide a function <a href="./#Devices.Cells.uniquename"><code>uniquename</code></a> to generate unique names based on human-readable prefixes.</p>
@@ -625,7 +626,7 @@ julia&gt; trans(Point(2.0,3.0))
 
 
 <p>Given a cell, recursively traverse its references for other cells and add to array <code>a</code> some tuples: <code>(level, c)</code>. <code>level</code> corresponds to how deep the cell was found, and <code>c</code> is the found cell.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L695-L700' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L695-L700' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Cells.order!' href='#Devices.Cells.order!'>#</a>
 <strong><code>Devices.Cells.order!</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>order!(a::AbstractArray)
@@ -634,7 +635,7 @@ julia&gt; trans(Point(2.0,3.0))
 
 <p>Given an array of tuples like that coming out of <a href="./#Devices.Cells.traverse!"><code>traverse!</code></a>, we sort by the <code>level</code>, strip the level out, and then retain unique entries. The aim of this function is to determine an optimal writing order when saving pattern data (although the GDS-II spec does not require cells to be in a particular order, there may be performance ramifications).</p>
 <p>For performance reasons, this function modifies <code>a</code> but what you want is the returned result array.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/023f8e8d01d05b86283a0584311873bc15e164f7/src/cells.jl#L708-L718' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/21fb35f4fb7bb5e3293b44313688b6f5956f4761/src/cells.jl#L708-L718' class='documenter-source'>source</a><br></p>
                 
                   
                 
@@ -704,9 +705,9 @@ julia&gt; trans(Point(2.0,3.0))
       
     </div>
     
-      <script src="../assets/javascripts/application.abd7b172.js"></script>
+      <script src="../assets/javascripts/application.8eb9be28.js"></script>
       
-      <script>app.initialize({version:"0.17.2",url:{base:".."}})</script>
+      <script>app.initialize({version:"0.17.3",url:{base:".."}})</script>
       
         <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
       
