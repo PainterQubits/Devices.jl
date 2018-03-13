@@ -52,7 +52,7 @@ beginning of the latter taper.
 
 ```@example 2
 straight!(p, 10μm, Paths.Taper())
-straight!(p, 10μm, Paths.Trace(2.0μm, 1.0μm))
+straight!(p, 10μm, Paths.TaperTrace(2.0μm, 1.0μm))
 ```
 
 As a final example, `Paths.Taper` can also be used in [`turn!`](@ref) segments, and
