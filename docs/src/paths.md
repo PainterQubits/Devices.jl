@@ -26,6 +26,48 @@ One can implement new styles by writing methods for [`render!`](@ref) that dispa
 different style types. In this way, the rendering code can be specialized for the task at
 hand, improving performance and shrinking generated file sizes (ideally).
 
+### Tapers
+
+As a convenience, this package provides functions for the automatic tapering
+of both [`Paths.Trace`](@ref) and [`Paths.CPW`](@ref) via the [`Paths.Taper`](@ref)
+constructor. Alternatively, one can specify the tapers concretely by calling
+their respective constructors.
+
+The following example illustrates the use of automatic tapering. First, we
+construct a taper with two different traces surrounding it:
+```@example 2
+using Devices, Devices.PreferMicrons
+
+p = Path(μm)
+straight!(p, 10μm, Paths.Trace(2.0μm))
+straight!(p, 10μm, Paths.Taper())
+straight!(p, 10μm, Paths.Trace(4.0μm))
+```
+
+The taper is automatically chosen to be a `Paths.Trace`, with appropriate initial
+(`2.0 μm`) and final (`4.0 μm`) widths. The next segment shows that we can
+even automatically taper between the current `Paths.Trace` and a hard-coded taper
+(of concrete type [`Paths.TaperTrace`](@ref)), matching to the dimensions at the
+beginning of the latter taper.
+
+```@example 2
+straight!(p, 10μm, Paths.Taper())
+straight!(p, 10μm, Paths.Trace(2.0μm, 1.0μm))
+```
+
+As a final example, `Paths.Taper` can also be used in [`turn!`](@ref) segments, and
+as a way to automatically transition from a `Paths.Taper` to a `Paths.CPW`, or vice-versa:
+
+```@example 2
+turn!(p, -π/2, 10μm, Paths.Taper())
+straight!(p, 10μm, Paths.Trace(2.0μm))
+straight!(p, 10μm, Paths.Taper())
+straight!(p, 10μm, Paths.CPW(2.0μm, 1.0μm))
+
+c = Cell("tapers", nm)
+render!(c, p, GDSMeta(0))
+```
+
 ## Corners
 
 Sharp turns in a path can be accomplished with [`Paths.corner!`](@ref). Sharp turns pose a
@@ -172,6 +214,7 @@ manner, it is easy to find the right `CellReference` to use with
 ```@docs
     Paths.Trace
     Paths.CPW
+    Paths.Taper
     Paths.undecorated
 ```
 
@@ -190,6 +233,8 @@ manner, it is easy to find the right `CellReference` to use with
     Paths.GeneralTrace
     Paths.SimpleCPW
     Paths.GeneralCPW
+    Paths.TaperTrace
+    Paths.TaperCPW
     Paths.CompoundStyle
     Paths.DecoratedStyle
 ```
