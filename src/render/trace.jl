@@ -10,8 +10,7 @@ function render!(c::Cell, f, len, s::Paths.Trace, meta::Meta; kwargs...)
     mgrid = adapted_grid(t->Paths.direction(r->g(r,-1), t), bnds; kwargs...)
 
     pts = [g.(pgrid, 1); @view (g.(mgrid, -1))[end:-1:1]]
-
-    render!(c, Polygon(pts), Polygons.Plain(), meta)
+    render!(c, Polygon(uniquepoints(pts)), Polygons.Plain(), meta)
 end
 
 function render!(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleTrace, meta::Meta) where {T}

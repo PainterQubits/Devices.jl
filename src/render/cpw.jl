@@ -15,8 +15,8 @@ function render!(c::Cell, f, len, s::Paths.CPW, meta::Meta; kwargs...)
     ppts = [g.(ppgrid,  1,  1); @view (g.(pmgrid,  1, -1))[end:-1:1]]
     mpts = [g.(mmgrid, -1, -1); @view (g.(mpgrid, -1,  1))[end:-1:1]]
 
-    render!(c, Polygon(ppts), Polygons.Plain(), meta)
-    render!(c, Polygon(mpts), Polygons.Plain(), meta)
+    render!(c, Polygon(uniquepoints(ppts)), Polygons.Plain(), meta)
+    render!(c, Polygon(uniquepoints(mpts)), Polygons.Plain(), meta)
 end
 
 function render!(c::Cell, segment::Paths.Straight{T}, s::Paths.SimpleCPW, meta::Meta) where {T}

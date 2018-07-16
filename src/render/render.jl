@@ -20,3 +20,7 @@ function render!(c::Cell, seg::Paths.Segment, s::Paths.NoRenderDiscrete, meta::M
     kwargs...) end
 function render!(c::Cell, seg::Paths.Segment, s::Paths.SimpleNoRender,
     meta::Meta; kwargs...) end
+
+function uniquepoints(pts)
+    return pts[.![i == 1 ? false : (pts[i] ≈ pts[max(1,i-1)]) for i in 1:size(pts,1)]]
+end
