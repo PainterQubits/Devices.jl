@@ -7,12 +7,12 @@ Render a rectangle `r` to cell `c`, defaulting to plain styling.
 """
 render!(c::Cell, r::Rectangle, meta::Meta=GDSMeta()) = render!(c, r, Rectangles.Plain(), meta)
 
-function render!(c::Cell, r::Rectangle, ::Rectangles.Plain, meta::Meta)
+function render!(c::Cell, r::Rectangle, ::Rectangles.Plain, meta::Meta; kwargs...)
     push!(c.elements, CellPolygon(r, meta))
     c
 end
 
-function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded, meta::Meta)
+function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded, meta::Meta; kwargs...)
     rad = s.r
     ll, ur = lowerleft(r), upperright(r)
     gr = Rectangle(ll + Point(rad,rad), ur - Point(rad,rad))
@@ -27,11 +27,11 @@ function render!(c::Cell, r::Rectangle, s::Rectangles.Rounded, meta::Meta)
     turn!(p, π/2, rad/2)
     straight!(p, height(r) - 2*rad)
     turn!(p, π/2, rad/2)
-    render!(c, p, meta)
+    render!(c, p, meta; kwargs...)
     c
 end
 
-function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut)
+function render!(c::Cell, r::Rectangle, s::Rectangles.Undercut; kwargs...)
     push!(c.elements, CellPolygon(r, s.meta))
 
     ucr = Rectangle(r.ll - Point(s.ucl, s.ucb), r.ur + Point(s.ucr, s.uct))
