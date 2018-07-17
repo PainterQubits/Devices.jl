@@ -1,76 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-    
     <url>
      <loc>/</loc>
-     <lastmod>2018-03-13</lastmod>
+     <lastmod>2018-07-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
-    
     <url>
      <loc>/points/</loc>
-     <lastmod>2018-03-13</lastmod>
+     <lastmod>2018-07-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
-    
     <url>
      <loc>/polygons/</loc>
-     <lastmod>2018-03-13</lastmod>
+     <lastmod>2018-07-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
-    
     <url>
      <loc>/cells/</loc>
-     <lastmod>2018-03-13</lastmod>
+     <lastmod>2018-07-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
-    
     <url>
      <loc>/paths/</loc>
-     <lastmod>2018-03-13</lastmod>
+     <lastmod>2018-07-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
-    
     <url>
      <loc>/shapes/</loc>
-     <lastmod>2018-03-13</lastmod>
+     <lastmod>2018-07-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
-    
     <url>
      <loc>/render/</loc>
-     <lastmod>2018-03-13</lastmod>
+     <lastmod>2018-07-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
-    
     <url>
      <loc>/fileio/</loc>
-     <lastmod>2018-03-13</lastmod>
+     <lastmod>2018-07-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
-    
     <url>
      <loc>/LICENSE/</loc>
-     <lastmod>2018-03-13</lastmod>
+     <lastmod>2018-07-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
-    
-
 </urlset>
