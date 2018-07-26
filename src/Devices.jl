@@ -168,7 +168,7 @@ macro junographics()
         function Media.render(pane::Atom.PlotPane, c::Cell)
             ps = Juno.plotsize()
             Media.render(pane, Atom.div(".fill",
-                Atom.HTML(reprmime(MIME("image/svg+xml"), c; width=ps[1], height=ps[2]))))
+                Atom.HTML(repr(MIME("image/svg+xml"), c; width=ps[1], height=ps[2]))))
         end
     end)
 end

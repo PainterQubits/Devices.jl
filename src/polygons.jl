@@ -42,8 +42,8 @@ at the end (although this is true for the GDS format).
 """
 struct Polygon{T} <: AbstractPolygon{T}
     p::Vector{Point{T}}
-    (::Type{Polygon{T}}){T}(x) = new{T}(x)
-    (::Type{Polygon{T}}){T}(x::AbstractPolygon) = convert(Polygon{T}, x)
+    Polygon{T}(x) where {T} = new{T}(x)
+    Polygon{T}(x::AbstractPolygon) where {T} = convert(Polygon{T}, x)
 end
 
 """
@@ -437,7 +437,7 @@ function uniqueray(v::Vector{Point{T}}) where {T <: Real}
     nopts = reinterpret(T, v)
     yarr = view(nopts, 2:2:length(nopts))
     miny, indy = findmin(yarr)
-    xarr = view(nopts, (find(x->x==miny, yarr).*2).-1)
+    xarr = view(nopts, (findall(x->x==miny, yarr).*2).-1)
     minx, indx = findmin(xarr)
     Ray(Point(minx,miny), Point(minx, miny-1))
 end

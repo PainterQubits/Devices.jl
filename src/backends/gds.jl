@@ -427,19 +427,19 @@ end
 
 function colrowcheck(c)
     (0 <= c <= 32767) ||
-        warn("The GDS-II spec only permits 0 to 32767 rows or columns.")
+        @warn("The GDS-II spec only permits 0 to 32767 rows or columns.")
 end
 
 function namecheck(a::String)
     invalid = r"[^A-Za-z0-9_\?\0\$]+"
-    (length(a) > 32 || ismatch(invalid, a)) && warn(
+    (length(a) > 32 || occursin(invalid, a)) && warn(
         "The GDS-II spec says that cell names must only have characters A-Z, a-z, ",
         "0-9, '_', '?', '\$', and be less than or equal to 32 characters long."
     )
 end
 
 function layercheck(layer)
-    (0 <= layer <= 63) || warn("The GDS-II spec only permits layers from 0 to 63.")
+    (0 <= layer <= 63) || @warn("The GDS-II spec only permits layers from 0 to 63.")
 end
 
 gdsend(io::IO) = gdswrite(io, ENDLIB)
@@ -478,13 +478,13 @@ function save(f::File{format"GDS"}, cell0::Cell, cell::Cell...;
             traverse!(a, c)
         end
         if verbose
-            info("Traversal tree:")
+            @info("Traversal tree:")
             display(a)
             print("\n")
         end
         ordered = order!(a)
         if verbose
-            info("Cells written in order:")
+            @info("Cells written in order:")
             display(ordered)
             print("\n")
         end
@@ -548,7 +548,7 @@ function load(f::File{format"GDS"}; verbose::Bool=false, nounits::Bool=false)
             if first
                 first = false
                 if token != BGNLIB
-                    warn("GDS-II file did not start with a BGNLIB record.")
+                    @warn("GDS-II file did not start with a BGNLIB record.")
                 end
             end
 
@@ -611,7 +611,7 @@ function load(f::File{format"GDS"}; verbose::Bool=false, nounits::Bool=false)
 
         # Consistency check
         if token != ENDLIB
-            warn("GDS-II file did not end with an ENDLIB record.")
+            @warn("GDS-II file did not end with an ENDLIB record.")
         end
 
         # Up until this point, CellReferences and CellArrays were
@@ -690,13 +690,13 @@ function boundary(s, dbs, verbose, nounits)
         if token == EFLAGS
             verbose && info(string(infostr, " (EFLAGS)"))
             haseflags && error("Already read EFLAGS tag for this BOUNDARY tag.")
-            warn("Not implemented: EFLAGS")
+            @warn("Not implemented: EFLAGS")
             haseflags = true
             skip(s, bytes)
         elseif token == PLEX
             verbose && info(string(infostr, " (PLEX)"))
             hasplex && error("Already read PLEX tag for this BOUNDARY tag.")
-            warn("Not implemented: PLEX")
+            @warn("Not implemented: PLEX")
             hasplex = true
             skip(s, bytes)
         elseif token == LAYER
@@ -743,8 +743,8 @@ function boundary(s, dbs, verbose, nounits)
         end
     end
 
-    verbose && !haslayer && warn("Did not read LAYER tag.")
-    verbose && !hasdt && warn("Did not read DATATYPE tag.")
+    verbose && !haslayer && @warn("Did not read LAYER tag.")
+    verbose && !hasdt && @warn("Did not read DATATYPE tag.")
     Polygon(xy), GDSMeta(lyr, dt)
 end
 
@@ -768,13 +768,13 @@ function sref(s, dbs, verbose, nounits)
         if token == EFLAGS
             verbose && info(string(infostr, " (EFLAGS)"))
             haseflags && error("Already read EFLAGS tag for this SREF tag.")
-            warn("Not implemented: EFLAGS")
+            @warn("Not implemented: EFLAGS")
             haseflags = true
             skip(s, bytes)
         elseif token == PLEX
             verbose && info(string(infostr, " (PLEX)"))
             hasplex && error("Already read PLEX tag for this SREF tag.")
-            warn("Not implemented: PLEX")
+            @warn("Not implemented: PLEX")
             hasplex = true
             skip(s, bytes)
         elseif token == SNAME
@@ -858,13 +858,13 @@ function aref(s, dbs, verbose, nounits)
         if token == EFLAGS
             verbose && info(string(infostr, " (EFLAGS)"))
             haseflags && error("Already read EFLAGS tag for this AREF tag.")
-            warn("Not implemented: EFLAGS")
+            @warn("Not implemented: EFLAGS")
             haseflags = true
             skip(s, bytes)
         elseif token == PLEX
             verbose && info(string(infostr, " (PLEX)"))
             hasplex && error("Already read PLEX tag for this AREF tag.")
-            warn("Not implemented: PLEX")
+            @warn("Not implemented: PLEX")
             hasplex = true
             skip(s, bytes)
         elseif token == SNAME

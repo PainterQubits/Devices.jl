@@ -32,7 +32,7 @@ CompoundStyle(seg::AbstractVector, sty::AbstractVector) =
 Returns a collection with the values of `t` to use for
 rendering a `CompoundSegment` with a `CompoundStyle`.
 """
-function makegrid{T<:Segment}(segments::AbstractVector{T}, styles)
+function makegrid(segments::AbstractVector{T}, styles) where T<:Segment
     isempty(segments) && error("Cannot use makegrid with zero segments.")
     length(segments) != length(styles) &&
         error("Must have same number of segments and styles.")

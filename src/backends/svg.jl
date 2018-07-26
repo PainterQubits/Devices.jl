@@ -49,8 +49,8 @@ function Base.reprmime(::MIME"image/svg+xml", c::Cell; options...)
         bnd = ustrip(bounds(c))
 
         vp = "viewBox=\"$(bnd.ll.x) 0 $(Int(round(width(bnd)))) $(Int(round(height(bnd))))\" "
-        wh = haskey(opt, :width)? "width=\"$(opt[:width])\" " : ""
-        wh *= haskey(opt, :height)? "height=\"$(opt[:height])\" " : ""
+        wh = haskey(opt, :width) ? "width=\"$(opt[:width])\" " : ""
+        wh *= haskey(opt, :height) ? "height=\"$(opt[:height])\" " : ""
 
         ly = collect(layers(c))
         trans = Translation(0, bnd.ur.y) ∘ XReflection()
@@ -73,7 +73,7 @@ function Base.reprmime(::MIME"image/svg+xml", c::Cell; options...)
 end
 
 Base.show(io, mime::MIME"image/svg+xml", c0::Cell; options...) =
-    write(io, reprmime(mime, c0; options...))
+    write(io, repr(mime, c0; options...))
 
 """
     save(::Union{AbstractString,IO}, c0::Cell; options...)

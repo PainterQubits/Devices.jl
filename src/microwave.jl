@@ -61,7 +61,7 @@ function bridge!(c::Cell, steps, foot_width, foot_height, span,
 
     # Bridge Profile
     yinv_gnd(y, span) = span/2 * acosh(-y + 2) / acosh(2)
-    ypos = linspace(0, 1, steps + 1)
+    ypos = range(0, stop=1, length=steps + 1)
 
     render!(c, Rectangle(Point(-(span/2 + foot_width), -foot_height/2),
         Point(-span/2, foot_height/2)), metas[1])
@@ -536,7 +536,7 @@ function radialcut!(c::Cell{T}, r, Θ, h, meta::Meta=GDSMeta(0,0); narc::Int=197
     straight!(p, r-h*sec(Θ/2))
 
     seg = segment(p[3])
-    pts = map(seg, linspace(zero(T), pathlength(seg), narc))
+    pts = map(seg, range(zero(T), stop=pathlength(seg), length=narc))
     push!(pts, Paths.p1(p))
     h != zero(T) && push!(pts, Paths.p0(p))
     poly = Polygon(pts) + Point(zero(T), h) # + Point(0.0, (r-h)/2)
@@ -556,7 +556,7 @@ to the radial stub, not the ground plane defect.
 """
 function radialstub!(c::Cell{T}, r, Θ, h, t, meta::Meta=GDSMeta(0,0); narc::Int=197) where {T}
     # inner ring (bottom)
-    pts = [Point(r*cos(α),r*sin(α)) for α in linspace(-(Θ+π)/2, (Θ-π)/2, narc)]
+    pts = [Point(r*cos(α),r*sin(α)) for α in range(-(Θ+π)/2, stop=(Θ-π)/2, length=narc)]
     # top right
     push!(pts, Point(h*tan(Θ/2), -h), Point(h*tan(Θ/2)+t*sec(Θ/2), -h))
     # outer ring (bottom)
@@ -566,7 +566,7 @@ function radialstub!(c::Cell{T}, r, Θ, h, t, meta::Meta=GDSMeta(0,0); narc::Int
     a0 = R^2 - (R^2-t^2)*csc(Θ/2)^2
     ϕ = 2*acos((-a1+sqrt(a1^2-4*a0*a2))/(2*a2))
     append!(pts,
-        [Point(R*cos(α),R*sin(α)) for α in linspace((ϕ-π)/2, -(ϕ+π)/2, narc)])
+        [Point(R*cos(α),R*sin(α)) for α in range((ϕ-π)/2, stop=-(ϕ+π)/2, length=narc)])
     # top left
     push!(pts, Point(-h*tan(Θ/2)-t*sec(Θ/2), -h), Point(-h*tan(Θ/2), -h))
 
