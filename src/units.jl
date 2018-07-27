@@ -6,8 +6,8 @@ module PreferNanometers
     import Unitful
     syms = (:fm, :pm, :nm, :μm, :mm, :cm, :dm, :m)
     for s in syms
-        eval(PreferNanometers, :(const $s = Unitful.ContextUnits(Unitful.$s, Unitful.nm)))
-        eval(PreferNanometers, Expr(:export, s))
+        eval(:(const $s = Unitful.ContextUnits(Unitful.$s, Unitful.nm)))
+        eval(Expr(:export, s))
     end
 
     # nums = (1, 1.0)
@@ -23,8 +23,8 @@ module PreferMicrons
     import Unitful
     syms = (:fm, :pm, :nm, :μm, :mm, :cm, :dm, :m)
     for s in syms
-        eval(PreferMicrons, :(const $s = Unitful.ContextUnits(Unitful.$s, Unitful.μm)))
-        eval(PreferMicrons, Expr(:export, s))
+        eval(:(const $s = Unitful.ContextUnits(Unitful.$s, Unitful.μm)))
+        eval(Expr(:export, s))
     end
 
     # nums = (1, 1.0)

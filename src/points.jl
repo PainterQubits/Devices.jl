@@ -5,8 +5,7 @@ import StaticArrays
 import StaticArrays: @SMatrix
 import CoordinateTransformations: LinearMap, Translation, ∘, compose
 import Clipper: IntPoint
-import Base: convert, *, summary, show, reinterpret
-import Base: scalarmin, scalarmax, isapprox
+import Base: convert, *, summary, show, reinterpret, isapprox
 import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Unitful, Length, DimensionlessQuantity, NoUnits, ustrip, unit
 
@@ -69,10 +68,10 @@ Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 @inline gety(p::Point) = p.y
 
 for f in (:+, :-)
-    @eval Base.broadcast(::typeof($f), a::AbstractArray, p::Point{T}) where {T} =
-        broadcast($f, a, StaticArrays.Scalar{typeof(p)}((p,)))
-    @eval Base.broadcast(::typeof($f), p::Point{T}, a::AbstractArray) where {T} =
-        broadcast($f, StaticArrays.Scalar{typeof(p)}((p,)), a)
+    @eval Base.Broadcast.broadcasted(::typeof($f), a::AbstractArray, p::Point{T}) where {T} =
+        Base.Broadcast.broadcasted($f, a, StaticArrays.Scalar{typeof(p)}((p,)))
+    @eval Base.Broadcast.broadcast(::typeof($f), p::Point{T}, a::AbstractArray) where {T} =
+        Base.Broadcast.broadcasted($f, StaticArrays.Scalar{typeof(p)}((p,)), a)
 end
 
 """

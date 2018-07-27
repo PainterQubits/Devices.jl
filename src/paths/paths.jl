@@ -194,7 +194,7 @@ Set the style associated with node `x` to `s`.
 """
 setstyle!(x::Node, s::Style) = x.sty = s
 
-function deepcopy_internal(x::Style, stackdict::ObjectIdDict)
+function deepcopy_internal(x::Style, stackdict::IdDict)
     if haskey(stackdict, x)
         return stackdict[x]
     end
@@ -272,7 +272,7 @@ end
 show(io::IO, s::Segment) = print(io, summary(s))
 show(io::IO, s::Style) = print(io, summary(s))
 
-function deepcopy_internal(x::Segment, stackdict::ObjectIdDict)
+function deepcopy_internal(x::Segment, stackdict::IdDict)
     if haskey(stackdict, x)
         return stackdict[x]
     end
