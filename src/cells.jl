@@ -74,7 +74,7 @@ session basis, so if you load an existing GDS-II file and try to save unique
 cells on top of that you may get an unlucky clash.
 """
 function uniquename(str)
-    replace(str*string(gensym()),"##","_")
+    replace(str*string(gensym()), "##"=>"_")
 end
 
 abstract type CellRef{S<:Coordinate, T} end

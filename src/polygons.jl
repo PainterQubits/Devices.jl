@@ -19,6 +19,7 @@ import Unitful
 import Unitful: Quantity, Length, dimension, unit, ustrip, uconvert, °
 using ..Points
 using ..Rectangles
+using ..cclipper
 
 export Polygon
 export points
@@ -251,6 +252,16 @@ function clip(op::Clipper.ClipType,
     declipperize(polys, T)
 end
 
+function add_path!(c::Clipper.Clip, path::Vector{Point{T}}, polyType::Clipper.PolyType,
+        closed::Bool) where {T<:Union{Int64, Unitful.Quantity{Int64}}}
+    ccall((:add_path, cclipper), Cuchar, (Ptr{Void}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cuchar),
+          c.clipper_ptr,
+          path,
+          length(path),
+          Int(polyType),
+          closed) == 1 ? true : false
+end
+
 # Clipping two identically-typed arrays of "Int64-based" Polygons.
 # Internal method which should not be called by user (but does the heavy lifting)
 function _clip(op::Clipper.ClipType,
@@ -262,12 +273,10 @@ function _clip(op::Clipper.ClipType,
     clip = clipper()
     Clipper.clear!(clip)
     for s0 in s
-        Clipper.add_path!(clip, reinterpret(Clipper.IntPoint, s0.p),
-            Clipper.PolyTypeSubject, true)
+        add_path!(clip, s0.p, Clipper.PolyTypeSubject, true)
     end
     for c0 in c
-        Clipper.add_path!(clip, reinterpret(Clipper.IntPoint, c0.p),
-            Clipper.PolyTypeClip, true)
+        add_path!(clip, c0.p, Clipper.PolyTypeClip, true)
     end
     result = convert(Clipper.PolyNode{Point{Int}},
         Clipper.execute_pt(clip, op, pfs, pfc)[2])
@@ -388,6 +397,16 @@ function offset(s::AbstractVector{Polygon{T}}, delta::T;
     declipperize(polys, T)
 end
 
+function add_path!(c::Clipper.ClipperOffset, path::Vector{Point{T}},
+        joinType::Clipper.JoinType, endType::Clipper.EndType) where {T<:Union{Int64, Unitful.Quantity{Int64}}}
+    ccall((:add_offset_path, cclipper), Void, (Ptr{Void}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cint),
+          c.clipper_ptr,
+          path,
+          length(path),
+          Int(joinType),
+          Int(endType))
+end
+
 function _offset(s::AbstractVector{Polygon{T}}, delta;
         j::Clipper.JoinType=Clipper.JoinTypeMiter,
         e::Clipper.EndType=Clipper.EndTypeClosedPolygon) where
@@ -396,7 +415,7 @@ function _offset(s::AbstractVector{Polygon{T}}, delta;
     c = coffset()
     Clipper.clear!(c)
     for s0 in s
-        Clipper.add_path!(c, reinterpret(Clipper.IntPoint, s0.p), j, e)
+        add_path!(c, s0.p, j, e)
     end
     result = Clipper.execute(c, Float64(ustrip(delta))) #TODO: fix in clipper
     [Polygon(reinterpret(Point{T}, p)) for p in result]

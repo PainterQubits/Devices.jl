@@ -359,9 +359,9 @@ function pathlength end
 
 pathlength(p::Path) = pathlength(nodes(p))
 pathlength(array::AbstractArray{Node{T}}) where {T} =
-    mapreduce(pathlength, +, zero(T), array)
+    mapreduce(pathlength, +, array; init = zero(T))
 pathlength(array::AbstractArray{T}) where {T <: Segment} =
-    mapreduce(pathlength, +, zero(T), array)
+    mapreduce(pathlength, +, array; init = zero(T))
 pathlength(node::Node) = pathlength(segment(node))
 
 """

@@ -1,5 +1,5 @@
-__precompile__()
 module Devices
+using Random
 using ForwardDiff
 using FileIO
 include("units.jl")
@@ -21,12 +21,12 @@ const DEFAULT_DATATYPE = 0
 # For help with precompiling
 global _clip = Ref(Clipper.Clip())
 global _coffset = Ref(Clipper.ClipperOffset())
+include(joinpath(Pkg.dir("Clipper"), "deps", "deps.jl"))
 
 function __init__()
     # To ensure no crashes
     global _clip = Ref(Clipper.Clip())
     global _coffset = Ref(Clipper.ClipperOffset())
-
     # The magic bytes are the GDS HEADER tag (0x0002), preceded by the number of
     # bytes in total (6 == 0x0006) for the HEADER record.
     add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02], ".gds")

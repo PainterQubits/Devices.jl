@@ -88,7 +88,7 @@ julia> lowerleft([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
 ```
 """
 function lowerleft(A::AbstractArray{Point{T}}) where {T}
-    B = reinterpret(T, A, (2*length(A),))
+    B = reshape(reinterpret(T, vec(A)), (2*length(A),))
     @inbounds Bx = view(B, 1:2:length(B))
     @inbounds By = view(B, 2:2:length(B))
     Point(minimum(Bx), minimum(By))
@@ -108,7 +108,7 @@ julia> upperright([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
 ```
 """
 function upperright(A::AbstractArray{Point{T}}) where {T}
-    B = reinterpret(T, A, (2*length(A),))
+    B = reshape(reinterpret(T, vec(A)), (2*length(A),))
     @inbounds Bx = view(B, 1:2:length(B))
     @inbounds By = view(B, 2:2:length(B))
     Point(maximum(Bx), maximum(By))

@@ -716,7 +716,7 @@ end
         turn!(pa, π/2, 20.0μm)
         straight!(pa, 20.0μm)
         simplify!(pa)
-        attach!(pa, cref, linspace(0μm, pathlength(pa), 3))
+        attach!(pa, cref, range(0μm, stop = pathlength(pa), length = 3))
         render!(c,pa)
 
         @test isempty(c.elements)
@@ -748,7 +748,7 @@ end
         cref = CellReference(csub, Point(0.0μm, 10.0μm))
         c = Cell("main", nm)
         setstyle!(pa[1], Paths.Trace(1μm))
-        attach!(pa, cref, linspace(0μm, pathlength(pa), 3), location=-1)
+        attach!(pa, cref, range(0μm, stop = pathlength(pa), length = 3), location=-1)
         render!(c, pa)
 
         @test length(c.elements) == 1
@@ -780,7 +780,7 @@ end
         # === Issue 13 ===
         c2 = Cell("c2", nm)
         render!(c2, Rectangle(1μm, 1μm), GDSMeta(1))
-        const c2ref = CellReference(c2, Point(0μm,0μm))
+        c2ref = CellReference(c2, Point(0μm,0μm))
 
         c = Cell("c", nm)
         ro = Path(μm, α0 = 180°)

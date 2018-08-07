@@ -37,7 +37,7 @@ function makegrid(segments::AbstractVector{T}, styles) where T<:Segment
     length(segments) != length(styles) &&
         error("Must have same number of segments and styles.")
 
-    grid = Vector{eltype(T)}(length(segments)+1)
+    grid = Vector{eltype(T)}(undef, length(segments)+1)
     grid[1] = zero(eltype(T))
     v = view(grid, 2:length(grid))
     v .= pathlength.(segments)
