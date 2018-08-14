@@ -142,12 +142,12 @@ mutable struct Node{T<:Coordinate}
     prev::Node{T}
     next::Node{T}
 
-    (::Type{Node{T}}){T}(a,b) = begin
+    Node{T}(a,b) where {T} = begin
         n = new{T}(a,b)
         n.prev = n
         n.next = n
     end
-    (::Type{Node{T}}){T}(a,b,c,d) = new{T}(a,b,c,d)
+    Node{T}(a,b,c,d) where {T} = new{T}(a,b,c,d)
 end
 
 """
@@ -295,8 +295,8 @@ mutable struct Path{T<:Coordinate} <: AbstractVector{Node{T}}
     α0::Float64
     nodes::Array{Node{T},1}
 
-    (::Type{Path{T}}){T}() = new{T}(Point(zero(T),zero(T)), 0.0, Node{T}[])
-    (::Type{Path{T}}){T}(a,b,c) = new{T}(a,b,c)
+    Path{T}() where {T} = new{T}(Point(zero(T),zero(T)), 0.0, Node{T}[])
+    Path{T}(a,b,c) where {T} = new{T}(a,b,c)
 end
 @inline Base.eltype(::Path{T}) where {T} = T
 @inline Base.eltype(::Type{Path{T}}) where {T} = T

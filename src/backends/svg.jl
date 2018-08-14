@@ -49,8 +49,8 @@ function Base.reprmime(::MIME"image/svg+xml", c::Cell; options...)
         bnd = ustrip(bounds(c))
 
         vp = "viewBox=\"$(bnd.ll.x) 0 $(Int(round(width(bnd)))) $(Int(round(height(bnd))))\" "
-        wh = haskey(opt, :width)? "width=\"$(opt[:width])\" " : ""
-        wh *= haskey(opt, :height)? "height=\"$(opt[:height])\" " : ""
+        wh = haskey(opt, :width) ? "width=\"$(opt[:width])\" " : ""
+        wh *= haskey(opt, :height) ? "height=\"$(opt[:height])\" " : ""
 
         ly = collect(layers(c))
         trans = Translation(0, bnd.ur.y) ∘ XReflection()

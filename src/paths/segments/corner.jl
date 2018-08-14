@@ -18,8 +18,8 @@ mutable struct Corner{T} <: DiscreteSegment{T}
     p0::Point{T}
     α0::Float64
     extent::T
-    (::Type{Corner{T}}){T}(a) = new{T}(a, Point(zero(T), zero(T)), 0.0, zero(T))
-    (::Type{Corner{T}}){T}(a,b,c,d) = new{T}(a,b,c,d)
+    Corner{T}(a) where {T} = new{T}(a, Point(zero(T), zero(T)), 0.0, zero(T))
+    Corner{T}(a,b,c,d) where {T} = new{T}(a,b,c,d)
 end
 
 """

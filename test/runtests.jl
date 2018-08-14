@@ -70,17 +70,10 @@ p(x,y) = Point(x,y)
         @test [Point(1,2), Point(3,4)] .- Point(1,1) == [Point(0,1), Point(2,3)]
         @test Point(1,1) .- [Point(1,2), Point(2,3)] == [Point(0,-1), Point(-1,-2)]
         @test [Point(2,3)] - [Point(1,3)] == [Point(1,0)]
-        if VERSION < v"0.6.0-pre"
-            @test_throws ErrorException Point(1,2) - [Point(1,0)]
-            @test_throws ErrorException [Point(2,3)] - Point(1,0)
-            @test_throws ErrorException Point(1,2) + [Point(3,4)]
-            @test_throws ErrorException [Point(1,2)] + Point(3,4)
-        else
-            @test_throws DimensionMismatch Point(1,2) - [Point(1,0)]
-            @test_throws DimensionMismatch [Point(2,3)] - Point(1,0)
-            @test_throws DimensionMismatch Point(1,2) + [Point(3,4)]
-            @test_throws DimensionMismatch [Point(1,2)] + Point(3,4)
-        end
+        @test_throws DimensionMismatch Point(1,2) - [Point(1,0)]
+        @test_throws DimensionMismatch [Point(2,3)] - Point(1,0)
+        @test_throws DimensionMismatch Point(1,2) + [Point(3,4)]
+        @test_throws DimensionMismatch [Point(1,2)] + Point(3,4)
 
         @test [Point(1,3)] .* 3 == [Point(3,9)]
         @test [Point(1,3)] * 3 == [Point(3,9)]

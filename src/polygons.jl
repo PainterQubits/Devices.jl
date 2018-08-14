@@ -42,8 +42,8 @@ at the end (although this is true for the GDS format).
 """
 struct Polygon{T} <: AbstractPolygon{T}
     p::Vector{Point{T}}
-    (::Type{Polygon{T}}){T}(x) = new{T}(x)
-    (::Type{Polygon{T}}){T}(x::AbstractPolygon) = convert(Polygon{T}, x)
+    Polygon{T}(x) where {T} = new{T}(x)
+    Polygon{T}(x::AbstractPolygon) where {T} = convert(Polygon{T}, x)
 end
 
 """
