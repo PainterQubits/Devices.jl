@@ -38,7 +38,7 @@ convert(::Type{Turn{T}}, x::Turn) where {T} =
     Turn{T}(x.α, T(x.r), convert(Point{T}, x.p0), x.α0)
 copy(s::Turn{T}) where {T} = Turn{T}(s.α,s.r,s.p0,s.α0)
 
-pathlength(s::Turn{T}) where {T} = T(abs(s.r*s.α))
+pathlength(s::Turn{T}) where {T} = convert(T, abs(s.r*s.α))
 p0(s::Turn) = s.p0
 α0(s::Turn) = s.α0
 summary(s::Turn) = "Turn by $(s.α) with radius $(s.r)"
@@ -74,7 +74,7 @@ function turn!(p::Path{T}, α, r::Coordinate, sty::Style=contstyle1(p)) where {T
     p0 = p1(p)
     α0 = α1(p)
     turn = Turn{T}(α, r, p0, α0)
-    push!(p, Node(turn, ContinuousStyle(sty)))
+    push!(p, Node(turn, convert(ContinuousStyle, sty)))
     nothing
 end
 
@@ -90,7 +90,7 @@ Turn a path `p` with direction coded by string `s`:
 By default, we take the last continuous style in the path.
 """
 function turn!(p::Path{T}, s::String, r::Coordinate,
-        sty::ContinuousStyle=contstyle1(p)) where {T <: Coordinate}
+        sty::Style=contstyle1(p)) where {T <: Coordinate}
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
     for ch in s
         if ch == 'l'
@@ -101,7 +101,7 @@ function turn!(p::Path{T}, s::String, r::Coordinate,
             error("Unrecognizable turn command.")
         end
         turn = Turn{T}(α, r, p1(p), α1(p))
-        push!(p, Node(turn,sty))
+        push!(p, Node(turn, convert(ContinuousStyle, sty)))
     end
     nothing
 end

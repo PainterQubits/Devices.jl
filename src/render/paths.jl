@@ -3,7 +3,7 @@
 Render a path `p` to a cell `c`.
 """
 function render!(c::Cell, p::Path{T}, meta::Meta=GDSMeta(); kwargs...) where {T}
-    inds = find(x->isa(segment(x), Paths.Corner), nodes(p))
+    inds = findall(x->isa(segment(x), Paths.Corner), nodes(p))
     segs = []
 
     # Adjust the path so corners, when rendered with finite extent,
@@ -54,7 +54,7 @@ cornertweak!(cornernode, seg::Paths.Segment) =
 
 function handle_generic_tapers!(p)
     # Adjust the path so generic tapers render correctly
-    generic_taper_inds = find(x->isa(style(x), Paths.Taper), nodes(p))
+    generic_taper_inds = findall(x->isa(style(x), Paths.Taper), nodes(p))
     for i in generic_taper_inds
         tapernode = p[i]
         prevnode = previous(tapernode)

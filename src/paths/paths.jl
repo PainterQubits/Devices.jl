@@ -142,12 +142,12 @@ mutable struct Node{T<:Coordinate}
     prev::Node{T}
     next::Node{T}
 
-    (::Type{Node{T}}){T}(a,b) = begin
+    Node{T}(a,b) where {T} = begin
         n = new{T}(a,b)
         n.prev = n
         n.next = n
     end
-    (::Type{Node{T}}){T}(a,b,c,d) = new{T}(a,b,c,d)
+    Node{T}(a,b,c,d) where {T} = new{T}(a,b,c,d)
 end
 
 """
@@ -194,7 +194,7 @@ Set the style associated with node `x` to `s`.
 """
 setstyle!(x::Node, s::Style) = x.sty = s
 
-function deepcopy_internal(x::Style, stackdict::ObjectIdDict)
+function deepcopy_internal(x::Style, stackdict::IdDict)
     if haskey(stackdict, x)
         return stackdict[x]
     end
@@ -272,7 +272,7 @@ end
 show(io::IO, s::Segment) = print(io, summary(s))
 show(io::IO, s::Style) = print(io, summary(s))
 
-function deepcopy_internal(x::Segment, stackdict::ObjectIdDict)
+function deepcopy_internal(x::Segment, stackdict::IdDict)
     if haskey(stackdict, x)
         return stackdict[x]
     end
@@ -295,8 +295,8 @@ mutable struct Path{T<:Coordinate} <: AbstractVector{Node{T}}
     α0::Float64
     nodes::Array{Node{T},1}
 
-    (::Type{Path{T}}){T}() = new{T}(Point(zero(T),zero(T)), 0.0, Node{T}[])
-    (::Type{Path{T}}){T}(a,b,c) = new{T}(a,b,c)
+    Path{T}() where {T} = new{T}(Point(zero(T),zero(T)), 0.0, Node{T}[])
+    Path{T}(a,b,c) where {T} = new{T}(a,b,c)
 end
 @inline Base.eltype(::Path{T}) where {T} = T
 @inline Base.eltype(::Type{Path{T}}) where {T} = T
@@ -359,9 +359,9 @@ function pathlength end
 
 pathlength(p::Path) = pathlength(nodes(p))
 pathlength(array::AbstractArray{Node{T}}) where {T} =
-    mapreduce(pathlength, +, zero(T), array)
+    mapreduce(pathlength, +, array; init = zero(T))
 pathlength(array::AbstractArray{T}) where {T <: Segment} =
-    mapreduce(pathlength, +, zero(T), array)
+    mapreduce(pathlength, +, array; init = zero(T))
 pathlength(node::Node) = pathlength(segment(node))
 
 """
@@ -419,10 +419,10 @@ function style1(p::Path, T)
     isempty(p) && error("path is empty, provide a style.")
     A = view(nodes(p), reverse(1:length(nodes(p))))
     i = findfirst(x->isa(style(x), T), A)
-    if i > 0
-        style(A[i])
-    else
+    if i == nothing
         error("No $T found in the path.")
+    else
+        style(A[i])
     end
 end
 

@@ -1,4 +1,7 @@
 module Cells
+using Dates
+using LinearAlgebra
+
 using Unitful
 import Unitful: Length, nm
 
@@ -73,7 +76,7 @@ session basis, so if you load an existing GDS-II file and try to save unique
 cells on top of that you may get an unlucky clash.
 """
 function uniquename(str)
-    replace(str*string(gensym()),"##","_")
+    replace(str*string(gensym()), "##"=>"_")
 end
 
 abstract type CellRef{S<:Coordinate, T} end
@@ -172,11 +175,11 @@ mutable struct Cell{S<:Coordinate, T<:Meta}
     elements::Vector{CellPolygon{S,T}}
     refs::Vector{CellRef}
     create::DateTime
-    (::Type{Cell{S,T}}){S,T}(x,y,z,t) = new{S,T}(x, y, z, t)
-    (::Type{Cell{S,T}}){S,T}(x,y,z) = new{S,T}(x, y, z, now())
-    (::Type{Cell{S,T}}){S,T}(x,y) = new{S,T}(x, y, CellRef[], now())
-    (::Type{Cell{S,T}}){S,T}(x) = new{S,T}(x, CellPolygon{S,T}[], CellRef[], now())
-    (::Type{Cell{S,T}}){S,T}() = begin
+    Cell{S,T}(x,y,z,t) where {S,T} = new{S,T}(x, y, z, t)
+    Cell{S,T}(x,y,z) where {S,T} = new{S,T}(x, y, z, now())
+    Cell{S,T}(x,y) where {S,T} = new{S,T}(x, y, CellRef[], now())
+    Cell{S,T}(x) where {S,T} = new{S,T}(x, CellPolygon{S,T}[], CellRef[], now())
+    Cell{S,T}() where {S,T} = begin
         c = new{S,T}()
         c.elements = CellPolygon{S,T}[]
         c.refs = CellRef[]
@@ -403,7 +406,7 @@ with synonyms allowed:
 - Rotation: `:rot`, `:rotation`, `:rotate`, `:angle`
 
 """
-function CellArray(x, c::Range, r::Range; kwargs...)
+function CellArray(x, c::AbstractRange, r::AbstractRange; kwargs...)
     argdict = Dict(k=>v for (k,v) in kwargs)
     xreflkeys = [:xrefl, :xreflection, :refl, :reflect,
                  :xreflect, :xmirror, :mirror]
@@ -485,7 +488,7 @@ then `index` specifies which one is returned (in the order they are found in
 `c.refs`). e.g. to specify an index of 2: `mycell["myreferencedcell",2]`.
 """
 function Base.getindex(c::Cell, nom::AbstractString, index::Integer=1)
-    inds = find(x->name(x)==nom, c.refs)
+    inds = findall(x->name(x)==nom, c.refs)
     c.refs[inds[index]]
 end
 
@@ -504,7 +507,7 @@ mycell["myreferencedcell"].cell["onedeeper"]
 ```
 """
 function Base.getindex(c::CellRef, nom::AbstractString, index::Integer=1)
-    inds = find(x->name(x)==nom, c.cell.refs)
+    inds = findall(x->name(x)==nom, c.cell.refs)
     c.cell.refs[inds[index]]
 end
 
@@ -656,7 +659,7 @@ function flatten(c::CellArray, name=uniquename("flatten"))
                       c.mag*sin(c.rot) sgn*c.mag*cos(c.rot)])
     newcell = flatten(c.cell)
     pts = [(i-1) * c.deltarow + (j-1) * c.deltacol for i in 1:c.row for j in 1:c.col]
-    pts2 = reinterpret(StaticArrays.Scalar{eltype(pts)}, pts, (1,length(pts)))
+    pts2 = reshape(reinterpret(StaticArrays.Scalar{eltype(pts)}, vec(pts)), (1,length(pts)))
     newpolys = a.(newcell.elements .+ pts2) # add each point in pts to each polygon
     Cell(name, @view newpolys[:])
 end
@@ -744,7 +747,7 @@ julia> trans(Point(2.0,3.0))
 ```
 """
 function transform(c::Cell, d::CellRef)
-    x,y = transform(c, d, CoordinateTransformations.LinearMap(StaticArrays.@SMatrix eye(2)))
+    x,y = transform(c, d, CoordinateTransformations.LinearMap(StaticArrays.SMatrix{2,2}(1.0I)))
 
     x || error("Reference tree does not contain $d.")
     return y

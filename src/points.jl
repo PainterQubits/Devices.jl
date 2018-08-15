@@ -5,8 +5,7 @@ import StaticArrays
 import StaticArrays: @SMatrix
 import CoordinateTransformations: LinearMap, Translation, ∘, compose
 import Clipper: IntPoint
-import Base: convert, *, summary, show, reinterpret
-import Base: scalarmin, scalarmax, isapprox
+import Base: convert, *, summary, show, reinterpret, isapprox
 import ForwardDiff: ForwardDiff, extract_derivative
 import Unitful: Unitful, Length, DimensionlessQuantity, NoUnits, ustrip, unit
 
@@ -69,10 +68,10 @@ Get the y-coordinate of a point. You can also use `p.y` or `p[2]`.
 @inline gety(p::Point) = p.y
 
 for f in (:+, :-)
-    @eval Base.broadcast(::typeof($f), a::AbstractArray, p::Point{T}) where {T} =
-        broadcast($f, a, StaticArrays.Scalar{typeof(p)}((p,)))
-    @eval Base.broadcast(::typeof($f), p::Point{T}, a::AbstractArray) where {T} =
-        broadcast($f, StaticArrays.Scalar{typeof(p)}((p,)), a)
+    @eval Base.Broadcast.broadcasted(::typeof($f), a::AbstractArray, p::Point{T}) where {T} =
+        Base.Broadcast.broadcasted($f, a, StaticArrays.Scalar{typeof(p)}((p,)))
+    @eval Base.Broadcast.broadcast(::typeof($f), p::Point{T}, a::AbstractArray) where {T} =
+        Base.Broadcast.broadcasted($f, StaticArrays.Scalar{typeof(p)}((p,)), a)
 end
 
 """
@@ -89,7 +88,7 @@ julia> lowerleft([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
 ```
 """
 function lowerleft(A::AbstractArray{Point{T}}) where {T}
-    B = reinterpret(T, A, (2*length(A),))
+    B = reshape(reinterpret(T, vec(A)), (2*length(A),))
     @inbounds Bx = view(B, 1:2:length(B))
     @inbounds By = view(B, 2:2:length(B))
     Point(minimum(Bx), minimum(By))
@@ -109,7 +108,7 @@ julia> upperright([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
 ```
 """
 function upperright(A::AbstractArray{Point{T}}) where {T}
-    B = reinterpret(T, A, (2*length(A),))
+    B = reshape(reinterpret(T, vec(A)), (2*length(A),))
     @inbounds Bx = view(B, 1:2:length(B))
     @inbounds By = view(B, 2:2:length(B))
     Point(maximum(Bx), maximum(By))

@@ -18,8 +18,8 @@ mutable struct Corner{T} <: DiscreteSegment{T}
     p0::Point{T}
     α0::Float64
     extent::T
-    (::Type{Corner{T}}){T}(a) = new{T}(a, Point(zero(T), zero(T)), 0.0, zero(T))
-    (::Type{Corner{T}}){T}(a,b,c,d) = new{T}(a,b,c,d)
+    Corner{T}(a) where {T} = new{T}(a, Point(zero(T), zero(T)), 0.0, zero(T))
+    Corner{T}(a,b,c,d) where {T} = new{T}(a,b,c,d)
 end
 
 """
@@ -55,8 +55,8 @@ Append a sharp turn or "corner" to path `p` with angle `α`.
 The style chosen for this corner, if not specified, is the last `DiscreteStyle`
 used in the path.
 """
-function corner!(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p)) where {T <: Coordinate}
+function corner!(p::Path{T}, α, sty::Style=discretestyle1(p)) where {T <: Coordinate}
     corn = Corner{T}(α)
-    push!(p, Node(corn, DiscreteStyle(sty)))
+    push!(p, Node(corn, convert(DiscreteStyle, sty)))
     nothing
 end

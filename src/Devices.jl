@@ -1,5 +1,5 @@
-__precompile__()
 module Devices
+using Random
 using ForwardDiff
 using FileIO
 include("units.jl")
@@ -21,12 +21,12 @@ const DEFAULT_DATATYPE = 0
 # For help with precompiling
 global _clip = Ref(Clipper.Clip())
 global _coffset = Ref(Clipper.ClipperOffset())
+include(joinpath(dirname(pathof(Clipper)), "..", "deps", "deps.jl"))
 
 function __init__()
     # To ensure no crashes
     global _clip = Ref(Clipper.Clip())
     global _coffset = Ref(Clipper.ClipperOffset())
-
     # The magic bytes are the GDS HEADER tag (0x0002), preceded by the number of
     # bytes in total (6 == 0x0006) for the HEADER record.
     add_format(format"GDS", UInt8[0x00, 0x06, 0x00, 0x02], ".gds")
@@ -76,11 +76,16 @@ eltype(::AbstractPolygon{T}) where {T} = T
 eltype(::Type{AbstractPolygon{T}}) where {T} = T
 
 include("points.jl")
-import .Points: Point, getx, gety
-import .Points: Rotation, Translation, XReflection, YReflection, ∘, compose
-export Points
-export Point, getx, gety
-export Rotation, Translation, XReflection, YReflection, ∘, compose
+import .Points: Point, Rotation, Translation, XReflection, YReflection,
+    compose,
+    getx,
+    gety,
+    ∘
+export Points, Point, Rotation, Translation, XReflection, YReflection,
+    compose,
+    getx,
+    gety,
+    ∘
 
 abstract type Meta end
 struct GDSMeta <: Meta
@@ -90,39 +95,99 @@ struct GDSMeta <: Meta
     GDSMeta(l) = new(l, DEFAULT_DATATYPE)
     GDSMeta(l,d) = new(l,d)
 end
-@inline layer(x::GDSMeta) = x.layer
-@inline datatype(x::GDSMeta) = x.datatype
+layer(x::GDSMeta) = x.layer
+datatype(x::GDSMeta) = x.datatype
 
 include("rectangles.jl")
-import .Rectangles: Rectangle, height, width, isproper
-export Rectangles, Rectangle
-export height, isproper, width
+import .Rectangles: Rectangle,
+    height,
+    isproper,
+    width
+export Rectangles, Rectangle,
+    height,
+    isproper,
+    width
 
 include("polygons.jl")
-import .Polygons: Polygon, clip, offset, points, circle
-export Polygons, Polygon
-export clip, offset, points, circle
+import .Polygons: Polygon,
+    circle,
+    clip,
+    offset,
+    points
+export Polygons, Polygon,
+    circle,
+    clip,
+    offset,
+    points
 
 include("cells.jl")
-import .Cells: Cell, CellArray, CellPolygon, CellReference
-import .Cells: elements, flatten, flatten!, layers, meta, name, order!, polygon, transform
-import .Cells: traverse!, uniquename
-export Cells, Cell, CellArray, CellPolygon, CellReference
-export elements, flatten, flatten!, layers, meta, name, order!, polygon, transform
-export traverse!, uniquename
+import .Cells: Cell, CellArray, CellPolygon, CellReference,
+    elements,
+    flatten,
+    flatten!,
+    layers,
+    meta,
+    name,
+    order!,
+    polygon,
+    transform,
+    traverse!,
+    uniquename
+export Cells, Cell, CellArray, CellPolygon, CellReference,
+    elements,
+    flatten,
+    flatten!,
+    layers,
+    meta,
+    name,
+    order!,
+    polygon,
+    transform
+    traverse!,
+    uniquename
 
 include("utils.jl")
 include("paths/paths.jl")
-importall .Paths
-export Paths, Path, Segment, Style
-export α0, α1,
+import .Paths: Path,
+    α0,
+    α1,
+    adjust!,
+    attach!,
+    contstyle1,
+    corner!,
+    direction,
+    discretestyle1,
+    launch!,
+    meander!,
+    next,
+    nodes,
+    p0,
+    p1,
+    pathf,
+    pathlength,
+    previous,
+    segment,
+    setsegment!,
+    simplify,
+    simplify!,
+    straight!,
+    style,
+    style0,
+    style1,
+    setstyle!,
+    turn!,
+    undecorated
+export Paths, Path, Segment, Style,
+    α0,
+    α1,
     adjust!,
     attach!,
     corner!,
     direction,
     meander!,
     launch!,
-    p0, p1,
+    p0,
+    p1,
     pathf,
     pathlength,
     segment,
@@ -140,21 +205,49 @@ export α0, α1,
 include("render/render.jl")
 
 include("microwave.jl")
-import .Microwave: bridge!, checkerboard!, device_template!, flux_bias!,
+import .Microwave:
+    bridge!,
+    checkerboard!,
+    device_template!,
+    flux_bias!,
     grating!,
-    interdigit!, jj!, jj_top_pad!, layerpixels!, qubit!, qubit_claw!, radialcut!, radialstub!
-export Microwave
-export bridge!, checkerboard!, device_template!, flux_bias!, grating!,
     interdigit!,
-    jj!, jj_top_pad!, layerpixels!, qubit!, qubit_claw!, radialcut!, radialstub!
+    jj!,
+    jj_top_pad!,
+    layerpixels!,
+    qubit!,
+    qubit_claw!,
+    radialcut!,
+    radialstub!
+export Microwave,
+    bridge!,
+    checkerboard!,
+    device_template!,
+    flux_bias!,
+    grating!,
+    interdigit!,
+    jj!,
+    jj_top_pad!,
+    layerpixels!,
+    qubit!,
+    qubit_claw!,
+    radialcut!,
+    radialstub!
 
 include("backends/gds.jl")
 include("backends/svg.jl")
 
 include("lcdfonts.jl")
-import .LCDFonts: lcdstring!, characters_demo, scripted_demo, referenced_characters_demo
-export LCDFonts
-export lcdstring!, characters_demo, scripted_demo, referenced_characters_demo
+import .LCDFonts:
+    characters_demo,
+    lcdstring!,
+    referenced_characters_demo,
+    scripted_demo
+export LCDFonts,
+    characters_demo,
+    lcdstring!,
+    referenced_characters_demo,
+    scripted_demo
 
 """
     @junographics()
@@ -168,7 +261,7 @@ macro junographics()
         function Media.render(pane::Atom.PlotPane, c::Cell)
             ps = Juno.plotsize()
             Media.render(pane, Atom.div(".fill",
-                Atom.HTML(reprmime(MIME("image/svg+xml"), c; width=ps[1], height=ps[2]))))
+                Atom.HTML(repr(MIME("image/svg+xml"), c; width=ps[1], height=ps[2]))))
         end
     end)
 end

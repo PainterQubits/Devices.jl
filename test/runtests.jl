@@ -1,4 +1,4 @@
-using Base.Test
+using Test
 using Devices, Unitful, FileIO
 import Unitful: s, DimensionError
 import Clipper
@@ -716,7 +716,7 @@ end
         turn!(pa, π/2, 20.0μm)
         straight!(pa, 20.0μm)
         simplify!(pa)
-        attach!(pa, cref, linspace(0μm, pathlength(pa), 3))
+        attach!(pa, cref, range(0μm, stop = pathlength(pa), length = 3))
         render!(c,pa)
 
         @test isempty(c.elements)
@@ -748,7 +748,7 @@ end
         cref = CellReference(csub, Point(0.0μm, 10.0μm))
         c = Cell("main", nm)
         setstyle!(pa[1], Paths.Trace(1μm))
-        attach!(pa, cref, linspace(0μm, pathlength(pa), 3), location=-1)
+        attach!(pa, cref, range(0μm, stop = pathlength(pa), length = 3), location=-1)
         render!(c, pa)
 
         @test length(c.elements) == 1
@@ -780,7 +780,7 @@ end
         # === Issue 13 ===
         c2 = Cell("c2", nm)
         render!(c2, Rectangle(1μm, 1μm), GDSMeta(1))
-        const c2ref = CellReference(c2, Point(0μm,0μm))
+        c2ref = CellReference(c2, Point(0μm,0μm))
 
         c = Cell("c", nm)
         ro = Path(μm, α0 = 180°)
@@ -1088,7 +1088,6 @@ end
         c = Cell("pathonly", nm)
         render!(c, p1, GDSMeta(0))
 
-        p(x,y) = Point(x, y)
         @test points(c.elements[2]) == Point{typeof(1.0nm)}[
                 p(10000.0nm, 1000.0nm),
                 p(20000.0nm, 2000.0nm),
@@ -1328,15 +1327,15 @@ end
         @test length(elements(cells["main"])) == 1
 
         # Corrupt file tests: records
-        @test_warn r"unknown record type 0xffff" load(joinpath(dirname(@__FILE__),
+        @test_logs (:warn, r"unknown record type 0xffff") load(joinpath(dirname(@__FILE__),
             "unknown_record.gds"))
-        @test_warn r"unimplemented record type 0x2202" load(joinpath(dirname(@__FILE__),
+        @test_logs (:warn, r"unimplemented record type 0x2202") load(joinpath(dirname(@__FILE__),
             "unimplemented_record.gds"))
         @test_throws ErrorException load(joinpath(dirname(@__FILE__),
             "badbytes_record.gds"))
-        @test_warn r"did not start with a BGNLIB" load(joinpath(dirname(@__FILE__),
+        @test_logs (:warn, r"did not start with a BGNLIB") load(joinpath(dirname(@__FILE__),
             "no_bgnlib.gds"))
-        @test_warn r"end with an ENDLIB" load(joinpath(dirname(@__FILE__),
+        @test_logs (:warn, r"end with an ENDLIB") load(joinpath(dirname(@__FILE__),
             "no_endlib.gds"))
 
         # Corrupt file tests: cells

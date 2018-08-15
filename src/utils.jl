@@ -45,7 +45,7 @@ function assemble_grids(f, anchors::AbstractVector,
         # Want a range that specially excludes the last point; use linspace with npts.
         @inbounds npts = Int(ceil(NoUnits((anchors[i+1] - anchors[i]) / grid_step))) - 1
         npts = ifelse(npts < 5, 5, ifelse(iseven(npts), npts+1, npts))
-        @inbounds grid = make_grid(f, linspace(anchors[i], anchors[i+1], npts),
+        @inbounds grid = make_grid(f, range(anchors[i], stop = anchors[i+1], length = npts),
             max_recursions, max_change, rand_factor)
         grid[1:(end-1)]
     end
@@ -75,7 +75,7 @@ function make_grid(f, initial_grid, max_recursions, max_change, rand_factor)
     n_tot_refinements = zeros(Int, n_intervals)
     while true
         results = zeros(typeof(f(initial_grid[1])), n_intervals)
-        active = Vector{Bool}(n_intervals)
+        active = Vector{Bool}(undef, n_intervals)
         # derivs = [ForwardDiff.derivative(f, xs[i]) for i in 1:(2*n_intervals + 1)]
 
         for interval in 1:n_intervals

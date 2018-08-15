@@ -32,12 +32,12 @@ CompoundStyle(seg::AbstractVector, sty::AbstractVector) =
 Returns a collection with the values of `t` to use for
 rendering a `CompoundSegment` with a `CompoundStyle`.
 """
-function makegrid{T<:Segment}(segments::AbstractVector{T}, styles)
+function makegrid(segments::AbstractVector{T}, styles) where T<:Segment
     isempty(segments) && error("Cannot use makegrid with zero segments.")
     length(segments) != length(styles) &&
         error("Must have same number of segments and styles.")
 
-    grid = Vector{eltype(T)}(length(segments)+1)
+    grid = Vector{eltype(T)}(undef, length(segments)+1)
     grid[1] = zero(eltype(T))
     v = view(grid, 2:length(grid))
     v .= pathlength.(segments)

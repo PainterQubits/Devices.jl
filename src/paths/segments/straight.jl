@@ -59,6 +59,6 @@ function straight!(p::Path{T}, l::Coordinate,
     p0 = p1(p)
     α = α1(p)
     s = Straight{T}(l, p0, α)
-    push!(p, Node(s, ContinuousStyle(sty)))
+    push!(p, Node(s, convert(ContinuousStyle, sty)))
     nothing
 end

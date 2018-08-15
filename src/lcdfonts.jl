@@ -97,7 +97,7 @@ const lcd = Dict{String, String}(
 ")" => "01000001000001000010000100010001000"*lcd_short,
 "-" => "00000000000000011111000000000000000"*lcd_short,
 "=" => "00000000001111100000111110000000000"*lcd_short,
-"\_" => "00000000000000000000000000000011111"*lcd_short,
+"_" => "00000000000000000000000000000011111"*lcd_short,
 "+" => "00000001000010011111001000010000000"*lcd_short,
 "{" => "00010001000010001000001000010000010"*lcd_short,
 "}" => "01000001000010000010001000010001000"*lcd_short,
@@ -181,7 +181,7 @@ const test_string = string(
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
 abcdefghijklmnopqrstuvwxyz
 
-~!@#\$%^&*()\_+
+~!@#\$%^&*()_+
 `1234567890-=
 
 []\\{}|;':\",./<>?
@@ -245,7 +245,7 @@ function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; met
             s = string(s)
             cr = get(existing_chars, s, 0)
             if  cr == 0
-                verbose? println("Character \"", s, "\" not found. Adding to CellReference dictionary."):nothing
+                verbose ? println("Character \"", s, "\" not found. Adding to CellReference dictionary.") : nothing
                 ss = get(lcd, s, s)
                 try
                     s_cell = (typeof(string_cell))(uniquename("lcd"))
@@ -254,10 +254,10 @@ function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; met
                     push!(string_cell.refs, crs + Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset)))
                     existing_chars[s] = crs
                 catch
-                    warn("Cannot render \"", s, "\" character. Replacing with a blank character.")
+                    @warn string("Cannot render \"", s, "\" character. Replacing with a blank character.")
                     blank_catch = get(existing_chars, " ", 0)
                     if  blank_catch == 0
-                        verbose? println("Blank character not in dictionary. Adding to it now."):nothing
+                        verbose ? println("Blank character not in dictionary. Adding to it now.") : nothing
                         s_cell = (typeof(string_cell))(uniquename("lcd"))
                         drawlcdcell!(s_cell, lcd_blank, pixelsize, pixelspacing, meta)
                         crs = CellReference(s_cell, Point(0*pixelspacing, 0*pixelspacing))
@@ -268,7 +268,7 @@ function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; met
                     end
                 end
             else
-                verbose? println("Character \"", s, "\" already in dictionary."):nothing
+                verbose ? println("Character \"", s, "\" already in dictionary.") : nothing
                 push!(string_cell.refs, cr + Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset)))
             end
             hpos += 1
