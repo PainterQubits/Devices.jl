@@ -172,11 +172,11 @@ mutable struct Cell{S<:Coordinate, T<:Meta}
     elements::Vector{CellPolygon{S,T}}
     refs::Vector{CellRef}
     create::DateTime
-    (::Type{Cell{S,T}}){S,T}(x,y,z,t) = new{S,T}(x, y, z, t)
-    (::Type{Cell{S,T}}){S,T}(x,y,z) = new{S,T}(x, y, z, now())
-    (::Type{Cell{S,T}}){S,T}(x,y) = new{S,T}(x, y, CellRef[], now())
-    (::Type{Cell{S,T}}){S,T}(x) = new{S,T}(x, CellPolygon{S,T}[], CellRef[], now())
-    (::Type{Cell{S,T}}){S,T}() = begin
+    Cell{S,T}(x,y,z,t) where {S,T} = new{S,T}(x, y, z, t)
+    Cell{S,T}(x,y,z) where {S,T} = new{S,T}(x, y, z, now())
+    Cell{S,T}(x,y) where {S,T} = new{S,T}(x, y, CellRef[], now())
+    Cell{S,T}(x) where {S,T} = new{S,T}(x, CellPolygon{S,T}[], CellRef[], now())
+    Cell{S,T}() where {S,T} = begin
         c = new{S,T}()
         c.elements = CellPolygon{S,T}[]
         c.refs = CellRef[]

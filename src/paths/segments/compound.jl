@@ -23,7 +23,7 @@ path function, and are not allowed in a `CompoundSegment`.
 struct CompoundSegment{T} <: ContinuousSegment{T}
     segments::Vector{Segment{T}}
 
-    (::Type{CompoundSegment{T}}){T}(segments) = begin
+    CompoundSegment{T}(segments) where {T} = begin
         if any(x->isa(x,Corner), segments)
             error("cannot have corners in a `CompoundSegment`. You may have ",
                 "tried to simplify a path containing `Corner` objects.")
