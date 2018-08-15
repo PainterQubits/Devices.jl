@@ -254,7 +254,7 @@ function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; met
                     push!(string_cell.refs, crs + Point(pixelspacing*6*(hpos - 1), -11*pixelspacing*(vpos - offset)))
                     existing_chars[s] = crs
                 catch
-                    warn("Cannot render \"", s, "\" character. Replacing with a blank character.")
+                    @warn string("Cannot render \"", s, "\" character. Replacing with a blank character.")
                     blank_catch = get(existing_chars, " ", 0)
                     if  blank_catch == 0
                         verbose ? println("Blank character not in dictionary. Adding to it now.") : nothing

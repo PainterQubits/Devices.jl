@@ -419,10 +419,10 @@ function style1(p::Path, T)
     isempty(p) && error("path is empty, provide a style.")
     A = view(nodes(p), reverse(1:length(nodes(p))))
     i = findfirst(x->isa(style(x), T), A)
-    if i > 0
-        style(A[i])
-    else
+    if i == nothing
         error("No $T found in the path.")
+    else
+        style(A[i])
     end
 end
 

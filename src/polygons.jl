@@ -19,7 +19,7 @@ import Unitful
 import Unitful: Quantity, Length, dimension, unit, ustrip, uconvert, °
 using ..Points
 using ..Rectangles
-using ..cclipper
+import ..cclipper
 
 export Polygon
 export points
@@ -254,7 +254,7 @@ end
 
 function add_path!(c::Clipper.Clip, path::Vector{Point{T}}, polyType::Clipper.PolyType,
         closed::Bool) where {T<:Union{Int64, Unitful.Quantity{Int64}}}
-    ccall((:add_path, cclipper), Cuchar, (Ptr{Void}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cuchar),
+    ccall((:add_path, cclipper), Cuchar, (Ptr{Cvoid}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cuchar),
           c.clipper_ptr,
           path,
           length(path),
@@ -399,7 +399,7 @@ end
 
 function add_path!(c::Clipper.ClipperOffset, path::Vector{Point{T}},
         joinType::Clipper.JoinType, endType::Clipper.EndType) where {T<:Union{Int64, Unitful.Quantity{Int64}}}
-    ccall((:add_offset_path, cclipper), Void, (Ptr{Void}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cint),
+    ccall((:add_offset_path, cclipper), Cvoid, (Ptr{Cvoid}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cint),
           c.clipper_ptr,
           path,
           length(path),

@@ -1,5 +1,7 @@
 module Cells
 using Dates
+using LinearAlgebra
+
 using Unitful
 import Unitful: Length, nm
 
@@ -657,7 +659,7 @@ function flatten(c::CellArray, name=uniquename("flatten"))
                       c.mag*sin(c.rot) sgn*c.mag*cos(c.rot)])
     newcell = flatten(c.cell)
     pts = [(i-1) * c.deltarow + (j-1) * c.deltacol for i in 1:c.row for j in 1:c.col]
-    pts2 = reinterpret(StaticArrays.Scalar{eltype(pts)}, pts, (1,length(pts)))
+    pts2 = reshape(reinterpret(StaticArrays.Scalar{eltype(pts)}, vec(pts)), (1,length(pts)))
     newpolys = a.(newcell.elements .+ pts2) # add each point in pts to each polygon
     Cell(name, @view newpolys[:])
 end
@@ -745,7 +747,7 @@ julia> trans(Point(2.0,3.0))
 ```
 """
 function transform(c::Cell, d::CellRef)
-    x,y = transform(c, d, CoordinateTransformations.LinearMap(StaticArrays.@SMatrix eye(2)))
+    x,y = transform(c, d, CoordinateTransformations.LinearMap(StaticArrays.SMatrix{2,2}(1.0I)))
 
     x || error("Reference tree does not contain $d.")
     return y

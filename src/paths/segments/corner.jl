@@ -55,8 +55,8 @@ Append a sharp turn or "corner" to path `p` with angle `α`.
 The style chosen for this corner, if not specified, is the last `DiscreteStyle`
 used in the path.
 """
-function corner!(p::Path{T}, α, sty::DiscreteStyle=discretestyle1(p)) where {T <: Coordinate}
+function corner!(p::Path{T}, α, sty::Style=discretestyle1(p)) where {T <: Coordinate}
     corn = Corner{T}(α)
-    push!(p, Node(corn, DiscreteStyle(sty)))
+    push!(p, Node(corn, convert(DiscreteStyle, sty)))
     nothing
 end

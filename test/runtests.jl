@@ -1088,7 +1088,6 @@ end
         c = Cell("pathonly", nm)
         render!(c, p1, GDSMeta(0))
 
-        p(x,y) = Point(x, y)
         @test points(c.elements[2]) == Point{typeof(1.0nm)}[
                 p(10000.0nm, 1000.0nm),
                 p(20000.0nm, 2000.0nm),
@@ -1328,15 +1327,15 @@ end
         @test length(elements(cells["main"])) == 1
 
         # Corrupt file tests: records
-        @test_warn r"unknown record type 0xffff" load(joinpath(dirname(@__FILE__),
+        @test_logs (:warn, r"unknown record type 0xffff") load(joinpath(dirname(@__FILE__),
             "unknown_record.gds"))
-        @test_warn r"unimplemented record type 0x2202" load(joinpath(dirname(@__FILE__),
+        @test_logs (:warn, r"unimplemented record type 0x2202") load(joinpath(dirname(@__FILE__),
             "unimplemented_record.gds"))
         @test_throws ErrorException load(joinpath(dirname(@__FILE__),
             "badbytes_record.gds"))
-        @test_warn r"did not start with a BGNLIB" load(joinpath(dirname(@__FILE__),
+        @test_logs (:warn, r"did not start with a BGNLIB") load(joinpath(dirname(@__FILE__),
             "no_bgnlib.gds"))
-        @test_warn r"end with an ENDLIB" load(joinpath(dirname(@__FILE__),
+        @test_logs (:warn, r"end with an ENDLIB") load(joinpath(dirname(@__FILE__),
             "no_endlib.gds"))
 
         # Corrupt file tests: cells
