@@ -142,7 +142,7 @@ export Cells, Cell, CellArray, CellPolygon, CellReference,
     name,
     order!,
     polygon,
-    transform
+    transform,
     traverse!,
     uniquename
 
