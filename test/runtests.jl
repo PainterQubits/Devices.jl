@@ -23,7 +23,7 @@ const cm2nm = Devices.PreferNanometers.cm
 const m2nm = Devices.PreferNanometers.m
 
 p(x,y) = Point(x,y)
-tdir = tempdir()
+tdir = mktempdir()
 
 @testset "Points" begin
     @testset "> Point constructors" begin
@@ -1317,12 +1317,12 @@ end
             nrows=2, ncols=1, dc=p(0.0μm, 0.0μm), dr=p(0.0μm, 20.0μm)))
         path = joinpath(tdir, "test.gds")
         @test save(path, main) == 454 # bytes written
-        rm(path, force=true)
         cells = load(path)
         @test haskey(cells, "main")
         @test isa(cells["main"], Cell{typeof(1.0*Unitful.nm), GDSMeta})
         @test length(cells["main"].refs) == 2
         @test length(elements(cells["main"])) == 1
+        rm(path, force=true)
 
         # Corrupt file tests: records
         @test_logs (:warn, r"unknown record type 0xffff") load(joinpath(dirname(@__FILE__),
@@ -1353,3 +1353,5 @@ end
 
     # TODO: SVG format
 end
+
+rm(tdir, recursive=true)
