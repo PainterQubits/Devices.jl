@@ -23,6 +23,7 @@ const cm2nm = Devices.PreferNanometers.cm
 const m2nm = Devices.PreferNanometers.m
 
 p(x,y) = Point(x,y)
+tdir = tempdir()
 
 @testset "Points" begin
     @testset "> Point constructors" begin
@@ -1291,12 +1292,15 @@ end
         lcdstring!(c, a_string, pix_size, pix_spacing, linelimit = ll)
         @test height(bounds(c)) ≈ pix_size+pix_spacing*4+(ceil(length(a_string)/ll)-1)*pix_spacing*11
         @test width(bounds(c)) ≈ pix_size+ll*(pix_spacing*5)+(ll-2)*pix_spacing
-        path = joinpath(dirname(@__FILE__), "characters.gds")
+        path = joinpath(tdir, "characters.gds")
         @test characters_demo(path) == 156744 # bytes written
-        path = joinpath(dirname(@__FILE__), "referenced_characters.gds")
+        rm(path; force=true)
+        path = joinpath(tdir, "referenced_characters.gds")
         @test referenced_characters_demo(path, verbose_override = true) == 7904
-        path = joinpath(dirname(@__FILE__), "scripted.gds")
+        rm(path; force=true)
+        path = joinpath(tdir, "scripted.gds")
         @test scripted_demo(path) == 28938
+        rm(path; force=true)
     end
 end
 
@@ -1311,8 +1315,9 @@ end
         push!(main.refs, CellReference(s1, p(0.0μm,20.0μm)))
         push!(main.refs, CellArray(s2, p(20.0μm, 0.0μm);
             nrows=2, ncols=1, dc=p(0.0μm, 0.0μm), dr=p(0.0μm, 20.0μm)))
-        path = joinpath(dirname(@__FILE__), "test.gds")
+        path = joinpath(tdir, "test.gds")
         @test save(path, main) == 454 # bytes written
+        rm(path, force=true)
         cells = load(path)
         @test haskey(cells, "main")
         @test isa(cells["main"], Cell{typeof(1.0*Unitful.nm), GDSMeta})

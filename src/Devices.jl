@@ -231,7 +231,7 @@ export Microwave,
     radialstub!
 
 include("backends/gds.jl")
-include("backends/svg.jl")
+include("backends/graphics.jl")
 
 include("lcdfonts.jl")
 import .LCDFonts:
@@ -256,8 +256,11 @@ macro junographics()
         Media.media(Cell, Media.Plot)
         function Media.render(pane::Atom.PlotPane, c::Cell)
             ps = Juno.plotsize()
-            Media.render(pane, Atom.div(".fill",
-                Atom.HTML(repr(MIME("image/svg+xml"), c; width=ps[1], height=ps[2]))))
+            io = IOBuffer()
+            # browser window, safe assumption 72 pt/inch, 96 pix/inch
+            show(io, MIME("image/svg+xml"), c; width=ps[1]*72/96, height=ps[2]*72/96)
+            str = String(take!(io))
+            Media.render(pane, Atom.div(".fill", Atom.HTML(str)))
         end
     end)
 end
