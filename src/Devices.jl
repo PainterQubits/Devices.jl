@@ -6,6 +6,7 @@ include("units.jl")
 
 import StaticArrays
 import Clipper
+import Clipper: cclipper
 import FileIO: save, load
 
 import Base: length, show, eltype
@@ -17,11 +18,6 @@ export datatype, layer, render!
 
 const DEFAULT_LAYER = 0
 const DEFAULT_DATATYPE = 0
-
-# For help with precompiling
-global _clip = Ref(Clipper.Clip())
-global _coffset = Ref(Clipper.ClipperOffset())
-include(joinpath(dirname(pathof(Clipper)), "..", "deps", "deps.jl"))
 
 function __init__()
     # To ensure no crashes
