@@ -7,6 +7,7 @@ include("cpw.jl")
 include("decorated.jl")
 include("compound.jl")
 include("tapers.jl")
+include("strands.jl")
 
 # Generic fallback method
 # If there's no specific method for this segment type, use the fallback method for the style.

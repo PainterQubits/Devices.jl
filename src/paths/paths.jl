@@ -431,6 +431,7 @@ include("contstyles/cpw.jl")
 include("contstyles/compound.jl")
 include("contstyles/decorated.jl")
 include("contstyles/tapers.jl")
+include("contstyles/strands.jl")
 include("discretestyles/simple.jl")
 include("norender.jl")
 
