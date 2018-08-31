@@ -42,7 +42,7 @@ end
 # TODO: Find a package for writing xml tags nicely and use that instead
 # TODO: don't just presume we flatten everything. preserve cell structure in svg format.
 #       <defs>, <symbol>, <use> tags for arrays, cell references?
-function Base.reprmime(::MIME"image/svg+xml", c::Cell; options...)
+function Base.repr(::MIME"image/svg+xml", c::Cell; options...)
     vp, wh = "", ""
     data = if length(c.elements) > 0    # Don't want to fail on an empty cell
         opt = Dict{Symbol,Any}(options)
