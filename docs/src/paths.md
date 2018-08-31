@@ -215,6 +215,7 @@ manner, it is easy to find the right `CellReference` to use with
     Paths.Trace
     Paths.CPW
     Paths.Taper
+    Paths.Strands
     Paths.undecorated
 ```
 
@@ -235,6 +236,8 @@ manner, it is easy to find the right `CellReference` to use with
     Paths.GeneralCPW
     Paths.TaperTrace
     Paths.TaperCPW
+    Paths.SimpleStrands
+    Paths.GeneralStrands
     Paths.CompoundStyle
     Paths.DecoratedStyle
 ```

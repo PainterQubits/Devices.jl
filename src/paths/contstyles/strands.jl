@@ -8,6 +8,13 @@ abstract type Strands <: ContinuousStyle end
         num::Int
     end
 
+                  example for num = 2
+    |||     |||                         |||     |||
+    |||     |||                         |||     |||
+    |||     |||                         |||     |||
+    |||     |||                         |||     |||
+    <-><---><-><-----------|-----------><-><---><->
+     w   s   w    offset                 w   s   w
 
 Strands with variable center offset, width, and spacing as a function of path length.
 `offset`, `width`, and `spacing` are callable.
@@ -32,6 +39,15 @@ copy(x::GeneralStrands) = GeneralStrands(x.offset, x.width, x.spacing, x.num)
         spacing::T
         num::Int
     end
+
+                  example for num = 2
+    |||     |||                         |||     |||
+    |||     |||                         |||     |||
+    |||     |||                         |||     |||
+    |||     |||                         |||     |||
+    <-><---><-><-----------|-----------><-><---><->
+     w   s   w    offset                 w   s   w
+
 Strands with fixed center offset, width, and spacing as a function of path length.
 """
 struct SimpleStrands{T<:Coordinate} <: Strands
@@ -56,6 +72,15 @@ copy(x::SimpleStrands) = SimpleStrands(x.offset, x.width, x.spacing, x.num)
     Strands(offset, width::Coordinate, spacing, num::Int)
     Strands(offset, width, spacing::Coordinate, num::Int)
     Strands(offset, width, spacing, num::Int)
+
+                  example for num = 2
+    |||     |||                         |||     |||
+    |||     |||                         |||     |||
+    |||     |||                         |||     |||
+    |||     |||                         |||     |||
+    <-><---><-><-----------|-----------><-><---><->
+     w   s   w    offset                 w   s   w
+
 Constructors for Strands styles. Automatically chooses between `SimpleStrands`or
 `GeneralStrands` styles as appropriate.
 """
