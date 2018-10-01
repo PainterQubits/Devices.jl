@@ -258,9 +258,14 @@ macro junographics()
             ps = Juno.plotsize()
             io = IOBuffer()
             # browser window, safe assumption 72 pt/inch, 96 pix/inch
-            show(io, MIME("image/svg+xml"), c; width=ps[1]*72/96, height=ps[2]*72/96)
+            show(io, MIME"image/svg+xml"(), c; width=ps[1]*72/96, height=ps[2]*72/96)
             str = String(take!(io))
             Media.render(pane, Atom.div(".fill", Atom.HTML(str)))
+        end
+        function Base.display(d::Atom.JunoDisplay, c::Cell)
+            Media.render(Atom.PlotPane(), c)
+            d = last(filter(x ->(x isa REPL.REPLDisplay), Base.Multimedia.displays))
+            display(d, MIME"text/plain"(), c)
         end
     end)
 end

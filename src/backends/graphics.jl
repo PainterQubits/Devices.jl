@@ -38,7 +38,8 @@ function fillcolor(options, layer)
     return (0.0, 0.0, 0.0)
 end
 
-function Base.show(io, mime::MIME, c0::Cell; options...)
+MIMETypes = Union{MIME"image/png", MIME"image/svg+xml", MIME"application/pdf", MIME"application/postscript"}
+function Base.show(io, mime::MIMETypes, c0::Cell; options...)
     length(c0.elements) > 0 || return
     opt = Dict{Symbol,Any}(options)
     bnd = ustrip(bounds(c0))
