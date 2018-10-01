@@ -98,19 +98,6 @@ function poly!(cr::Cairo.CairoContext, pts)
     Cairo.close_path(cr)
 end
 
-"""
-    save(f::File{format"SVG"}, c0::Cell; options...)
-This method is implicitly called when you use the convenient syntax of:
-`save("/path/to/my.gds", cell_i_want_to_save)`
-
-Possible keyword arguments include:
-  - `width`: Specifies the width parameter of the SVG tag. Defaults to the width of the cell
-    bounding box (stripped of units).
-  - `height`: Specifies the height parameter of the SVG tag. Defaults to the height of the
-    cell bounding box (stripped of units).
-  - `layercolors`: Should be a dictionary with `Int` keys for layers and color strings
-    as values. By color strings we mean "#ff0000", "red", "rgb(255,0,0)", etc.
-"""
 function save(f::File{format"SVG"}, c0::Cell; options...)
     open(f, "w") do s
         io = stream(s)
