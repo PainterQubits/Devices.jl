@@ -79,11 +79,11 @@ height(r::Rectangle) = gety(r.ur) - gety(r.ll)
 
 """
     isproper(r::Rectangle)
-Returns `true` if the rectangle has a non-zero size. Otherwise, returns `false`.
+Returns `true` if the rectangle has a non-zero area. Otherwise, returns `false`.
 Note that the upper-right and lower-left corners are enforced to be the `ur`
 and `ll` fields of a `Rectangle` by the inner constructor.
 """
-isproper(r::Rectangle) = r.ur != r.ll
+isproper(r::Rectangle) = (r.ur.x != r.ll.x) && (r.ur.y != r.ll.y)
 
 """
     bounds(r::Rectangle)

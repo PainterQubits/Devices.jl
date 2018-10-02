@@ -39,13 +39,14 @@ function fillcolor(options, layer)
 end
 
 MIMETypes = Union{MIME"image/png", MIME"image/svg+xml", MIME"application/pdf", MIME"application/postscript"}
-function Base.show(io, mime::MIMETypes, c0::Cell; options...)
+function Base.show(io, mime::MIMETypes, c0::Cell{T}; options...) where T
     length(c0.elements) > 0 || return
     opt = Dict{Symbol,Any}(options)
     bnd = ustrip(bounds(c0))
     w, h = width(bnd), height(bnd)
-    w1 = haskey(opt, :width) ? opt[:width] : w
-    h1 = haskey(opt, :height) ? opt[:height] : h
+    w1 = haskey(opt, :width) ? opt[:width] : 1000
+    h1 = haskey(opt, :height) ? opt[:height] : 1000
+    bboxes = haskey(opt, :bboxes) ? opt[:bboxes] : false
 
     surf = if mime isa MIME"image/png"
         Cairo.CairoARGBSurface(w1, h1)
@@ -61,7 +62,8 @@ function Base.show(io, mime::MIMETypes, c0::Cell; options...)
 
     ctx = Cairo.CairoContext(surf)
     if mime isa MIME"image/png"
-        Cairo.set_source_rgba(ctx, 0.0, 0.0, 0.0, 0.0) # transparent black
+         # Transparent background
+        Cairo.set_source_rgba(ctx, 0.0, 0.0, 0.0, 0.0)
         Cairo.rectangle(ctx, 0, 0, w1, h1)
         Cairo.fill(ctx)
     end
@@ -74,12 +76,25 @@ function Base.show(io, mime::MIMETypes, c0::Cell; options...)
 
     for l in sort(ly)
         Cairo.save(ctx)
-        Cairo.set_source_rgb(ctx, fillcolor(options, l)...)
+        Cairo.set_source_rgba(ctx, fillcolor(options, l)..., 0.5)
         for p in c0.elements[layer.(c0.elements) .== l]
             poly!(ctx, trans.(ustrip(points(p))))
         end
         Cairo.fill(ctx)
         Cairo.restore(ctx)
+    end
+
+    if bboxes
+        for ref in c0.refs
+            Cairo.save(ctx)
+            r = convert(Rectangle{T}, bounds(ref))
+            Cairo.set_line_width(ctx, 0.5);
+            Cairo.set_source_rgb(ctx, 1, 1, 0);
+            Cairo.set_dash(ctx, [1.0, 1.0])
+            Cairo.rectangle(ctx, trans(ustrip(r.ll)).x, trans(ustrip(r.ur)).y, ustrip(width(r)), ustrip(height(r)))
+            Cairo.stroke(ctx)
+            Cairo.restore(ctx)
+        end
     end
 
     if mime isa MIME"image/png"

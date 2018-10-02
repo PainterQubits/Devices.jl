@@ -454,12 +454,13 @@ Cell(name::AbstractString) = Cell{Float64, GDSMeta}(name)
     Cell(name::AbstractString, unit::Unitful.LengthUnit)
 Convenience constructor for `Cell{typeof(1.0unit)}`.
 """
-Cell(name::AbstractString, unit::Unitful.LengthUnits) = Cell{typeof(1.0unit), GDSMeta}(name)
+Cell(name::AbstractString, unit::Unitful.LengthUnits) =
+    Cell{typeof(1.0unit), GDSMeta}(name)
 
 Cell(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}}) where {S,T} =
     Cell{S,T}(name, elements)
-Cell(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}},
-    refs::AbstractVector{CellRef}) where {S,T} = Cell{S,T}(name, elements, refs)
+Cell(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}}, refs) where {S,T} =
+    Cell{S,T}(name, elements, refs)
 
 # Don't print out everything in the cell, it is a mess that way.
 Base.show(io::IO, c::Cell) = print(io,
@@ -510,9 +511,10 @@ function Base.getindex(c::CellRef, nom::AbstractString, index::Integer=1)
 end
 
 """
-    bounds{T<:Coordinate}(cell::Cell{T})
+    bounds(cell::Cell{T}) where {T <: Coordinate}
     bounds(cell0::Cell, cell1::Cell, cell::Cell...)
 Returns a `Rectangle` bounding box around all objects in a cell or cells.
+Returns a rectangle with zero width and height if the cell or cells are empty.
 """
 function bounds(cell::Cell{T}) where {T <: Coordinate}
     mi, ma = Point(typemax(T), typemax(T)), Point(typemin(T), typemin(T))
@@ -522,7 +524,7 @@ function bounds(cell::Cell{T}) where {T <: Coordinate}
     bce(S,x) = x
 
     isempty(cell.elements) && isempty(cell.refs) &&
-        return Rectangle(mi, ma)
+        return Rectangle(Point(zero(T), zero(T)), Point(zero(T), zero(T)))
 
     for el in cell.elements
         b = bounds(el)
@@ -591,7 +593,7 @@ function bounds(ref::CellReference)
     sgn = ref.xrefl ? -1 : 1
     a = Translation(ref.origin) ∘ CoordinateTransformations.LinearMap(
         StaticArrays.@SMatrix [sgn*ref.mag*cos(ref.rot) -ref.mag*sin(ref.rot);
-                  sgn*ref.mag*sin(ref.rot) ref.mag*cos(ref.rot)])
+                    sgn*ref.mag*sin(ref.rot)  ref.mag*cos(ref.rot)])
     c = a(b)
     bounds(c)
 end
@@ -602,6 +604,32 @@ Returns the `CellPolygon` objects in the cell, which are `Polygon`s with metadat
 layer, datatype, etc.
 """
 elements(c::Cell) = c.elements
+
+for T in (:LinearMap, :AffineMap)
+    @eval function (f::$T)(x::CellReference)
+        mag = norm(f.linear[:,1])
+        xrefl = f.linear[1,1] != f.linear[2,2]
+        rot = acos(f.linear[1,1] / mag)
+        return CellReference(x.cell, f(x.origin),
+            xrefl ⊻ x.xrefl, mag * x.mag, rot + x.rot)
+    end
+    @eval function (f::$T)(x::CellArray)
+        mag = norm(f.linear[:,1])
+        xrefl = f.linear[1,1] != f.linear[2,2]
+        rot = acos(f.linear[1,1] / mag)
+        return CellArray(x.cell, f(x.origin), f(x.deltacol), f(x.deltarow), x.col, x.row,
+            xrefl ⊻ x.xrefl, mag * x.mag, rot + x.rot)
+    end
+end
+
+function (f::Translation)(x::CellReference)
+    CellReference(x.cell, f(x.origin), x.xrefl, x.mag, x.rot)
+end
+
+function (f::Translation)(x::CellArray)
+    CellArray(x.cell, f(x.origin), x.deltacol, x.deltarow,
+        x.col, x.row, x.xrefl, x.mag, x.rot)
+end
 
 """
     flatten!(c::Cell, depth::Integer=-1)
@@ -650,10 +678,11 @@ function flatten(c::CellReference; depth::Integer=-1, name=uniquename("flatten")
     sgn = c.xrefl ? -1 : 1
     a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
         StaticArrays.@SMatrix [c.mag*cos(c.rot) -c.mag*sgn*sin(c.rot);
-                  c.mag*sin(c.rot) c.mag*sgn*cos(c.rot)])
+                               c.mag*sin(c.rot)  c.mag*sgn*cos(c.rot)])
     cflat = flatten(c.cell; depth=depth-1)
     newelements = a.(cflat.elements)
-    Cell(name, newelements, cflat.refs)
+    newrefs = a.(cflat.refs)
+    Cell(name, newelements, newrefs)
 end
 
 """
@@ -667,13 +696,14 @@ as that will flatten with unlimited depth.
 function flatten(c::CellArray; depth::Integer=-1, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
     a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
-            StaticArrays.@SMatrix [c.mag*cos(c.rot) -c.mag*sgn*sin(c.rot);
-                      c.mag*sin(c.rot) sgn*c.mag*cos(c.rot)])
+        StaticArrays.@SMatrix [c.mag*cos(c.rot) -c.mag*sgn*sin(c.rot);
+                               c.mag*sin(c.rot)  c.mag*sgn*cos(c.rot)])
     cflat = flatten(c.cell; depth=depth-1)
     pts = [(i-1) * c.deltarow + (j-1) * c.deltacol for i in 1:c.row for j in 1:c.col]
     pts2 = reshape(reinterpret(StaticArrays.Scalar{eltype(pts)}, vec(pts)), (1,length(pts)))
     newelements = a.(cflat.elements .+ pts2) # add each point in pts to each polygon
-    Cell(name, (@view newelements[:]), cflat.refs)
+    newrefs = a.(cflat.refs .+ pts2)
+    Cell(name, (@view newelements[:]), (@view newrefs[:]))
 end
 
 """
