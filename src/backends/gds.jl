@@ -3,7 +3,7 @@ using Dates
 using Unitful
 import Unitful: Length, fm, pm, nm, μm, m
 
-import Base: bswap, bits, convert, write, read
+import Base: bswap, bitstring, convert, write, read
 import Devices: DEFAULT_LAYER, DEFAULT_DATATYPE, GDSMeta, layer, datatype, points, render!
 using ..Points
 import ..Rectangles: Rectangle
@@ -120,10 +120,10 @@ struct GDS64 <: GDSFloat
 end
 
 """
-    bits(x::GDS64)
+    bitstring(x::GDS64)
 A string giving the literal bit representation of a GDS64 number.
 """
-bits(x::GDS64) = bits(x.x)
+bitstring(x::GDS64) = bitstring(x.x)
 
 """
     bswap(x::GDS64)

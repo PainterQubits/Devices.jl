@@ -9,22 +9,19 @@ import Base:
     convert,
     copy,
     deepcopy_internal,
-    start,
-    done,
-    next,
     enumerate,
     isempty,
     empty!,
     deleteat!,
     length,
-    endof,
+    lastindex,
     size,
     getindex,
     setindex!,
     push!,
     pop!,
-    unshift!,
-    shift!,
+    pushfirst!,
+    popfirst!,
     insert!,
     append!,
     show,
@@ -211,7 +208,7 @@ end
 #     mi,ma = extrema(f.(extr))
 #     normcurv = x->D(x->D(x->(f(x)-mi)/ma,x), x)
 #     divs = Float64[]
-#     !(extr[1] ≈ 0.0) && unshift!(extr, 0.0)
+#     !(extr[1] ≈ 0.0) && pushfirst!(extr, 0.0)
 #     !(extr[end] ≈ 1.0) && push!(extr, 1.0)
 #
 #     for (i, start) in enumerate(extr[1:(end-1)])
@@ -502,9 +499,7 @@ end
 
 # Methods for Path as AbstractArray
 length(p::Path) = length(nodes(p))
-start(p::Path) = start(nodes(p))
-done(p::Path, state) = done(nodes(p), state)
-next(p::Path, state) = next(nodes(p), state)
+iterate(p::Path, state...) = iterate(nodes(p), state...)
 enumerate(p::Path) = enumerate(nodes(p))
 rest(p::Path, state) = rest(nodes(p), state)
 take(p::Path, n::Int) = take(nodes(p), n)
@@ -516,7 +511,7 @@ function deleteat!(p::Path, inds)
     deleteat!(nodes(p), inds)
     adjust!(p, first(inds))
 end
-endof(p::Path) = length(nodes(p))
+lastindex(p::Path) = length(nodes(p))
 size(p::Path) = size(nodes(p))
 getindex(p::Path, i::Integer) = nodes(p)[i]
 function setindex!(p::Path, v::Node, i::Integer)
@@ -539,12 +534,12 @@ function push!(p::Path, node::Node)
     adjust!(p, length(p))
 end
 
-function unshift!(p::Path, node::Node)
-    unshift!(nodes(p), node)
+function pushfirst!(p::Path, node::Node)
+    pushfirst!(nodes(p), node)
     adjust!(p)
 end
 
-for x in (:push!, :unshift!)
+for x in (:push!, :pushfirst!)
     @eval function ($x)(p::Path, seg::Segment, sty::Style)
         ($x)(p, Node(seg,sty))
     end
@@ -562,8 +557,8 @@ function pop!(p::Path)
     x
 end
 
-function shift!(p::Path)
-    x = shift!(nodes(p))
+function popfirst!(p::Path)
+    x = popfirst!(nodes(p))
     adjust!(p)
     x
 end

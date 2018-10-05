@@ -2,8 +2,8 @@ module Polygons
 
 using LinearAlgebra
 
-import Base: +, -, *, .*, /, ==, .+, .-, isapprox
-import Base: convert, getindex, start, next, done
+import Base: +, -, *, /, ==, isapprox
+import Base: convert, getindex
 import Base: copy, promote_rule
 
 using ForwardDiff
