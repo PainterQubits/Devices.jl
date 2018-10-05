@@ -205,7 +205,7 @@ gggg
 ♇♇♇♇" # End with invalid character to test catch fallback
 
 """
-    lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; scripting = false, linelimit = 2^32, meta::Meta=GDSMeta(0,0))
+    lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; scripting = false, linelimit = typemax(Int), meta::Meta=GDSMeta(0,0))
 Renders the string `str` to cell `c` in a pixelated font format.
 - `pixelsize`: dimension for the width/height of each pixel
 - `pixelspacing`: dimension for the spacing between adjacent pixels
@@ -213,7 +213,7 @@ Renders the string `str` to cell `c` in a pixelated font format.
 - `linelimit`: sets the maximum number of characters per line and continues on a new line if `str` is longer than `linelimit`
 - `verbose`: prints out information about the character dictionary
 """
-function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; meta::Meta=GDSMeta(0,0), scripting = false, linelimit = 2^32, verbose = false)
+function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; meta::Meta=GDSMeta(0,0), scripting = false, linelimit = typemax(Int), verbose = false)
     hpos = 1
     vpos = 1
     subscript = -1
@@ -228,7 +228,7 @@ function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; met
         else
             offset = 0.0
         end
-        if s == '\n' || hpos > linelimit
+        if s == '\n'
             vpos += 1
             hpos = 1
         elseif s == '_' && scripting
@@ -242,6 +242,11 @@ function lcdstring!(string_cell::Cell, str::String, pixelsize, pixelspacing; met
             superscript = +1
             waitforend = false
         else
+            # If horizontal position is beyond limit, reset before starting to write.
+            if hpos > linelimit
+                vpos += 1
+                hpos = 1
+            end
             s = string(s)
             cr = get(existing_chars, s, 0)
             if  cr == 0
