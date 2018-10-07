@@ -456,12 +456,10 @@ Convenience constructor for `Cell{typeof(1.0unit)}`.
 """
 Cell(name::AbstractString, unit::Unitful.LengthUnits) = Cell{typeof(1.0unit), GDSMeta}(name)
 
-"""
-    Cell{S,T}(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}})
-Convenience constructor for `Cell{S,T}`.
-"""
 Cell(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}}) where {S,T} =
     Cell{S,T}(name, elements)
+Cell(name::AbstractString, elements::AbstractVector{CellPolygon{S,T}},
+    refs::AbstractVector{CellRef}) where {S,T} = Cell{S,T}(name, elements, refs)
 
 # Don't print out everything in the cell, it is a mess that way.
 Base.show(io::IO, c::Cell) = print(io,
@@ -606,62 +604,76 @@ layer, datatype, etc.
 elements(c::Cell) = c.elements
 
 """
-    flatten!(c::Cell)
-All cell references and arrays are turned into polygons and added to cell `c`.
-The references and arrays are then removed. This "flattening" of the cell is
-recursive: references in referenced cells are flattened too. The modified cell
-is returned.
+    flatten!(c::Cell, depth::Integer=-1)
+Cell references and arrays up to a hierarchical `depth` are recursively flattened into
+polygons and added to cell `c`. The references and arrays that were flattened are then
+discarded. Deeper cell references and arrays are brought upwards and are not discarded.
+This function has no effect for `depth == 0`, and unlimited depth by default.
 """
-function flatten!(c::Cell)
-    c.elements = flatten(c).elements
-    empty!(c.refs)
-    c
+function flatten!(c::Cell; depth::Integer=-1)
+    depth == 0 && return c
+    cflat = flatten(c; depth=depth)
+    c.elements = cflat.elements
+    c.refs = cflat.refs
+    return c
 end
 
 """
-    flatten(c::Cell, name=uniquename("flatten"))
-All cell references and arrays are resolved into polygons, recursively. A new `Cell` is
-returned containing these polygons, together with the polygons already explicitly in cell
-`c`. The cell `c` remains unmodified.
+    flatten(c::Cell; depth::Integer=-1, name=uniquename("flatten"))
+Cell references and arrays in `c` up to a hierarchical `depth` are recursively flattened into
+polygons and added to a new `Cell` with name `name`. The references and arrays that were
+flattened are then discarded. Deeper cell references and arrays are brought upwards and are
+not discarded. This function has no effect for `depth == 0`, and unlimited depth by default.
+The cell `c` remains unmodified.
 """
-function flatten(c::Cell, name=uniquename("flatten"))
-    polys = copy(c.elements)
+function flatten(c::Cell; depth::Integer=-1, name=uniquename("flatten"))
+    depth == 0 && return copy(c)
+    elements = copy(c.elements)
+    refs = empty(c.refs)
     for r in c.refs
-        append!(polys, flatten(r).elements)
+        rflat = flatten(r; depth=depth)
+        append!(elements, rflat.elements)
+        append!(refs, rflat.refs)
     end
-    Cell(name, polys)
+    Cell(name, elements, refs)
 end
 
 """
-    flatten(c::CellReference, name=uniquename("flatten"))
-Cell reference `c` is resolved into polygons, recursively. A new `Cell` is returned
-containing these polygons. The cell reference `c` remains unmodified.
+    flatten(c::CellReference; depth::Integer=-1, name=uniquename("flatten"))
+Cell reference `c` is recursively flattened into polygons up to a hierarchical `depth` and
+added to a new `Cell` with name `name`. The references and arrays that were flattened are
+then discarded. Deeper cell references and arrays are brought upwards and are
+not discarded. The cell reference `c` remains unmodified. The user should not pass `depth=0`
+as that will flatten with unlimited depth.
 """
-function flatten(c::CellReference, name=uniquename("flatten"))
+function flatten(c::CellReference; depth::Integer=-1, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
     a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
         StaticArrays.@SMatrix [c.mag*cos(c.rot) -c.mag*sgn*sin(c.rot);
                   c.mag*sin(c.rot) c.mag*sgn*cos(c.rot)])
-    newcell = flatten(c.cell)
-    newpolys = a.(newcell.elements)
-    Cell(name, newpolys)
+    cflat = flatten(c.cell; depth=depth-1)
+    newelements = a.(cflat.elements)
+    Cell(name, newelements, cflat.refs)
 end
 
 """
-    flatten(c::CellArray, name=uniquename("flatten"))
-Cell array `c` is resolved into polygons, recursively. A new `Cell` is returned containing
-these polygons. The cell array `c` remains unmodified.
+    flatten(c::CellArray; depth::Integer=-1, name=uniquename("flatten"))
+Cell array `c` is recursively flattened into polygons up to a hierarchical `depth` and
+added to a new `Cell` with name `name`. The references and arrays that were flattened are
+then discarded. Deeper cell references and arrays are brought upwards and are
+not discarded. The cell reference `c` remains unmodified. The user should not pass `depth=0`
+as that will flatten with unlimited depth.
 """
-function flatten(c::CellArray, name=uniquename("flatten"))
+function flatten(c::CellArray; depth::Integer=-1, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
     a = Translation(c.origin) ∘ CoordinateTransformations.LinearMap(
             StaticArrays.@SMatrix [c.mag*cos(c.rot) -c.mag*sgn*sin(c.rot);
                       c.mag*sin(c.rot) sgn*c.mag*cos(c.rot)])
-    newcell = flatten(c.cell)
+    cflat = flatten(c.cell; depth=depth-1)
     pts = [(i-1) * c.deltarow + (j-1) * c.deltacol for i in 1:c.row for j in 1:c.col]
     pts2 = reshape(reinterpret(StaticArrays.Scalar{eltype(pts)}, vec(pts)), (1,length(pts)))
-    newpolys = a.(newcell.elements .+ pts2) # add each point in pts to each polygon
-    Cell(name, @view newpolys[:])
+    newelements = a.(cflat.elements .+ pts2) # add each point in pts to each polygon
+    Cell(name, (@view newelements[:]), cflat.refs)
 end
 
 """

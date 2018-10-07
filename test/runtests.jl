@@ -502,7 +502,15 @@ end
     @test bounds(c2ref′) ≈ (bounds(c2ref) + Point(10.,10.))
 
     # Test `flatten!` when encountering a CellReference
-    flatten!(c)
+    let c2 = flatten(c; name="flat_ref")
+        @test name(c2) == "flat_ref"
+        @test bounds(c) == bounds(c2ref)
+    end
+    let c2 = flatten(c; depth=1)
+        @test isempty(elements(c2))
+        @test c2.refs[1] === c3ref
+    end
+    @test flatten!(c) === c
     @test bounds(c) == bounds(c2ref)
 
     # More setup
@@ -518,7 +526,10 @@ end
     @test bounds(c) == Rectangle(95,95)
 
     # Test `flatten!` when encountering a CellArray
-    flatten!(c)
+    let c2 = flatten(c; name="flat_arr")
+        @test name(c2) == "flat_arr"
+    end
+    @test flatten!(c) === c
     @test bounds(c) == Rectangle(95,95)
 
     # TODO Test push! and pop!
