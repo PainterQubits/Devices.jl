@@ -605,9 +605,10 @@ elements(c::Cell) = c.elements
 
 """
     flatten!(c::Cell, depth::Integer=-1)
-All cell references and arrays are turned into polygons and added to cell `c`.
-The references and arrays are then removed. This "flattening" of the cell is recursive:
-references in referenced cells are flattened too. The modified cell is returned.
+Cell references and arrays up to a hierarchical `depth` are recursively flattened into
+polygons and added to cell `c`. The references and arrays that were flattened are then
+discarded. Deeper cell references and arrays are brought upwards and are not discarded.
+This function has no effect for `depth == 0`, and unlimited depth by default.
 """
 function flatten!(c::Cell; depth::Integer=-1)
     depth == 0 && return c
@@ -619,9 +620,11 @@ end
 
 """
     flatten(c::Cell; depth::Integer=-1, name=uniquename("flatten"))
-All cell references and arrays are resolved into polygons, recursively. A new `Cell` with
-name `name` is returned containing these polygons, together with the polygons already
-explicitly in cell `c`. The cell `c` remains unmodified.
+Cell references and arrays in `c` up to a hierarchical `depth` are recursively flattened into
+polygons and added to a new `Cell` with name `name`. The references and arrays that were
+flattened are then discarded. Deeper cell references and arrays are brought upwards and are
+not discarded. This function has no effect for `depth == 0`, and unlimited depth by default.
+The cell `c` remains unmodified.
 """
 function flatten(c::Cell; depth::Integer=-1, name=uniquename("flatten"))
     depth == 0 && return copy(c)
@@ -637,8 +640,11 @@ end
 
 """
     flatten(c::CellReference; depth::Integer=-1, name=uniquename("flatten"))
-Cell reference `c` is resolved into polygons, recursively. A new `Cell` with name `name` is
-returned containing these polygons. The cell reference `c` remains unmodified.
+Cell reference `c` is recursively flattened into polygons up to a hierarchical `depth` and
+added to a new `Cell` with name `name`. The references and arrays that were flattened are
+then discarded. Deeper cell references and arrays are brought upwards and are
+not discarded. The cell reference `c` remains unmodified. The user should not pass `depth=0`
+as that will flatten with unlimited depth.
 """
 function flatten(c::CellReference; depth::Integer=-1, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
@@ -652,8 +658,11 @@ end
 
 """
     flatten(c::CellArray; depth::Integer=-1, name=uniquename("flatten"))
-Cell array `c` is resolved into polygons, recursively. A new `Cell` with name `name` is
-returned containing these polygons. The cell array `c` remains unmodified.
+Cell array `c` is recursively flattened into polygons up to a hierarchical `depth` and
+added to a new `Cell` with name `name`. The references and arrays that were flattened are
+then discarded. Deeper cell references and arrays are brought upwards and are
+not discarded. The cell reference `c` remains unmodified. The user should not pass `depth=0`
+as that will flatten with unlimited depth.
 """
 function flatten(c::CellArray; depth::Integer=-1, name=uniquename("flatten"))
     sgn = c.xrefl ? -1 : 1
