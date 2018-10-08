@@ -1,7 +1,7 @@
 module GDS
 using Dates
 using Unitful
-import Unitful: Length, fm, pm, nm, μm, m
+import Unitful: Length, fm, pm, nm, μm, m, °
 
 import Base: bswap, bitstring, convert, write, read
 import Devices: DEFAULT_LAYER, DEFAULT_DATATYPE, GDSMeta, layer, datatype, points, render!
@@ -420,7 +420,7 @@ function strans(io::IO, ref)
     (ref.xrefl || ref.mag != 1.0 || ref.rot != 0.0) &&
         (bytes += gdswrite(io, STRANS, bits))
     ref.mag != 1.0 && (bytes += gdswrite(io, MAG, ref.mag))
-    ref.rot != 0.0 && (bytes += gdswrite(io, ANGLE, ref.rot*180/π))
+    ref.rot != 0.0 && (bytes += gdswrite(io, ANGLE, ref.rot |> °))
     bytes
 end
 
@@ -797,7 +797,7 @@ function sref(s, dbs, verbose, nounits)
             verbose && @info(string(infostr, " (ANGLE)"))
             hasangle && error("Already read ANGLE tag for this SREF tag.")
             hasangle = true
-            rot = convert(Float64, ntoh(read(s, GDS64)))
+            rot = convert(Float64, ntoh(read(s, GDS64)))*°
         elseif token == XY
             verbose && @info(string(infostr, " (XY)"))
             hasxy && error("Already read XY tag for this SREF tag.")
@@ -887,7 +887,7 @@ function aref(s, dbs, verbose, nounits)
             verbose && @info(string(infostr, " (ANGLE)"))
             hasangle && error("Already read ANGLE tag for this AREF tag.")
             hasangle = true
-            rot = convert(Float64, ntoh(read(s, GDS64)))
+            rot = convert(Float64, ntoh(read(s, GDS64)))*°
         elseif token == COLROW
             verbose && @info(string(infostr, " (COLROW)"))
             hascolrow && error("Already read COLROW tag for this AREF tag.")
