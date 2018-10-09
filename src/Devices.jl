@@ -250,8 +250,8 @@ export LCDFonts,
 function Base.show(io::IO, mime::MIME"application/juno+plotpane", c0::Cell)
     svgio = IOBuffer()
     ps = get(io, :juno_plotsize, [100, 100])
-    bx,by,un,ur = let b=bounds(c0)
-        ustrip(width(b)), ustrip(height(b)), unit(width(b)), ustrip(b.ur.y)
+    bx,by,un,yoff,xoff = let b=bounds(c0)
+        ustrip(width(b)), ustrip(height(b)), unit(width(b)), ustrip(b.ur.y), ustrip(b.ll.x)
     end
     sx,sy = bx/ps[1]*96/72, by/ps[2]*96/72
     maxs = max(sx,sy)
@@ -269,8 +269,8 @@ function Base.show(io::IO, mime::MIME"application/juno+plotpane", c0::Cell)
             scaleVar = 1;
 
             function rescl(datum, scale) {
-                return {x: (datum.x - translateVar.x) / scaleVar * scale,
-                        y: (datum.y - translateVar.y) / -scaleVar * scale + $ur};
+                return {x: (datum.x - translateVar.x) / scaleVar * scale + $xoff,
+                        y: (datum.y - translateVar.y) / -scaleVar * scale + $yoff};
             }
 
             function updateLine(g, data) {
@@ -279,8 +279,8 @@ function Base.show(io::IO, mime::MIME"application/juno+plotpane", c0::Cell)
                     d.enter()
                      .append("line")
                      .merge(d)
-                     .attr("x1", firstPointLoc.x * scaleVar + translateVar.x)
-                     .attr("y1", (firstPointLoc.y - $ur) * -scaleVar + translateVar.y)
+                     .attr("x1", (firstPointLoc.x - $xoff) * scaleVar + translateVar.x)
+                     .attr("y1", (firstPointLoc.y - $yoff) * -scaleVar + translateVar.y)
                      .attr("x2", function(d) {return d.x})
                      .attr("y2", function(d) {return d.y})
                      .attr("stroke", "red")
@@ -296,8 +296,8 @@ function Base.show(io::IO, mime::MIME"application/juno+plotpane", c0::Cell)
                       .attr("x", function(d) {return d.x})
                       .attr("y", function(d) {return d.y})
                       .text(function (d) {
-                          var p1 = {x: firstPointLoc.x * $maxs,
-                                    y: (firstPointLoc.y - $ur) * $maxs + $ur}
+                          var p1 = {x: (firstPointLoc.x - $xoff) * $maxs + $xoff,
+                                    y: (firstPointLoc.y - $yoff) * $maxs + $yoff}
                           var p2 = rescl(d, $maxs)
                           var d = Math.sqrt(Math.pow(p1.x - p2.x, 2) +
                             Math.pow(p1.y - p2.y, 2))

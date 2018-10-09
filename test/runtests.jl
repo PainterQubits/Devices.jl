@@ -508,7 +508,8 @@ end
     end
     let c2 = flatten(c; depth=1)
         @test isempty(elements(c2))
-        @test c2.refs[1] === c3ref
+        @test c2.refs[1].rot ≈ 270°
+        @test c2.refs[1].origin ≈ Point(-20.0, 0.0)
     end
     @test flatten!(c) === c
     @test bounds(c) == bounds(c2ref)
