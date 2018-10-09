@@ -420,7 +420,7 @@ function strans(io::IO, ref)
     (ref.xrefl || ref.mag != 1.0 || ref.rot != 0.0) &&
         (bytes += gdswrite(io, STRANS, bits))
     ref.mag != 1.0 && (bytes += gdswrite(io, MAG, ref.mag))
-    ref.rot != 0.0 && (bytes += gdswrite(io, ANGLE, ref.rot |> °))
+    ref.rot != 0.0 && (bytes += gdswrite(io, ANGLE, ustrip(ref.rot |> °)))
     bytes
 end
 
