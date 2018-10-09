@@ -14,6 +14,9 @@ Using the [Cairo graphics library](https://cairographics.org), it is possible to
 patterns into SVG, PDF, and EPS vector graphics formats, or into the PNG raster graphic
 format. This enables patterns to be displayed in web browsers, publications, presentations,
 and so on. You can save a cell to a graphics file by, e.g. `save("/path/to/file.svg", mycell)`.
+Note that cell references and arrays are not saved, so you should flatten cells if desired
+before saving them.
+
 Possible keyword arguments include:
 
 - `width`: Specifies the width parameter of the SVG tag. Defaults to the width of the cell
@@ -22,6 +25,8 @@ Possible keyword arguments include:
   cell bounding box (stripped of units).
 - `layercolors`: Should be a dictionary with `Int` keys for layers and color strings
   as values. By color strings we mean "#ff0000", "red", "rgb(255,0,0)", etc.
+- `bboxes`: Specifies whether to draw bounding boxes around the bounds of cell arrays or
+  cell references (true/false).
 
 ## Loading patterns
 

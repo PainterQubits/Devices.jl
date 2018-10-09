@@ -141,11 +141,12 @@ Return a bounding Rectangle for polygon `p`.
 bounds(p::Polygon) = Rectangle(lowerleft(p), upperright(p))
 
 """
-    bounds{T<:AbstractPolygon}(parr::AbstractArray{T})
+    bounds(parr::AbstractArray{<:AbstractPolygon})
 Return a bounding `Rectangle` for an array `parr` of `AbstractPolygon` objects.
+Rectangles having zero width and height should be excluded from the calculation.
 """
-function bounds(parr::AbstractArray{T}) where {T <: AbstractPolygon}
-    rects = map(bounds, parr)
+function bounds(parr::AbstractArray{<:AbstractPolygon})
+    rects = filter(isproper, map(bounds, parr))
     ll = lowerleft(map(lowerleft, rects))
     ur = upperright(map(upperright, rects))
     Rectangle(ll, ur)
