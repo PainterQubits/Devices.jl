@@ -263,11 +263,12 @@ function Base.show(io::IO, mime::MIME"application/juno+plotpane", c0::Cell)
         dom"script"(setInnerHtml=D3STR),
         dom"div"(setInnerHtml=svgstr),
         dom"script"("""
-            firstPoint = false;
-            firstPointLoc = {x: 0, y: 0};
-            translateVar =  {x: 0, y: 0};
+            firstPoint = false;                 // keeps track of first vs. second click
+            firstPointLoc = {x: 0, y: 0};       // keeps track of first click location
+            translateVar =  {x: 0, y: 0};       // keeps track of zooming
             scaleVar = 1;
 
+            // go from mouse click coordinate to cell coordinate
             function rescl(datum, scale) {
                 return {x: (datum.x - translateVar.x) / scaleVar * scale + $xoff,
                         y: (datum.y - translateVar.y) / -scaleVar * scale + $yoff};
@@ -304,23 +305,25 @@ function Base.show(io::IO, mime::MIME"application/juno+plotpane", c0::Cell)
                           return d.toFixed(3) + " $un"
                       })
                 } else {
+                    // user clicked a second time, remove the measurement line.
                     g.selectAll("line").remove()
                     g.selectAll("#dist").remove()
                 }
             }
 
+            // fill the plot pane with the svg
             var svg = d3.selectAll("svg")
                     .attr("width", "100%")
                     .attr("height", "100%")
             var oldg = svg.selectAll("g")
 
             var newg = svg.append("g")
-            newg.append("rect")
+            newg.append("rect")                    // white rect in upper-left for text.
                 .attr("fill", "white")
                 .attr("opacity", "0.5")
                 .attr("width", "300px")
                 .attr("height", "18px")
-            newg.append("rect")
+            newg.append("rect")                    // capture all mouse events in plot pane.
                 .attr("fill", "none")
                 .attr("pointer-events", "all")
                 .attr("cursor", "crosshair")
@@ -372,6 +375,10 @@ function Base.show(io::IO, mime::MIME"application/juno+plotpane", c0::Cell)
                     coords = rescl({x: coords[0], y: coords[1]}, 1)
                     firstPointLoc = {x: coords.x, y: coords.y};
                 }
+
+                // Display or hide text and line after click as appropriate.
+                var d = newg.selectAll("text").data(data)
+                updateLine(newg, data)
             })
 
             newg.call(d3.zoom()
