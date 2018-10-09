@@ -1,3 +1,14 @@
+- v0.3.0
+  - Julia 1.0 compatibility.
+  - `Rectangles.isproper` has a slightly different definition. Rectangles are
+    considered proper if they have non-zero area now.
+  - `flatten` now has a keyword argument `name` instead of an optional argument.
+    It now also has a `depth` keyword argument that can be used to control how
+    far down the cell hierarchy to flatten. `flatten!` also has the `depth` keyword argument.
+  - Fixed a bug where rotations would be corrupted when loading GDS files.
+  - Fixed a bug where x-reflections could be corrupted when loading GDS files.
+  - Added some basic interactive display for use with the Juno IDE.
+  - Can now save a variety of graphics formats reliably (png, eps, pdf, svg).
 - v0.2.0
   - `LCDFonts` module added. Try out `lcdstring!` for your text rendering needs.
   - Redesign rendering pipeline.
