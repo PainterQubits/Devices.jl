@@ -5,6 +5,14 @@ superconducting devices operating at microwave frequencies.
 
 ## Installation
 
+### Julia 0.7 and above
+
+Activate package mode by pressing `]` at the REPL in a Julia console.
+
++ `add https://github.com/PainterQubits/Devices.jl.git`
+
+### Older versions
+
 + `Pkg.add("Clipper")`
 
 When Clipper.jl is added, it will be built to compile shared library / DLL files. A
