@@ -953,7 +953,7 @@ function sname(s, bytes)
 end
 
 function strans(s)
-    bits = read(s, UInt16)
+    bits = ntoh(read(s, UInt16))
     xrefl = (bits & 0x8000) != 0
     magflag = (bits & 0x0004) != 0
     angleflag = (bits & 0x0002) != 0
