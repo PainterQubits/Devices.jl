@@ -139,7 +139,7 @@ manner, it is easy to find the right `CellReference` to use with
 
 ```@docs
     Paths.Path
-    Paths.Path{T<:Real}(::Point{T})
+    Paths.Path(::Point)
 ```
 ### Path interrogation
 

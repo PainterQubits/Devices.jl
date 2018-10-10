@@ -56,11 +56,11 @@ display complexity.
 
 ```@docs
     CellArray
-    CellArray{T<:Devices.Coordinate}(::Any, ::Point{T})
-    CellArray{T<:Devices.Coordinate}(::Any, ::Range{T}, ::Range{T})
+    CellArray(::Cell{S}; kwargs...) where {S<:Devices.Coordinate}
+    CellArray(::Any, ::AbstractRange, ::AbstractRange)
     CellReference
-    CellReference{T<:Devices.Coordinate}(::Any, ::Point{T}=Point(0.,0.))
-    bounds{S<:Devices.Coordinate, T<:Devices.Coordinate}(::CellArray{T, Cell{S}})
+    CellReference(::Cell{S}; kwargs...) where {S<:Devices.Coordinate}
+    bounds(::CellArray{T, Cell{S,U}}) where {S<:Devices.Coordinate, T<:Devices.Coordinate, U<:Devices.Meta}
     bounds(::CellReference)
     copy(::CellReference)
     copy(::CellArray)

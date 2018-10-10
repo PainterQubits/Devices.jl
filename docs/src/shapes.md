@@ -126,7 +126,7 @@ Example:
 ```@example 7
 using Devices, Devices.PreferMicrons, FileIO # hide
 c = Cell("main", nm)
-radialcut!(c, 20μm, 90°, 5μm, GDSMeta(1))
+radialcut!(c, 20μm, π/2, 5μm, GDSMeta(1))
 save("radialcut.svg", flatten(c)); nothing # hide
 ```
 <img src="../radialcut.svg" style="width:2in;"/>
@@ -139,7 +139,7 @@ Example:
 ```@example 8
 using Devices, Devices.PreferMicrons, FileIO # hide
 c = Cell("main", nm)
-radialstub!(c, 20μm, 90°, 5μm, 1μm, GDSMeta(1))
+radialstub!(c, 20μm, π/2, 5μm, 1μm, GDSMeta(1))
 save("radialstub.svg", flatten(c)); nothing # hide
 ```
 <img src="../radialstub.svg" style="width:2in;"/>

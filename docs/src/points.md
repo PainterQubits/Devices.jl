@@ -9,17 +9,17 @@ Points live in a Cartesian coordinate system with `Real` or `Unitful.Length` coo
 
 ```jldoctest
 julia> Point(1,1)
-2-element Devices.Points.Point{Int64}:
+2-element Point{Int64}:
  1
  1
 
 julia> Point(1.0,1.0)
-2-element Devices.Points.Point{Float64}:
+2-element Point{Float64}:
  1.0
  1.0
 
 julia> Point(1.0u"μm", 1.0u"μm")
-2-element Devices.Points.Point{Quantity{Float64, Dimensions:{𝐋}, Units:{μm}}}:
+2-element Point{Unitful.Quantity{Float64,Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)},Unitful.FreeUnits{(Unitful.Unit{:Meter,Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)}}(-6, 1//1),),Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)}}}}:
  1.0 μm
  1.0 μm
 ```
@@ -37,7 +37,7 @@ ERROR: Cannot use `Point` with this combination of types.
 You can add Points together or scale them:
 ```jldoctest
 julia> 3*Point(1,1)+Point(1,2)
-2-element Devices.Points.Point{Int64}:
+2-element Point{Int64}:
  4
  5
 ```
@@ -53,7 +53,7 @@ julia> aff = Rotation(90°) ∘ Translation(Point(1,2))
 AffineMap([0.0 -1.0; 1.0 0.0], (-2.0,1.0))
 
 julia> aff(Point(0,0))
-2-element Devices.Points.Point{Float64}:
+2-element Point{Float64}:
  -2.0
   1.0
 ```

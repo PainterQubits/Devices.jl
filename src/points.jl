@@ -82,7 +82,7 @@ Returns the lower-left [`Point`](@ref) of the smallest bounding rectangle
 Example:
 ```jldoctest
 julia> lowerleft([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
-2-element Devices.Points.Point{Int64}:
+2-element Point{Int64}:
  -1
   0
 ```
@@ -102,7 +102,7 @@ Returns the upper-right [`Point`](@ref) of the smallest bounding rectangle
 Example:
 ```jldoctest
 julia> upperright([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
-2-element Devices.Points.Point{Int64}:
+2-element Point{Int64}:
  2
  3
 ```
@@ -140,7 +140,7 @@ julia> trans = XReflection()
 LinearMap([1 0; 0 -1])
 
 julia> trans(Point(1,1))
-2-element Devices.Points.Point{Int64}:
+2-element Point{Int64}:
   1
  -1
 ```
@@ -157,7 +157,7 @@ julia> trans = YReflection()
 LinearMap([-1 0; 0 1])
 
 julia> trans(Point(1,1))
-2-element Devices.Points.Point{Int64}:
+2-element Point{Int64}:
  -1
   1
 ```

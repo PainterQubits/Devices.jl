@@ -24,7 +24,7 @@ An example of how to use affine transformations with polygons:
 
 ```jldoctest
 julia> r = Rectangle(1,1)
-Devices.Rectangles.Rectangle{Int64}((0,0), (1,1))
+Rectangle{Int64}((0,0), (1,1))
 
 julia> trans = Translation(10,10)
 Translation(10, 10)
@@ -33,7 +33,7 @@ julia> trans = Rotation(90°) ∘ trans
 AffineMap([0.0 -1.0; 1.0 0.0], [-10.0, 10.0])
 
 julia> trans(r)
-Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0), (-10.0,11.0), (-11.0,11.0), (-11.0,10.0)])
+Polygon{Float64}(Point{Float64}[(-10.0,10.0), (-10.0,11.0), (-11.0,11.0), (-11.0,10.0)])
 ```
 
 ```@docs
@@ -69,7 +69,7 @@ Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0), (-
     isproper(::Rectangle)
     lowerleft(::Rectangle)
     upperright(::Rectangle)
-    points{T<:Real}(::Rectangle{T})
+    points(::Rectangle{T}) where {T<:Real}
     width(::Rectangle)
     +(::Rectangle, ::Point)
 ```
@@ -78,10 +78,10 @@ Devices.Polygons.Polygon{Float64}(Devices.Points.Point{Float64}[(-10.0,10.0), (-
 
 ```@docs
     Polygon
-    Polygon{T}(::AbstractVector{Point{T}})
+    Polygon(::AbstractVector{Point{T}}) where {T}
     Polygon(::Point, ::Point, ::Point, ::Point...)
     bounds(::Polygon)
-    bounds{T<:Devices.AbstractPolygon}(::AbstractArray{T})
+    bounds(::AbstractArray{<:Devices.AbstractPolygon})
     bounds(::Devices.AbstractPolygon, ::Devices.AbstractPolygon...)
     lowerleft(::Polygon)
     upperright(::Polygon)

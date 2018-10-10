@@ -390,7 +390,7 @@ function carr(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
 end
 
 """
-    CellArray(x, c::Range, r::Range; kwargs...)
+    CellArray(x, c::AbstractRange, r::AbstractRange; kwargs...)
 Construct a `CellArray` based on ranges (probably `LinSpace` or
 `FloatRange`). `c` specifies column coordinates and `r` for the rows. Pairs from
 `c` and `r` specify the origins of the repeated cells. The extrema of the ranges

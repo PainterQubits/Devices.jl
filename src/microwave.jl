@@ -489,7 +489,7 @@ function qubit_claw!(c::Cell{T}, trace, gap, claw_width, claw_length, claw_gap,
 end
 
 """
-    radialcut!{T}(c::Cell{T}, r, Θ, h, meta::Meta=GDSMeta(0,0); narc::Int=197)
+    radialcut!(c::Cell{T}, r, Θ, h, meta::Meta=GDSMeta(0,0); narc::Int=197) where {T}
 Renders a radial cut (like a radial stub with no metal) into cell `c`.
 The polygon has to be subtracted from a ground plane.
 
@@ -544,7 +544,7 @@ function radialcut!(c::Cell{T}, r, Θ, h, meta::Meta=GDSMeta(0,0); narc::Int=197
 end
 
 """
-    radialstub!{T}(c::Cell{T}, r, Θ, h, t, meta::Meta=GDSMeta(0,0); narc::Int=197)
+    radialstub!(c::Cell{T}, r, Θ, h, t, meta::Meta=GDSMeta(0,0); narc::Int=197) where {T}
 See also the documentation for `radialcut!`.
 
 Returns a polygon for a radial stub. The polygon has to be subtracted from a
