@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="./assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-0.17.5, mkdocs-material-2.9.2">
+      <meta name="generator" content="mkdocs-0.17.5, mkdocs-material-2.9.4">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="./assets/stylesheets/application.ba0fd1a6.css">
+      <link rel="stylesheet" href="./assets/stylesheets/application.451f80e5.css">
       
       
     
@@ -201,11 +201,11 @@
                   <div class="md-sidebar__inner">
                     <nav class="md-nav md-nav--primary" data-md-level="0">
   <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <span class="md-nav__button md-logo">
+    <a href="." title="Devices.jl" class="md-nav__button md-logo">
       
         <i class="md-icon"></i>
       
-    </span>
+    </a>
     Devices.jl
   </label>
   
@@ -269,6 +269,26 @@
   <a href="#installation" title="Installation" class="md-nav__link">
     Installation
   </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#julia-07-and-above" title="Julia 0.7 and above" class="md-nav__link">
+    Julia 0.7 and above
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#older-versions" title="Older versions" class="md-nav__link">
+    Older versions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -407,6 +427,18 @@
 
 
   <li class="md-nav__item">
+    <a href="gui/" title="Graphical interface" class="md-nav__link">
+      Graphical interface
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
     <a href="LICENSE/" title="License" class="md-nav__link">
       License
     </a>
@@ -437,6 +469,26 @@
   <a href="#installation" title="Installation" class="md-nav__link">
     Installation
   </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#julia-07-and-above" title="Julia 0.7 and above" class="md-nav__link">
+    Julia 0.7 and above
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#older-versions" title="Older versions" class="md-nav__link">
+    Older versions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -498,6 +550,14 @@
 <p>A <a href="http://julialang.org">Julia</a> package for CAD of electronic devices, in particular superconducting devices operating at microwave frequencies.</p>
 <p><a id='Installation-1'></a></p>
 <h2 id="installation">Installation</h2>
+<p><a id='Julia-0.7-and-above-1'></a></p>
+<h3 id="julia-07-and-above">Julia 0.7 and above</h3>
+<p>Activate package mode by pressing <code>]</code> at the REPL in a Julia console.</p>
+<ul>
+<li><code>add https://github.com/PainterQubits/Devices.jl.git</code></li>
+</ul>
+<p><a id='Older-versions-1'></a></p>
+<h3 id="older-versions">Older versions</h3>
 <ul>
 <li><code>Pkg.add("Clipper")</code></li>
 </ul>
@@ -536,7 +596,7 @@
 <p><img src="units_pathonly.svg" style="width: 3in;"/></p>
 <p>Finally, let's put bridges across the feedline:</p>
 <div class="codehilite"><pre><span></span><span class="n">turnidx</span> <span class="o">=</span> <span class="kt">Int</span><span class="p">((</span><span class="n">length</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="c"># the first straight segment of the path</span>
-<span class="n">simplify!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">turnidx</span><span class="o">+</span><span class="p">(</span><span class="mi">0</span><span class="o">:</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">simplify!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">turnidx</span> <span class="o">.+</span> <span class="p">(</span><span class="mi">0</span><span class="o">:</span><span class="mi">2</span><span class="p">))</span>
 <span class="n">attach!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">CellReference</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mf">0.0</span><span class="n">μm</span><span class="p">,</span> <span class="mf">0.0</span><span class="n">μm</span><span class="p">)),</span> <span class="p">(</span><span class="mi">40</span><span class="n">μm</span><span class="p">)</span><span class="o">:</span><span class="p">(</span><span class="mi">40</span><span class="n">μm</span><span class="p">)</span><span class="o">:</span><span class="p">((</span><span class="n">pathlength</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">turnidx</span><span class="p">]))</span><span class="o">-</span><span class="mi">40</span><span class="n">μm</span><span class="p">),</span> <span class="n">i</span><span class="o">=</span><span class="n">turnidx</span><span class="p">)</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span><span class="s">&quot;decoratedpath&quot;</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
 <span class="n">render!</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">GDSMeta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
@@ -674,7 +734,7 @@
       
     </div>
     
-      <script src="./assets/javascripts/application.a59e2a89.js"></script>
+      <script src="./assets/javascripts/application.30f6b8b1.js"></script>
       
       <script>app.initialize({version:"0.17.5",url:{base:"."}})</script>
       

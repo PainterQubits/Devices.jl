@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-0.17.5, mkdocs-material-2.9.2">
+      <meta name="generator" content="mkdocs-0.17.5, mkdocs-material-2.9.4">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.ba0fd1a6.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.451f80e5.css">
       
       
     
@@ -201,11 +201,11 @@
                   <div class="md-sidebar__inner">
                     <nav class="md-nav md-nav--primary" data-md-level="0">
   <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <span class="md-nav__button md-logo">
+    <a href=".." title="Devices.jl" class="md-nav__button md-logo">
       
         <i class="md-icon"></i>
       
-    </span>
+    </a>
     Devices.jl
   </label>
   
@@ -376,6 +376,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../gui/" title="Graphical interface" class="md-nav__link">
+      Graphical interface
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
     <a href="../LICENSE/" title="License" class="md-nav__link">
       License
     </a>
@@ -435,12 +447,11 @@
                 
                   <h1>File formats</h1>
                 
-                <p>This package can load/save patterns in the GDS-II format for use with e-beam lithography systems. In the future it may be useful to implement machine-specific pattern formats to force fracturing or dosing in an explicit manner.</p>
-<p>We also provide an experimental option to export to the SVG vector graphics format. This enables patterns to be inspected in web browsers or used in presentations, for example.</p>
+                <p>To save or load patterns in any format, make sure you are <code>using FileIO</code>.</p>
 <p><a id='Saving-patterns-1'></a></p>
 <h2 id="saving-patterns">Saving patterns</h2>
-<p>To save a pattern in any format, make sure you are <code>using</code> <code>FileIO</code>.</p>
-<p><a id='FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell,Vararg{Devices.Cells.Cell,N} where N}' href='#FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:GDS}},Devices.Cells.Cell,Vararg{Devices.Cells.Cell,N} where N}'>#</a>
+<p>This package can load/save patterns in the GDS-II format for use with e-beam lithography systems. In the future it may be useful to implement machine-specific pattern formats to force fracturing or dosing in an explicit manner.</p>
+<p><a id='FileIO.save-Tuple{File{DataFormat{:GDS}},Cell,Vararg{Cell,N} where N}' href='#FileIO.save-Tuple{File{DataFormat{:GDS}},Cell,Vararg{Cell,N} where N}'>#</a>
 <strong><code>FileIO.save</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span><span class="nt">save</span><span class="o">(</span><span class="p">::</span><span class="nd">Union</span><span class="p">{</span><span class="err">AbstractString,IO</span><span class="p">}</span><span class="o">,</span> <span class="nt">cell0</span><span class="p">::</span><span class="nd">Cell</span><span class="p">{</span><span class="err">T</span><span class="p">}</span><span class="o">,</span> <span class="nt">cell</span><span class="p">::</span><span class="nd">Cell</span><span class="o">...)</span>
 <span class="nt">save</span><span class="o">(</span><span class="nt">f</span><span class="p">::</span><span class="nd">File</span><span class="p">{</span><span class="err">format&quot;GDS&quot;</span><span class="p">}</span><span class="o">,</span> <span class="nt">cell0</span><span class="p">::</span><span class="nd">Cell</span><span class="o">,</span> <span class="nt">cell</span><span class="p">::</span><span class="nd">Cell</span><span class="o">...;</span>
@@ -458,26 +469,18 @@
 <li><code>acc</code>: date of last accession. It would be unusual to have this differ from <code>now()</code>.</li>
 <li><code>verbose</code>: monitor the output of <a href="../cells/#Devices.Cells.traverse!"><code>traverse!</code></a> and <a href="../cells/#Devices.Cells.order!"><code>order!</code></a> to see if something funny is happening while saving.</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/7b8011046aef8868a91c205f0739c46612a2cac8/src/backends/gds.jl#L447-L464' class='documenter-source'>source</a><br></p>
-<p><a id='FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:SVG}},Devices.Cells.Cell}' href='#FileIO.save-Tuple{FileIO.File{FileIO.DataFormat{:SVG}},Devices.Cells.Cell}'>#</a>
-<strong><code>FileIO.save</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span><span class="nt">save</span><span class="o">(</span><span class="p">::</span><span class="nd">Union</span><span class="p">{</span><span class="err">AbstractString,IO</span><span class="p">}</span><span class="o">,</span> <span class="nt">c0</span><span class="p">::</span><span class="nd">Cell</span><span class="o">;</span> <span class="nt">options</span><span class="o">...)</span>
-<span class="nt">save</span><span class="o">(</span><span class="nt">f</span><span class="p">::</span><span class="nd">File</span><span class="p">{</span><span class="err">format&quot;SVG&quot;</span><span class="p">}</span><span class="o">,</span> <span class="nt">c0</span><span class="p">::</span><span class="nd">Cell</span><span class="o">;</span> <span class="nt">options</span><span class="o">...)</span>
-</pre></div>
-
-
-<p>This bottom method is implicitly called when you use the convenient syntax of the top method: <code>save("/path/to/my.gds", cell_i_want_to_save)</code></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/9f17ca47d595aa290d5806c66140c638a3ac0389/src/backends/gds.jl#L447-L464' class='documenter-source'>source</a><br></p>
+<p>Using the <a href="https://cairographics.org">Cairo graphics library</a>, it is possible to save patterns into SVG, PDF, and EPS vector graphics formats, or into the PNG raster graphic format. This enables patterns to be displayed in web browsers, publications, presentations, and so on. You can save a cell to a graphics file by, e.g. <code>save("/path/to/file.svg", mycell)</code>. Note that cell references and arrays are not saved, so you should flatten cells if desired before saving them.</p>
 <p>Possible keyword arguments include:</p>
 <ul>
 <li><code>width</code>: Specifies the width parameter of the SVG tag. Defaults to the width of the cell bounding box (stripped of units).</li>
 <li><code>height</code>: Specifies the height parameter of the SVG tag. Defaults to the height of the cell bounding box (stripped of units).</li>
 <li><code>layercolors</code>: Should be a dictionary with <code>Int</code> keys for layers and color strings as values. By color strings we mean "#ff0000", "red", "rgb(255,0,0)", etc.</li>
+<li><code>bboxes</code>: Specifies whether to draw bounding boxes around the bounds of cell arrays or cell references (true/false).</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/7b8011046aef8868a91c205f0739c46612a2cac8/src/backends/svg.jl#L78-L91' class='documenter-source'>source</a><br></p>
 <p><a id='Loading-patterns-1'></a></p>
 <h2 id="loading-patterns">Loading patterns</h2>
-<p>To load a pattern in any format, make sure you are <code>using</code> <code>FileIO</code>.</p>
-<p><a id='FileIO.load-Tuple{FileIO.File{FileIO.DataFormat{:GDS}}}' href='#FileIO.load-Tuple{FileIO.File{FileIO.DataFormat{:GDS}}}'>#</a>
+<p><a id='FileIO.load-Tuple{File{DataFormat{:GDS}}}' href='#FileIO.load-Tuple{File{DataFormat{:GDS}}}'>#</a>
 <strong><code>FileIO.load</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span><span class="nt">load</span><span class="o">(</span><span class="nt">f</span><span class="p">::</span><span class="nd">File</span><span class="p">{</span><span class="err">format&quot;GDS&quot;</span><span class="p">}</span><span class="o">;</span> <span class="nt">verbose</span><span class="p">::</span><span class="nd">Bool</span><span class="o">=</span><span class="nt">false</span><span class="o">,</span> <span class="nt">nounits</span><span class="p">::</span><span class="nd">Bool</span><span class="o">=</span><span class="nt">false</span><span class="o">)</span>
 </pre></div>
@@ -490,15 +493,7 @@
 <p>Encountering an ENDLIB record will discard the remainder of the GDS-II file without warning. If no ENDLIB record is present, a warning will be thrown.</p>
 <p>The content of some records are currently discarded (mainly the more obscure GDS-II record types, but also BGNLIB and LIBNAME).</p>
 <p>If <code>nounits</code> is true, <code>Cell{Float64}</code> objects will be returned, where 1.0 corresponds to one micron.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/7b8011046aef8868a91c205f0739c46612a2cac8/src/backends/gds.jl#L498-L528' class='documenter-source'>source</a><br></p>
-<p><a id='FileIO.load-Tuple{FileIO.File{FileIO.DataFormat{:SVG}}}' href='#FileIO.load-Tuple{FileIO.File{FileIO.DataFormat{:SVG}}}'>#</a>
-<strong><code>FileIO.load</code></strong> &mdash; <em>Method</em>.</p>
-<div class="codehilite"><pre><span></span>load(f::File{format&quot;SVG&quot;})
-</pre></div>
-
-
-<p>Not yet implemented.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/7b8011046aef8868a91c205f0739c46612a2cac8/src/backends/svg.jl#L100-L103' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/9f17ca47d595aa290d5806c66140c638a3ac0389/src/backends/gds.jl#L498-L528' class='documenter-source'>source</a><br></p>
                 
                   
                 
@@ -534,13 +529,13 @@
           </a>
         
         
-          <a href="../LICENSE/" title="License" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../gui/" title="Graphical interface" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                License
+                Graphical interface
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
@@ -570,7 +565,7 @@
       
     </div>
     
-      <script src="../assets/javascripts/application.a59e2a89.js"></script>
+      <script src="../assets/javascripts/application.30f6b8b1.js"></script>
       
       <script>app.initialize({version:"0.17.5",url:{base:".."}})</script>
       
