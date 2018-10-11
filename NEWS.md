@@ -1,4 +1,4 @@
-- v0.3.0
+- v0.4.0
   - Julia 1.0 compatibility.
   - `Rectangles.isproper` has a slightly different definition. Rectangles are
     considered proper if they have non-zero area now.
@@ -9,6 +9,12 @@
   - Fixed a bug where x-reflections could be corrupted when loading GDS files.
   - Added some basic interactive display for use with the Juno IDE.
   - Can now save a variety of graphics formats reliably (png, eps, pdf, svg).
+- v0.3.0
+  - Last release to support Julia 0.6.
+  - Added `TaperTrace`, `TaperCPW`, etc.
+  - Fix annoying "absolute angle" bug which caused weird rotations when viewing pattern
+    output in some GDS viewers.
+  - Other bug fixes, improved rendering output, etc.
 - v0.2.0
   - `LCDFonts` module added. Try out `lcdstring!` for your text rendering needs.
   - Redesign rendering pipeline.
