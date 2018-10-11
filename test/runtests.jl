@@ -1310,13 +1310,13 @@ end
         @test height(bounds(c)) ≈ pix_size+pix_spacing*4+(ceil(length(a_string)/ll)-1)*pix_spacing*11
         @test width(bounds(c)) ≈ pix_size+ll*(pix_spacing*5)+(ll-2)*pix_spacing
         path = joinpath(tdir, "characters.gds")
-        @test characters_demo(path) == 157064 # bytes written
+        @test characters_demo(path) == 152860 # bytes written
         rm(path; force=true)
         path = joinpath(tdir, "referenced_characters.gds")
-        @test referenced_characters_demo(path, verbose_override = true) == 7904
+        @test referenced_characters_demo(path, verbose_override = true) == 7732
         rm(path; force=true)
         path = joinpath(tdir, "scripted.gds")
-        @test scripted_demo(path) == 28938
+        @test scripted_demo(path) == 28798
         rm(path; force=true)
     end
 end
