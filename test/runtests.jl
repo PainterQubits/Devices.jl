@@ -23,7 +23,7 @@ const cm2nm = Devices.PreferNanometers.cm
 const m2nm = Devices.PreferNanometers.m
 
 p(x,y) = Point(x,y)
-tdir = mktempdir()
+const tdir = mktempdir()
 
 @testset "Points" begin
     @testset "> Point constructors" begin
@@ -479,11 +479,16 @@ end
     c = Cell("main")
     c2 = Cell("c2")
     c3 = Cell("c3")
+    c2ref = CellReference(c2, Point(-10.0,0.0); mag=1.0, rot=180°)
+    c3ref = CellReference(c3, Point(10.0,0.0); mag=2.0, rot=90°)
+
+    @test bounds(c3) == Rectangle(0,0)
+    @test !isproper(bounds(c3))
+    @test c2ref.cell === c2
+    @test bounds(c2ref) == Rectangle(0,0)
+
     r = Rectangle(5,10)
     render!(c3, r, GDSMeta())
-    c2ref = CellReference(c2, Point(-10.0,0.0); mag=1.0, rot=180°)
-    @test c2ref.cell === c2
-    c3ref = CellReference(c3, Point(10.0,0.0); mag=2.0, rot=90°)
     push!(c.refs, c2ref)
     push!(c2.refs, c3ref)
     tr = transform(c,c3ref)
@@ -1361,6 +1366,19 @@ end
             "badbytes_boundary.gds"))
         @test_throws ErrorException load(joinpath(dirname(@__FILE__),
             "unknown_boundary.gds")) # unknown token in boundary (0xffff)
+
+        # Round-trip tests
+        let c = Cell("main", nm), c2 = Cell("sub", nm)
+            render!(c2, Rectangle(1μm, 1μm), Rectangles.Plain(), GDSMeta(0))
+            c2ref = CellReference(c2, xrefl=true, rot=90°)
+            push!(c.refs, c2ref)
+            path = joinpath(tdir, "test.gds")
+            save(path, c)
+            gds = load(path)
+            @test gds["main"].refs[1].xrefl == true
+            @test gds["main"].refs[1].rot == 90°
+            rm(path, force=true)
+        end
     end
 
     # TODO: SVG format
