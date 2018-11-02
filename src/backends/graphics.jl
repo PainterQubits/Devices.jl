@@ -1,6 +1,6 @@
 module Graphics
 using Unitful
-import Unitful: Length, fm, pm, nm, μm, m, ustrip
+import Unitful: Length, fm, pm, nm, μm, m, inch, ustrip
 import Cairo
 
 import Devices: bounds, layer, datatype
@@ -38,13 +38,17 @@ function fillcolor(options, layer)
     return (0.0, 0.0, 0.0, 0.5)
 end
 
+lscale(x::Length)  = round(NoUnits((x |> inch) * 72/inch))
+lscale(x::Integer) = x
+lscale(x::Real) = Int(round(x))
+
 MIMETypes = Union{MIME"image/png", MIME"image/svg+xml", MIME"application/pdf", MIME"application/postscript"}
 function Base.show(io, mime::MIMETypes, c0::Cell{T}; options...) where T
     opt = Dict{Symbol,Any}(options)
     bnd = ustrip(bounds(c0))
     w, h = width(bnd), height(bnd)
-    w1 = haskey(opt, :width) ? opt[:width] : 1000
-    h1 = haskey(opt, :height) ? opt[:height] : 1000
+    w1 = haskey(opt, :width) ? lscale(opt[:width]) : 4*72
+    h1 = haskey(opt, :height) ? lscale(opt[:height]) : 4*72
     bboxes = haskey(opt, :bboxes) ? opt[:bboxes] : false
 
     surf = if mime isa MIME"image/png"

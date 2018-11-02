@@ -1381,7 +1381,22 @@ end
         end
     end
 
-    # TODO: SVG format
+    @testset "Graphics formats" begin
+        s1 = Cell("sub1", nm)
+        render!(s1, Rectangle(10μm, 10μm), Rectangles.Plain(), GDSMeta(1,0))
+        path = joinpath(tdir, "test.svg")
+        save(path, s1, width=10cm)
+        rm(path, force=true)
+        path = joinpath(tdir, "test.eps")
+        save(path, s1, height=10cm)
+        rm(path, force=true)
+        path = joinpath(tdir, "test.pdf")
+        save(path, s1, height=72*8)
+        rm(path, force=true)
+        path = joinpath(tdir, "test.png")
+        save(path, s1, width=72*4)
+        rm(path, force=true)
+    end
 end
 
 rm(tdir, recursive=true)

@@ -19,12 +19,14 @@ before saving them.
 
 Possible keyword arguments include:
 
-- `width`: Specifies the width parameter of the SVG tag. Defaults to the width of the cell
-  bounding box (stripped of units).
-- `height`: Specifies the height parameter of the SVG tag. Defaults to the height of the
-  cell bounding box (stripped of units).
-- `layercolors`: Should be a dictionary with `Int` keys for layers and color strings
-  as values. By color strings we mean "#ff0000", "red", "rgb(255,0,0)", etc.
+- `width`: Specifies the width parameter. A unitless number will give the width in pixels,
+72dpi. You can also give a length in any unit using a `Unitful.Quantity`, e.g. `u"4inch"` if
+you had previously done `using Unitful`.
+- `height`: Specifies the height parameter. A unitless number will give the width in pixels,
+72dpi. You can also give a length in any unit using a `Unitful.Quantity`. The aspect ratio
+of the output is always preserved so specify either `width` or `height`.
+- `layercolors`: Should be a dictionary with `Int` keys for layers and RGBA tuples as values.
+For example, (1.0, 0.0, 0.0, 0.5) is red with 50% opacity.
 - `bboxes`: Specifies whether to draw bounding boxes around the bounds of cell arrays or
   cell references (true/false).
 

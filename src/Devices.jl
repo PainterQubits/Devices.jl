@@ -11,7 +11,7 @@ import Clipper: cclipper
 import FileIO: save, load
 
 import Base: length, show, eltype
-import Unitful: Length, DimensionlessQuantity, ustrip, unit
+import Unitful: Length, DimensionlessQuantity, ustrip, unit, inch
 Unitful.@derived_dimension InverseLength inv(Unitful.𝐋)
 
 export GDSMeta
@@ -255,7 +255,7 @@ function Base.show(io::IO, mime::MIME"application/juno+plotpane", c0::Cell)
     end
     sx,sy = bx/ps[1]*96/72, by/ps[2]*96/72
     maxs = max(sx,sy)
-    show(svgio, MIME"image/svg+xml"(), c0; width=ps[1]*72/96, height=ps[2]*72/96, bboxes=true)
+    show(svgio, MIME"image/svg+xml"(), c0; width=(ps[1]/96)inch, height=(ps[2]/96)inch, bboxes=true)
     svgstr = String(take!(svgio))
     svgstr = replace(svgstr, r"<\?[A-Za-z .=0-9\-\"]+\?>"=>"")
     w = Scope()
