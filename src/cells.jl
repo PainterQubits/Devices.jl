@@ -188,6 +188,7 @@ mutable struct Cell{S<:Coordinate, T<:Meta}
     end
 end
 Base.copy(c::Cell{S,T}) where {S,T} = Cell{S,T}(c.name, copy(c.elements), copy(c.refs), c.create)
+Base.broadcastable(x::Cell) = Ref(x)
 
 # Do NOT define a convert method like this or otherwise cells will
 # be copied when referenced by CellRefs!

@@ -95,6 +95,7 @@ struct GDSMeta <: Meta
 end
 layer(x::GDSMeta) = x.layer
 datatype(x::GDSMeta) = x.datatype
+Base.broadcastable(x::Meta) = Ref(x)
 
 include("rectangles.jl")
 import .Rectangles: Rectangle,
