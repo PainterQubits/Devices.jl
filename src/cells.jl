@@ -246,9 +246,6 @@ function CellReference(x::Cell{S}, origin::Point{T}; kwargs...) where
     cref(x, origin; kwargs...)
 end
 
-CellReference(x, origin::Point{T}; kwargs...) where {T <: Coordinate} =
-    cref(x, origin; kwargs...)
-
 function cref(x, origin::Point{T}; kwargs...) where {T <: Coordinate}
     argdict = Dict(k=>v for (k,v) in kwargs)
     xreflkeys = [:xrefl, :xreflection, :refl, :reflect,

@@ -569,9 +569,6 @@ end
     flatten!(c)
     @test isempty(elements(c))
 
-    # GDS loading actually uses a string for the first argument, until cells are all loaded
-    @test CellReference("gdstest", Point(0.,0.)) isa CellReference{Float64, String}
-
     # === End Issues 17 and 18 ===
 
     @test_throws DimensionError CellReference(Cell("junk", nm), Point(0,0))

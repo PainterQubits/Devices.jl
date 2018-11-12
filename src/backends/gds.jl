@@ -837,7 +837,7 @@ function sref(s, dbs, verbose, nounits)
     hassname || error("Missing SNAME tag.")
     hasxy || error("Missing XY tag.")
 
-    CellReference(str, xy; xrefl=xrefl, mag=mag, rot=rot)
+    CellReference{eltype(xy), String}(str, xy, xrefl, mag, rot)
 end
 
 function aref(s, dbs, verbose, nounits)
