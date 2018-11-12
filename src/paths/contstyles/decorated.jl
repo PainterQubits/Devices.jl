@@ -13,7 +13,7 @@ mutable struct DecoratedStyle{T<:FloatCoordinate} <: ContinuousStyle
     dirs::Array{Int,1}
     refs::Array{CellReference,1}
 end
-summary(s::DecoratedStyle) = string(summary(s.style), " with ", length(s.refs), " decorations")
+summary(s::DecoratedStyle) = string(summary(s.s), " with ", length(s.refs), " decorations")
 
 """
     undecorated(s::DecoratedStyle)
