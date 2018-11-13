@@ -272,6 +272,25 @@ end
             Polygon(Point{Float64}[p(2,2), p(1,2), p(1,0), p(2,0)])
         @test typeof(clip(Clipper.ClipTypeDifference, p1, r2)[1]) ==
             Polygon{Float64}
+
+        let
+            # Issue 37
+            square_pts = Point.([(-1,-1),(-1,1),(1,1),(1,-1)])
+            small_square = Polygon(square_pts)
+            big_square = Polygon(2 .* square_pts)
+            mask = first(clip(Clipper.ClipTypeDifference, big_square, small_square))
+            c = Cell("test")
+            render!(c, mask)
+            canvas = Polygon(5 .* square_pts)
+            x = clip(Clipper.ClipTypeDifference, canvas, mask)
+            c2 = Cell("squares")
+            for p in x
+                render!(c2, p, GDSMeta(0))
+            end
+
+            @test length(elements(c2)) == 2
+        end
+
     end
 
     @testset "> Clipping individuals w/ units" begin
