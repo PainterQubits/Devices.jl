@@ -544,16 +544,16 @@ function intersection(A::Line, B::Line, checkparallel=true)
 end
 
 function interiorcuts(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}}) where {T}
-    # currently assumes we have first element an enclosing polygon with
-    # the rest being holes. We don't dig deep into the PolyTree...
-
-    # We also assume no hole collision
+    # Assumes we have first element an enclosing polygon with the rest being holes.
+    # We also assume no hole collision.
 
     minpt = Point(-Inf, -Inf)
-
     for enclosing in children(nodeortree)
         segs = segments(contour(enclosing))
         for hole in children(enclosing)
+            # process all the holes.
+            interiorcuts(hole, outpolys)
+
             # Intersect the unique ray with the line segments of the polygon.
             ray = uniqueray(contour(hole))
 
