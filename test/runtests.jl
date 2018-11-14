@@ -284,8 +284,8 @@ end
             canvas = Polygon(5 .* square_pts)
             x = clip(Clipper.ClipTypeDifference, canvas, mask)
             c2 = Cell("squares")
-            for p in x
-                render!(c2, p, GDSMeta(0))
+            for z in x
+                render!(c2, z, GDSMeta(0))
             end
 
             @test length(elements(c2)) == 2
