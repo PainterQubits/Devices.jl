@@ -10,11 +10,11 @@ import Base:
     copy,
     deepcopy_internal,
     enumerate,
-    firstindex,
     isempty,
     empty!,
     deleteat!,
     length,
+    firstindex,
     lastindex,
     size,
     getindex,
@@ -26,6 +26,7 @@ import Base:
     insert!,
     append!,
     splice!,
+    intersect!,
     show,
     summary,
     dims2string
@@ -34,8 +35,9 @@ import Base.Iterators
 
 using ForwardDiff
 import Devices
-import Devices: Coordinate, FloatCoordinate, GDSMeta, Meta
-import Devices: bounds
+import Devices: Polygons, Coordinate, FloatCoordinate, CoordinateUnits, GDSMeta, Meta
+import Devices.Polygons: segmentize, intersects
+import Devices: bounds, bridge!
 
 export Path
 
@@ -63,21 +65,6 @@ export reconcile!,
     undecorated
 
 """
-    extent(s,t)
-For a style `s`, returns a distance tangential to the path specifying the lateral extent
-of the polygons rendered. The extent is measured from the center of the path to the edge
-of the polygon (half the total width along the path). The extent is evaluated at path length
-`t` from the start of the associated segment.
-"""
-function extent end
-
-"""
-    width(s,t)
-For a style `s` and parameteric argument `t`, returns the width of paths rendered.
-"""
-function width end
-
-"""
     abstract type Style end
 How to render a given path segment.
 """
@@ -99,6 +86,8 @@ abstract type ContinuousStyle{CanStretch} <: Style end
 Any style that applies to segments which have zero path length.
 """
 abstract type DiscreteStyle <: Style end
+
+include("contstyles/interface.jl")
 
 """
     abstract type Segment{T<:Coordinate} end
@@ -460,6 +449,8 @@ include("segments/straight.jl")
 include("segments/turn.jl")
 include("segments/corner.jl")
 include("segments/compound.jl")
+
+include("intersect.jl")
 
 """
     discretestyle1(p::Path)

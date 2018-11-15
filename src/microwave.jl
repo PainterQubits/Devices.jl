@@ -9,7 +9,7 @@ using Devices.Rectangles
 using Devices.Polygons
 using Devices.Points
 using Devices.Cells
-import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
+import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta, bridge!
 import Unitful: NoUnits, cm, μm, nm, ustrip, unit
 
 export bridge!

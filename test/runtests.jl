@@ -493,6 +493,16 @@ end
     # end
 end
 
+@testset "Intersections" begin
+    @test promote(Polygons.Line(p(0,0), p(1,1)), Polygons.Line(p(1.0,0.0), p(2.0,0.0))) ===
+        (Polygons.Line(p(0.0,0.0), p(1.0,1.0)), Polygons.Line(p(1.0,0.0), p(2.0,0.0)))
+    @test promote(
+        Polygons.Line(p(0,0)μm2μm, p(1,1)μm2μm),
+            Polygons.Line(p(1.0,0.0)nm2μm, p(2.0,0.0)nm2μm)) ===
+        (Polygons.Line(p(0.0,0.0)μm2μm, p(1.0,1.0)μm2μm),
+            Polygons.Line(p(0.001,0.0)μm2μm, p(0.002,0.0)μm2μm))
+end
+
 @testset "Cell methods" begin
     # Setup nested cell refs
     c = Cell("main")

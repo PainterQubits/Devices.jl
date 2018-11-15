@@ -39,7 +39,7 @@ adapted_grid(f, anchors::AbstractVector{T};
 
 function assemble_grids(f, anchors::AbstractVector,
         max_recursions, max_change, rand_factor, grid_step)
-    dimension(f(anchors[1])) != dimension(max_change) &&
+    dimension(eltype(f(anchors[1]))) != dimension(max_change) &&
         throw(ArgumentError("max_change must have dimensions of f($(anchors[1]))"))
     g = i->begin
         # Want a range that specially excludes the last point; use linspace with npts.
