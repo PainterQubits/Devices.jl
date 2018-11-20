@@ -10,6 +10,7 @@ import Base:
     copy,
     deepcopy_internal,
     enumerate,
+    firstindex,
     isempty,
     empty!,
     deleteat!,
@@ -565,103 +566,98 @@ Iterators.drop(p::Path, n::Int) = Iterators.drop(nodes(p), n)
 Iterators.cycle(p::Path) = Iterators.cycle(nodes(p))
 isempty(p::Path) = isempty(nodes(p))
 empty!(p::Path) = empty!(nodes(p))
-function deleteat!(p::Path, inds)
+function deleteat!(p::Path, inds; reconcile=true)
     deleteat!(nodes(p), inds)
-    reconcile!(p, first(inds))
+    reconcile && reconcile!(p, first(inds))
 end
+firstindex(p::Path) = 1
 lastindex(p::Path) = length(nodes(p))
 size(p::Path) = size(nodes(p))
 getindex(p::Path, i::Integer) = nodes(p)[i]
-function setindex!(p::Path, v::Node, i::Integer)
+function setindex!(p::Path, v::Node, i::Integer; reconcile=true)
     nodes(p)[i] = v
-    reconcile!(p, i)
+    reconcile && reconcile!(p, i)
 end
-
-function setindex!(p::Path, v::Segment, i::Integer)
-    setsegment!(nodes(p)[i],v)
-    reconcile!(p, i)
+function setindex!(p::Path, v::Segment, i::Integer; reconcile=true)
+    setsegment!(nodes(p)[i], v; reconcile=reconcile)
 end
-
-function setindex!(p::Path, v::Style, i::Integer)
-    setstyle!(nodes(p)[i],v)
-    reconcile!(p, i)
+function setindex!(p::Path, v::Style, i::Integer; reconcile=true)
+    setstyle!(nodes(p)[i], v; reconcile=reconcile)
 end
-
-function push!(p::Path, node::Node)
+function push!(p::Path, node::Node; reconcile=true)
     push!(nodes(p), node)
-    reconcile!(p, length(p))
+    reconcile && reconcile!(p, length(p))
 end
-
-function pushfirst!(p::Path, node::Node)
+function pushfirst!(p::Path, node::Node; reconcile=true)
     pushfirst!(nodes(p), node)
-    reconcile!(p)
+    reconcile && reconcile!(p)
 end
 
 for x in (:push!, :pushfirst!)
-    @eval function ($x)(p::Path, seg::Segment, sty::Style)
-        ($x)(p, Node(seg,sty))
+    @eval function ($x)(p::Path, seg::Segment, sty::Style; reconcile=true)
+        ($x)(p, Node(seg, sty); reconcile=reconcile)
     end
-    @eval function ($x)(p::Path, segsty0::Node, segsty::Node...)
-        ($x)(p, segsty0)
+    @eval function ($x)(p::Path, segsty0::Node, segsty::Node...; reconcile=true)
+        ($x)(p, segsty0; reconcile=reconcile)
         for x in segsty
-            ($x)(p, x)
+            ($x)(p, x; reconcile=reconcile)
         end
     end
 end
 
-function pop!(p::Path)
+function pop!(p::Path; reconcile=true)
     x = pop!(nodes(p))
-    reconcile!(p, length(p))
-    x
+    reconcile && reconcile!(p, length(p))
+    return x
 end
 
-function popfirst!(p::Path)
+function popfirst!(p::Path; reconcile=true)
     x = popfirst!(nodes(p))
-    reconcile!(p)
-    x
+    reconcile && reconcile!(p)
+    return x
 end
 
-function insert!(p::Path, i::Integer, segsty::Node)
+function insert!(p::Path, i::Integer, segsty::Node; reconcile=true)
     insert!(nodes(p), i, segsty)
-    reconcile!(p, i)
+    reconcile && reconcile!(p, i)
 end
 
-insert!(p::Path, i::Integer, seg::Segment, sty::Style) =
-    insert!(p, i, Node(seg,sty))
+insert!(p::Path, i::Integer, seg::Segment, sty::Style; reconcile=true) =
+    insert!(p, i, Node(seg,sty); reconcile=reconcile)
 
-function insert!(p::Path, i::Integer, seg::Segment)
+function insert!(p::Path, i::Integer, seg::Segment; reconcile=true)
     if i == 1
         sty = style0(p)
     else
         sty = style(nodes(p)[i-1])
     end
-    insert!(p, i, Node(seg,sty))
+    insert!(p, i, Node(seg,sty); reconcile=reconcile)
 end
 
-function insert!(p::Path, i::Integer, segsty0::Node, segsty::Node...)
-    insert!(p, i, segsty0)
+function insert!(p::Path, i::Integer, segsty0::Node, segsty::Node...; reconcile=true)
+    insert!(p, i, segsty0; reconcile=reconcile)
     for x in segsty
-        insert!(p, i, x)
+        insert!(p, i, x; reconcile=reconcile)
     end
 end
 
 """
-    append!(p::Path, p′::Path)
+    append!(p::Path, p′::Path; reconcile=true)
 Given paths `p` and `p′`, path `p′` is appended to path `p`.
 The p0 and initial angle of the first segment from path `p′` is
 modified to match the last point and last angle of path `p`.
 """
-function append!(p::Path, p′::Path)
+function append!(p::Path, p′::Path; reconcile=true)
     isempty(p′) && return
     i = length(p)
     lp, la = p1(p), α1(p)
     append!(nodes(p), nodes(p′))
-    reconcile!(p, i+1)
+    reconcile && reconcile!(p, i+1)
     nothing
 end
 
 """
-    simplify(p::Path, inds::UnitRange=1:length(p))
+    simplify(p::Path, inds::UnitRange=firstindex(p):lastindex(p))
 At `inds`, segments of a path are turned into a `CompoundSegment` and
 styles of a path are turned into a `CompoundStyle`. The method returns a tuple,
 `(segment, style)`.
@@ -672,27 +668,22 @@ in a path unless you could simplify it.
 - You don't need to think hard about boundaries between straights and turns
 when you want a continuous styling of a very long path.
 """
-function simplify(p::Path, inds::UnitRange=1:length(p))
+function simplify(p::Path, inds::UnitRange=firstindex(p):lastindex(p))
     cseg = CompoundSegment(nodes(p)[inds])
     csty = CompoundStyle(cseg.segments, map(style, nodes(p)[inds]))
     Node(cseg, csty)
 end
 
 """
-    simplify!(p::Path, inds::UnitRange=1:length(p))
+    simplify!(p::Path, inds::UnitRange=firstindex(p):lastindex(p))
 In-place version of [`simplify`](@ref).
 """
-function simplify!(p::Path, inds::UnitRange=1:length(p))
+function simplify!(p::Path, inds::UnitRange=firstindex(p):lastindex(p))
     x = simplify(p, inds)
     deleteat!(p, inds)
     insert!(p, inds[1], x)
     p
 end
-
-# function split{T<:Real}(s::CompoundSegment{T}, points) # WIP
-#     segs = CompoundSegment{T}[]
-#     segs
-# end
 
 """
     meander!(p::Path, len, straightlen, r, α)
