@@ -18,7 +18,7 @@ function render!(c::Cell, p::Path{T}, meta::Meta=GDSMeta(); kwargs...) where {T}
         cornertweaks!(cornernode, prevseg, previous)
         cornertweaks!(cornernode, nextseg, next)
     end
-    !isempty(inds) && adjust!(p)
+    !isempty(inds) && reconcile!(p)
 
     taper_inds = handle_generic_tapers!(p)
 
@@ -31,7 +31,7 @@ function render!(c::Cell, p::Path{T}, meta::Meta=GDSMeta(); kwargs...) where {T}
         setsegment!(next(p[i]), pop!(segs))
         setsegment!(previous(p[i]), pop!(segs))
     end
-    !isempty(inds) && adjust!(p)
+    !isempty(inds) && reconcile!(p)
 
     restore_generic_tapers!(p, taper_inds)
 

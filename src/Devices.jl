@@ -150,7 +150,7 @@ include("paths/paths.jl")
 import .Paths: Path,
     α0,
     α1,
-    adjust!,
+    reconcile!,
     attach!,
     contstyle1,
     corner!,
@@ -176,10 +176,12 @@ import .Paths: Path,
     setstyle!,
     turn!,
     undecorated
+
+@deprecate adjust! reconcile!
 export Paths, Path, Segment, Style,
     α0,
     α1,
-    adjust!,
+    adjust!, reconcile!,
     attach!,
     corner!,
     direction,
