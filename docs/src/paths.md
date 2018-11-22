@@ -161,10 +161,10 @@ manner, it is easy to find the right `CellReference` to use with
     Paths.setp0!
     Paths.setα0!
     append!(::Path, ::Path)
-    adjust!
     attach!
     corner!
     meander!
+    reconcile!
     simplify
     simplify!
     straight!
