@@ -38,7 +38,7 @@ import Devices: bounds
 export Path
 
 export α0, α1, p0, p1, style0, style1, discretestyle1, contstyle1
-export adjust!,
+export reconcile!,
     attach!,
     corner!,
     direction,
@@ -75,11 +75,7 @@ function width end
 
 """
     abstract type Style end
-How to render a given path segment. All styles should implement the following
-methods:
-
- - `extent`
- - `width`
+How to render a given path segment.
 """
 abstract type Style end
 
@@ -94,6 +90,14 @@ abstract type ContinuousStyle <: Style end
 Any style that applies to segments which have zero path length.
 """
 abstract type DiscreteStyle <: Style end
+
+#=
+For some styles (e.g. tapers) we will want to provide a segment length to the style during
+operations like `straight!(path, L, TaperCPW(...))` in order to concretely specify how the
+geometry will look. Otherwise the geometry is only partially specified, which makes
+operations like `extent(s, t)` impossible to be used generically.
+=#
+_lengthhint(s::Style) = s
 
 """
     abstract type Segment{T<:Coordinate} end
@@ -450,50 +454,69 @@ Returns the last-used discrete style in the path.
 contstyle1(p::Path) = style1(p, ContinuousStyle)
 
 """
-    adjust!(p::Path, n::Integer=1)
-Adjust a path's parametric functions starting from index `n`.
-Used internally whenever segments are inserted into the path.
+    reconcilelinkedlist!(p::Path, m::Integer)
+Paths have both array-like access and linked-list-like access (most often you use array
+access, but segments/styles need to know about their neighbors sometimes). When doing array
+operations on the path, the linked list can become inconsistent. This function restores
+consistency for the node at index `m`, with previous node `m-1` and next node `m+1`.
+First and last node are treated specially.
 """
-function adjust!(p::Path, n::Integer=1)
-    isempty(p) && return
-
-    function updatell!(p::Path, m::Integer)
-        if m == 1
-            seg = segment(nodes(p)[1])
-            nodes(p)[1].prev = nodes(p)[1]
-            if length(p) == 1
-                nodes(p)[1].next = nodes(p)[1]
-            end
-        else
-            nodes(p)[m-1].next = nodes(p)[m]
-            nodes(p)[m].prev = nodes(p)[m-1]
-            if m == length(p)
-                nodes(p)[m].next = nodes(p)[m]
-            end
+function reconcilelinkedlist!(p::Path, m::Integer)
+    if m == 1
+        seg = segment(nodes(p)[1])
+        nodes(p)[1].prev = nodes(p)[1]
+        if length(p) == 1
+            nodes(p)[1].next = nodes(p)[1]
+        end
+    else
+        nodes(p)[m-1].next = nodes(p)[m]
+        nodes(p)[m].prev = nodes(p)[m-1]
+        if m == length(p)
+            nodes(p)[m].next = nodes(p)[m]
         end
     end
+end
 
-    function updatefields!(n::Node)
+"""
+    reconcilefields!(n::Node)
+Segments or styles can have fields that depend on the properties of neighbors. Examples:
+  - Corners need to know their extents based on previous/next styles.
+  - Tapers need to know their length for `extent(s, t)` to work.
+This function reconciles node `n` for consistency with neighbors in this regard.
+"""
+function reconcilefields!(n::Node)
+    seg = segment(n)
+    if isa(seg, Corner)
+        seg.extent = extent(style(previous(n)), 1.0)
+    end
+end
+
+"""
+    reconcilestart!(n::Node, α0, p0)
+This function reconciles the starting position and angle of the segment at path node `n`
+to match the ending position and angle of the previous node.
+"""
+function reconcilestart!(n::Node, α0, p0)
+    if previous(n) == n # first node
+        setα0p0!(segment(n), α0, p0)
+    else
         seg = segment(n)
-        if isa(seg, Corner)
-            seg.extent = extent(style(previous(n)), 1.0)
-        end
+        seg0 = segment(previous(n))
+        setα0p0!(seg, α1(seg0), p1(seg0))
     end
+end
 
-    function updateα0p0!(n::Node{T}, α0, p0) where {T}
-        if previous(n) == n # first node
-            setα0p0!(segment(n), α0, p0)
-        else
-            seg = segment(n)
-            seg0 = segment(previous(n))
-            setα0p0!(seg, α1(seg0), p1(seg0))
-        end
-    end
-
-    for j in n:length(p)
-        updatell!(p,j)
-        updatefields!(p[j])
-        updateα0p0!(p[j], p.α0, p.p0)
+"""
+    reconcile!(p::Path, n::Integer=1)
+Reconcile all inconsistencies in a path starting from index `n`. Used internally whenever
+segments are inserted into the path, but can be safely used by the user as well.
+"""
+function reconcile!(p::Path, n::Integer=1)
+    isempty(p) && return
+    for j in n:lastindex(p)
+        reconcilelinkedlist!(p,j)
+        reconcilefields!(p[j])
+        reconcilestart!(p[j], p.α0, p.p0)
     end
 end
 
@@ -509,34 +532,34 @@ isempty(p::Path) = isempty(nodes(p))
 empty!(p::Path) = empty!(nodes(p))
 function deleteat!(p::Path, inds)
     deleteat!(nodes(p), inds)
-    adjust!(p, first(inds))
+    reconcile!(p, first(inds))
 end
 lastindex(p::Path) = length(nodes(p))
 size(p::Path) = size(nodes(p))
 getindex(p::Path, i::Integer) = nodes(p)[i]
 function setindex!(p::Path, v::Node, i::Integer)
     nodes(p)[i] = v
-    adjust!(p, i)
+    reconcile!(p, i)
 end
 
 function setindex!(p::Path, v::Segment, i::Integer)
     setsegment!(nodes(p)[i],v)
-    adjust!(p, i)
+    reconcile!(p, i)
 end
 
 function setindex!(p::Path, v::Style, i::Integer)
     setstyle!(nodes(p)[i],v)
-    adjust!(p, i)
+    reconcile!(p, i)
 end
 
 function push!(p::Path, node::Node)
     push!(nodes(p), node)
-    adjust!(p, length(p))
+    reconcile!(p, length(p))
 end
 
 function pushfirst!(p::Path, node::Node)
     pushfirst!(nodes(p), node)
-    adjust!(p)
+    reconcile!(p)
 end
 
 for x in (:push!, :pushfirst!)
@@ -553,19 +576,19 @@ end
 
 function pop!(p::Path)
     x = pop!(nodes(p))
-    adjust!(p, length(p))
+    reconcile!(p, length(p))
     x
 end
 
 function popfirst!(p::Path)
     x = popfirst!(nodes(p))
-    adjust!(p)
+    reconcile!(p)
     x
 end
 
 function insert!(p::Path, i::Integer, segsty::Node)
     insert!(nodes(p), i, segsty)
-    adjust!(p, i)
+    reconcile!(p, i)
 end
 
 insert!(p::Path, i::Integer, seg::Segment, sty::Style) =
@@ -598,7 +621,7 @@ function append!(p::Path, p′::Path)
     i = length(p)
     lp, la = p1(p), α1(p)
     append!(nodes(p), nodes(p′))
-    adjust!(p, i+1)
+    reconcile!(p, i+1)
     nothing
 end
 
