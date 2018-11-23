@@ -2,10 +2,9 @@
 function render!(c::Cell, f, len, s::Paths.TaperTrace, meta::Meta; kwargs...)
     bnds = (zero(len), len)
 
-    # Minor change here - geometry is paramatrized in a dimensionless way
     g = (t,sgn)->begin
         d = Paths.direction(f,t) + sgn * π/2
-        return f(t) + Paths.extent(s,t/len) * Point(cos(d),sin(d))
+        return f(t) + Paths.extent(s,t) * Point(cos(d), sin(d))
     end
 
     pgrid = adapted_grid(t->Paths.direction(r->g(r, 1), t), bnds; kwargs...)
@@ -19,11 +18,10 @@ end
 function render!(c::Cell, f, len, s::Paths.TaperCPW, meta::Meta; kwargs...)
     bnds = (zero(len), len)
 
-    # Minor change here - geometry is paramatrized in a dimensionless way
     g = (t,sgn1,sgn2)->begin
         d = Paths.direction(f,t) + sgn1 * π/2       # turn left (+) or right (-) of path
-        offset = (Paths.gap(s,t/len) + Paths.trace(s,t/len)) / 2
-        return f(t) + (sgn2 * Paths.gap(s,t/len)/2 + offset) * Point(cos(d),sin(d))
+        offset = 0.5*(Paths.gap(s,t) + Paths.trace(s,t))
+        return f(t) + (sgn2 * 0.5*Paths.gap(s,t) + offset) * Point(cos(d), sin(d))
     end
 
     ppgrid = adapted_grid(t->Paths.direction(r->g(r,  1,  1), t), bnds; kwargs...)
@@ -43,10 +41,8 @@ function render!(c::Cell, segment::Paths.Straight{T}, s::Paths.TaperTrace, meta:
     dir = direction(segment, zero(T))
     dp, dm = dir+π/2, dir-π/2
 
-    # parametrization of style relies on dimensionless t
-    one_T = one(T)
-    ext_start = Paths.extent(s, zero(one_T))
-    ext_end = Paths.extent(s, one_T)
+    ext_start = Paths.extent(s, zero(T))
+    ext_end = Paths.extent(s, pathlength(segment))
 
     tangents = StaticArrays.@SVector [
         ext_start * Point(cos(dp),sin(dp)),
@@ -65,12 +61,10 @@ function render!(c::Cell, segment::Paths.Straight{T}, s::Paths.TaperCPW, meta::M
     dir = direction(segment, zero(T))
     dp = dir+π/2
 
-    # parametrization of style relies on dimensionless t
-    one_T = one(T)
-    ext_start = Paths.extent(s, zero(one_T))
-    ext_end = Paths.extent(s, one_T)
-    trace_start = Paths.trace(s, zero(one_T))
-    trace_end = Paths.trace(s, one_T)
+    ext_start = Paths.extent(s, zero(T))
+    ext_end = Paths.extent(s, pathlength(segment))
+    trace_start = Paths.trace(s, zero(T))
+    trace_end = Paths.trace(s, pathlength(segment))
 
     tangents = StaticArrays.@SVector [
         Point(cos(dp),sin(dp)),
@@ -79,10 +73,8 @@ function render!(c::Cell, segment::Paths.Straight{T}, s::Paths.TaperCPW, meta::M
         Point(cos(dp),sin(dp))
     ]
 
-    extents_p = StaticArrays.@SVector [ext_start, ext_end,
-                                       trace_end/2., trace_start/2.]
-    extents_m = StaticArrays.@SVector [trace_start/2., trace_end/2.,
-                                       ext_end, ext_start]
+    extents_p = StaticArrays.@SVector [ext_start, ext_end, 0.5*trace_end, 0.5*trace_start]
+    extents_m = StaticArrays.@SVector [0.5*trace_start, 0.5*trace_end, ext_end, ext_start]
 
     a,b = segment(zero(T)), segment(pathlength(segment))
     origins = StaticArrays.@SVector [a,b,b,a]

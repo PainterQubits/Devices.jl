@@ -1,20 +1,7 @@
 """
     mutable struct Turn{T} <: ContinuousSegment{T}
-        α::typeof(1.0°)
-        r::T
-        p0::Point{T}
-        α0::typeof(1.0°)
-    end
 A circular turn is parameterized by the turn angle `α` and turning radius `r`.
 It begins at a point `p0` with initial angle `α0`.
-
-The center of the circle is given by:
-
-`cen = p0 + Point(r*cos(α0+sign(α)*π/2), r*sin(α0+sign(α)*π/2))`
-
-The parametric function over `t ∈ [0,1]` describing the turn is given by:
-
-`t -> cen + Point(r*cos(α0-sign(α)*π/2+α*t), r*sin(α0-sign(α)*π/2+α*t))`
 """
 mutable struct Turn{T} <: ContinuousSegment{T}
     α::typeof(1.0°)
@@ -29,7 +16,7 @@ function (s::Turn)(t)
 end
 
 """
-    Turn{T<:Coordinate}(α, r::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°)
+    Turn(α, r::T, p0::Point{T}=Point(0.0,0.0), α0=0.0°) where {T<:Coordinate}
 Outer constructor for `Turn` segments.
 """
 Turn(α, r::T; p0::Point=Point(zero(T),zero(T)), α0=0.0°) where {T <: Coordinate} =
@@ -44,44 +31,35 @@ p0(s::Turn) = s.p0
 summary(s::Turn) = "Turn by $(s.α) with radius $(s.r)"
 
 """
-```
-setp0!(s::Turn, p::Point)
-```
-
+    setp0!(s::Turn, p::Point)
 Set the p0 of a turn.
 """
 setp0!(s::Turn, p::Point) = s.p0 = p
 
 """
-```
-setα0!(s::Turn, α0′)
-```
-
+    setα0!(s::Turn, α0′)
 Set the starting angle of a turn.
 """
 setα0!(s::Turn, α0′) = s.α0 = α0′
 
 α1(s::Turn) = s.α0 + s.α
 
-
 """
-    turn!{T<:Coordinate}(p::Path{T}, α, r::Coordinate, sty::Style=contstyle1(p))
+    turn!(p::Path, α, r::Coordinate, sty::Style=contstyle1(p))
 Turn a path `p` by angle `α` with a turning radius `r` in the current direction.
 Positive angle turns left. By default, we take the last continuous style in the path.
 """
-function turn!(p::Path{T}, α, r::Coordinate, sty::Style=contstyle1(p)) where {T <: Coordinate}
+function turn!(p::Path, α, r::Coordinate, sty::Style=contstyle1(p))
+    T = eltype(p)
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
-    p0 = p1(p)
-    α0 = α1(p)
-    turn = Turn{T}(α, r, p0, α0)
-    push!(p, Node(turn, convert(ContinuousStyle, sty)))
+    seg = Turn{T}(α, r, p1(p), α1(p))
+    push!(p, Node(seg, convert(ContinuousStyle, sty)))
     nothing
 end
 
 """
-    turn!{T<:Coordinate}(p::Path{T}, s::String, r::Coordinate,
-        sty::ContinuousStyle=contstyle1(p))
-Turn a path `p` with direction coded by string `s`:
+    turn!(p::Path, str::String, r::Coordinate, sty::Style=contstyle1(p))
+Turn a path `p` with direction coded by string `str`:
 
 - "l": turn by π/2 radians (left)
 - "r": turn by -π/2 radians (right)
@@ -89,10 +67,10 @@ Turn a path `p` with direction coded by string `s`:
 
 By default, we take the last continuous style in the path.
 """
-function turn!(p::Path{T}, s::String, r::Coordinate,
-        sty::Style=contstyle1(p)) where {T <: Coordinate}
+function turn!(p::Path, str::String, r::Coordinate, sty::Style=contstyle1(p))
+    T = eltype(p)
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
-    for ch in s
+    for ch in str
         if ch == 'l'
             α = π/2
         elseif ch == 'r'
@@ -100,8 +78,9 @@ function turn!(p::Path{T}, s::String, r::Coordinate,
         else
             error("Unrecognizable turn command.")
         end
-        turn = Turn{T}(α, r, p1(p), α1(p))
-        push!(p, Node(turn, convert(ContinuousStyle, sty)))
+        seg = Turn{T}(α, r, p1(p), α1(p))
+        # convert takes NoRender() → NoRenderContinuous()
+        push!(p, Node(seg, convert(ContinuousStyle, sty)))
     end
     nothing
 end

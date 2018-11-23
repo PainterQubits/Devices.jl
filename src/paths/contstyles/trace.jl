@@ -1,12 +1,12 @@
-abstract type Trace <: ContinuousStyle end
+abstract type Trace{T} <: ContinuousStyle{T} end
 
 """
-    struct GeneralTrace{T} <: Trace
+    struct GeneralTrace{T} <: Trace{false}
         width::T
     end
 A single trace with variable width as a function of path length. `width` is callable.
 """
-struct GeneralTrace{T} <: Trace
+struct GeneralTrace{T} <: Trace{false}
     width::T
 end
 copy(x::GeneralTrace) = GeneralTrace(x.width)
@@ -14,12 +14,12 @@ copy(x::GeneralTrace) = GeneralTrace(x.width)
 @inline width(s::GeneralTrace, t) = s.width(t)
 
 """
-    struct SimpleTrace{T<:Coordinate} <: Trace
+    struct SimpleTrace{T<:Coordinate} <: Trace{false}
         width::T
     end
 A single trace with fixed width as a function of path length.
 """
-struct SimpleTrace{T<:Coordinate} <: Trace
+struct SimpleTrace{T<:Coordinate} <: Trace{false}
     width::T
 end
 SimpleTrace(width) = SimpleTrace(width)

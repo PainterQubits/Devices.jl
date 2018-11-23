@@ -1,14 +1,14 @@
-abstract type CPW <: ContinuousStyle end
+abstract type CPW{T} <: ContinuousStyle{T} end
 
 """
-    struct GeneralCPW{S,T} <: CPW
+    struct GeneralCPW{S,T} <: CPW{false}
         trace::S
         gap::T
     end
 A CPW with variable trace and gap as a function of path length. `trace` and `gap` are
 callable.
 """
-struct GeneralCPW{S,T} <: CPW
+struct GeneralCPW{S,T} <: CPW{false}
     trace::S
     gap::T
 end
@@ -24,7 +24,7 @@ copy(x::GeneralCPW) = GeneralCPW(x.trace, x.gap)
     end
 A CPW with fixed trace and gap as a function of path length.
 """
-struct SimpleCPW{T<:Coordinate} <: CPW
+struct SimpleCPW{T<:Coordinate} <: CPW{false}
     trace::T
     gap::T
 end

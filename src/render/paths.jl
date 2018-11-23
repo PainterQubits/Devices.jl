@@ -1,5 +1,5 @@
 """
-    render!{T}(c::Cell, p::Path{T}, meta::Meta=GDSMeta(); kwargs...)
+    render!(c::Cell, p::Path{T}, meta::Meta=GDSMeta(); kwargs...) where {T}
 Render a path `p` to a cell `c`.
 """
 function render!(c::Cell, p::Path{T}, meta::Meta=GDSMeta(); kwargs...) where {T}
@@ -59,7 +59,7 @@ function handle_generic_tapers!(p)
         tapernode = p[i]
         prevnode = previous(tapernode)
         nextnode = next(tapernode)
-        if prevnode === tapernode || nextnode === tapernode
+        if (prevnode === tapernode) || (nextnode === tapernode)
             error("A generic taper cannot start or finish a path")
         end
         taper_style = get_taper_style(prevnode, nextnode)
@@ -72,6 +72,7 @@ end
 function get_taper_style(prevnode, nextnode)
     prevstyle = style(prevnode)
     nextstyle = style(nextnode)
+    beginof_next = zero(pathlength(segment(nextnode)))
     endof_prev = pathlength(segment(prevnode))
     # handle case of compound style (#39)
     if prevstyle isa Paths.CompoundStyle
@@ -80,15 +81,7 @@ function get_taper_style(prevnode, nextnode)
     if nextstyle isa Paths.CompoundStyle
         nextstyle = first(nextstyle.styles)
     end
-    # handle special case of tapers, set endof_prev to normalized dimensionless parameter
-    if prevstyle isa Paths.TaperTrace || prevstyle isa Paths.TaperCPW
-        endof_prev = endof_prev/endof_prev
-    end
-    beginof_next = zero(pathlength(segment(nextnode)))
-    # handle special case of tapers, set beginof_next to normalized dimensionless parameter
-    if nextstyle isa Paths.TaperTrace || nextstyle isa Paths.TaperCPW
-        beginof_next = beginof_next/pathlength(segment(nextnode))
-    end
+
     if ((prevstyle isa Paths.CPW || prevstyle isa Paths.Trace)
         && nextstyle isa Paths.CPW || nextstyle isa Paths.Trace)
         #special case: both ends are Traces, make a Paths.TaperTrace
