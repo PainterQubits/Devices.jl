@@ -15,13 +15,13 @@ struct CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle{false}
 end
 function (s::CompoundStyle)(t)
     l0 = s.grid[1]
-    t < l0 && return 1, t - l0
+    t < l0 && return s.styles[1], t - l0
     for i in 2:(length(s.grid) - 1)
         l1 = s.grid[i]
-        (l0 <= t) && (t < l1) && return (i-1), t-l0
+        (l0 <= t) && (t < l1) && return s.styles[i-1], t - l0
         l0 = s.grid[i]
     end
-    return length(s.grid) - 1, t - l0
+    return s.styles[length(s.grid) - 1], t - l0
 end
 
 CompoundStyle(seg::AbstractVector, sty::AbstractVector) =
@@ -46,8 +46,8 @@ end
 
 for x in (:extent, :width)
     @eval function ($x)(s::CompoundStyle, t)
-        idx, teff = s(t)
-        ($x)(s.styles[idx], teff)
+        sty, teff = s(t)
+        ($x)(sty, teff)
     end
 end
 

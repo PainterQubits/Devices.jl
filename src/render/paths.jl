@@ -76,10 +76,10 @@ function get_taper_style(prevnode, nextnode)
     endof_prev = pathlength(segment(prevnode))
     # handle case of compound style (#39)
     if prevstyle isa Paths.CompoundStyle
-        prevstyle = last(prevstyle.styles)
+        prevstyle, endof_prev = prevstyle(endof_prev)
     end
     if nextstyle isa Paths.CompoundStyle
-        nextstyle = first(nextstyle.styles)
+        nextstyle, beginof_next = nextstyle(beginof_next)
     end
 
     if ((prevstyle isa Paths.CPW || prevstyle isa Paths.Trace)
@@ -109,7 +109,7 @@ function get_taper_style(prevnode, nextnode)
                                  trace_end, gap_end)
         end
     else
-        error("A generic taper must have either a CPW or Paths.Trace on both ends")
+        error("a generic taper must have either a Paths.CPW or Paths.Trace on both ends.")
     end
     return thisstyle
 end
