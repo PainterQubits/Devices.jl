@@ -1,15 +1,15 @@
 struct NoRender <: Style end
 struct NoRenderDiscrete <: DiscreteStyle end
-struct NoRenderContinuous <: ContinuousStyle end
+struct NoRenderContinuous <: ContinuousStyle{false} end
 
 """
-    struct SimpleNoRender{T} <: ContinuousStyle
+    struct SimpleNoRender{T} <: ContinuousStyle{false}
         width::T
     end
 A style that inhibits path rendering, but pretends to have a finite width for
 [`Paths.attach!`](@ref).
 """
-struct SimpleNoRender{T} <: ContinuousStyle
+struct SimpleNoRender{T} <: ContinuousStyle{false}
     width::T
 end
 SimpleNoRender(x::T) where {T <: Coordinate} = SimpleNoRender{T}(x)

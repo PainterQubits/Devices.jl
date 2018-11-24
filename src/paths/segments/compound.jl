@@ -1,17 +1,6 @@
 
 """
     struct CompoundSegment{T} <: ContinuousSegment{T}
-        segments::Vector{Segment{T}}
-
-        CompoundSegment(segments) = begin
-            if any(x->isa(x,Corner), segments)
-                error("cannot have corners in a `CompoundSegment`. You may have ",
-                    "tried to simplify a path containing `Corner` objects.")
-            else
-                new(deepcopy(Array(segments)))
-            end
-        end
-    end
 Consider an array of segments as one contiguous segment.
 Useful e.g. for applying styles, uninterrupted over segment changes.
 The array of segments given to the constructor is copied and retained
@@ -32,6 +21,7 @@ struct CompoundSegment{T} <: ContinuousSegment{T}
         end
     end
 end
+
 # Parametric function over the domain [zero(T),pathlength(c)] that represents the
 # compound segments.
 function (s::CompoundSegment{T})(t) where {T}
@@ -68,12 +58,12 @@ function (s::CompoundSegment{T})(t) where {T}
     end
 end
 
-CompoundSegment(nodes::AbstractArray{Node{T},1}) where {T} =
+CompoundSegment(nodes::AbstractVector{Node{T}}) where {T} =
     CompoundSegment{T}(map(segment, nodes))
 
 summary(s::CompoundSegment) = string(length(s.segments), " segments")
-copy(s::CompoundSegment{T}) where {T} = CompoundSegment{T}(s.segments)
-pathlength(s::CompoundSegment{T}) where {T} = sum(pathlength, s.segments)
+copy(s::CompoundSegment) = (typeof(s))(s.segments)
+pathlength(s::CompoundSegment) = sum(pathlength, s.segments)
 
 function setα0p0!(s::CompoundSegment, angle, p::Point)
     setα0p0!(s.segments[1], angle, p)

@@ -9,7 +9,7 @@ Combines styles together, typically for use with a [`CompoundSegment`](@ref).
 by the outer constructor.
 - `grid`: An array of `t` values needed for rendering the parameteric path.
 """
-struct CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle
+struct CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle{false}
     styles::Vector{Style}
     grid::Vector{T}
 end

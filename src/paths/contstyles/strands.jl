@@ -1,7 +1,7 @@
-abstract type Strands <: ContinuousStyle end
+abstract type Strands{T} <: ContinuousStyle{T} end
 
 """
-    struct GeneralStrands{S,T,U} <: Strands
+    struct GeneralStrands{S,T,U} <: Strands{false}
         offset::S
         width::T
         spacing::U
@@ -19,7 +19,7 @@ abstract type Strands <: ContinuousStyle end
 Strands with variable center offset, width, and spacing as a function of path length.
 `offset`, `width`, and `spacing` are callable.
 """
-struct GeneralStrands{S,T,U} <: Strands
+struct GeneralStrands{S,T,U} <: Strands{false}
     offset::S
     width::T
     spacing::U
@@ -33,7 +33,7 @@ copy(x::GeneralStrands) = GeneralStrands(x.offset, x.width, x.spacing, x.num)
 @inline num(s::GeneralStrands, t) = s.num
 
 """
-    struct SimpleStrands{T<:Coordinate} <: Strands
+    struct SimpleStrands{T<:Coordinate} <: Strands{false}
         offset::T
         width::T
         spacing::T
@@ -50,7 +50,7 @@ copy(x::GeneralStrands) = GeneralStrands(x.offset, x.width, x.spacing, x.num)
 
 Strands with fixed center offset, width, and spacing as a function of path length.
 """
-struct SimpleStrands{T<:Coordinate} <: Strands
+struct SimpleStrands{T<:Coordinate} <: Strands{false}
     offset::T
     width::T
     spacing::T

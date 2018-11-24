@@ -61,15 +61,16 @@ export reconcile!,
 
 """
     extent(s,t)
-For a style `s` and parameteric argument `t`, returns a distance tangential
-to the path specifying the lateral extent of the polygons rendered.
+For a style `s`, returns a distance tangential to the path specifying the lateral extent
+of the polygons rendered. The extent is measured from the center of the path to the edge
+of the polygon (half the total width along the path). The extent is evaluated at path length
+`t` from the start of the associated segment.
 """
 function extent end
 
 """
     width(s,t)
-For a style `s` and parameteric argument `t`, returns the width
-of paths rendered.
+For a style `s` and parameteric argument `t`, returns the width of paths rendered.
 """
 function width end
 
@@ -80,10 +81,15 @@ How to render a given path segment.
 abstract type Style end
 
 """
-    abstract type ContinuousStyle <: Style end
-Any style that applies to segments which have non-zero path length.
+    abstract type ContinuousStyle{CanStretch} <: Style end
+Any style that applies to segments which have non-zero path length. For most styles,
+`CanStretch == false`. An example of an exception is a linear taper, e.g.
+[`Paths.TaperTrace`](@ref), where you fix the starting and ending trace widths and let the
+segment length dictate the abruptness of the transition (hence, stretching the style).
+Concrete types inheriting from `ContinuousStyle{true}` should have a length field as the
+last field of their structure.
 """
-abstract type ContinuousStyle <: Style end
+abstract type ContinuousStyle{CanStretch} <: Style end
 
 """
     abstract type DiscreteStyle <: Style end
@@ -91,18 +97,10 @@ Any style that applies to segments which have zero path length.
 """
 abstract type DiscreteStyle <: Style end
 
-#=
-For some styles (e.g. tapers) we will want to provide a segment length to the style during
-operations like `straight!(path, L, TaperCPW(...))` in order to concretely specify how the
-geometry will look. Otherwise the geometry is only partially specified, which makes
-operations like `extent(s, t)` impossible to be used generically.
-=#
-_lengthhint(s::Style) = s
-
 """
     abstract type Segment{T<:Coordinate} end
-Path segment in the plane. All Segment objects should have the implement
-the following methods:
+Path segment in the plane. All Segment objects should have the implement the following
+methods:
 
 - `pathlength`
 - `p0`
@@ -118,17 +116,16 @@ abstract type Segment{T<:Coordinate} end
 Base.zero(::Segment{T}) where {T} = zero(T)     # TODO: remove and fix for 0.6 only versions
 Base.zero(::Type{Segment{T}}) where {T} = zero(T)
 
+# Used only to get dispatch to work right with ForwardDiff.jl.
+struct Curv{T} s::T end
+(s::Curv)(t) = ForwardDiff.derivative(s.s,t)
+
 """
     curvature(s, t)
 Returns the curvature of a function `t->Point(x(t),y(t))` at `t`. The result will have units
 of inverse length if units were used for the segment. The result can be interpreted as the
 inverse radius of a circle with the same curvature.
 """
-curvature
-
-# Used only to get dispatch to work right with ForwardDiff.jl.
-struct Curv{T} s::T end
-(s::Curv)(t) = ForwardDiff.derivative(s.s,t)
 curvature(s, t) = ForwardDiff.derivative(Curv(s), t)
 
 abstract type DiscreteSegment{T} <: Segment{T} end
@@ -152,10 +149,11 @@ mutable struct Node{T<:Coordinate}
 end
 
 """
-    Node{T}(a::Segment{T}, b::Style)
+    Node(a::Segment{T}, b::Style) where {T}
 Create a node with segment `a` and style `b`.
 """
 Node(a::Segment{T}, b::Style) where {T} = Node{T}(a,b)
+
 @inline Base.eltype(::Node{T}) where {T} = T
 @inline Base.eltype(::Type{Node{T}}) where {T} = T
 
@@ -184,16 +182,35 @@ Return the style associated with node `x`.
 style(x::Node) = x.sty
 
 """
-    setsegment!(x::Node, s::Segment)
-Set the segment associated with node `x` to `s`.
+    setsegment!(n::Node, s::Segment)
+Set the segment associated with node `n` to `s`. If `reconcile`, then modify fields as
+appropriate for internal consistency (possibly including other linked nodes).
 """
-setsegment!(x::Node, s::Segment) = x.seg = s
+function setsegment!(n::Node, s::Segment; reconcile=true)
+    n.seg = s
+    if reconcile
+        reconcilefields!(n)
+        reconcilestart!(n)
+        n′ = n
+        while next(n′) !== n′
+            n′ = next(n′)
+            reconcilefields!(n′)
+            reconcilestart!(n′)
+        end
+    end
+    return n
+end
 
 """
-    setstyle!(x::Node, s::Style)
-Set the style associated with node `x` to `s`.
+    setstyle!(n::Node, s::Style; reconcile=true)
+Set the style associated with node `n` to `s`. If `reconcile`, then modify fields as
+appropriate for internal consistency.
 """
-setstyle!(x::Node, s::Style) = x.sty = s
+function setstyle!(n::Node, s::Style; reconcile=true)
+    n.sty = s
+    reconcile && reconcilefields!(n)
+    return n
+end
 
 function deepcopy_internal(x::Style, stackdict::IdDict)
     if haskey(stackdict, x)
@@ -242,13 +259,13 @@ function direction(s, t)
 end
 
 """
-    p0{T}(s::Segment{T})
+    p0(s::Segment{T}) where {T}
 Return the first point in a segment (calculated).
 """
 p0(s::Segment{T}) where {T} = s(zero(T))::Point{T}
 
 """
-    p1{T}(s::Segment{T})
+    p1(s::Segment{T}) where {T}
 Return the last point in a segment (calculated).
 """
 p1(s::Segment{T}) where {T} = s(pathlength(s))::Point{T}
@@ -321,8 +338,8 @@ end
 Path(p0::Point=Point(0.0,0.0); α0=0.0)
 Path(p0x::Real, p0y::Real; kwargs...)
 
-Path{T<:Length}(p0::Point{T}; α0=0.0)
-Path{T<:Length}(p0x::T, p0y::T; kwargs...)
+Path(p0::Point{T}; α0=0.0) where {T<:Length}
+Path(p0x::T, p0y::T; kwargs...) where {T<:Length}
 Path(p0x::Length, p0y::Length; kwargs...)
 
 Path(u::LengthUnits; α0=0.0)
@@ -350,8 +367,8 @@ Path(x::Coordinate, y::Coordinate; kwargs...) = throw(DimensionError(x,y))
 
 """
     pathlength(p::Path)
-    pathlength{T}(array::AbstractArray{Node{T}})
-    pathlength{T<:Segment}(array::AbstractArray{T})
+    pathlength(array::AbstractArray{Node{T}}) where {T}
+    pathlength(array::AbstractArray{T}) where {T<:Segment}
     pathlength(node::Node)
 Physical length of a path. Note that `length` will return the number of
 segments in a path, not the physical length of the path.
@@ -442,10 +459,10 @@ include("segments/corner.jl")
 include("segments/compound.jl")
 
 """
-    discretestyle1{T}(p::Path{T})
+    discretestyle1(p::Path)
 Returns the last-used discrete style in the path.
 """
-discretestyle1(p::Path{T}) where {T} = style1(p, DiscreteStyle)
+discretestyle1(p::Path) = style1(p, DiscreteStyle)
 
 """
     contstyle1(p::Path)
@@ -485,18 +502,22 @@ Segments or styles can have fields that depend on the properties of neighbors. E
 This function reconciles node `n` for consistency with neighbors in this regard.
 """
 function reconcilefields!(n::Node)
-    seg = segment(n)
+    seg,sty = segment(n), style(n)
     if isa(seg, Corner)
         seg.extent = extent(style(previous(n)), 1.0)
+    end
+    if isa(sty, ContinuousStyle{true})
+        n.sty = typeof(sty)(
+            (getfield(sty, i) for i in 1:(nfields(sty)-1))..., pathlength(seg))
     end
 end
 
 """
-    reconcilestart!(n::Node, α0, p0)
+    reconcilestart!(n::Node{T}, α0=0, p0=Point(zero(T), zero(T))) where {T}
 This function reconciles the starting position and angle of the segment at path node `n`
 to match the ending position and angle of the previous node.
 """
-function reconcilestart!(n::Node, α0, p0)
+function reconcilestart!(n::Node{T}, α0=0, p0=Point(zero(T), zero(T))) where {T}
     if previous(n) == n # first node
         setα0p0!(segment(n), α0, p0)
     else
@@ -516,7 +537,7 @@ function reconcile!(p::Path, n::Integer=1)
     for j in n:lastindex(p)
         reconcilelinkedlist!(p,j)
         reconcilefields!(p[j])
-        reconcilestart!(p[j], p.α0, p.p0)
+        reconcilestart!(p[j], α0(p), p0(p))
     end
 end
 
