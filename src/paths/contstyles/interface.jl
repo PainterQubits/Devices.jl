@@ -19,3 +19,17 @@ Creates a style `s′` such that all properties `f(s′, t) == f(s, t+x)`. Basic
 the style forward by path length `x`.
 """
 function translate end
+
+"""
+    pin(s::ContinuousStyle; start=nothing, stop=nothing)
+Imagine having a styled segment of length `L` split into two, the first segment having
+length `l` and the second having length `L-l`. In all but the simplest styles, the styles
+need to be modified in order to maintain the rendered appearances. A style appropriate for
+the segment of length `l` (`L-l`) is given by `pin(s; stop=l)` (`pin(s; start=l)`).
+"""
+function pin(s::ContinuousStyle{false}; start=nothing, stop=nothing)
+    if start !== nothing
+        return translate(s, start)
+    end
+    return s
+end

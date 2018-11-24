@@ -26,6 +26,7 @@ struct GeneralStrands{S,T,U} <: Strands{false}
     num::Int
 end
 copy(x::GeneralStrands) = GeneralStrands(x.offset, x.width, x.spacing, x.num)
+GeneralStrands(o,w,s,n) = GeneralStrands{typeof(o), typeof(w), typeof(s)}(o,w,s,n)
 extent(s::GeneralStrands, t) = s.offset(t) + (s.num)*(s.width(t)) + (s.num - 1)*(s.spacing(t))
 offset(s::GeneralStrands, t) = s.offset(t)
 width(s::GeneralStrands, t) = s.width(t)
