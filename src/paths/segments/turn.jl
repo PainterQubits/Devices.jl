@@ -84,3 +84,12 @@ function turn!(p::Path, str::String, r::Coordinate, sty::Style=contstyle1(p))
     end
     nothing
 end
+
+function _split(seg::Turn{T}, x) where {T}
+    r, α = seg.r, seg.α
+    α1 = x / r
+    α2 = α - α1
+    s1 = Turn{T}(α1, seg.r, seg.p0, seg.α0)
+    s2 = Turn{T}(α2, seg.r, seg(x), seg.α0 + α1)
+    return s1, s2
+end

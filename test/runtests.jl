@@ -1092,6 +1092,21 @@ end
         straight!(pa, 20μm, Paths.Trace(15μm))
         straight!(pa, 20μm, Paths.Trace(20μm))
         simplify!(pa)
+
+        pa2 = split(pa[1], 20μm)
+        @test length(pa2) == 2
+        @test length(segment(pa2[1]).segments) == 1
+        @test p1(segment(pa2[1])) == p0(segment(pa2[2])) == Point(20,0)μm
+        @test p1(segment(pa2[2])) == Point(60,0)μm
+        @test length(segment(pa2[2]).segments) == 2
+
+        pa2 = split(pa[1], 30μm)
+        @test length(pa2) == 2
+        @test length(segment(pa2[1]).segments) == 2
+        @test p1(segment(pa2[1])) == p0(segment(pa2[2])) == Point(30,0)μm
+        @test p1(segment(pa2[2])) == Point(60,0)μm
+        @test length(segment(pa2[2]).segments) == 2
+
         setsegment!(pa[1], Paths.Straight(120.0μm, p(0.0μm, 0.0μm), 0.0))
         render!(c, pa)
         @test lowerleft(bounds(c.elements[1])) ≈ Point(0μm, -5μm)

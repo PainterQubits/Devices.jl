@@ -26,6 +26,7 @@ import Base:
     insert!,
     append!,
     splice!,
+    split,
     intersect!,
     show,
     summary,
@@ -34,6 +35,7 @@ import Base:
 import Base.Iterators
 
 using ForwardDiff
+import IntervalSets.(..)
 import Devices
 import Devices: Polygons, Coordinate, FloatCoordinate, CoordinateUnits, GDSMeta, Meta
 import Devices.Polygons: segmentize, intersects
@@ -760,5 +762,67 @@ terminationlength(s::CPW, t) = gap(s,t)
 
 terminationstyle(pa::Path, t=pathlength(pa[end])) = terminationstyle(style(pa[end]), t)
 terminationstyle(s::CPW, t) = Paths.Trace(2 * extent(s,t))
+
+"""
+    split(n::Node, x)
+Splits a path node at a position `x` along the segment, returning a path.
+
+Splitting and splicing back into a path:
+    splice!(path, i, split(path[i], x))
+"""
+function split(n::Node, x::Coordinate)
+    seg1, seg2, sty1, sty2 = split(segment(n), style(n), x)
+
+    n1 = Node(seg1, sty1)
+    n2 = Node(seg2, sty2)
+    n1.prev = n.prev
+    n1.next = n2
+    n2.prev = n1
+    n2.next = n.next
+
+    return Path([n1, n2])
+end
+
+"""
+    split(n::Node, x::AbstractVector{<:Coordinate}; issorted=false)
+Splits a path node at positions in `x` along the segment, returning a path.
+If `issorted`, don't sort `x` first (otherwise required for this to work).
+"""
+function split(n::Node, x::AbstractVector{<:Coordinate}; issorted=false)
+    @assert !isempty(x)
+    sortedx = issorted ? x : sort(x)
+
+    i = 2
+    L = first(sortedx)
+    path = split(n, L)
+    for pos in view(sortedx, (firstindex(sortedx)+1):lastindex(sortedx))
+        splice!(path, i, split(path[i], pos-L); reconcile=false)
+        L = pos
+        i += 1
+    end
+    reconcile!(path)
+    return path
+end
+
+function split(seg::Segment, sty::Style, x)
+    return (split(seg, x)..., split(sty, x)...)
+end
+
+function split(seg::Segment, x)
+    @assert zero(x) < x < pathlength(seg)
+    @assert seg isa ContinuousSegment
+    return _split(seg, x)
+end
+
+function split(sty::Style, x)
+    @assert sty isa ContinuousStyle
+    return _split(sty, x)
+end
+
+function _split(sty::Style, x)
+    s1, s2 = pin(sty; stop=x), pin(sty; start=x)
+    undecorate!(s1, x)  # don't duplicate attachments at the split point!
+    return s1, s2
+end
 
 end

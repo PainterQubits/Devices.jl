@@ -12,7 +12,7 @@ path function, and are not allowed in a `CompoundSegment`.
 struct CompoundSegment{T} <: ContinuousSegment{T}
     segments::Vector{Segment{T}}
 
-    CompoundSegment{T}(segments) where {T} = begin
+    function CompoundSegment{T}(segments) where {T}
         if any(x->isa(x,Corner), segments)
             error("cannot have corners in a `CompoundSegment`. You may have ",
                 "tried to simplify a path containing `Corner` objects.")
@@ -55,6 +55,34 @@ function (s::CompoundSegment{T})(t) where {T}
     else
         x = a0 + Point(D0x * t, D0y * t)
         return x::Point{R}
+    end
+end
+
+function _split(seg::CompoundSegment{T}, x) where {T}
+    @assert zero(x) < x < pathlength(seg)
+    c = seg.segments
+    isempty(c) && error("cannot split a CompoundSegment based on zero segments.")
+
+    L = pathlength(seg)
+    l0 = zero(L)
+
+    for i in firstindex(c):lastindex(c)
+        seg = c[i]
+        l1 = l0 + pathlength(seg)
+        if l0 <= x < l1
+            if x == l0 # can't happen on the firstindex because we have an assertion earlier
+                # This is a clean split between segments
+                seg1 = CompoundSegment{T}(c[firstindex(c):(i-1)])
+                seg2 = CompoundSegment{T}(c[i:lastindex(c)])
+                return seg1, seg2
+            else
+                s1, s2 = split(seg, x - l0)
+                seg1 = CompoundSegment{T}(push!(c[firstindex(c):(i-1)], s1))
+                seg2 = CompoundSegment{T}(pushfirst!(c[(i+1):lastindex(c)], s2))
+                return seg1, seg2
+            end
+        end
+        l0 = l1
     end
 end
 

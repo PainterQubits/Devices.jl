@@ -53,3 +53,9 @@ function straight!(p::Path, l::Coordinate, sty::Style=contstyle1(p))
     push!(p, Node(seg, convert(ContinuousStyle, sty)))
     nothing
 end
+
+function _split(seg::Straight{T}, x) where {T}
+    s1 = Straight{T}(x, seg.p0, seg.α0)
+    s2 = Straight{T}(seg.l - x, seg(x), seg.α0)
+    return s1, s2
+end
