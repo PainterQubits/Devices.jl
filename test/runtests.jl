@@ -739,7 +739,7 @@ end
     @test grid == [0.0μm, 25μm, 50μm, 75μm, 100μm]
 end
 
-@testset "Style rendering" begin
+@testset "Styles" begin
     @testset "NoRender" begin
         c = Cell("main")
         pa = Path(α0=24.31°)
@@ -1004,8 +1004,8 @@ end
             p(45000.0nm,               50000.0nm),
             p(42136.27270417631nm,     34203.338245082065nm),
             p(31831.68817591114nm,     18192.08230846353nm),
-            p(16324.071497917907nm,    8065.23292385107nm),
-            p(6.429395695523605e-12nm, 5000.0nm)
+            p(16324.071497917907nm,     8065.23292385107nm),
+            p(6.429395695523605e-12nm,  5000.0nm)
         ]
         @test points(c.elements[2]) == Point{typeof(1.0nm)}[
             p(6.429395695523605e-12nm, -5000.0nm),
@@ -1015,11 +1015,30 @@ end
             p(55000.0nm,               50000.0nm),
             p(61000.0nm,               50000.0nm),
             p(57118.0585545501nm,      28586.74739888902nm),
-            p(43149.62174956843nm,     6882.600462583895nm),
+            p(43149.62174956843nm,      6882.600462583895nm),
             p(22128.185808288712nm,    -6844.906481001884nm),
-            p(6.79678973526781e-12nm,  -11000.0nm)
+            p(6.79678973526781e-12nm, -11000.0nm)
         ]
 
+        pa = Path(μm)
+        turn!(pa, π/2, 50.0μm, Paths.CPW(10.0μm, 6.0μm))
+
+        pa2 = split(pa[1], 50.0μm * 30°)
+        let s1 = style(pa2[1]), s2 = style(pa2[2])
+            @test Paths.trace(s1, 0μm) == 10.0μm
+            @test Paths.trace(s1, 50.0μm * 30°) == 10.0μm
+            @test Paths.trace(s2, 0μm) == 10.0μm
+            @test Paths.trace(s2, 50.0μm * 60°) == 10.0μm
+            @test Paths.gap(s1, 0μm) == 6.0μm
+            @test Paths.gap(s1, 50.0μm * 30°) == 6.0μm
+            @test Paths.gap(s2, 0μm) == 6.0μm
+            @test Paths.gap(s2, 50.0μm * 60°) == 6.0μm
+        end
+        let s1 = segment(pa2[1]), s2 = segment(pa2[2])
+            @test p0(s1) == Point(0,0)μm
+            @test p1(s1) == p0(s2) ≈ Point(50.0*sin(30°), 50*(1-cos(30°)))μm
+            @test p1(s2) ≈ Point(50,50)μm
+        end
     end
 
     @testset "Straight, TaperTrace" begin
@@ -1028,11 +1047,29 @@ end
         straight!(pa, 50.0μm, Paths.TaperTrace(10.0μm, 6.0μm))
         render!(c, pa)
         @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
-            p(0.0nm,    5000.0nm),
-            p(50000.0nm, 3000.0nm),
+            p(0.0nm,      5000.0nm),
+            p(50000.0nm,  3000.0nm),
             p(50000.0nm, -3000.0nm),
-            p(0.0nm, -5000.0nm)
+            p(0.0nm,     -5000.0nm)
         ]
+
+        # length not yet specified
+        @test_throws AssertionError split(Paths.TaperTrace(10.0μm, 6.0μm), 10μm)
+
+        pa2 = split(pa[1], 10μm)
+        let s1 = style(pa2[1]), s2 = style(pa2[2])
+            @test Paths.width(s1, 0μm)  ≈ 10.0μm
+            @test Paths.width(s1, 10μm) ≈ 9.2μm
+            @test s1.length == 10μm
+            @test Paths.width(s2, 0μm)  ≈ 9.2μm
+            @test Paths.width(s2, 40μm) ≈ 6.0μm
+            @test s2.length == 40μm
+        end
+        let s1 = segment(pa2[1]), s2 = segment(pa2[2])
+            @test p0(s1) == Point(0,0)μm
+            @test p1(s1) == p0(s2) == Point(10,0)μm
+            @test p1(s2) == Point(50,0)μm
+        end
     end
 
     @testset "Straight, TaperCPW" begin
@@ -1041,17 +1078,33 @@ end
         straight!(pa, 50.0μm, Paths.TaperCPW(10.0μm, 6.0μm, 8.0μm, 2.0μm))
         render!(c, pa)
         @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
-            p(0.0nm,    11000.0nm),
-            p(50000.0nm, 6000.0nm),
-            p(50000.0nm, 4000.0nm),
-            p(0.0nm, 5000.0nm)
+            p(0.0nm,     11000.0nm),
+            p(50000.0nm,  6000.0nm),
+            p(50000.0nm,  4000.0nm),
+            p(0.0nm,      5000.0nm)
         ]
         @test points(c.elements[2]) ≈ Point{typeof(1.0nm)}[
-            p(0.0nm,    -5000.0nm),
-            p(50000.0nm, -4000.0nm),
-            p(50000.0nm, -6000.0nm),
-            p(0.0nm, -11000.0nm)
+            p(0.0nm,      -5000.0nm),
+            p(50000.0nm,  -4000.0nm),
+            p(50000.0nm,  -6000.0nm),
+            p(0.0nm,     -11000.0nm)
         ]
+
+        @test_throws AssertionError split(Paths.TaperCPW(10.0μm, 6.0μm, 8.0μm, 2.0μm), 10μm)
+
+        pa2 = split(pa[1], 10μm)
+        let s1 = style(pa2[1]), s2 = style(pa2[2])
+            @test Paths.trace(s1, 0μm)  ≈ 10.0μm
+            @test Paths.trace(s1, 10μm) ≈ 9.6μm
+            @test Paths.gap(s1, 0μm)    ≈ 6.0μm
+            @test Paths.gap(s1, 10μm)   ≈ 5.2μm
+            @test s1.length == 10μm
+            @test Paths.trace(s2, 0μm)  ≈ 9.6μm
+            @test Paths.trace(s2, 40μm) ≈ 8.0μm
+            @test Paths.gap(s2, 0μm)    ≈ 5.2μm
+            @test Paths.gap(s2, 40μm)   ≈ 2.0μm
+            @test s2.length == 40μm
+        end
     end
 
     @testset "CompoundSegment" begin
