@@ -11,16 +11,22 @@ path function, and are not allowed in a `CompoundSegment`.
 """
 struct CompoundSegment{T} <: ContinuousSegment{T}
     segments::Vector{Segment{T}}
+    tag::Symbol
 
-    function CompoundSegment{T}(segments) where {T}
+    function CompoundSegment{T}(segments, tag=gensym()) where {T}
         if any(x->isa(x,Corner), segments)
             error("cannot have corners in a `CompoundSegment`. You may have ",
                 "tried to simplify a path containing `Corner` objects.")
         else
-            new{T}(deepcopy(Array(segments)))
+            new{T}(deepcopy(Array(segments)), tag)
         end
     end
 end
+copy(s::CompoundSegment) = (typeof(s))(s.segments)
+CompoundSegment(nodes::AbstractVector{Node{T}}, tag=gensym()) where {T} =
+    CompoundSegment{T}(map(segment, nodes), tag)
+CompoundSegment(segments::AbstractVector{Segment{T}}, tag=gensym()) where {T} =
+    CompoundSegment{T}(segments, tag)
 
 # Parametric function over the domain [zero(T),pathlength(c)] that represents the
 # compound segments.
@@ -58,7 +64,7 @@ function (s::CompoundSegment{T})(t) where {T}
     end
 end
 
-function _split(seg::CompoundSegment{T}, x) where {T}
+function _split(seg::CompoundSegment{T}, x, tag1=gensym(), tag2=gensym()) where {T}
     @assert zero(x) < x < pathlength(seg)
     c = seg.segments
     isempty(c) && error("cannot split a CompoundSegment based on zero segments.")
@@ -72,13 +78,13 @@ function _split(seg::CompoundSegment{T}, x) where {T}
         if l0 <= x < l1
             if x == l0 # can't happen on the firstindex because we have an assertion earlier
                 # This is a clean split between segments
-                seg1 = CompoundSegment{T}(c[firstindex(c):(i-1)])
-                seg2 = CompoundSegment{T}(c[i:lastindex(c)])
+                seg1 = CompoundSegment(c[firstindex(c):(i-1)], tag1)
+                seg2 = CompoundSegment(c[i:lastindex(c)], tag2)
                 return seg1, seg2
             else
                 s1, s2 = split(seg, x - l0)
-                seg1 = CompoundSegment{T}(push!(c[firstindex(c):(i-1)], s1))
-                seg2 = CompoundSegment{T}(pushfirst!(c[(i+1):lastindex(c)], s2))
+                seg1 = CompoundSegment(push!(c[firstindex(c):(i-1)], s1), tag1)
+                seg2 = CompoundSegment(pushfirst!(c[(i+1):lastindex(c)], s2), tag2)
                 return seg1, seg2
             end
         end
@@ -86,11 +92,7 @@ function _split(seg::CompoundSegment{T}, x) where {T}
     end
 end
 
-CompoundSegment(nodes::AbstractVector{Node{T}}) where {T} =
-    CompoundSegment{T}(map(segment, nodes))
-
 summary(s::CompoundSegment) = string(length(s.segments), " segments")
-copy(s::CompoundSegment) = (typeof(s))(s.segments)
 pathlength(s::CompoundSegment) = sum(pathlength, s.segments)
 
 function setα0p0!(s::CompoundSegment, angle, p::Point)

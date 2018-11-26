@@ -651,15 +651,16 @@ At `inds`, segments of a path are turned into a `CompoundSegment` and
 styles of a path are turned into a `CompoundStyle`. The method returns a tuple,
 `(segment, style)`.
 
-- Indexing the path becomes more sane when you can combine several path
-segments into one logical element. A launcher would have several indices
-in a path unless you could simplify it.
-- You don't need to think hard about boundaries between straights and turns
-when you want a continuous styling of a very long path.
+- Indexing the path becomes more sane when you can combine several path segments into one
+  logical element. A launcher would have several indices in a path unless you could simplify
+  it.
+- You don't need to think hard about boundaries between straights and turns when you want a
+  continuous styling of a very long path.
 """
 function simplify(p::Path, inds::UnitRange=firstindex(p):lastindex(p))
-    cseg = CompoundSegment(nodes(p)[inds])
-    csty = CompoundStyle(cseg.segments, map(style, nodes(p)[inds]))
+    tag = gensym()
+    cseg = CompoundSegment(nodes(p)[inds], tag)
+    csty = CompoundStyle(cseg.segments, map(style, nodes(p)[inds]), tag)
     Node(cseg, csty)
 end
 
@@ -676,12 +677,12 @@ end
 
 """
     meander!(p::Path, len, straightlen, r, α)
-Alternate between going straight with length `straightlen` and turning
-with radius `r` and angle `α`. Each turn goes the opposite direction of the
-previous. The total length is `len`. Useful for making resonators.
+Alternate between going straight with length `straightlen` and turning with radius `r` and
+angle `α`. Each turn goes the opposite direction of the previous. The total length is `len`.
+Useful for making resonators.
 
-The straight and turn segments are combined into a `CompoundSegment` and
-appended to the path `p`.
+The straight and turn segments are combined into a `CompoundSegment` and appended to the
+path `p`.
 """
 function meander!(p::Path, len, straightlen, r, α)
     unit = straightlen + r*abs(α)
@@ -823,6 +824,10 @@ function _split(sty::Style, x)
     s1, s2 = pin(sty; stop=x), pin(sty; start=x)
     undecorate!(s1, x)  # don't duplicate attachments at the split point!
     return s1, s2
+end
+
+function _split(sty::CompoundStyle, x, tag1, tag2)
+    return pin(sty; stop=x, tag=tag1), pin(sty; start=x, tag=tag2)
 end
 
 end

@@ -12,6 +12,7 @@ by the outer constructor.
 struct CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle{false}
     styles::Vector{Style}
     grid::Vector{T}
+    tag::Symbol
 end
 function (s::CompoundStyle)(t)
     l0 = s.grid[1]
@@ -23,9 +24,9 @@ function (s::CompoundStyle)(t)
     end
     return s.styles[length(s.grid) - 1], t - l0
 end
-copy(s::CompoundStyle) = (typeof(s))(deepcopy(s.styles), copy(s.grid))
-CompoundStyle(seg::AbstractVector, sty::AbstractVector) =
-    CompoundStyle(deepcopy(Vector{Style}(sty)), makegrid(seg, sty))
+copy(s::CompoundStyle, tag=gensym()) = (typeof(s))(deepcopy(s.styles), copy(s.grid), tag)
+CompoundStyle(seg::AbstractVector{Segment{T}}, sty::AbstractVector, tag=gensym()) where {T} =
+    CompoundStyle(deepcopy(Vector{Style}(sty)), makegrid(seg, sty), tag)
 
 """
     makegrid{T<:Segment}(segments::AbstractVector{T}, styles)
@@ -53,8 +54,15 @@ end
 
 summary(::CompoundStyle) = "Compound style"
 
-function translate(s::CompoundStyle, x)
-    s′ = copy(s)
+function translate(s::CompoundStyle, x, tag=gensym())
+    s′ = copy(s, tag)
     s′.grid .-= x
     return s′
+end
+
+function pin(s::CompoundStyle; start=nothing, stop=nothing, tag=gensym())
+    if start !== nothing
+        return translate(s, start, tag)
+    end
+    return copy(s, tag)
 end
