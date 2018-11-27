@@ -23,6 +23,31 @@ const DEFAULT_LAYER = 0
 const DEFAULT_DATATYPE = 0
 const D3STR = read(joinpath(dirname(@__FILE__), "../deps/d3.min.js"), String)
 
+# setup for robust 2d predicates
+const splitter, epsilon =
+    let every_other = true, half = 0.5, epsilon = 1.0, splitter = 1.0, check = 1.0
+        lastcheck = check
+        epsilon *= half
+        every_other && (splitter *= 2.0)
+        every_other = !every_other
+        check = 1.0 + epsilon
+
+        while (check != 1.0) && (check != lastcheck)
+            lastcheck = check
+            epsilon *= half
+            every_other && (splitter *= 2.0)
+            every_other = !every_other
+            check = 1.0 + epsilon
+        end
+        splitter += 1.0
+        splitter, epsilon
+    end
+
+const resulterrbound = (3.0 + 8.0 * epsilon) * epsilon
+const ccwerrboundA   = (3.0 + 16.0 * epsilon) * epsilon
+const ccwerrboundB   = (2.0 + 12.0 * epsilon) * epsilon
+const ccwerrboundC   = (9.0 + 64.0 * epsilon) * epsilon * epsilon
+
 function __init__()
     # To ensure no crashes
     global _clip = Ref(Clipper.Clip())
@@ -92,6 +117,8 @@ export Points, Point, Rotation, Translation, XReflection, YReflection,
     getx,
     gety,
     ∘
+
+include("predicates.jl")
 
 abstract type Meta end
 struct GDSMeta <: Meta

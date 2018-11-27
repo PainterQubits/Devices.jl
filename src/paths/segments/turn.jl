@@ -10,9 +10,11 @@ mutable struct Turn{T} <: ContinuousSegment{T}
     α0::Float64
 end
 function (s::Turn)(t)
+    # assuming s.α not zero
     x = ifelse(s.r == zero(s.r), typeof(s.r)(one(s.r)), s.r) # guard against div by zero
-    cen = s.p0 + Point(s.r*cos(s.α0+sign(s.α)*π/2), s.r*sin(s.α0+sign(s.α)*π/2))
-    cen + Point(s.r*cos(s.α0-sign(s.α)*(π/2-t/x)), s.r*sin(s.α0-sign(s.α)*(π/2-t/x)))
+    cen = s.p0 + Point(-s.r*sign(s.α)sin(s.α0), s.r*sign(s.α)cos(s.α0))
+    return cen + Point(s.r*(cos(s.α0)*sin(t/x) + sign(s.α)*sin(s.α0)*cos(t/x)),
+                       s.r*(sin(s.α0)*sin(t/x) - sign(s.α)*cos(s.α0)*cos(t/x)))
 end
 
 """

@@ -9,12 +9,12 @@ import Base: copy, promote_rule
 using ForwardDiff
 import CoordinateTransformations: AffineMap, LinearMap, Translation
 import Clipper
-import Clipper: orientation, children, contour
+import Clipper: children, contour
 import StaticArrays
 
 import Devices
 import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
-import Devices: bounds, lowerleft, upperright
+import Devices: bounds, lowerleft, upperright, orientation
 import Unitful
 import Unitful: Quantity, Length, dimension, unit, ustrip, uconvert, °
 using ..Points
@@ -22,6 +22,7 @@ using ..Rectangles
 import ..cclipper
 
 import IntervalSets.(..)
+import IntervalSets.endpoints
 
 export Polygon
 export points
@@ -464,6 +465,8 @@ struct Line{T} <: D1{T}
     p1::Point{T}
 end
 Line(p0::Point{S}, p1::Point{T}) where {S,T} = Line(promote(p0, p1)...)
+Line(seg::LineSegment) = Line(seg.p0, seg.p1)
+
 Base.promote_rule(::Type{Line{S}}, ::Type{Line{T}}) where {S,T} = Line{promote_type(S,T)}
 Base.convert(::Type{Line{S}}, L::Line) where S = Line{S}(L.p0, L.p1)
 
@@ -531,7 +534,9 @@ iscolinear(A::Point, B::D1) = iscolinear(B, A)
 
 """
     intersects(A::LineSegment, B::LineSegment)
-Does `A` intersect `B`?
+Returns two `Bool`s:
+1) Does `A` intersect `B`?
+2) Did an intersection happen at a single point? (`false` if no intersection)
 """
 function intersects(A::LineSegment, B::LineSegment)
     sb0 = orientation(A.p0, A.p1, B.p0)
@@ -543,37 +548,48 @@ function intersects(A::LineSegment, B::LineSegment)
     sa = sa0 == sa1
 
     if sa == false && sb == false
-        return true
+        return true, true
     else
         # Test for special case of colinearity
         if sb0 == sb1 == sa0 == sa1 == 0
             xinter = intersect(A.p0.x..A.p1.x, B.p0.x..B.p1.x)
             yinter = intersect(A.p0.y..A.p1.y, B.p0.y..B.p1.y)
             if !isempty(xinter) && !isempty(yinter)
-               return true
+                if reduce(==, endpoints(xinter)) && reduce(==, endpoints(yinter))
+                    return true, true
+                else
+                    return true, false
+                end
             else
-               return false
+                return false, false
             end
         else
-            return false
+            return false, false
         end
     end
 end
 
 """
-    intersects_onsegment(A::LineSegment, B::LineSegment)
-Returns `true` if `intersects(A,B)` and the intersection was not between endpoints of both
-`A` and `B`.
+    intersects_at_endpoint(A::LineSegment, B::LineSegment)
+Returns three `Bool`s:
+1) Does `A` intersect `B`?
+2) Did an intersection happen at a single point? (`false` if no intersection)
+3) Did an endpoint of `A` intersect an endpoint of `B`?
 """
-function intersects_onsegment(A::LineSegment, B::LineSegment)
-    if intersects(A,B)
-        if (A.p0 == B.p0) || (A.p0 == B.p1) || (A.p1 == B.p0) || (A.p1 == B.p1)
-            return false
+function intersects_at_endpoint(A::LineSegment, B::LineSegment)
+    A_intersects_B, atapoint = intersects(A,B)
+    if A_intersects_B
+        if atapoint
+            if (A.p1 == B.p0) || (A.p1 == B.p1) || (A.p0 == B.p0) || (A.p0 == B.p1)
+                return A_intersects_B, atapoint, true
+            else
+                return A_intersects_B, atapoint, false
+            end
         else
-            return true
+            return A_intersects_B, atapoint, false
         end
     else
-        return false
+        return A_intersects_B, atapoint, false
     end
 end
 

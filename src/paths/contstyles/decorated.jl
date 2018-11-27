@@ -1,17 +1,17 @@
 """
     mutable struct DecoratedStyle{T<:FloatCoordinate} <: ContinuousStyle{false}
         s::Style
-        ts::Array{Float64,1}
-        dirs::Array{Int,1}
-        refs::Array{CellReference,1}
+        ts::Vector{Float64}
+        dirs::Vector{Int}
+        refs::Vector{CellReference}
     end
 Style with decorations, like structures periodically repeated along the path, etc.
 """
 mutable struct DecoratedStyle{T<:FloatCoordinate} <: ContinuousStyle{false}
     s::Style
-    ts::Array{T,1}
-    dirs::Array{Int,1}
-    refs::Array{CellReference,1}
+    ts::Vector{T}
+    dirs::Vector{Int}
+    refs::Vector{CellReference}
 end
 summary(s::DecoratedStyle) = string(summary(s.s), " with ", length(s.refs), " decorations")
 
