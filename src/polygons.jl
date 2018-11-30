@@ -672,7 +672,7 @@ this. This function makes cuts between the inner/outer contours so that ultimate
 is just one contour with one or more overlapping edges.
 
 Example:
-⁠⁠┌────────────┐               ⁠⁠┌────────────┐
+┌────────────┐               ┌────────────┐
 │ ┌──┐       │   becomes...  │ ┌──┐       │
 │ └──┘  ┌──┐ │               │ ├──┘  ┌──┐ │
 │       └──┘ │               │ │     ├──┘ │

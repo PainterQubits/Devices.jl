@@ -310,7 +310,8 @@ Convenience constructors for `Path{T}` object.
 mutable struct Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
     α0::Float64
-    nodes::Array{Node{T},1}
+    nodes::Vector{Node{T}}
+    laststyle::ContinuousStyle
 
     Path{T}() where {T} = new{T}(Point(zero(T),zero(T)), 0.0, Node{T}[])
     Path{T}(a,b,c) where {T} = new{T}(a,b,c)
@@ -458,9 +459,12 @@ discretestyle1(p::Path) = style1(p, DiscreteStyle)
 
 """
     contstyle1(p::Path)
-Returns the last-used discrete style in the path.
+Returns the last user-provided continuous style in the path.
 """
-contstyle1(p::Path) = style1(p, ContinuousStyle)
+function contstyle1(p::Path)
+    isdefined(p, :laststyle) || error("path is empty, provide a style.")
+    return p.laststyle
+end
 
 """
     reconcilelinkedlist!(p::Path, m::Integer)

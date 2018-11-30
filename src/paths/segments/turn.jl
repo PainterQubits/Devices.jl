@@ -54,8 +54,11 @@ Positive angle turns left. By default, we take the last continuous style in the 
 function turn!(p::Path, α, r::Coordinate, sty::Style=contstyle1(p))
     T = eltype(p)
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
+    !isempty(p) && (segment(last(p)) isa Paths.Corner) &&
+        error("`Paths.Straight` segments must follow `Paths.Corner`s.")
     seg = Turn{T}(α, r, p1(p), α1(p))
     push!(p, Node(seg, convert(ContinuousStyle, sty)))
+    p.laststyle = sty
     nothing
 end
 
@@ -72,6 +75,8 @@ By default, we take the last continuous style in the path.
 function turn!(p::Path, str::String, r::Coordinate, sty::Style=contstyle1(p))
     T = eltype(p)
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
+    !isempty(p) && (segment(last(p)) isa Paths.Corner) &&
+        error("`Paths.Straight` segments must follow `Paths.Corner`s.")
     for ch in str
         if ch == 'l'
             α = π/2
@@ -84,6 +89,7 @@ function turn!(p::Path, str::String, r::Coordinate, sty::Style=contstyle1(p))
         # convert takes NoRender() → NoRenderContinuous()
         push!(p, Node(seg, convert(ContinuousStyle, sty)))
     end
+    p.laststyle = sty
     nothing
 end
 

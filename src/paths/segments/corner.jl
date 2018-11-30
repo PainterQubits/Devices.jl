@@ -26,13 +26,14 @@ copy(x::Corner{T}) where {T} = Corner{T}(x.α, x.p0, x.α0, x.extent)
 
 pathlength(::Corner{T}) where {T} = zero(T)
 p0(s::Corner) = s.p0
-function p1(s::Corner)
-    sgn = ifelse(s.α >= 0.0, 1, -1)
-    ∠A = s.α0+sgn*π/2
-    v = s.extent*Point(cos(∠A),sin(∠A))
-    ∠B = ∠A + π + s.α
-    s.p0+v+s.extent*Point(cos(∠B),sin(∠B))
-end
+p1(s::Corner) = s.p0
+# function p1(s::Corner)
+#     sgn = ifelse(s.α >= 0.0, 1, -1)
+#     ∠A = s.α0+sgn*π/2
+#     v = s.extent*Point(cos(∠A),sin(∠A))
+#     ∠B = ∠A + π + s.α
+#     s.p0+v+s.extent*Point(cos(∠B),sin(∠B))
+# end
 α0(s::Corner) = s.α0
 α1(s::Corner) = s.α0 + s.α
 setp0!(s::Corner, p::Point) = s.p0 = p
@@ -47,8 +48,17 @@ The style chosen for this corner, if not specified, is the last `DiscreteStyle` 
 path.
 """
 function corner!(p::Path, α, sty::Style=discretestyle1(p))
+    segment(last(p)) isa Paths.Straight ||
+        error("corners must follow `Paths.Straight` segments.")
     T = eltype(p)
     seg = Corner{T}(α)
+
+    ext = extent(style(p[end]), pathlength(p[end]))
+    w = ext * tan(abs(0.5*seg.α))
+    pa = split(p[end], pathlength(p[end]) - w)
+    setstyle!(pa[end], SimpleNoRender(2*ext))
+    splice!(p, length(p), pa)
+
     # convert takes NoRender() → NoRenderDiscrete()
     push!(p, Node(seg, convert(DiscreteStyle, sty)))
     nothing

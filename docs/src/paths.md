@@ -72,9 +72,16 @@ render!(c, p, GDSMeta(0))
 
 Sharp turns in a path can be accomplished with [`Paths.corner!`](@ref). Sharp turns pose a
 challenge to the path abstraction in that they have zero length, and when rendered
-effectively take up some length of the neighboring segments. These details are
-automatically accounted for by tweaking segment lengths and other captured segment variables
-just before rendering a path.
+effectively take up some length of the neighboring segments. Originally, the segment lengths
+were tweaked at render time to achieve the intended output. As other code began taking
+advantage of the path abstractions, the limitations of this approach became apparent.
+
+Currently, corners are implemented such that the preceding [`Paths.Node`](@ref) is split
+using [`Paths.split`](@ref) near the corner when `corner!` is used, and a short resulting
+section near the corner has the style changed to [`Paths.SimpleNoRender`](@ref).
+When this is followed by [`Paths.straight!`](@ref) to create the next segment, a similar
+operation is done, to ensure the corner is not twice-rendered. This change was necessary
+to be able to use [`Paths.intersect!`](@ref) on paths with corners.
 
 ## Attachments
 

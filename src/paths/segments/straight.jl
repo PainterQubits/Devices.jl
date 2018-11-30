@@ -49,8 +49,23 @@ function straight!(p::Path, l::Coordinate, sty::Style=contstyle1(p))
     dimension(T) != dimension(typeof(l)) && throw(DimensionError(T(1),l))
     @assert l >= zero(l) "tried to go straight by a negative amount."
     seg = Straight{T}(l, p1(p), α1(p))
-    # convert takes NoRender() → NoRenderContinuous()
-    push!(p, Node(seg, convert(ContinuousStyle, sty)))
+
+    if !isempty(p) && (segment(last(p)) isa Paths.Corner)
+        cseg = segment(last(p))
+        minlen = cseg.extent * tan(abs(0.5*cseg.α))
+        @assert l > minlen "straight following corner needs minimum length $l."
+
+        # convert takes NoRender() → NoRenderContinuous()
+        push!(p, Node(seg, convert(ContinuousStyle, sty)))
+
+        pa = split(p[end], minlen)
+        setstyle!(pa[1], SimpleNoRender(2*cseg.extent))
+        splice!(p, length(p), pa)
+    else
+        # convert takes NoRender() → NoRenderContinuous()
+        push!(p, Node(seg, convert(ContinuousStyle, sty)))
+    end
+    p.laststyle = sty
     nothing
 end
 
