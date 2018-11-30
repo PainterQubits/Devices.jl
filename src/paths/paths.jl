@@ -190,7 +190,7 @@ function setsegment!(n::Node, s::Segment; reconcile=true)
     n.seg = s
     if reconcile
         reconcilefields!(n)
-        reconcilestart!(n)
+        reconcilestart!(n, α0(s), p0(s))
         n′ = n
         while next(n′) !== n′
             n′ = next(n′)

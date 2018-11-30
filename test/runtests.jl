@@ -664,6 +664,12 @@ end
         @test ForwardDiff.derivative(segment(pa[2]), (5π/2)μm) ≈ Point(0.0, 1.0)
         @test Devices.Paths.curvature(segment(pa[2]), 0.0μm) ≈ Point(0.0/μm, 0.2/μm)
         @test Devices.Paths.curvature(segment(pa[2]), (5π/2)μm) ≈ Point(-0.2/μm, 0.0/μm)
+
+        # test setsegment! works correctly
+        pa = Path(μm, α0=90°)
+        straight!(pa, 100μm, Paths.Trace(2μm))
+        setsegment!(pa[1], copy(segment(pa[1])))
+        @test α0(pa) == 90°
     end
 
     @testset "> Path-based launchers" begin
