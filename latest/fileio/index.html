@@ -469,7 +469,7 @@
 <li><code>acc</code>: date of last accession. It would be unusual to have this differ from <code>now()</code>.</li>
 <li><code>verbose</code>: monitor the output of <a href="../cells/#Devices.Cells.traverse!"><code>traverse!</code></a> and <a href="../cells/#Devices.Cells.order!"><code>order!</code></a> to see if something funny is happening while saving.</li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/af82e7b511d1942895905b9e9f04592d7269f7af/src/backends/gds.jl#L447-L464' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/cafb11a0e588cae639c234de1076831a31f0160c/src/backends/gds.jl#L447-L464' class='documenter-source'>source</a><br></p>
 <p>Using the <a href="https://cairographics.org">Cairo graphics library</a>, it is possible to save patterns into SVG, PDF, and EPS vector graphics formats, or into the PNG raster graphic format. This enables patterns to be displayed in web browsers, publications, presentations, and so on. You can save a cell to a graphics file by, e.g. <code>save("/path/to/file.svg", mycell)</code>. Note that cell references and arrays are not saved, so you should flatten cells if desired before saving them.</p>
 <p>Possible keyword arguments include:</p>
 <ul>
@@ -502,7 +502,7 @@
 <p>Encountering an ENDLIB record will discard the remainder of the GDS-II file without warning. If no ENDLIB record is present, a warning will be thrown.</p>
 <p>The content of some records are currently discarded (mainly the more obscure GDS-II record types, but also BGNLIB and LIBNAME).</p>
 <p>If <code>nounits</code> is true, <code>Cell{Float64}</code> objects will be returned, where 1.0 corresponds to one micron.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/af82e7b511d1942895905b9e9f04592d7269f7af/src/backends/gds.jl#L498-L528' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/cafb11a0e588cae639c234de1076831a31f0160c/src/backends/gds.jl#L498-L528' class='documenter-source'>source</a><br></p>
                 
                   
                 
