@@ -24,6 +24,7 @@ import Base:
     popfirst!,
     insert!,
     append!,
+    splice!,
     show,
     summary,
     dims2string
@@ -543,6 +544,18 @@ function reconcile!(p::Path, n::Integer=1)
 end
 
 # Methods for Path as AbstractArray
+
+function splice!(p::Path, inds; reconcile=true)
+    n = splice!(nodes(p), inds)
+    reconcile && reconcile!(p, first(inds))
+    return n
+end
+function splice!(p::Path, inds, p2::Path; reconcile=true)
+    n = splice!(nodes(p), inds, nodes(p2))
+    reconcile && reconcile!(p, first(inds))
+    return n
+end
+
 length(p::Path) = length(nodes(p))
 iterate(p::Path, state...) = iterate(nodes(p), state...)
 enumerate(p::Path) = enumerate(nodes(p))
