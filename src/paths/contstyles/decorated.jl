@@ -67,7 +67,7 @@ end
 
 function attach!(p::Path, c::CellReference, t;
         i::Int=length(p), location=zeros(Int, length(t)))
-    for (ti, li) in zip(t, cycle(location))
+    for (ti, li) in zip(t, Iterators.cycle(location))
         attach!(p, c, ti; i=i, location=li)
     end
 end
