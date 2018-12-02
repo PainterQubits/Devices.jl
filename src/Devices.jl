@@ -174,6 +174,7 @@ import .Paths: Path,
     style0,
     style1,
     setstyle!,
+    terminate!,
     turn!,
     undecorated
 
@@ -200,6 +201,7 @@ export Paths, Path, Segment, Style,
     style1,
     setstyle!,
     straight!,
+    terminate!,
     turn!,
     undecorated
 

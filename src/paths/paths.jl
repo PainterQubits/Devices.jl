@@ -56,6 +56,7 @@ export reconcile!,
     straight!,
     style,
     setstyle!,
+    terminate!,
     turn!,
     undecorated
 
@@ -752,5 +753,21 @@ function _launch!(p::Path{T}; kwargs...) where {T <: Coordinate}
 
     CPW(trace1, gap1)
 end
+
+"""
+    terminate!(pa::Path)
+End a path with open termination (do nothing for a trace, leave a gap for a CPW).
+"""
+function terminate!(pa::Path{T}) where T
+    terminationlength(pa) > zero(T) &&
+        straight!(pa, terminationlength(pa), terminationstyle(pa))
+end
+
+terminationlength(pa::Path, t=pathlength(pa[end])) = terminationlength(style(pa[end]), t)
+terminationlength(s::Trace, t) = zero(t)
+terminationlength(s::CPW, t) = gap(s,t)
+
+terminationstyle(pa::Path, t=pathlength(pa[end])) = terminationstyle(style(pa[end]), t)
+terminationstyle(s::CPW, t) = Paths.Trace(2 * extent(s,t))
 
 end
