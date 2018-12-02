@@ -28,7 +28,7 @@ import Base:
     summary,
     dims2string
 
-import Base.Iterators: rest, take, drop, cycle
+import Base.Iterators
 
 using ForwardDiff
 import Devices
@@ -545,10 +545,10 @@ end
 length(p::Path) = length(nodes(p))
 iterate(p::Path, state...) = iterate(nodes(p), state...)
 enumerate(p::Path) = enumerate(nodes(p))
-rest(p::Path, state) = rest(nodes(p), state)
-take(p::Path, n::Int) = take(nodes(p), n)
-drop(p::Path, n::Int) = drop(nodes(p), n)
-cycle(p::Path) = cycle(nodes(p))
+Iterators.rest(p::Path, state) = Iterators.rest(nodes(p), state)
+Iterators.take(p::Path, n::Int) = Iterators.take(nodes(p), n)
+Iterators.drop(p::Path, n::Int) = Iterators.drop(nodes(p), n)
+Iterators.cycle(p::Path) = Iterators.cycle(nodes(p))
 isempty(p::Path) = isempty(nodes(p))
 empty!(p::Path) = empty!(nodes(p))
 function deleteat!(p::Path, inds)
