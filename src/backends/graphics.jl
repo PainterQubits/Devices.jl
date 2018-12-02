@@ -30,6 +30,15 @@ const layercolors = Dict(
     14=>(0xb8,0xa9,0xc9,0x80)./0xff,
     15=>(0x62,0x25,0x69,0x80)./0xff
 )
+for i in 21:30
+    layercolors[i] = ((i-20)/10, 0, 0, 0.5)
+end
+for i in 31:40
+    layercolors[i] = (0, (i-30)/10,  0, 0.5)
+end
+for i in 41:50
+    layercolors[i] = (0, 0, (i-40)/10, 0.5)
+end
 
 function fillcolor(options, layer)
     haskey(options, :layercolors) && haskey(options[:layercolors], layer) &&
