@@ -13,9 +13,9 @@ struct GeneralCPW{S,T} <: CPW{false}
     gap::T
 end
 copy(x::GeneralCPW) = GeneralCPW(x.trace, x.gap)
-@inline extent(s::GeneralCPW, t) = s.trace(t)/2 + s.gap(t)
-@inline trace(s::GeneralCPW, t) = s.trace(t)
-@inline gap(s::GeneralCPW, t) = s.gap(t)
+extent(s::GeneralCPW, t) = s.trace(t)/2 + s.gap(t)
+trace(s::GeneralCPW, t) = s.trace(t)
+gap(s::GeneralCPW, t) = s.gap(t)
 
 """
     struct SimpleCPW{T<:Coordinate} <: CPW
@@ -29,9 +29,9 @@ struct SimpleCPW{T<:Coordinate} <: CPW{false}
     gap::T
 end
 copy(x::SimpleCPW) = SimpleCPW(x.trace, x.gap)
-@inline extent(s::SimpleCPW, t...) = s.trace/2 + s.gap
-@inline trace(s::SimpleCPW, t...) = s.trace
-@inline gap(s::SimpleCPW, t...) = s.gap
+extent(s::SimpleCPW, t...) = s.trace/2 + s.gap
+trace(s::SimpleCPW, t...) = s.trace
+gap(s::SimpleCPW, t...) = s.gap
 
 """
     CPW(trace::Coordinate, gap::Coordinate)

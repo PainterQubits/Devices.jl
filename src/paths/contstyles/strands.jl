@@ -26,11 +26,11 @@ struct GeneralStrands{S,T,U} <: Strands{false}
     num::Int
 end
 copy(x::GeneralStrands) = GeneralStrands(x.offset, x.width, x.spacing, x.num)
-@inline extent(s::GeneralStrands, t) = s.offset(t) + (s.num)*(s.width(t)) + (s.num - 1)*(s.spacing(t))
-@inline offset(s::GeneralStrands, t) = s.offset(t)
-@inline width(s::GeneralStrands, t) = s.width(t)
-@inline spacing(s::GeneralStrands, t) = s.spacing(t)
-@inline num(s::GeneralStrands, t) = s.num
+extent(s::GeneralStrands, t) = s.offset(t) + (s.num)*(s.width(t)) + (s.num - 1)*(s.spacing(t))
+offset(s::GeneralStrands, t) = s.offset(t)
+width(s::GeneralStrands, t) = s.width(t)
+spacing(s::GeneralStrands, t) = s.spacing(t)
+num(s::GeneralStrands, t) = s.num
 
 """
     struct SimpleStrands{T<:Coordinate} <: Strands{false}
@@ -57,11 +57,11 @@ struct SimpleStrands{T<:Coordinate} <: Strands{false}
     num::Int
 end
 copy(x::SimpleStrands) = SimpleStrands(x.offset, x.width, x.spacing, x.num)
-@inline extent(s::SimpleStrands, t...) = s.offset + (s.num)*(s.width + (s.num - 1)*(s.spacing))
-@inline offset(s::SimpleStrands, t...) = s.offset
-@inline width(s::SimpleStrands, t...) = s.width
-@inline spacing(s::SimpleStrands, t...) = s.spacing
-@inline num(s::SimpleStrands, t...) = s.num
+extent(s::SimpleStrands, t...) = s.offset + (s.num)*(s.width + (s.num - 1)*(s.spacing))
+offset(s::SimpleStrands, t...) = s.offset
+width(s::SimpleStrands, t...) = s.width
+spacing(s::SimpleStrands, t...) = s.spacing
+num(s::SimpleStrands, t...) = s.num
 
 """
     Strands(offset::Coordinate, width::Coordinate, spacing::Coordinate, num::Int)

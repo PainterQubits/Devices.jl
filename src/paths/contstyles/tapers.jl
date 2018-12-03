@@ -14,8 +14,8 @@ struct TaperTrace{T<:Coordinate} <: Trace{true}
     TaperTrace{T}(ws::T, we::T, l) where {T<:Coordinate} = new{T}(ws, we, l)
 end
 copy(x::TaperTrace) = TaperTrace(x.width_start, x_width_end)
-@inline extent(s::TaperTrace, t) = 0.5 * width(s,t)
-@inline width(s::TaperTrace, t) = (1-t/s.length) * s.width_start + t/s.length * s.width_end
+extent(s::TaperTrace, t) = 0.5 * width(s,t)
+width(s::TaperTrace, t) = (1-t/s.length) * s.width_start + t/s.length * s.width_end
 function TaperTrace(width_start::Coordinate, width_end::Coordinate)
     dimension(width_start) != dimension(width_end) && throw(DimensionError(trace,gap))
     w_s,w_e = promote(float(width_start), float(width_end))
@@ -43,10 +43,10 @@ struct TaperCPW{T<:Coordinate} <: CPW{true}
         new{T}(ts, gs, te, ge, l)
 end
 copy(x::TaperCPW) = TaperCPW(x.trace_start, x.gap_start, x.trace_end, x.gap_end)
-@inline extent(s::TaperCPW, t) = (1-t/s.length) * (0.5*s.trace_start + s.gap_start) +
+extent(s::TaperCPW, t) = (1-t/s.length) * (0.5*s.trace_start + s.gap_start) +
     (t/s.length) * (0.5*s.trace_end + s.gap_end)
-@inline trace(s::TaperCPW, t) = (1-t/s.length) * s.trace_start + t/s.length * s.trace_end
-@inline gap(s::TaperCPW, t) = (1-t/s.length) * s.gap_start + t/s.length * s.gap_end
+trace(s::TaperCPW, t) = (1-t/s.length) * s.trace_start + t/s.length * s.trace_end
+gap(s::TaperCPW, t) = (1-t/s.length) * s.gap_start + t/s.length * s.gap_end
 function TaperCPW(trace_start::Coordinate, gap_start::Coordinate, trace_end::Coordinate, gap_end::Coordinate)
     ((dimension(trace_start) != dimension(gap_start)
         || dimension(trace_end) != dimension(gap_end)

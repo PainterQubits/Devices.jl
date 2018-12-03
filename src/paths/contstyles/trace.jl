@@ -10,8 +10,8 @@ struct GeneralTrace{T} <: Trace{false}
     width::T
 end
 copy(x::GeneralTrace) = GeneralTrace(x.width)
-@inline extent(s::GeneralTrace, t) = s.width(t)/2
-@inline width(s::GeneralTrace, t) = s.width(t)
+extent(s::GeneralTrace, t) = 0.5*s.width(t)
+width(s::GeneralTrace, t) = s.width(t)
 
 """
     struct SimpleTrace{T<:Coordinate} <: Trace{false}
@@ -24,8 +24,8 @@ struct SimpleTrace{T<:Coordinate} <: Trace{false}
 end
 SimpleTrace(width) = SimpleTrace(width)
 copy(x::SimpleTrace) = Trace(x.width)
-@inline extent(s::SimpleTrace, t...) = s.width/2
-@inline width(s::SimpleTrace, t...) = s.width
+extent(s::SimpleTrace, t...) = 0.5*s.width
+width(s::SimpleTrace, t...) = s.width
 
 """
     Trace(width)
