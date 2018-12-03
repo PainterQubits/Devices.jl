@@ -23,7 +23,7 @@ function (s::CompoundStyle)(t)
     end
     return s.styles[length(s.grid) - 1], t - l0
 end
-
+copy(s::CompoundStyle) = (typeof(s))(deepcopy(s.styles), copy(s.grid))
 CompoundStyle(seg::AbstractVector, sty::AbstractVector) =
     CompoundStyle(deepcopy(Vector{Style}(sty)), makegrid(seg, sty))
 
