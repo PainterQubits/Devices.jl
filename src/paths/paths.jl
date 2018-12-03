@@ -769,10 +769,12 @@ terminationstyle(pa::Path, t=pathlength(pa[end])) = terminationstyle(style(pa[en
 terminationstyle(s::CPW, t) = Paths.Trace(2 * extent(s,t))
 
 """
-    split(n::Node, x)
-Splits a path node at a position `x` along the segment, returning a path.
+    split(n::Node, x::Coordinate)
+    split(n::Node, x::AbstractVector{<:Coordinate}; issorted=false)
+Splits a path node at position(s) `x` along the segment, returning a path.
+If `issorted`, don't sort `x` first (otherwise required for this to work).
 
-Splitting and splicing back into a path:
+A useful idiom, splitting and splicing back into a path:
     splice!(path, i, split(path[i], x))
 """
 function split(n::Node, x::Coordinate)
@@ -788,11 +790,6 @@ function split(n::Node, x::Coordinate)
     return Path([n1, n2])
 end
 
-"""
-    split(n::Node, x::AbstractVector{<:Coordinate}; issorted=false)
-Splits a path node at positions in `x` along the segment, returning a path.
-If `issorted`, don't sort `x` first (otherwise required for this to work).
-"""
 function split(n::Node, x::AbstractVector{<:Coordinate}; issorted=false)
     @assert !isempty(x)
     sortedx = issorted ? x : sort(x)
