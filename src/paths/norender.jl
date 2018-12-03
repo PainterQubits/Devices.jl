@@ -1,11 +1,15 @@
+"""
+    struct NoRender <: Style
+Style for suppressing rendering. When asked, it will claim to have zero width.
+Converts to a continuous or discrete style as needed by `straight!`, `turn!`, `corner!`,
+etc.
+"""
 struct NoRender <: Style end
 struct NoRenderDiscrete <: DiscreteStyle end
 struct NoRenderContinuous <: ContinuousStyle{false} end
 
 """
     struct SimpleNoRender{T} <: ContinuousStyle{false}
-        width::T
-    end
 A style that inhibits path rendering, but pretends to have a finite width for
 [`Paths.attach!`](@ref).
 """
@@ -28,3 +32,6 @@ copy(x::SimpleNoRender) = SimpleNoRender(x.width)
 convert(::Type{DiscreteStyle}, x::NoRender) = NoRenderDiscrete()
 convert(::Type{ContinuousStyle}, x::NoRender) = NoRenderContinuous()
 NoRender(width::Coordinate) = SimpleNoRender(float(width))
+
+translate(s::SimpleNoRender, t) = copy(s)
+translate(s::NoRenderContinuous, t) = copy(s)

@@ -493,6 +493,16 @@ end
     # end
 end
 
+@testset "Intersections" begin
+    @test promote(Polygons.Line(p(0,0), p(1,1)), Polygons.Line(p(1.0,0.0), p(2.0,0.0))) ===
+        (Polygons.Line(p(0.0,0.0), p(1.0,1.0)), Polygons.Line(p(1.0,0.0), p(2.0,0.0)))
+    @test promote(
+        Polygons.Line(p(0,0)μm2μm, p(1,1)μm2μm),
+            Polygons.Line(p(1.0,0.0)nm2μm, p(2.0,0.0)nm2μm)) ===
+        (Polygons.Line(p(0.0,0.0)μm2μm, p(1.0,1.0)μm2μm),
+            Polygons.Line(p(0.001,0.0)μm2μm, p(0.002,0.0)μm2μm))
+end
+
 @testset "Cell methods" begin
     # Setup nested cell refs
     c = Cell("main")
@@ -729,7 +739,7 @@ end
     @test grid == [0.0μm, 25μm, 50μm, 75μm, 100μm]
 end
 
-@testset "Style rendering" begin
+@testset "Styles" begin
     @testset "NoRender" begin
         c = Cell("main")
         pa = Path(α0=24.31°)
@@ -766,10 +776,10 @@ end
             p(-5.0nm,  5.0nm)
         ]
         @test points(c.elements[2]) == Point{typeof(1.0nm)}[
-            p(34142.13562373095nm,  5850.793308457187nm),
-            p(34149.206691542815nm, 5857.864376269053nm),
-            p(34142.13562373095nm,  5864.9354440809175nm),
-            p(34135.06455591909nm,  5857.864376269053nm)
+            p(34142.13562373095nm,  5850.793308457185nm),
+            p(34149.206691542815nm, 5857.864376269051nm),
+            p(34142.13562373095nm,  5864.935444080916nm),
+            p(34135.06455591909nm,  5857.864376269051nm)
         ]
         @test points(c.elements[3]) == Point{typeof(1.0nm)}[
             p(40005.0nm, 39995.0nm),
@@ -798,10 +808,10 @@ end
             p(-4.99999999999997nm, 10505.0nm)
         ]
         @test points(c.elements[2]) == Point{typeof(1.0nm)}[
-            p(26717.5144212722nm,   13275.414510915934nm),
-            p(26724.585489084064nm, 13282.485578727801nm),
-            p(26717.5144212722nm,   13289.556646539668nm),
-            p(26710.443353460334nm, 13282.485578727801nm)
+            p(26717.5144212722nm,   13275.414510915933nm),
+            p(26724.585489084064nm, 13282.4855787278nm),
+            p(26717.5144212722nm,   13289.556646539666nm),
+            p(26710.443353460334nm, 13282.4855787278nm)
         ]
         @test points(c.elements[3]) == Point{typeof(1.0nm)}[
             p(29505.0nm, 39995.0nm),
@@ -957,28 +967,28 @@ end
         turn!(pa, π/2, 50.0, Paths.CPW(10.0,6.0))
         render!(c, pa, grid_step=500.0, max_change=90°)
         @test points(c.elements[1]) == Point{Float64}[
-            p(6.79678973526781e-15,  11.0),
-            p(14.147528631528852,    13.656535200670929),
-            p(27.587463085789658,    22.433138000668393),
-            p(36.518103010286126,    36.30955981240446),
+            p(6.735557395310443e-16, 11.0),
+            p(14.14752863152884,     13.656535200670923),
+            p(27.58746308578965,     22.433138000668386),
+            p(36.518103010286126,    36.309559812404444),
             p(39.0,                  50.0),
             p(45.0,                  50.0),
-            p(42.13627270417631,     34.203338245082065),
-            p(31.83168817591114,     18.19208230846353),
-            p(16.324071497917906,    8.06523292385107),
-            p(6.429395695523605e-15, 5.0)
+            p(42.13627270417631,     34.20333824508206),
+            p(31.831688175911133,    18.192082308463522),
+            p(16.324071497917892,     8.065232923851063),
+            p(3.061616997868383e-16,  5.0)
         ]
         @test points(c.elements[2]) == Point{Float64}[
-            p(6.429395695523605e-15, -5.0),
-            p(19.95164294189966,     -1.2536042041820252),
-            p(38.90539665944695,     11.123656154788758),
-            p(51.49988886065992,     30.69296896621141),
-            p(55.0,                  50.0),
-            p(61.0,                  50.0),
-            p(57.1180585545501,      28.58674739888902),
-            p(43.14962174956843,     6.882600462583895),
-            p(22.128185808288713,    -6.844906481001884),
-            p(6.79678973526781e-15,  -11.0)
+            p(3.061616997868383e-16,  -5.0),
+            p(19.951642941899642,     -1.2536042041820332),
+            p(38.90539665944694,      11.123656154788751),
+            p(51.49988886065992,      30.692968966211403),
+            p(55.0,                   50.0),
+            p(61.0,                   50.0),
+            p(57.1180585545501,       28.586747398889013),
+            p(43.149621749568425,      6.882600462583888),
+            p(22.128185808288695,     -6.8449064810018925),
+            p(6.735557395310443e-16, -11.0)
         ]
 
         c = Cell("main", nm)
@@ -986,30 +996,49 @@ end
         turn!(pa, π/2, 50.0μm, Paths.CPW(10.0μm, 6.0μm))
         render!(c, pa, grid_step=500.0μm, max_change=90°)
         @test points(c.elements[1]) == Point{typeof(1.0nm)}[
-            p(6.79678973526781e-12nm,  11000.0nm),
-            p(14147.528631528852nm,    13656.535200670929nm),
-            p(27587.46308578966nm,     22433.138000668394nm),
-            p(36518.103010286126nm,    36309.559812404455nm),
-            p(39000.0nm,               50000.0nm),
-            p(45000.0nm,               50000.0nm),
-            p(42136.27270417631nm,     34203.338245082065nm),
-            p(31831.68817591114nm,     18192.08230846353nm),
-            p(16324.071497917907nm,    8065.23292385107nm),
-            p(6.429395695523605e-12nm, 5000.0nm)
+            (6.735557395310443e-13nm, 11000.0nm),
+            (14147.52863152884nm,     13656.535200670924nm),
+            (27587.46308578965nm,     22433.138000668387nm),
+            (36518.103010286126nm,    36309.55981240444nm),
+            (39000.0nm,               50000.0nm),
+            (45000.0nm,               50000.0nm),
+            (42136.27270417631nm,     34203.33824508206nm),
+            (31831.68817591113nm,     18192.082308463523nm),
+            (16324.071497917892nm,     8065.232923851063nm),
+            (3.061616997868383e-13nm,  5000.0nm)
         ]
         @test points(c.elements[2]) == Point{typeof(1.0nm)}[
-            p(6.429395695523605e-12nm, -5000.0nm),
-            p(19951.64294189966nm,     -1253.6042041820251nm),
-            p(38905.39665944695nm,     11123.656154788758nm),
-            p(51499.88886065992nm,     30692.96896621141nm),
-            p(55000.0nm,               50000.0nm),
-            p(61000.0nm,               50000.0nm),
-            p(57118.0585545501nm,      28586.74739888902nm),
-            p(43149.62174956843nm,     6882.600462583895nm),
-            p(22128.185808288712nm,    -6844.906481001884nm),
-            p(6.79678973526781e-12nm,  -11000.0nm)
+            p(3.061616997868383e-13nm,  -5000.0nm),
+            p(19951.64294189964nm,      -1253.6042041820333nm),
+            p(38905.396659446946nm,     11123.65615478875nm),
+            p(51499.88886065992nm,      30692.968966211403nm),
+            p(55000.0nm,                50000.0nm),
+            p(61000.0nm,                50000.0nm),
+            p(57118.0585545501nm,       28586.747398889012nm),
+            p(43149.621749568425nm,      6882.600462583888nm),
+            p(22128.185808288694nm,     -6844.906481001893nm),
+            p(6.735557395310443e-13nm, -11000.0nm)
         ]
 
+        pa = Path(μm)
+        turn!(pa, π/2, 50.0μm, Paths.CPW(10.0μm, 6.0μm))
+
+        pa2 = split(pa[1], 50.0μm * 30°)
+        let s1 = style(pa2[1]), s2 = style(pa2[2])
+            @test Paths.trace(s1, 0μm) == 10.0μm
+            @test Paths.trace(s1, 50.0μm * 30°) == 10.0μm
+            @test Paths.trace(s2, 0μm) == 10.0μm
+            @test Paths.trace(s2, 50.0μm * 60°) == 10.0μm
+            @test Paths.gap(s1, 0μm) == 6.0μm
+            @test Paths.gap(s1, 50.0μm * 30°) == 6.0μm
+            @test Paths.gap(s2, 0μm) == 6.0μm
+            @test Paths.gap(s2, 50.0μm * 60°) == 6.0μm
+        end
+        let s1 = segment(pa2[1]), s2 = segment(pa2[2])
+            @test p0(s1) == Point(0,0)μm
+            @test p1(s1) == p0(s2) ≈ Point(50.0*sin(30°), 50*(1-cos(30°)))μm
+            @test p1(s2) ≈ Point(50,50)μm
+        end
     end
 
     @testset "Straight, TaperTrace" begin
@@ -1018,11 +1047,29 @@ end
         straight!(pa, 50.0μm, Paths.TaperTrace(10.0μm, 6.0μm))
         render!(c, pa)
         @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
-            p(0.0nm,    5000.0nm),
-            p(50000.0nm, 3000.0nm),
+            p(0.0nm,      5000.0nm),
+            p(50000.0nm,  3000.0nm),
             p(50000.0nm, -3000.0nm),
-            p(0.0nm, -5000.0nm)
+            p(0.0nm,     -5000.0nm)
         ]
+
+        # length not yet specified
+        @test_throws AssertionError split(Paths.TaperTrace(10.0μm, 6.0μm), 10μm)
+
+        pa2 = split(pa[1], 10μm)
+        let s1 = style(pa2[1]), s2 = style(pa2[2])
+            @test Paths.width(s1, 0μm)  ≈ 10.0μm
+            @test Paths.width(s1, 10μm) ≈ 9.2μm
+            @test s1.length == 10μm
+            @test Paths.width(s2, 0μm)  ≈ 9.2μm
+            @test Paths.width(s2, 40μm) ≈ 6.0μm
+            @test s2.length == 40μm
+        end
+        let s1 = segment(pa2[1]), s2 = segment(pa2[2])
+            @test p0(s1) == Point(0,0)μm
+            @test p1(s1) == p0(s2) == Point(10,0)μm
+            @test p1(s2) == Point(50,0)μm
+        end
     end
 
     @testset "Straight, TaperCPW" begin
@@ -1031,17 +1078,33 @@ end
         straight!(pa, 50.0μm, Paths.TaperCPW(10.0μm, 6.0μm, 8.0μm, 2.0μm))
         render!(c, pa)
         @test points(c.elements[1]) ≈ Point{typeof(1.0nm)}[
-            p(0.0nm,    11000.0nm),
-            p(50000.0nm, 6000.0nm),
-            p(50000.0nm, 4000.0nm),
-            p(0.0nm, 5000.0nm)
+            p(0.0nm,     11000.0nm),
+            p(50000.0nm,  6000.0nm),
+            p(50000.0nm,  4000.0nm),
+            p(0.0nm,      5000.0nm)
         ]
         @test points(c.elements[2]) ≈ Point{typeof(1.0nm)}[
-            p(0.0nm,    -5000.0nm),
-            p(50000.0nm, -4000.0nm),
-            p(50000.0nm, -6000.0nm),
-            p(0.0nm, -11000.0nm)
+            p(0.0nm,      -5000.0nm),
+            p(50000.0nm,  -4000.0nm),
+            p(50000.0nm,  -6000.0nm),
+            p(0.0nm,     -11000.0nm)
         ]
+
+        @test_throws AssertionError split(Paths.TaperCPW(10.0μm, 6.0μm, 8.0μm, 2.0μm), 10μm)
+
+        pa2 = split(pa[1], 10μm)
+        let s1 = style(pa2[1]), s2 = style(pa2[2])
+            @test Paths.trace(s1, 0μm)  ≈ 10.0μm
+            @test Paths.trace(s1, 10μm) ≈ 9.6μm
+            @test Paths.gap(s1, 0μm)    ≈ 6.0μm
+            @test Paths.gap(s1, 10μm)   ≈ 5.2μm
+            @test s1.length == 10μm
+            @test Paths.trace(s2, 0μm)  ≈ 9.6μm
+            @test Paths.trace(s2, 40μm) ≈ 8.0μm
+            @test Paths.gap(s2, 0μm)    ≈ 5.2μm
+            @test Paths.gap(s2, 40μm)   ≈ 2.0μm
+            @test s2.length == 40μm
+        end
     end
 
     @testset "CompoundSegment" begin
@@ -1082,6 +1145,21 @@ end
         straight!(pa, 20μm, Paths.Trace(15μm))
         straight!(pa, 20μm, Paths.Trace(20μm))
         simplify!(pa)
+
+        pa2 = split(pa[1], 20μm)
+        @test length(pa2) == 2
+        @test length(segment(pa2[1]).segments) == 1
+        @test p1(segment(pa2[1])) == p0(segment(pa2[2])) == Point(20,0)μm
+        @test p1(segment(pa2[2])) == Point(60,0)μm
+        @test length(segment(pa2[2]).segments) == 2
+
+        pa2 = split(pa[1], 30μm)
+        @test length(pa2) == 2
+        @test length(segment(pa2[1]).segments) == 2
+        @test p1(segment(pa2[1])) == p0(segment(pa2[2])) == Point(30,0)μm
+        @test p1(segment(pa2[2])) == Point(60,0)μm
+        @test length(segment(pa2[2]).segments) == 2
+
         setsegment!(pa[1], Paths.Straight(120.0μm, p(0.0μm, 0.0μm), 0.0))
         render!(c, pa)
         @test lowerleft(bounds(c.elements[1])) ≈ Point(0μm, -5μm)

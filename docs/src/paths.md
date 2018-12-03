@@ -35,8 +35,9 @@ their respective constructors.
 
 The following example illustrates the use of automatic tapering. First, we
 construct a taper with two different traces surrounding it:
-```@example 2
-using Devices, Devices.PreferMicrons
+
+```@example 1
+using Devices, Devices.PreferMicrons, FileIO # hide
 
 p = Path(μm)
 straight!(p, 10μm, Paths.Trace(2.0μm))
@@ -50,7 +51,7 @@ even automatically taper between the current `Paths.Trace` and a hard-coded tape
 (of concrete type [`Paths.TaperTrace`](@ref)), matching to the dimensions at the
 beginning of the latter taper.
 
-```@example 2
+```@example 1
 straight!(p, 10μm, Paths.Taper())
 straight!(p, 10μm, Paths.TaperTrace(2.0μm, 1.0μm))
 ```
@@ -58,7 +59,7 @@ straight!(p, 10μm, Paths.TaperTrace(2.0μm, 1.0μm))
 As a final example, `Paths.Taper` can also be used in [`turn!`](@ref) segments, and
 as a way to automatically transition from a `Paths.Taper` to a `Paths.CPW`, or vice-versa:
 
-```@example 2
+```@example 1
 turn!(p, -π/2, 10μm, Paths.Taper())
 straight!(p, 10μm, Paths.Trace(2.0μm))
 straight!(p, 10μm, Paths.Taper())
@@ -72,9 +73,16 @@ render!(c, p, GDSMeta(0))
 
 Sharp turns in a path can be accomplished with [`Paths.corner!`](@ref). Sharp turns pose a
 challenge to the path abstraction in that they have zero length, and when rendered
-effectively take up some length of the neighboring segments. These details are
-automatically accounted for by tweaking segment lengths and other captured segment variables
-just before rendering a path.
+effectively take up some length of the neighboring segments. Originally, the segment lengths
+were tweaked at render time to achieve the intended output. As other code began taking
+advantage of the path abstractions, the limitations of this approach became apparent.
+
+Currently, corners are implemented such that the preceding [`Paths.Node`](@ref) is split
+using [`Paths.split`](@ref) near the corner when `corner!` is used, and a short resulting
+section near the corner has the style changed to [`Paths.SimpleNoRender`](@ref).
+When this is followed by [`Paths.straight!`](@ref) to create the next segment, a similar
+operation is done, to ensure the corner is not twice-rendered. This change was necessary
+to be able to use [`Paths.intersect!`](@ref) on paths with corners.
 
 ## Attachments
 
@@ -133,13 +141,68 @@ if we want to refer to references inside that attachment: `aaa["bbb",2]["ccc"]`.
 manner, it is easy to find the right `CellReference` to use with
 [`Cells.transform(::Cell, ::Cells.CellRef)`](@ref).
 
+## Intersections
+
+How to do the right thing when paths intersect is often tedious. [`Paths.intersect!`](@ref)
+provides a useful function to modify existing paths automatically to account for
+intersections according to intersection styles ([`Paths.IntersectStyle`](@ref)). Since this
+is done prior to rendering, further modification can be done easily. Both self-intersections
+and pairwise intersections can be handled for any reasonable number of paths.
+
+For now, one intersection style is implemented, but the heavy-lifting to add more has been
+done already. Here's an example (consult API docs below for further information):
+
+```@example 1
+pa1 = Path(μm)
+turn!(pa1, -360°, 100μm, Paths.CPW(10μm, 6μm))
+pa2 = Path(Point(0,100)μm, α0=-90°)
+straight!(pa2, 400μm, Paths.CPW(10μm, 6μm))
+turn!(pa2, 270°, 200μm)
+straight!(pa2, 400μm)
+
+bridgemetas = GDSMeta.(20:30)
+intersect!(Paths.Bridges(bridgemetas=bridgemetas, gap=2μm, footlength=2μm), pa1, pa2;
+    interactions=[true true; false true])
+
+c = Cell("test", nm)
+render!(c, pa1, GDSMeta(0))
+render!(c, pa2, GDSMeta(1))
+save("intersect_circle.svg", flatten(c); layercolors=merge(Devices.Graphics.layercolors, Dict(1=>(0,0,0,1)))); nothing # hide
+```
+<img src="../intersect_circle.svg" style="width:4in;"/>
+
+Here's another example:
+
+```@example 1
+pa = Path(μm, α0=90°)
+straight!(pa, 100μm, Paths.Trace(2μm))
+corner!(pa, 90°, Paths.SimpleTraceCorner())
+let L = 4μm
+    for i in 1:50
+
+    straight!(pa, L)
+    corner!(pa, 90°, Paths.SimpleTraceCorner())
+    L += 4μm
+    end
+end
+straight!(pa, 4μm)
+
+c = Cell("test", nm)
+
+bridgemetas = GDSMeta.(20:30)
+intersect!(Paths.Bridges(bridgemetas=bridgemetas, gap=2μm, footlength=1μm), pa)
+
+render!(c, pa, GDSMeta(1))
+save("intersect_spiral.svg", flatten(c); layercolors=merge(Devices.Graphics.layercolors, Dict(1=>(0,0,0,1)))); nothing # hide
+```
+<img src="../intersect_spiral.svg" style="width:4in;"/>
+
 ## Path API
 
 ### Path construction
 
 ```@docs
     Paths.Path
-    Paths.Path(::Point)
 ```
 ### Path interrogation
 
@@ -163,12 +226,21 @@ manner, it is easy to find the right `CellReference` to use with
     append!(::Path, ::Path)
     attach!
     corner!
+    intersect!
     meander!
     reconcile!
     simplify
     simplify!
     straight!
+    terminate!
     turn!
+```
+
+### Path intersection styles
+
+```@docs
+    Paths.IntersectStyle
+    Paths.Bridges
 ```
 
 ## Node API
@@ -185,6 +257,7 @@ manner, it is easy to find the right `CellReference` to use with
     Paths.previous
     Paths.next
     Paths.segment
+    Paths.split(::Paths.Node, ::Devices.Coordinate)
     Paths.style
     Paths.setsegment!
     Paths.setstyle!
@@ -209,13 +282,21 @@ manner, it is easy to find the right `CellReference` to use with
 
 ## Style API
 
-### Constructors and methods
+### Style construction
 
 ```@docs
     Paths.Trace
     Paths.CPW
     Paths.Taper
     Paths.Strands
+    Paths.NoRender
+```
+
+### Style manipulation
+
+```@docs
+    Paths.pin
+    Paths.translate
     Paths.undecorated
 ```
 
@@ -230,6 +311,7 @@ manner, it is easy to find the right `CellReference` to use with
 ### Concrete types
 
 ```@docs
+    Paths.SimpleNoRender
     Paths.SimpleTrace
     Paths.GeneralTrace
     Paths.SimpleCPW

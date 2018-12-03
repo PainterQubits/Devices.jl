@@ -10,9 +10,11 @@ mutable struct Turn{T} <: ContinuousSegment{T}
     α0::Float64
 end
 function (s::Turn)(t)
+    # assuming s.α not zero
     x = ifelse(s.r == zero(s.r), typeof(s.r)(one(s.r)), s.r) # guard against div by zero
-    cen = s.p0 + Point(s.r*cos(s.α0+sign(s.α)*π/2), s.r*sin(s.α0+sign(s.α)*π/2))
-    cen + Point(s.r*cos(s.α0-sign(s.α)*(π/2-t/x)), s.r*sin(s.α0-sign(s.α)*(π/2-t/x)))
+    cen = s.p0 + Point(-s.r*sign(s.α)sin(s.α0), s.r*sign(s.α)cos(s.α0))
+    return cen + Point(s.r*(cos(s.α0)*sin(t/x) + sign(s.α)*sin(s.α0)*cos(t/x)),
+                       s.r*(sin(s.α0)*sin(t/x) - sign(s.α)*cos(s.α0)*cos(t/x)))
 end
 
 """
@@ -52,8 +54,11 @@ Positive angle turns left. By default, we take the last continuous style in the 
 function turn!(p::Path, α, r::Coordinate, sty::Style=contstyle1(p))
     T = eltype(p)
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
+    !isempty(p) && (segment(last(p)) isa Paths.Corner) &&
+        error("`Paths.Straight` segments must follow `Paths.Corner`s.")
     seg = Turn{T}(α, r, p1(p), α1(p))
     push!(p, Node(seg, convert(ContinuousStyle, sty)))
+    p.laststyle = sty
     nothing
 end
 
@@ -70,6 +75,8 @@ By default, we take the last continuous style in the path.
 function turn!(p::Path, str::String, r::Coordinate, sty::Style=contstyle1(p))
     T = eltype(p)
     dimension(T) != dimension(typeof(r)) && throw(DimensionError(T(1),r))
+    !isempty(p) && (segment(last(p)) isa Paths.Corner) &&
+        error("`Paths.Straight` segments must follow `Paths.Corner`s.")
     for ch in str
         if ch == 'l'
             α = π/2
@@ -82,5 +89,15 @@ function turn!(p::Path, str::String, r::Coordinate, sty::Style=contstyle1(p))
         # convert takes NoRender() → NoRenderContinuous()
         push!(p, Node(seg, convert(ContinuousStyle, sty)))
     end
+    p.laststyle = sty
     nothing
+end
+
+function _split(seg::Turn{T}, x) where {T}
+    r, α = seg.r, seg.α
+    α1 = x / r
+    α2 = α - α1
+    s1 = Turn{T}(α1, seg.r, seg.p0, seg.α0)
+    s2 = Turn{T}(α2, seg.r, seg(x), seg.α0 + α1)
+    return s1, s2
 end

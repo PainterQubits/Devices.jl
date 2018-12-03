@@ -12,6 +12,8 @@ end
 copy(x::GeneralTrace) = GeneralTrace(x.width)
 extent(s::GeneralTrace, t) = 0.5*s.width(t)
 width(s::GeneralTrace, t) = s.width(t)
+trace(s::GeneralTrace, t) = s.width(t)
+translate(s::GeneralTrace, t) = GeneralTrace(x->s.width(x+t))
 
 """
     struct SimpleTrace{T<:Coordinate} <: Trace{false}
@@ -26,6 +28,8 @@ SimpleTrace(width) = SimpleTrace(width)
 copy(x::SimpleTrace) = Trace(x.width)
 extent(s::SimpleTrace, t...) = 0.5*s.width
 width(s::SimpleTrace, t...) = s.width
+trace(s::SimpleTrace, t...) = s.width
+translate(s::SimpleTrace, t) = copy(s)
 
 """
     Trace(width)

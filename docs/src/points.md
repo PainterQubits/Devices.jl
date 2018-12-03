@@ -19,7 +19,7 @@ julia> Point(1.0,1.0)
  1.0
 
 julia> Point(1.0u"μm", 1.0u"μm")
-2-element Point{Unitful.Quantity{Float64,Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)},Unitful.FreeUnits{(Unitful.Unit{:Meter,Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)}}(-6, 1//1),),Unitful.Dimensions{(Unitful.Dimension{:Length}(1//1),)}}}}:
+2-element Point{Quantity{Float64,𝐋,Unitful.FreeUnits{(μm,),𝐋,nothing}}}:
  1.0 μm
  1.0 μm
 ```

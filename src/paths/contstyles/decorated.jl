@@ -1,17 +1,17 @@
 """
     mutable struct DecoratedStyle{T<:FloatCoordinate} <: ContinuousStyle{false}
         s::Style
-        ts::Array{Float64,1}
-        dirs::Array{Int,1}
-        refs::Array{CellReference,1}
+        ts::Vector{Float64}
+        dirs::Vector{Int}
+        refs::Vector{CellReference}
     end
 Style with decorations, like structures periodically repeated along the path, etc.
 """
 mutable struct DecoratedStyle{T<:FloatCoordinate} <: ContinuousStyle{false}
     s::Style
-    ts::Array{T,1}
-    dirs::Array{Int,1}
-    refs::Array{CellReference,1}
+    ts::Vector{T}
+    dirs::Vector{Int}
+    refs::Vector{CellReference}
 end
 summary(s::DecoratedStyle) = string(summary(s.s), " with ", length(s.refs), " decorations")
 
@@ -85,3 +85,28 @@ function decorate(sty::DecoratedStyle, T, t, location, c)
     push!(sty.refs, c)
     sty
 end
+
+function pin(sty::DecoratedStyle{T}; start=nothing, stop=nothing) where T
+    x0 = ifelse(start === nothing, zero(sty.length), start)
+    x1 = ifelse(stop === nothing, sty.length, stop)
+    s = pin(undecorated(sty); start=start, stop=stop)
+    inds = findall(t->t in x0..x1, sty.ts)
+    ts = sty.ts[inds]
+    dirs = sty.dirs[inds]
+    refs = sty.refs[inds]
+    return DecoratedStyle{T}(s, ts, dirs, refs)
+end
+
+"""
+    undecorate!(sty, t)
+Removes all attachments at position `t` from a style.
+"""
+function undecorate!(sty::DecoratedStyle, t)
+    inds = findall(x->x==t, sty.ts)
+    deleteat!(sty.ts, inds)
+    deleteat!(sty.dirs, inds)
+    deleteat!(sty.refs, inds)
+    return sty
+end
+undecorate!(sty::Style, t) = sty
+# handling compound style is probably brittle if it has decorations inside

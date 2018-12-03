@@ -1,3 +1,14 @@
+- v0.5.0
+  - Rewrite some line/ray/line-segment intersection code.
+  - `adjust!` has been renamed `reconcile!`
+    - For many array-like methods on paths, there is now a keyword argument that lets you
+      specify whether you want to reconcile the path immediately or defer. This is useful
+      when speed is a concern and you are chaining operations.
+  - Implement code to automatically handle path intersections: `Paths.intersect!`
+  - Path termination: `Paths.terminate!`
+  - Style translation: `Paths.pin` and `Paths.translate`.
+  - Node/segment/style splitting: `Paths.split`.
+  - Add some default colors: 21--29 is a red gradient, 31--39 is green, 41--49 is blue.
 - v0.4.0
   - Julia 1.0 compatibility.
   - `Rectangles.isproper` has a slightly different definition. Rectangles are

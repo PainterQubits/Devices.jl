@@ -1,5 +1,6 @@
 module Devices
 using Random
+using LinearAlgebra
 using ForwardDiff
 using FileIO
 using WebIO
@@ -10,8 +11,9 @@ import Clipper
 import Clipper: cclipper
 import FileIO: save, load
 
-import Base: length, show, eltype
-import Unitful: Length, DimensionlessQuantity, ustrip, unit, inch
+import Base: length, show, eltype, intersect!
+import Unitful: Length, LengthUnits, DimensionlessQuantity, NoUnits, DimensionError
+import Unitful: ustrip, unit, inch
 Unitful.@derived_dimension InverseLength inv(Unitful.𝐋)
 
 export GDSMeta
@@ -20,6 +22,31 @@ export datatype, layer, render!
 const DEFAULT_LAYER = 0
 const DEFAULT_DATATYPE = 0
 const D3STR = read(joinpath(dirname(@__FILE__), "../deps/d3.min.js"), String)
+
+# setup for robust 2d predicates
+const splitter, epsilon =
+    let every_other = true, half = 0.5, epsilon = 1.0, splitter = 1.0, check = 1.0
+        lastcheck = check
+        epsilon *= half
+        every_other && (splitter *= 2.0)
+        every_other = !every_other
+        check = 1.0 + epsilon
+
+        while (check != 1.0) && (check != lastcheck)
+            lastcheck = check
+            epsilon *= half
+            every_other && (splitter *= 2.0)
+            every_other = !every_other
+            check = 1.0 + epsilon
+        end
+        splitter += 1.0
+        splitter, epsilon
+    end
+
+const resulterrbound = (3.0 + 8.0 * epsilon) * epsilon
+const ccwerrboundA   = (3.0 + 16.0 * epsilon) * epsilon
+const ccwerrboundB   = (2.0 + 12.0 * epsilon) * epsilon
+const ccwerrboundC   = (9.0 + 64.0 * epsilon) * epsilon * epsilon
 
 function __init__()
     # To ensure no crashes
@@ -50,6 +77,12 @@ function upperright end
 Type alias for numeric types suitable for coordinate systems.
 """
 const Coordinate = Union{Real, Length}
+
+"""
+    CoordinateUnits = Union{typeof(NoUnits), LengthUnits}
+Type alias for units suitable for coordinate systems.
+"""
+const CoordinateUnits = Union{typeof(NoUnits), LengthUnits}
 
 """
     PointTypes = Union{Real, DimensionlessQuantity, Length, InverseLength}
@@ -84,6 +117,8 @@ export Points, Point, Rotation, Translation, XReflection, YReflection,
     getx,
     gety,
     ∘
+
+include("predicates.jl")
 
 abstract type Meta end
 struct GDSMeta <: Meta
@@ -146,6 +181,10 @@ export Cells, Cell, CellArray, CellPolygon, CellReference,
     uniquename
 
 include("utils.jl")
+
+function bridge! end    # needed in Paths, but not defined in Microwave
+export bridge!
+
 include("paths/paths.jl")
 import .Paths: Path,
     α0,
@@ -174,6 +213,7 @@ import .Paths: Path,
     style0,
     style1,
     setstyle!,
+    terminate!,
     turn!,
     undecorated
 
@@ -200,6 +240,7 @@ export Paths, Path, Segment, Style,
     style1,
     setstyle!,
     straight!,
+    terminate!,
     turn!,
     undecorated
 
@@ -207,7 +248,6 @@ include("render/render.jl")
 
 include("microwave.jl")
 import .Microwave:
-    bridge!,
     checkerboard!,
     device_template!,
     flux_bias!,
@@ -221,7 +261,6 @@ import .Microwave:
     radialcut!,
     radialstub!
 export Microwave,
-    bridge!,
     checkerboard!,
     device_template!,
     flux_bias!,

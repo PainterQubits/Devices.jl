@@ -16,6 +16,15 @@ end
 copy(x::TaperTrace) = TaperTrace(x.width_start, x_width_end)
 extent(s::TaperTrace, t) = 0.5 * width(s,t)
 width(s::TaperTrace, t) = (1-t/s.length) * s.width_start + t/s.length * s.width_end
+function pin(s::TaperTrace; start=nothing, stop=nothing)
+    !isdefined(s, :length) && error("cannot `pin`; length of $s not yet determined.")
+    x0 = ifelse(start === nothing, zero(s.length), start)
+    x1 = ifelse(stop === nothing, s.length, stop)
+    @assert x1 - x0 > zero(x1 - x0)
+    @assert zero(x0) <= x0 < s.length
+    @assert zero(x1) < x1 <= s.length
+    return typeof(s)(width(s, x0), width(s, x1), x1-x0)
+end
 function TaperTrace(width_start::Coordinate, width_end::Coordinate)
     dimension(width_start) != dimension(width_end) && throw(DimensionError(trace,gap))
     w_s,w_e = promote(float(width_start), float(width_end))
@@ -54,6 +63,15 @@ function TaperCPW(trace_start::Coordinate, gap_start::Coordinate, trace_end::Coo
         && throw(DimensionError(trace,gap)))
     t_s,g_s,t_e,g_e = promote(float(trace_start), float(gap_start), float(trace_end), float(gap_end))
     return TaperCPW{typeof(t_s)}(t_s, g_s, t_e, g_e)
+end
+function pin(sty::TaperCPW; start=nothing, stop=nothing)
+    !isdefined(sty, :length) && error("cannot `pin`; length of $sty not yet determined.")
+    x0 = ifelse(start === nothing, zero(sty.length), start)
+    x1 = ifelse(stop === nothing, sty.length, stop)
+    @assert x1 - x0 > zero(x1 - x0)
+    @assert zero(x0) <= x0 < sty.length
+    @assert zero(x1) < x1 <= sty.length
+    return typeof(sty)(trace(sty, x0), gap(sty, x0), trace(sty, x1), gap(sty, x1), x1 - x0)
 end
 
 summary(s::TaperTrace) = string("Tapered trace with initial width ", s.width_start,

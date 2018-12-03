@@ -14,6 +14,7 @@ import Base:
     empty!,
     deleteat!,
     length,
+    firstindex,
     lastindex,
     size,
     getindex,
@@ -24,6 +25,9 @@ import Base:
     popfirst!,
     insert!,
     append!,
+    splice!,
+    split,
+    intersect!,
     show,
     summary,
     dims2string
@@ -31,9 +35,11 @@ import Base:
 import Base.Iterators
 
 using ForwardDiff
+import IntervalSets.(..)
 import Devices
-import Devices: Coordinate, FloatCoordinate, GDSMeta, Meta
-import Devices: bounds
+import Devices: Polygons, Coordinate, FloatCoordinate, CoordinateUnits, GDSMeta, Meta
+import Devices.Polygons: segmentize, intersects
+import Devices: bounds, bridge!
 
 export Path
 
@@ -56,23 +62,9 @@ export reconcile!,
     straight!,
     style,
     setstyle!,
+    terminate!,
     turn!,
     undecorated
-
-"""
-    extent(s,t)
-For a style `s`, returns a distance tangential to the path specifying the lateral extent
-of the polygons rendered. The extent is measured from the center of the path to the edge
-of the polygon (half the total width along the path). The extent is evaluated at path length
-`t` from the start of the associated segment.
-"""
-function extent end
-
-"""
-    width(s,t)
-For a style `s` and parameteric argument `t`, returns the width of paths rendered.
-"""
-function width end
 
 """
     abstract type Style end
@@ -96,6 +88,8 @@ abstract type ContinuousStyle{CanStretch} <: Style end
 Any style that applies to segments which have zero path length.
 """
 abstract type DiscreteStyle <: Style end
+
+include("contstyles/interface.jl")
 
 """
     abstract type Segment{T<:Coordinate} end
@@ -301,17 +295,23 @@ end
 
 """
     mutable struct Path{T<:Coordinate} <: AbstractVector{Node{T}}
-        p0::Point{T}
-        α0::Float64
-        nodes::Array{Node{T},1}
-    end
 Type for abstracting an arbitrary styled path in the plane. Iterating returns
-[`Paths.Node`](@ref) objects, essentially
+[`Paths.Node`](@ref) objects.
+
+    Path(p0::Point=Point(0.0,0.0); α0=0.0)
+    Path(p0x::Real, p0y::Real; kwargs...)
+    Path(p0::Point{T}; α0=0.0) where {T<:Length}
+    Path(p0x::T, p0y::T; kwargs...) where {T<:Length}
+    Path(p0x::Length, p0y::Length; kwargs...)
+    Path(u::LengthUnits; α0=0.0)
+    Path(v::Vector{<:Node})
+Convenience constructors for `Path{T}` object.
 """
 mutable struct Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
     α0::Float64
-    nodes::Array{Node{T},1}
+    nodes::Vector{Node{T}}
+    laststyle::ContinuousStyle
 
     Path{T}() where {T} = new{T}(Point(zero(T),zero(T)), 0.0, Node{T}[])
     Path{T}(a,b,c) where {T} = new{T}(a,b,c)
@@ -333,20 +333,6 @@ function show(io::IO, x::Node)
     print(io, "$(segment(x)) styled as $(style(x))")
 end
 
-"""
-```
-Path(p0::Point=Point(0.0,0.0); α0=0.0)
-Path(p0x::Real, p0y::Real; kwargs...)
-
-Path(p0::Point{T}; α0=0.0) where {T<:Length}
-Path(p0x::T, p0y::T; kwargs...) where {T<:Length}
-Path(p0x::Length, p0y::Length; kwargs...)
-
-Path(u::LengthUnits; α0=0.0)
-```
-
-Convenience constructors for `Path{T}` object.
-"""
 function Path(p0::Point=Point(0.0,0.0); α0=0.0)
     Path{Float64}(p0, α0, Node{Float64}[])
 end
@@ -362,6 +348,11 @@ Path(p0x::Length, p0y::Length; kwargs...) = Path(promote(p0x,p0y)...; kwargs...)
 function Path(u::LengthUnits; α0=0.0)
     Path{typeof(0.0u)}(Point(0.0u,0.0u), α0, Node{typeof(0.0u)}[])
 end
+function Path(v::Vector{Node{T}}) where {T}
+    isempty(v) && return Path{T}(Point(zero(T), zero(T)), 0.0, v)
+    return Path{T}(p0(segment(v[1])), α0(segment(v[1])), v)
+end
+
 
 Path(x::Coordinate, y::Coordinate; kwargs...) = throw(DimensionError(x,y))
 
@@ -458,6 +449,8 @@ include("segments/turn.jl")
 include("segments/corner.jl")
 include("segments/compound.jl")
 
+include("intersect.jl")
+
 """
     discretestyle1(p::Path)
 Returns the last-used discrete style in the path.
@@ -466,9 +459,12 @@ discretestyle1(p::Path) = style1(p, DiscreteStyle)
 
 """
     contstyle1(p::Path)
-Returns the last-used discrete style in the path.
+Returns the last user-provided continuous style in the path.
 """
-contstyle1(p::Path) = style1(p, ContinuousStyle)
+function contstyle1(p::Path)
+    isdefined(p, :laststyle) || error("path is empty, provide a style.")
+    return p.laststyle
+end
 
 """
     reconcilelinkedlist!(p::Path, m::Integer)
@@ -542,6 +538,18 @@ function reconcile!(p::Path, n::Integer=1)
 end
 
 # Methods for Path as AbstractArray
+
+function splice!(p::Path, inds; reconcile=true)
+    n = splice!(nodes(p), inds)
+    reconcile && reconcile!(p, first(inds))
+    return n
+end
+function splice!(p::Path, inds, p2::Path; reconcile=true)
+    n = splice!(nodes(p), inds, nodes(p2))
+    reconcile && reconcile!(p, first(inds))
+    return n
+end
+
 length(p::Path) = length(nodes(p))
 iterate(p::Path, state...) = iterate(nodes(p), state...)
 enumerate(p::Path) = enumerate(nodes(p))
@@ -551,143 +559,134 @@ Iterators.drop(p::Path, n::Int) = Iterators.drop(nodes(p), n)
 Iterators.cycle(p::Path) = Iterators.cycle(nodes(p))
 isempty(p::Path) = isempty(nodes(p))
 empty!(p::Path) = empty!(nodes(p))
-function deleteat!(p::Path, inds)
+function deleteat!(p::Path, inds; reconcile=true)
     deleteat!(nodes(p), inds)
-    reconcile!(p, first(inds))
+    reconcile && reconcile!(p, first(inds))
 end
+firstindex(p::Path) = 1
 lastindex(p::Path) = length(nodes(p))
 size(p::Path) = size(nodes(p))
 getindex(p::Path, i::Integer) = nodes(p)[i]
-function setindex!(p::Path, v::Node, i::Integer)
+function setindex!(p::Path, v::Node, i::Integer; reconcile=true)
     nodes(p)[i] = v
-    reconcile!(p, i)
+    reconcile && reconcile!(p, i)
 end
-
-function setindex!(p::Path, v::Segment, i::Integer)
-    setsegment!(nodes(p)[i],v)
-    reconcile!(p, i)
+function setindex!(p::Path, v::Segment, i::Integer; reconcile=true)
+    setsegment!(nodes(p)[i], v; reconcile=reconcile)
 end
-
-function setindex!(p::Path, v::Style, i::Integer)
-    setstyle!(nodes(p)[i],v)
-    reconcile!(p, i)
+function setindex!(p::Path, v::Style, i::Integer; reconcile=true)
+    setstyle!(nodes(p)[i], v; reconcile=reconcile)
 end
-
-function push!(p::Path, node::Node)
+function push!(p::Path, node::Node; reconcile=true)
     push!(nodes(p), node)
-    reconcile!(p, length(p))
+    reconcile && reconcile!(p, length(p))
 end
-
-function pushfirst!(p::Path, node::Node)
+function pushfirst!(p::Path, node::Node; reconcile=true)
     pushfirst!(nodes(p), node)
-    reconcile!(p)
+    reconcile && reconcile!(p)
 end
 
 for x in (:push!, :pushfirst!)
-    @eval function ($x)(p::Path, seg::Segment, sty::Style)
-        ($x)(p, Node(seg,sty))
+    @eval function ($x)(p::Path, seg::Segment, sty::Style; reconcile=true)
+        ($x)(p, Node(seg, sty); reconcile=reconcile)
     end
-    @eval function ($x)(p::Path, segsty0::Node, segsty::Node...)
-        ($x)(p, segsty0)
+    @eval function ($x)(p::Path, segsty0::Node, segsty::Node...; reconcile=true)
+        ($x)(p, segsty0; reconcile=reconcile)
         for x in segsty
-            ($x)(p, x)
+            ($x)(p, x; reconcile=reconcile)
         end
     end
 end
 
-function pop!(p::Path)
+function pop!(p::Path; reconcile=true)
     x = pop!(nodes(p))
-    reconcile!(p, length(p))
-    x
+    reconcile && reconcile!(p, length(p))
+    return x
 end
 
-function popfirst!(p::Path)
+function popfirst!(p::Path; reconcile=true)
     x = popfirst!(nodes(p))
-    reconcile!(p)
-    x
+    reconcile && reconcile!(p)
+    return x
 end
 
-function insert!(p::Path, i::Integer, segsty::Node)
+function insert!(p::Path, i::Integer, segsty::Node; reconcile=true)
     insert!(nodes(p), i, segsty)
-    reconcile!(p, i)
+    reconcile && reconcile!(p, i)
 end
 
-insert!(p::Path, i::Integer, seg::Segment, sty::Style) =
-    insert!(p, i, Node(seg,sty))
+insert!(p::Path, i::Integer, seg::Segment, sty::Style; reconcile=true) =
+    insert!(p, i, Node(seg,sty); reconcile=reconcile)
 
-function insert!(p::Path, i::Integer, seg::Segment)
+function insert!(p::Path, i::Integer, seg::Segment; reconcile=true)
     if i == 1
         sty = style0(p)
     else
         sty = style(nodes(p)[i-1])
     end
-    insert!(p, i, Node(seg,sty))
+    insert!(p, i, Node(seg,sty); reconcile=reconcile)
 end
 
-function insert!(p::Path, i::Integer, segsty0::Node, segsty::Node...)
-    insert!(p, i, segsty0)
+function insert!(p::Path, i::Integer, segsty0::Node, segsty::Node...; reconcile=true)
+    insert!(p, i, segsty0; reconcile=reconcile)
     for x in segsty
-        insert!(p, i, x)
+        insert!(p, i, x; reconcile=reconcile)
     end
 end
 
 """
-    append!(p::Path, p′::Path)
+    append!(p::Path, p′::Path; reconcile=true)
 Given paths `p` and `p′`, path `p′` is appended to path `p`.
 The p0 and initial angle of the first segment from path `p′` is
 modified to match the last point and last angle of path `p`.
 """
-function append!(p::Path, p′::Path)
+function append!(p::Path, p′::Path; reconcile=true)
     isempty(p′) && return
     i = length(p)
     lp, la = p1(p), α1(p)
     append!(nodes(p), nodes(p′))
-    reconcile!(p, i+1)
+    reconcile && reconcile!(p, i+1)
     nothing
 end
 
 """
-    simplify(p::Path, inds::UnitRange=1:length(p))
+    simplify(p::Path, inds::UnitRange=firstindex(p):lastindex(p))
 At `inds`, segments of a path are turned into a `CompoundSegment` and
 styles of a path are turned into a `CompoundStyle`. The method returns a tuple,
 `(segment, style)`.
 
-- Indexing the path becomes more sane when you can combine several path
-segments into one logical element. A launcher would have several indices
-in a path unless you could simplify it.
-- You don't need to think hard about boundaries between straights and turns
-when you want a continuous styling of a very long path.
+- Indexing the path becomes more sane when you can combine several path segments into one
+  logical element. A launcher would have several indices in a path unless you could simplify
+  it.
+- You don't need to think hard about boundaries between straights and turns when you want a
+  continuous styling of a very long path.
 """
-function simplify(p::Path, inds::UnitRange=1:length(p))
-    cseg = CompoundSegment(nodes(p)[inds])
-    csty = CompoundStyle(cseg.segments, map(style, nodes(p)[inds]))
+function simplify(p::Path, inds::UnitRange=firstindex(p):lastindex(p))
+    tag = gensym()
+    cseg = CompoundSegment(nodes(p)[inds], tag)
+    csty = CompoundStyle(cseg.segments, map(style, nodes(p)[inds]), tag)
     Node(cseg, csty)
 end
 
 """
-    simplify!(p::Path, inds::UnitRange=1:length(p))
+    simplify!(p::Path, inds::UnitRange=firstindex(p):lastindex(p))
 In-place version of [`simplify`](@ref).
 """
-function simplify!(p::Path, inds::UnitRange=1:length(p))
+function simplify!(p::Path, inds::UnitRange=firstindex(p):lastindex(p))
     x = simplify(p, inds)
     deleteat!(p, inds)
     insert!(p, inds[1], x)
     p
 end
 
-# function split{T<:Real}(s::CompoundSegment{T}, points) # WIP
-#     segs = CompoundSegment{T}[]
-#     segs
-# end
-
 """
     meander!(p::Path, len, straightlen, r, α)
-Alternate between going straight with length `straightlen` and turning
-with radius `r` and angle `α`. Each turn goes the opposite direction of the
-previous. The total length is `len`. Useful for making resonators.
+Alternate between going straight with length `straightlen` and turning with radius `r` and
+angle `α`. Each turn goes the opposite direction of the previous. The total length is `len`.
+Useful for making resonators.
 
-The straight and turn segments are combined into a `CompoundSegment` and
-appended to the path `p`.
+The straight and turn segments are combined into a `CompoundSegment` and appended to the
+path `p`.
 """
 function meander!(p::Path, len, straightlen, r, α)
     unit = straightlen + r*abs(α)
@@ -751,6 +750,85 @@ function _launch!(p::Path{T}; kwargs...) where {T <: Coordinate}
     end
 
     CPW(trace1, gap1)
+end
+
+"""
+    terminate!(pa::Path)
+End a path with open termination (do nothing for a trace, leave a gap for a CPW).
+"""
+function terminate!(pa::Path{T}) where T
+    terminationlength(pa) > zero(T) &&
+        straight!(pa, terminationlength(pa), terminationstyle(pa))
+end
+
+terminationlength(pa::Path, t=pathlength(pa[end])) = terminationlength(style(pa[end]), t)
+terminationlength(s::Trace, t) = zero(t)
+terminationlength(s::CPW, t) = gap(s,t)
+
+terminationstyle(pa::Path, t=pathlength(pa[end])) = terminationstyle(style(pa[end]), t)
+terminationstyle(s::CPW, t) = Paths.Trace(2 * extent(s,t))
+
+"""
+    split(n::Node, x::Coordinate)
+    split(n::Node, x::AbstractVector{<:Coordinate}; issorted=false)
+Splits a path node at position(s) `x` along the segment, returning a path.
+If `issorted`, don't sort `x` first (otherwise required for this to work).
+
+A useful idiom, splitting and splicing back into a path:
+    splice!(path, i, split(path[i], x))
+"""
+function split(n::Node, x::Coordinate)
+    seg1, seg2, sty1, sty2 = split(segment(n), style(n), x)
+
+    n1 = Node(seg1, sty1)
+    n2 = Node(seg2, sty2)
+    n1.prev = n.prev
+    n1.next = n2
+    n2.prev = n1
+    n2.next = n.next
+
+    return Path([n1, n2])
+end
+
+function split(n::Node, x::AbstractVector{<:Coordinate}; issorted=false)
+    @assert !isempty(x)
+    sortedx = issorted ? x : sort(x)
+
+    i = 2
+    L = first(sortedx)
+    path = split(n, L)
+    for pos in view(sortedx, (firstindex(sortedx)+1):lastindex(sortedx))
+        splice!(path, i, split(path[i], pos-L); reconcile=false)
+        L = pos
+        i += 1
+    end
+    reconcile!(path)
+    return path
+end
+
+function split(seg::Segment, sty::Style, x)
+    return (split(seg, x)..., split(sty, x)...)
+end
+
+function split(seg::Segment, x)
+    @assert zero(x) < x < pathlength(seg)
+    @assert seg isa ContinuousSegment
+    return _split(seg, x)
+end
+
+function split(sty::Style, x)
+    @assert sty isa ContinuousStyle
+    return _split(sty, x)
+end
+
+function _split(sty::Style, x)
+    s1, s2 = pin(sty; stop=x), pin(sty; start=x)
+    undecorate!(s1, x)  # don't duplicate attachments at the split point!
+    return s1, s2
+end
+
+function _split(sty::CompoundStyle, x, tag1, tag2)
+    return pin(sty; stop=x, tag=tag1), pin(sty; start=x, tag=tag2)
 end
 
 end

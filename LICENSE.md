@@ -21,14 +21,13 @@ The Devices.jl package is licensed under the MIT "Expat" License:
 > TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 > SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-A modified version of `adaptive_grid` was originally from PlotUtils.jl,
-an MIT "Expat" licensed Julia package by Tom Breloff and contributors (notably
-Kristoffer Carlsson).
+A modified version of `adaptive_grid` was originally from PlotUtils.jl, an MIT "Expat"
+licensed Julia package by Tom Breloff and contributors (notably Kristoffer Carlsson).
 
-Cadence Design Systems, Inc. holds the rights to the GDS-II format. The specification
-has been described with permission in the SPIE Handbook of Microlithography, Micromachining
-and Microfabrication, vol. 1 (accessible [here](http://www.cnf.cornell.edu/cnf_spie9.html)
-as of April 17, 2017).
+Cadence Design Systems, Inc. holds the rights to the GDS-II format. The specification has
+been described with permission in the SPIE Handbook of Microlithography, Micromachining and
+Microfabrication, vol. 1 (accessible [here](http://www.cnf.cornell.edu/cnf_spie9.html) as of
+April 17, 2017).
 
 This package uses the D3.js library for interactive visualization, under the 3-clause BSD
 license:
@@ -58,3 +57,6 @@ license:
 > ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 > (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 > SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The file `src/predicates.jl` contains a Julia adaptation of public domain C code written by
+Jonathan Richard Shewchuk. Available at http://www.cs.cmu.edu/~quake/robust.html.     

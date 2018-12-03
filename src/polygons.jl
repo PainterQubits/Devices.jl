@@ -9,17 +9,20 @@ import Base: copy, promote_rule
 using ForwardDiff
 import CoordinateTransformations: AffineMap, LinearMap, Translation
 import Clipper
-import Clipper: orientation, children, contour
+import Clipper: children, contour
 import StaticArrays
 
 import Devices
 import Devices: AbstractPolygon, Coordinate, GDSMeta, Meta
-import Devices: bounds, lowerleft, upperright
+import Devices: bounds, lowerleft, upperright, orientation
 import Unitful
 import Unitful: Quantity, Length, dimension, unit, ustrip, uconvert, °
 using ..Points
 using ..Rectangles
 import ..cclipper
+
+import IntervalSets.(..)
+import IntervalSets.endpoints
 
 export Polygon
 export points
@@ -424,37 +427,70 @@ end
 
 ### cutting algorithm
 
-abstract type D1 end
+abstract type D1{T} end
+Δy(d1::D1) = d1.p1.y - d1.p0.y
+Δx(d1::D1) = d1.p1.x - d1.p0.x
 
 ab(p0, p1) = Point(gety(p1)-gety(p0), getx(p0)-getx(p1))
 
-struct Segment <: D1
-    p0::Point{Float64}
-    p1::Point{Float64}
-    ab::Point{Float64}
+"""
+    LineSegment{T} <: D1{T}
+Represents a line segment. By construction, `p0.x <= p1.x`.
+"""
+struct LineSegment{T} <: D1{T}
+    p0::Point{T}
+    p1::Point{T}
+    function LineSegment(p0::Point{T}, p1::Point{T}) where T
+        if p1.x < p0.x
+            return new{T}(p1, p0)
+        else
+            return new{T}(p0, p1)
+        end
+    end
 end
-Segment(p0,p1) = Segment(p0, p1, ab(p0, p1))
+LineSegment(p0::Point{S}, p1::Point{T}) where {S,T} = LineSegment(promote(p0, p1)...)
 
-struct Ray <: D1
-    p0::Point{Float64}
-    p1::Point{Float64}
-    ab::Point{Float64}
+"""
+    Ray{T} <: D1{T}
+Represents a ray. The ray starts at `p0` and goes toward `p1`.
+"""
+struct Ray{T} <: D1{T}
+    p0::Point{T}
+    p1::Point{T}
 end
-Ray(p0,p1) = Ray(p0, p1, ab(p0, p1))
+Ray(p0::Point{S}, p1::Point{T}) where {S,T} = Ray(promote(p0, p1)...)
 
-struct Line <: D1
-    p0::Point{Float64}
-    p1::Point{Float64}
-    ab::Point{Float64}
+struct Line{T} <: D1{T}
+    p0::Point{T}
+    p1::Point{T}
 end
-Line(p0,p1) = Line(p0, p1, ab(p0, p1))
+Line(p0::Point{S}, p1::Point{T}) where {S,T} = Line(promote(p0, p1)...)
+Line(seg::LineSegment) = Line(seg.p0, seg.p1)
 
-function segments(vertices)
+Base.promote_rule(::Type{Line{S}}, ::Type{Line{T}}) where {S,T} = Line{promote_type(S,T)}
+Base.convert(::Type{Line{S}}, L::Line) where S = Line{S}(L.p0, L.p1)
+
+"""
+    segmentize(vertices, closed=true)
+Make an array of `LineSegment` out of an array of points. If `closed`, a segment should go
+between the first and last point, otherwise nah.
+"""
+function segmentize(vertices, closed=true)
     l = length(vertices)
-    [Segment(vertices[i], vertices[i==l ? 1 : i+1]) for i = 1:l]
+    if closed
+        return [LineSegment(vertices[i], vertices[i==l ? 1 : i+1]) for i = 1:l]
+    else
+        return [LineSegment(vertices[i], vertices[i+1]) for i = 1:(l-1)]
+    end
 end
 
-# Find the lower-most then left-most polygon
+"""
+    uniqueray(v::Vector{Point{T}}) where {T <: Real}
+Given an array of points (thought to indicate a polygon or a hole in a polygon),
+find the lowest / most negative y-coordinate[s] `miny`, then the lowest / most negative
+x-coordinate `minx` of the points having that y-coordinate. This `Point(minx,miny)` ∈ `v`.
+Return a ray pointing in -ŷ direction from that point.
+"""
 function uniqueray(v::Vector{Point{T}}) where {T <: Real}
     nopts = reinterpret(T, v)
     yarr = view(nopts, 2:2:length(nopts))
@@ -464,42 +500,127 @@ function uniqueray(v::Vector{Point{T}}) where {T <: Real}
     Ray(Point(minx,miny), Point(minx, miny-1))
 end
 
-orientation(p::Polygon) = orientation(reinterpret(Clipper.IntPoint, p.p))
+"""
+    orientation(p::Polygon)
+Returns 1 if the points in the polygon contour are going counter-clockwise, -1 if clockwise.
+Clipper considers clockwise-oriented polygons to be holes for some polygon fill types.
+"""
+function orientation(p::Polygon)
+    ccall((:orientation, cclipper), Cuchar, (Ptr{Clipper.IntPoint}, Csize_t),
+        reinterpret(Clipper.IntPoint, p.p),length(p.p)) == 1 ? 1 : -1
+end
 
-ishole(p) = orientation(p) == false
-isparallel(A::D1, B::D1) = getx(A.ab) * gety(B.ab) == getx(B.ab) * gety(A.ab)
-isdegenerate(A::D1, B::D1) = dot(A.ab, B.p0-A.p0) == dot(A.ab, B.p1-A.p0) == 0
+"""
+    ishole(p::Polygon)
+Returns `true` if Clipper would consider this polygon to be a hole, for applicable
+polygon fill rules.
+"""
+ishole(p::Polygon) = orientation(p) == -1
 
-# Expected to be fast
-function intersects(A::Segment, B::Segment)
-    sb0 = sign(dot(A.ab, B.p0-A.p0))
-    sb1 = sign(dot(A.ab, B.p1-A.p0))
+"""
+    orientation(p1::Point, p2::Point, p3::Point)
+Returns 1 if the path `p1`--`p2`--`p3` is going counter-clockwise (increasing angle),
+-1 if the path is going clockwise (decreasing angle), 0 if `p1`, `p2`, `p3` are colinear.
+"""
+function orientation(p1::Point, p2::Point, p3::Point)
+    return sign((p3.y-p2.y)*(p2.x-p1.x)-(p2.y-p1.y)*(p3.x-p2.x))
+end
+
+isparallel(A::D1, B::D1) = Δy(A) * Δx(B) == Δy(B) * Δx(A)
+isdegenerate(A::D1, B::D1) =
+    orientation(A.p0, A.p1, B.p0) == orientation(A.p0, A.p1, B.p1) == 0
+iscolinear(A::D1, B::Point) = orientation(A.p0, A.p1, B) == orientation(B, A.p1, A.p0) == 0
+iscolinear(A::Point, B::D1) = iscolinear(B, A)
+
+"""
+    intersects(A::LineSegment, B::LineSegment)
+Returns two `Bool`s:
+1) Does `A` intersect `B`?
+2) Did an intersection happen at a single point? (`false` if no intersection)
+"""
+function intersects(A::LineSegment, B::LineSegment)
+    sb0 = orientation(A.p0, A.p1, B.p0)
+    sb1 = orientation(A.p0, A.p1, B.p1)
     sb = sb0 == sb1
 
-    sa0 = sign(dot(B.ab, A.p0-B.p0))
-    sa1 = sign(dot(B.ab, A.p1-B.p0))
+    sa0 = orientation(B.p0, B.p1, A.p0)
+    sa1 = orientation(B.p0, B.p1, A.p1)
     sa = sa0 == sa1
 
     if sa == false && sb == false
-        return true
+        return true, true
+    else
+        # Test for special case of colinearity
+        if sb0 == sb1 == sa0 == sa1 == 0
+            xinter = intersect(A.p0.x..A.p1.x, B.p0.x..B.p1.x)
+            yinter = intersect(A.p0.y..A.p1.y, B.p0.y..B.p1.y)
+            if !isempty(xinter) && !isempty(yinter)
+                if reduce(==, endpoints(xinter)) && reduce(==, endpoints(yinter))
+                    return true, true
+                else
+                    return true, false
+                end
+            else
+                return false, false
+            end
+        else
+            return false, false
+        end
+    end
+end
+
+"""
+    intersects_at_endpoint(A::LineSegment, B::LineSegment)
+Returns three `Bool`s:
+1) Does `A` intersect `B`?
+2) Did an intersection happen at a single point? (`false` if no intersection)
+3) Did an endpoint of `A` intersect an endpoint of `B`?
+"""
+function intersects_at_endpoint(A::LineSegment, B::LineSegment)
+    A_intersects_B, atapoint = intersects(A,B)
+    if A_intersects_B
+        if atapoint
+            if (A.p1 == B.p0) || (A.p1 == B.p1) || (A.p0 == B.p0) || (A.p0 == B.p1)
+                return A_intersects_B, atapoint, true
+            else
+                return A_intersects_B, atapoint, false
+            end
+        else
+            return A_intersects_B, atapoint, false
+        end
+    else
+        return A_intersects_B, atapoint, false
+    end
+end
+
+"""
+    intersects(p::Point, A::Ray)
+Does `p` intersect `A`?
+"""
+function intersects(p::Point, A::Ray)
+    correctdir = dot(A.p1-A.p0, p-A.p0) >= 0
+    return iscolinear(p, A) && correctdir
+end
+
+"""
+    intersects(p::Point, A::LineSegment)
+Does `p` intersect `A`?
+"""
+function intersects(p::Point, A::LineSegment)
+    if iscolinear(p, A)
+        xinter = intersect(A.p0.x..A.p1.x, p.x..p.x)
+        yinter = intersect(A.p0.y..A.p1.y, p.y..p.y)
+        if !isempty(xinter) && !isempty(yinter)
+           return true
+        else
+           return false
+        end
     else
         return false
     end
 end
 
-function onray(p::Point{T}, A::Ray) where {T <: Real}
-    return (dot(A.ab, p-A.p0) ≈ 0) &&
-        (dot(A.p1-A.p0, p-A.p0) >= 0)
-end
-
-function onsegment(p::Point{T}, A::Segment) where {T <: Real}
-    return (dot(A.ab, p-A.p0) ≈ 0) &&
-        (dot(A.p1-A.p0, p-A.p0) >= 0) &&
-        (dot(A.p0-A.p1, p-A.p1) >= 0)
-end
-
-# Not type stable...
-function intersection(A::Ray, B::Segment)
+function intersection(A::Ray, B::LineSegment)
     if isparallel(A, B)
         if isdegenerate(A, B)
             # correct direction?
@@ -525,31 +646,45 @@ function intersection(A::Ray, B::Segment)
             return false, Point(0.,0.)
         end
     else
-        tf, where = intersection(Line(A.p0,A.p1,A.ab), Line(B.p0,B.p1,B.ab), false)
-        if onray(where, A) && onsegment(where, B)
-            return true, where
+        tf, w = intersection(Line(A.p0,A.p1), Line(B.p0,B.p1), false)
+        if intersects(w, A) && intersects(w, B)
+            return true, w
         else
             return false, Point(0.,0.)
         end
     end
 end
 
-function intersection(A::Line, B::Line, checkparallel=true)
+function intersection(A::Line{T}, B::Line{T}, checkparallel=true) where T
     if checkparallel
         # parallel checking goes here!
     else
-        w = [getx(A.ab) gety(A.ab); getx(B.ab) gety(B.ab)] \ [dot(A.ab, A.p0), dot(B.ab, B.p0)]
-        true, Point(w)
+        xA, xB, yA, yB = Δx(A), Δx(B), Δy(A), Δy(B)
+        w = ustrip.([yA -xA; yB -xB]) \ ustrip.([A.p0.x*yA - A.p0.y*xA, B.p0.x*yB - B.p0.y*xB])
+        true, Point(w)*unit(A.p0.x)
     end
 end
 
+"""
+    interiorcuts(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}}) where {T}
+Clipper gives polygons with holes as separate contours. The GDS-II format doesn't support
+this. This function makes cuts between the inner/outer contours so that ultimately there
+is just one contour with one or more overlapping edges.
+
+Example:
+┌────────────┐               ┌────────────┐
+│ ┌──┐       │   becomes...  │ ┌──┐       │
+│ └──┘  ┌──┐ │               │ ├──┘  ┌──┐ │
+│       └──┘ │               │ │     ├──┘ │
+└────────────┘               └─┴─────┴────┘
+"""
 function interiorcuts(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}}) where {T}
     # Assumes we have first element an enclosing polygon with the rest being holes.
     # We also assume no hole collision.
 
     minpt = Point(-Inf, -Inf)
     for enclosing in children(nodeortree)
-        segs = segments(contour(enclosing))
+        segs = segmentize(contour(enclosing))
         for hole in children(enclosing)
             # process all the holes.
             interiorcuts(hole, outpolys)
@@ -561,28 +696,19 @@ function interiorcuts(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}}
             k = -1
             bestwhere = minpt
             for (j,s) in enumerate(segs)
-                tf, where = intersection(ray, s)
+                tf, wh = intersection(ray, s)
                 if tf
-                    if gety(where) > gety(bestwhere)
-                        bestwhere = where
+                    if gety(wh) > gety(bestwhere)
+                        bestwhere = wh
                         k = j
                     end
                 end
             end
 
-            # println(bestwhere)
-            # println(k)
-            # println(ray)
             # Since the polygon was enclosing, an intersection had to happen *somewhere*.
             if k != -1
                 w = Point{Int64}(round(getx(bestwhere)), round(gety(bestwhere)))
-                # println(w)
                 kp1 = contour(enclosing)[(k+1 > length(contour(enclosing))) ? 1 : k+1]
-
-                # println(contour(enclosing)[1:k])
-                # println(w)
-                # println(contour(hole))
-                # println(contour(enclosing)[(k+1):end])
 
                 # Make the cut in the enclosing polygon
                 enclosing.contour = Point{Int64}[contour(enclosing)[1:k];
@@ -594,11 +720,11 @@ function interiorcuts(nodeortree::Clipper.PolyNode, outpolys::Vector{Polygon{T}}
 
                 # update the segment cache
                 segs = [segs[1:(k-1)];
-                    Segment(contour(enclosing)[k], w);
-                    Segment(w, contour(hole)[1]);
-                    segments(contour(hole));
-                    Segment(contour(hole)[1], w);
-                    Segment(w, kp1);
+                    LineSegment(contour(enclosing)[k], w);
+                    LineSegment(w, contour(hole)[1]);
+                    segmentize(contour(hole));
+                    LineSegment(contour(hole)[1], w);
+                    LineSegment(w, kp1);
                     segs[(k+1):end]]
             end
         end

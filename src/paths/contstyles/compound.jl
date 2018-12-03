@@ -1,17 +1,18 @@
 """
-    struct CompoundStyle <: ContinuousStyle
+    struct CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle{false}
         styles::Vector{Style}
-        grid::Vector{Float64}
+        grid::Vector{T}
     end
 Combines styles together, typically for use with a [`CompoundSegment`](@ref).
 
-- `styles`: Array of styles making up the object. This is shallow-copied
-by the outer constructor.
+- `styles`: Array of styles making up the object. This is deep-copied by the outer
+  constructor.
 - `grid`: An array of `t` values needed for rendering the parameteric path.
 """
 struct CompoundStyle{T<:FloatCoordinate} <: ContinuousStyle{false}
     styles::Vector{Style}
     grid::Vector{T}
+    tag::Symbol
 end
 function (s::CompoundStyle)(t)
     l0 = s.grid[1]
@@ -23,16 +24,16 @@ function (s::CompoundStyle)(t)
     end
     return s.styles[length(s.grid) - 1], t - l0
 end
-copy(s::CompoundStyle) = (typeof(s))(deepcopy(s.styles), copy(s.grid))
-CompoundStyle(seg::AbstractVector, sty::AbstractVector) =
-    CompoundStyle(deepcopy(Vector{Style}(sty)), makegrid(seg, sty))
+copy(s::CompoundStyle, tag=gensym()) = (typeof(s))(deepcopy(s.styles), copy(s.grid), tag)
+CompoundStyle(seg::AbstractVector{Segment{T}}, sty::AbstractVector, tag=gensym()) where {T} =
+    CompoundStyle(deepcopy(Vector{Style}(sty)), makegrid(seg, sty), tag)
 
 """
-    makegrid{T<:Segment}(segments::AbstractVector{T}, styles)
+    makegrid(segments::AbstractVector{T}, styles) where {T<:Segment}
 Returns a collection with the values of `t` to use for
 rendering a `CompoundSegment` with a `CompoundStyle`.
 """
-function makegrid(segments::AbstractVector{T}, styles) where T<:Segment
+function makegrid(segments::AbstractVector{T}, styles) where {T<:Segment}
     isempty(segments) && error("Cannot use makegrid with zero segments.")
     length(segments) != length(styles) &&
         error("Must have same number of segments and styles.")
@@ -52,3 +53,16 @@ for x in (:extent, :width)
 end
 
 summary(::CompoundStyle) = "Compound style"
+
+function translate(s::CompoundStyle, x, tag=gensym())
+    s′ = copy(s, tag)
+    s′.grid .-= x
+    return s′
+end
+
+function pin(s::CompoundStyle; start=nothing, stop=nothing, tag=gensym())
+    if start !== nothing
+        return translate(s, start, tag)
+    end
+    return copy(s, tag)
+end
