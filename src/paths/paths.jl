@@ -504,7 +504,7 @@ This function reconciles node `n` for consistency with neighbors in this regard.
 function reconcilefields!(n::Node)
     seg,sty = segment(n), style(n)
     if isa(seg, Corner)
-        seg.extent = extent(style(previous(n)), 1.0)
+        seg.extent = extent(style(previous(n)), pathlength(segment(previous(n))))
     end
     if isa(sty, ContinuousStyle{true})
         n.sty = typeof(sty)(
