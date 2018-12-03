@@ -52,3 +52,9 @@ for x in (:extent, :width)
 end
 
 summary(::CompoundStyle) = "Compound style"
+
+function translate(s::CompoundStyle, x)
+    s′ = copy(s)
+    s′.grid .-= x
+    return s′
+end

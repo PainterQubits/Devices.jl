@@ -28,3 +28,6 @@ copy(x::SimpleNoRender) = SimpleNoRender(x.width)
 convert(::Type{DiscreteStyle}, x::NoRender) = NoRenderDiscrete()
 convert(::Type{ContinuousStyle}, x::NoRender) = NoRenderContinuous()
 NoRender(width::Coordinate) = SimpleNoRender(float(width))
+
+translate(s::SimpleNoRender, t) = copy(s)
+translate(s::NoRenderContinuous, t) = copy(s)
