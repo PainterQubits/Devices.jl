@@ -293,12 +293,17 @@ end
 
 """
     mutable struct Path{T<:Coordinate} <: AbstractVector{Node{T}}
-        p0::Point{T}
-        α0::Float64
-        nodes::Array{Node{T},1}
-    end
 Type for abstracting an arbitrary styled path in the plane. Iterating returns
-[`Paths.Node`](@ref) objects, essentially
+[`Paths.Node`](@ref) objects.
+
+    Path(p0::Point=Point(0.0,0.0); α0=0.0)
+    Path(p0x::Real, p0y::Real; kwargs...)
+    Path(p0::Point{T}; α0=0.0) where {T<:Length}
+    Path(p0x::T, p0y::T; kwargs...) where {T<:Length}
+    Path(p0x::Length, p0y::Length; kwargs...)
+    Path(u::LengthUnits; α0=0.0)
+    Path(v::Vector{<:Node})
+Convenience constructors for `Path{T}` object.
 """
 mutable struct Path{T<:Coordinate} <: AbstractVector{Node{T}}
     p0::Point{T}
@@ -325,20 +330,6 @@ function show(io::IO, x::Node)
     print(io, "$(segment(x)) styled as $(style(x))")
 end
 
-"""
-```
-Path(p0::Point=Point(0.0,0.0); α0=0.0)
-Path(p0x::Real, p0y::Real; kwargs...)
-
-Path(p0::Point{T}; α0=0.0) where {T<:Length}
-Path(p0x::T, p0y::T; kwargs...) where {T<:Length}
-Path(p0x::Length, p0y::Length; kwargs...)
-
-Path(u::LengthUnits; α0=0.0)
-```
-
-Convenience constructors for `Path{T}` object.
-"""
 function Path(p0::Point=Point(0.0,0.0); α0=0.0)
     Path{Float64}(p0, α0, Node{Float64}[])
 end
@@ -354,6 +345,11 @@ Path(p0x::Length, p0y::Length; kwargs...) = Path(promote(p0x,p0y)...; kwargs...)
 function Path(u::LengthUnits; α0=0.0)
     Path{typeof(0.0u)}(Point(0.0u,0.0u), α0, Node{typeof(0.0u)}[])
 end
+function Path(v::Vector{Node{T}}) where {T}
+    isempty(v) && return Path{T}(Point(zero(T), zero(T)), 0.0, v)
+    return Path{T}(p0(segment(v[1])), α0(segment(v[1])), v)
+end
+
 
 Path(x::Coordinate, y::Coordinate; kwargs...) = throw(DimensionError(x,y))
 
