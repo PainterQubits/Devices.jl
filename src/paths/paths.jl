@@ -695,7 +695,7 @@ function meander!(p::Path, len, straightlen, r, α)
     nsegs = Int(fl)
     rem = (ratio-fl)*unit
 
-    for pm in take(cycle((1,-1)), nsegs)
+    for pm in Iterators.take(Iterators.cycle((1,-1)), nsegs)
         straight!(p, straightlen, style1(p))
         turn!(p, pm*α, r, style1(p))           # alternates left and right
     end
