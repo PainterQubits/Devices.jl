@@ -513,7 +513,7 @@
 
 
 <p>Anything you could call a polygon regardless of the underlying representation. Currently only <code>Rectangle</code> or <code>Polygon</code> are concrete subtypes, but one could imagine further subtypes to represent specific shapes that appear in highly optimized pattern formats. Examples include the OASIS format (which has 25 implementations of trapezoids) or e-beam lithography pattern files like the Raith GPF format.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/Devices.jl#L95-L103' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/Devices.jl#L95-L103' class='documenter-source'>source</a><br></p>
 <p><a id='Affine-transformations-1'></a></p>
 <h2 id="affine-transformations">Affine transformations</h2>
 <p>The mechanism for affine transformations is largely provided by the <a href="https://github.com/FugroRoames/CoordinateTransformations.jl"><code>CoordinateTransformations.jl</code></a> package. For convenience, the documentation for <code>Translation</code> and <code>compose</code> is reproduced below from that package. We implement our own 2D rotations.</p>
@@ -547,7 +547,7 @@ trans1 ∘ trans2
 
 
 <p>Construct a rotation about the origin. Units accepted (no units ⇒ radians).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/points.jl#L127-L130' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/points.jl#L127-L130' class='documenter-source'>source</a><br></p>
 <p><a id='CoordinateTransformations.Translation' href='#CoordinateTransformations.Translation'>#</a>
 <strong><code>CoordinateTransformations.Translation</code></strong> &mdash; <em>Type</em>.</p>
 <div class="codehilite"><pre><span></span>Translation(v) &lt;: AbstractAffineMap
@@ -575,7 +575,7 @@ julia&gt; trans(Point(1,1))
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/points.jl#L133-L147' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/points.jl#L133-L147' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.YReflection' href='#Devices.Points.YReflection'>#</a>
 <strong><code>Devices.Points.YReflection</code></strong> &mdash; <em>Function</em>.</p>
 <div class="codehilite"><pre><span></span>YReflection()
@@ -594,7 +594,7 @@ julia&gt; trans(Point(1,1))
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/points.jl#L150-L164' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/points.jl#L150-L164' class='documenter-source'>source</a><br></p>
 <p><a id='Clipping-1'></a></p>
 <h2 id="clipping">Clipping</h2>
 <p><a id='Devices.Polygons.clip' href='#Devices.Polygons.clip'>#</a>
@@ -628,7 +628,7 @@ julia&gt; trans(Point(1,1))
 <li><code>Clipper.PolyFillTypeEvenOdd</code></li>
 <li><code>Clipper.PolyFillTypeNonZero</code></li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L194-L225' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L194-L225' class='documenter-source'>source</a><br></p>
 <p><a id='Offsetting-1'></a></p>
 <h2 id="offsetting">Offsetting</h2>
 <p><a id='Devices.Polygons.offset' href='#Devices.Polygons.offset'>#</a>
@@ -660,7 +660,7 @@ julia&gt; trans(Point(1,1))
 <li><code>Clipper.EndTypeOpenRound</code></li>
 <li><code>Clipper.EndTypeOpenButt</code></li>
 </ul>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L340-L370' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L340-L370' class='documenter-source'>source</a><br></p>
 <p><a id='Rectangle-API-1'></a></p>
 <h2 id="rectangle-api">Rectangle API</h2>
 <p><a id='Devices.Rectangles.Rectangle' href='#Devices.Rectangles.Rectangle'>#</a>
@@ -679,7 +679,7 @@ end
 
 
 <p>A rectangle, defined by opposing lower-left and upper-right corner coordinates. Lower-left and upper-right are guaranteed to be such by the inner constructor.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L15-L28' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L15-L28' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Rectangles.Rectangle-Tuple{Point,Point}' href='#Devices.Rectangles.Rectangle-Tuple{Point,Point}'>#</a>
 <strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>Rectangle(ll::Point, ur::Point)
@@ -687,7 +687,7 @@ end
 
 
 <p>Convenience constructor for <code>Rectangle</code> objects.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L40-L43' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L40-L43' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Rectangles.Rectangle-Tuple{Any,Any}' href='#Devices.Rectangles.Rectangle-Tuple{Any,Any}'>#</a>
 <strong><code>Devices.Rectangles.Rectangle</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>Rectangle(width, height)
@@ -696,7 +696,7 @@ end
 
 <p>Constructs <code>Rectangle</code> objects by specifying the width and height rather than the lower-left and upper-right corners.</p>
 <p>The rectangle will sit with the lower-left corner at the origin. With centered rectangles we would need to divide width and height by 2 to properly position. If we wanted an object of <code>Rectangle{Int}</code> type, this would not be possible if either <code>width</code> or <code>height</code> were odd numbers. This definition ensures type stability in the constructor.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L47-L57' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L47-L57' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.bounds-Tuple{Rectangle}' href='#Devices.bounds-Tuple{Rectangle}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>bounds(r::Rectangle)
@@ -704,7 +704,7 @@ end
 
 
 <p>No-op (just returns <code>r</code>).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L88-L91' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L88-L91' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.center-Tuple{Rectangle}' href='#Devices.center-Tuple{Rectangle}'>#</a>
 <strong><code>Devices.center</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>center(r::Rectangle)
@@ -712,7 +712,7 @@ end
 
 
 <p>Returns a <a href="../points/#Devices.Points.Point"><code>Point</code></a> corresponding to the center of the rectangle.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L94-L97' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L94-L97' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.centered-Tuple{Rectangle}' href='#Devices.centered-Tuple{Rectangle}'>#</a>
 <strong><code>Devices.centered</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>centered(r::Rectangle)
@@ -720,7 +720,7 @@ end
 
 
 <p>Centers a copy of <code>r</code>, with promoted coordinates if necessary. This function will not throw an <code>InexactError()</code>, even if <code>r</code> had integer coordinates.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L100-L105' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L100-L105' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Rectangles.height-Tuple{Rectangle}' href='#Devices.Rectangles.height-Tuple{Rectangle}'>#</a>
 <strong><code>Devices.Rectangles.height</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>height(r::Rectangle)
@@ -728,7 +728,7 @@ end
 
 
 <p>Return the height of a rectangle.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L74-L77' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L74-L77' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Rectangles.isproper-Tuple{Rectangle}' href='#Devices.Rectangles.isproper-Tuple{Rectangle}'>#</a>
 <strong><code>Devices.Rectangles.isproper</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>isproper(r::Rectangle)
@@ -736,7 +736,7 @@ end
 
 
 <p>Returns <code>true</code> if the rectangle has a non-zero area. Otherwise, returns <code>false</code>. Note that the upper-right and lower-left corners are enforced to be the <code>ur</code> and <code>ll</code> fields of a <code>Rectangle</code> by the inner constructor.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L80-L85' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L80-L85' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.lowerleft-Tuple{Rectangle}' href='#Devices.lowerleft-Tuple{Rectangle}'>#</a>
 <strong><code>Devices.lowerleft</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>lowerleft(r::Rectangle)
@@ -744,7 +744,7 @@ end
 
 
 <p>Returns the lower-left corner of a rectangle (Point object).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L111-L114' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L111-L114' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.upperright-Tuple{Rectangle}' href='#Devices.upperright-Tuple{Rectangle}'>#</a>
 <strong><code>Devices.upperright</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>upperright(r::Rectangle)
@@ -752,7 +752,7 @@ end
 
 
 <p>Returns the upper-right corner of a rectangle (Point object).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L117-L120' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L117-L120' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Polygons.points-Union{Tuple{Rectangle{T}}, Tuple{T}} where T<:Real' href='#Devices.Polygons.points-Union{Tuple{Rectangle{T}}, Tuple{T}} where T<:Real'>#</a>
 <strong><code>Devices.Polygons.points</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>points{T}(x::Rectangle{T})
@@ -760,7 +760,7 @@ end
 
 
 <p>Returns the array of <code>Point</code> objects defining the rectangle.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L80-L83' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L80-L83' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Rectangles.width-Tuple{Rectangle}' href='#Devices.Rectangles.width-Tuple{Rectangle}'>#</a>
 <strong><code>Devices.Rectangles.width</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>width(r::Rectangle)
@@ -768,7 +768,7 @@ end
 
 
 <p>Return the width of a rectangle.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L68-L71' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L68-L71' class='documenter-source'>source</a><br></p>
 <p><a id='Base.:+-Tuple{Rectangle,Point}' href='#Base.:+-Tuple{Rectangle,Point}'>#</a>
 <strong><code>Base.:+</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>+(r::Rectangle, p::Point)
@@ -776,7 +776,7 @@ end
 
 
 <p>Translate a rectangle by <code>p</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/rectangles.jl#L129-L132' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/rectangles.jl#L129-L132' class='documenter-source'>source</a><br></p>
 <p><a id='Polygon-API-1'></a></p>
 <h2 id="polygon-api">Polygon API</h2>
 <p><a id='Devices.Polygons.Polygon' href='#Devices.Polygons.Polygon'>#</a>
@@ -790,7 +790,7 @@ end
 
 
 <p>Polygon defined by list of coordinates. The first point should not be repeated at the end (although this is true for the GDS format).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L40-L48' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L40-L48' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Polygons.Polygon-Union{Tuple{AbstractArray{Point{T},1}}, Tuple{T}} where T' href='#Devices.Polygons.Polygon-Union{Tuple{AbstractArray{Point{T},1}}, Tuple{T}} where T'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>Polygon{T}(parr::AbstractVector{Point{T}})
@@ -798,7 +798,7 @@ end
 
 
 <p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L61-L64' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L61-L64' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Polygons.Polygon-Tuple{Point,Point,Point,Vararg{Point,N} where N}' href='#Devices.Polygons.Polygon-Tuple{Point,Point,Point,Vararg{Point,N} where N}'>#</a>
 <strong><code>Devices.Polygons.Polygon</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>Polygon(p0::Point, p1::Point, p2::Point, p3::Point...)
@@ -806,7 +806,7 @@ end
 
 
 <p>Convenience constructor for a <code>Polygon{T}</code> object.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L55-L58' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L55-L58' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.bounds-Tuple{Polygon}' href='#Devices.bounds-Tuple{Polygon}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>bounds(p::Polygon)
@@ -814,7 +814,7 @@ end
 
 
 <p>Return a bounding Rectangle for polygon <code>p</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L140-L143' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L140-L143' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.bounds-Tuple{AbstractArray{#s85,N} where N where #s85<:Devices.AbstractPolygon}' href='#Devices.bounds-Tuple{AbstractArray{#s85,N} where N where #s85<:Devices.AbstractPolygon}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>bounds(parr::AbstractArray{&lt;:AbstractPolygon})
@@ -822,7 +822,7 @@ end
 
 
 <p>Return a bounding <code>Rectangle</code> for an array <code>parr</code> of <code>AbstractPolygon</code> objects. Rectangles having zero width and height should be excluded from the calculation.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L146-L150' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L146-L150' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.bounds-Tuple{Devices.AbstractPolygon,Vararg{Devices.AbstractPolygon,N} where N}' href='#Devices.bounds-Tuple{Devices.AbstractPolygon,Vararg{Devices.AbstractPolygon,N} where N}'>#</a>
 <strong><code>Devices.bounds</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>bounds(p0::AbstractPolygon, p::AbstractPolygon...)
@@ -830,7 +830,7 @@ end
 
 
 <p>Return a bounding <code>Rectangle</code> for several <code>AbstractPolygon</code> objects.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L158-L161' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L158-L161' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.lowerleft-Tuple{Polygon}' href='#Devices.lowerleft-Tuple{Polygon}'>#</a>
 <strong><code>Devices.lowerleft</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>lowerleft(x::Polygon)
@@ -838,7 +838,7 @@ end
 
 
 <p>Return the lower-left-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L105-L109' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L105-L109' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.upperright-Tuple{Polygon}' href='#Devices.upperright-Tuple{Polygon}'>#</a>
 <strong><code>Devices.upperright</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>upperright(x::Polygon)
@@ -846,7 +846,7 @@ end
 
 
 <p>Return the upper-right-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L112-L116' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L112-L116' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Polygons.points-Tuple{Polygon}' href='#Devices.Polygons.points-Tuple{Polygon}'>#</a>
 <strong><code>Devices.Polygons.points</code></strong> &mdash; <em>Method</em>.</p>
 <div class="codehilite"><pre><span></span>points(x::Polygon)
@@ -854,7 +854,7 @@ end
 
 
 <p>Returns the array of <code>Point</code> objects defining the polygon.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/99e9fdbb4fbbb325092c0e9a1636fd33815eccb6/src/polygons.jl#L74-L77' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/6e737c7aa8d5e31c1fd5b36fdcd897ee0a3db49f/src/polygons.jl#L74-L77' class='documenter-source'>source</a><br></p>
                 
                   
                 
