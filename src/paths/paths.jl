@@ -375,12 +375,9 @@ pathlength(node::Node) = pathlength(segment(node))
 
 """
     α0(p::Path)
-First angle of a path.
+First angle of a path, returns `p.α0`.
 """
-function α0(p::Path)
-    isempty(p) && return p.α0
-    α0(segment(nodes(p)[1]))
-end
+α0(p::Path) = p.α0
 
 """
     α1(p::Path)
@@ -393,12 +390,9 @@ end
 
 """
     p0(p::Path)
-First point of a path.
+First point of a path, returns `p.p0`.
 """
-function p0(p::Path)
-    isempty(p) && return p.p0
-    p0(segment(nodes(p)[1]))
-end
+p0(p::Path) = p.p0
 
 """
     p1(p::Path)
@@ -729,13 +723,17 @@ function _launch!(p::Path{T}; kwargs...) where {T <: Coordinate}
     flatlen, taperlen = d[:flatlen], d[:taperlen]
 
     y = isempty(p)
-    s0 = Trace(t->2*(trace0/2 + gap0 - extround + sqrt(extround^2 - (t - extround * y)^2)))
+    s0 = if extround == zero(extround)
+        Trace(trace0+2*gap0)
+    else
+        Trace(t->2*(trace0/2 + gap0 - extround + sqrt(extround^2 - (t - extround * y)^2)))
+    end
     s1 = Trace(trace0+2*gap0)
     s2 = CPW(trace0, gap0)
 
     u,v = ifelse(y, (trace0, trace1), (trace1, trace0))
     w,x = ifelse(y, (gap0, gap1), (gap1, gap0))
-    s3 = CPW(t->(u + t / taperlen * (v - u)), t->(w + t / taperlen * (x - w)))
+    s3 = TaperCPW(u,w,v,x)
 
     if y
         args = (extround, gap0-extround, flatlen, taperlen)
