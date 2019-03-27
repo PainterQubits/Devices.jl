@@ -497,7 +497,7 @@ function uniqueray(v::Vector{Point{T}}) where {T <: Real}
     miny, indy = findmin(yarr)
     xarr = view(nopts, (findall(x->x==miny, yarr).*2).-1)
     minx, indx = findmin(xarr)
-    Ray(Point(minx,miny), Point(minx, miny-1))
+    Ray(Point(minx, miny), Point(minx, miny-1))
 end
 
 """
@@ -659,9 +659,13 @@ function intersection(A::Line{T}, B::Line{T}, checkparallel=true) where T
     if checkparallel
         # parallel checking goes here!
     else
-        xA, xB, yA, yB = Δx(A), Δx(B), Δy(A), Δy(B)
-        w = ustrip.([yA -xA; yB -xB]) \ ustrip.([A.p0.x*yA - A.p0.y*xA, B.p0.x*yB - B.p0.y*xB])
-        true, Point(w)*unit(A.p0.x)
+        u = A.p1 - A.p0
+        v = B.p1 - B.p0
+        w = A.p0 - B.p0
+        vp = Point{float(T)}(-v.y, v.x)     # need float or hit overflow
+
+        i = dot(-vp, w) / dot(vp, u)
+        return true, A.p0 + i*u
     end
 end
 
