@@ -436,45 +436,45 @@
                   <h1>Points</h1>
                 
                 <p>Points live in a Cartesian coordinate system with <code>Real</code> or <code>Unitful.Length</code> coordinates:</p>
-<div class="codehilite"><pre><span></span>julia&gt; Point(1,1)
-2-element Point{Int64}:
- 1
- 1
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="mi">2</span><span class="o">-</span><span class="n">element</span> <span class="n">Point</span><span class="err">{</span><span class="n">Int64</span><span class="err">}</span><span class="p">:</span>
+ <span class="mi">1</span>
+ <span class="mi">1</span>
 
-julia&gt; Point(1.0,1.0)
-2-element Point{Float64}:
- 1.0
- 1.0
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="mi">2</span><span class="o">-</span><span class="n">element</span> <span class="n">Point</span><span class="err">{</span><span class="n">Float64</span><span class="err">}</span><span class="p">:</span>
+ <span class="mi">1</span><span class="p">.</span><span class="mi">0</span>
+ <span class="mi">1</span><span class="p">.</span><span class="mi">0</span>
 
-julia&gt; Point(1.0u&quot;μm&quot;, 1.0u&quot;μm&quot;)
-2-element Point{Quantity{Float64,𝐋,Unitful.FreeUnits{(μm,),𝐋,nothing}}}:
- 1.0 μm
- 1.0 μm
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="n">u</span><span class="ss">&quot;μm&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="n">u</span><span class="ss">&quot;μm&quot;</span><span class="p">)</span>
+<span class="mi">2</span><span class="o">-</span><span class="n">element</span> <span class="n">Point</span><span class="err">{</span><span class="n">Quantity</span><span class="err">{</span><span class="n">Float64</span><span class="p">,</span><span class="err">𝐋</span><span class="p">,</span><span class="n">Unitful</span><span class="p">.</span><span class="n">FreeUnits</span><span class="err">{</span><span class="p">(</span><span class="err">μ</span><span class="n">m</span><span class="p">,),</span><span class="err">𝐋</span><span class="p">,</span><span class="k">nothing</span><span class="err">}}}</span><span class="p">:</span>
+ <span class="mi">1</span><span class="p">.</span><span class="mi">0</span> <span class="err">μ</span><span class="n">m</span>
+ <span class="mi">1</span><span class="p">.</span><span class="mi">0</span> <span class="err">μ</span><span class="n">m</span>
 </pre></div>
 
 
 <p>If a point has <code>Real</code> coordinates, the absence of a unit is interpreted to mean <code>μm</code> whenever the geometry is saved to a GDS format, but until then it is just considered to be a pure number. Therefore you cannot mix and match <code>Real</code> and <code>Length</code> coordinates:</p>
-<div class="codehilite"><pre><span></span>julia&gt; Point(1.0u&quot;μm&quot;, 1.0)
-ERROR: Cannot use `Point` with this combination of types.
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="nf">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="n">u</span><span class="s2">&quot;μm&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">Cannot</span> <span class="k">use</span> <span class="ss">`Point`</span> <span class="k">with</span> <span class="n">this</span> <span class="n">combination</span> <span class="n">of</span> <span class="n">types</span><span class="p">.</span>
 </pre></div>
 
 
 <p>You can add Points together or scale them:</p>
-<div class="codehilite"><pre><span></span>julia&gt; 3*Point(1,1)+Point(1,2)
-2-element Point{Int64}:
- 4
- 5
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="mi">3</span><span class="o">*</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="mi">2</span><span class="o">-</span><span class="n">element</span> <span class="n">Point</span><span class="err">{</span><span class="n">Int64</span><span class="err">}</span><span class="p">:</span>
+ <span class="mi">4</span>
+ <span class="mi">5</span>
 </pre></div>
 
 
 <p>You can also do affine transformations by composing any number of <code>Translation</code> and <code>Rotation</code>s, which will return a callable object representing the transformation. You can type the following Unicode symbols with <code>\degree</code> and <code>\circ</code> tab-completions in the Julia REPL or using the Atom package <code>latex-completions</code>.</p>
-<div class="codehilite"><pre><span></span>julia&gt; aff = Rotation(90°) ∘ Translation(Point(1,2))
-AffineMap([0.0 -1.0; 1.0 0.0], (-2.0,1.0))
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">aff</span> <span class="o">=</span> <span class="n">Rotation</span><span class="p">(</span><span class="mi">90</span><span class="err">°</span><span class="p">)</span> <span class="err">∘</span> <span class="k">Translation</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">AffineMap</span><span class="p">([</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">))</span>
 
-julia&gt; aff(Point(0,0))
-2-element Point{Float64}:
- -2.0
-  1.0
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">aff</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="mi">2</span><span class="o">-</span><span class="n">element</span> <span class="n">Point</span><span class="err">{</span><span class="n">Float64</span><span class="err">}</span><span class="p">:</span>
+ <span class="o">-</span><span class="mi">2</span><span class="p">.</span><span class="mi">0</span>
+  <span class="mi">1</span><span class="p">.</span><span class="mi">0</span>
 </pre></div>
 
 
@@ -482,103 +482,103 @@ julia&gt; aff(Point(0,0))
 <h2 id="api">API</h2>
 <p><a id='Devices.PointTypes' href='#Devices.PointTypes'>#</a>
 <strong><code>Devices.PointTypes</code></strong> &mdash; <em>Constant</em>.</p>
-<div class="codehilite"><pre><span></span>PointTypes = Union{Real, DimensionlessQuantity, Length, InverseLength}
+<div class="codehilite"><pre><span></span><span class="n">PointTypes</span> <span class="o">=</span> <span class="k">Union</span><span class="err">{</span><span class="nb">Real</span><span class="p">,</span> <span class="n">DimensionlessQuantity</span><span class="p">,</span> <span class="k">Length</span><span class="p">,</span> <span class="n">InverseLength</span><span class="err">}</span>
 </pre></div>
 
 
 <p>Allowed type variables for <code>Point{T}</code> types.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/Devices.jl#L85-L88' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/Devices.jl#L85-L88' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Coordinate' href='#Devices.Coordinate'>#</a>
 <strong><code>Devices.Coordinate</code></strong> &mdash; <em>Constant</em>.</p>
-<div class="codehilite"><pre><span></span>Coordinate = Union{Real, Length}
+<div class="codehilite"><pre><span></span><span class="n">Coordinate</span> <span class="o">=</span> <span class="k">Union</span><span class="err">{</span><span class="nb">Real</span><span class="p">,</span> <span class="k">Length</span><span class="err">}</span>
 </pre></div>
 
 
 <p>Type alias for numeric types suitable for coordinate systems.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/Devices.jl#L73-L76' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/Devices.jl#L73-L76' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.Point' href='#Devices.Points.Point'>#</a>
 <strong><code>Devices.Points.Point</code></strong> &mdash; <em>Type</em>.</p>
-<div class="codehilite"><pre><span></span>struct Point{T} &lt;: StaticArrays.FieldVector{2,T}
-    x::T
-    y::T
-end
+<div class="codehilite"><pre><span></span><span class="nv">struct</span> <span class="nv">Point</span>{<span class="nv">T</span>} <span class="o">&lt;</span>: <span class="nv">StaticArrays</span>.<span class="nv">FieldVector</span>{<span class="mi">2</span>,<span class="nv">T</span>}
+    <span class="nv">x</span>::<span class="nv">T</span>
+    <span class="nv">y</span>::<span class="nv">T</span>
+<span class="k">end</span>
 </pre></div>
 
 
 <p>2D Cartesian coordinate in the plane.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/points.jl#L22-L28' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/points.jl#L22-L28' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.getx' href='#Devices.Points.getx'>#</a>
 <strong><code>Devices.Points.getx</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>getx(p::Point)
+<div class="codehilite"><pre><span></span><span class="n">getx</span><span class="p">(</span><span class="n">p</span><span class="p">::</span><span class="n">Point</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Get the x-coordinate of a point. You can also use <code>p.x</code> or <code>p[1]</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/points.jl#L58-L61' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/points.jl#L58-L61' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.Points.gety' href='#Devices.Points.gety'>#</a>
 <strong><code>Devices.Points.gety</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>gety(p::Point)
+<div class="codehilite"><pre><span></span><span class="n">gety</span><span class="p">(</span><span class="n">p</span><span class="p">::</span><span class="n">Point</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Get the y-coordinate of a point. You can also use <code>p.y</code> or <code>p[2]</code>.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/points.jl#L64-L67' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/points.jl#L64-L67' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.lowerleft' href='#Devices.lowerleft'>#</a>
 <strong><code>Devices.lowerleft</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>lowerleft{T}(A::AbstractArray{Point{T}})
+<div class="codehilite"><pre><span></span><span class="n">lowerleft</span><span class="err">{</span><span class="n">T</span><span class="err">}</span><span class="p">(</span><span class="n">A</span><span class="p">::</span><span class="n">AbstractArray</span><span class="err">{</span><span class="n">Point</span><span class="err">{</span><span class="n">T</span><span class="err">}}</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Returns the lower-left <a href="./#Devices.Points.Point"><code>Point</code></a> of the smallest bounding rectangle (with sides parallel to the x- and y-axes) that contains all points in <code>A</code>.</p>
 <p>Example:</p>
-<div class="codehilite"><pre><span></span>julia&gt; lowerleft([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
-2-element Point{Int64}:
- -1
-  0
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">lowerleft</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+<span class="mi">2</span><span class="o">-</span><span class="n">element</span> <span class="n">Point</span><span class="err">{</span><span class="n">Int64</span><span class="err">}</span><span class="p">:</span>
+ <span class="o">-</span><span class="mi">1</span>
+  <span class="mi">0</span>
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/points.jl#L77-L89' class='documenter-source'>source</a><br></p>
-<div class="codehilite"><pre><span></span>lowerleft(r::Rectangle)
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/points.jl#L77-L89' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="n">lowerleft</span><span class="p">(</span><span class="n">r</span><span class="p">::</span><span class="n">Rectangle</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Returns the lower-left corner of a rectangle (Point object).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/rectangles.jl#L111-L114' class='documenter-source'>source</a><br></p>
-<div class="codehilite"><pre><span></span>lowerleft(x::Polygon)
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/rectangles.jl#L111-L114' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="n">lowerleft</span><span class="p">(</span><span class="n">x</span><span class="p">::</span><span class="n">Polygon</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Return the lower-left-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/polygons.jl#L105-L109' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/polygons.jl#L105-L109' class='documenter-source'>source</a><br></p>
 <p><a id='Devices.upperright' href='#Devices.upperright'>#</a>
 <strong><code>Devices.upperright</code></strong> &mdash; <em>Function</em>.</p>
-<div class="codehilite"><pre><span></span>upperright{T}(A::AbstractArray{Point{T}})
+<div class="codehilite"><pre><span></span><span class="n">upperright</span><span class="err">{</span><span class="n">T</span><span class="err">}</span><span class="p">(</span><span class="n">A</span><span class="p">::</span><span class="n">AbstractArray</span><span class="err">{</span><span class="n">Point</span><span class="err">{</span><span class="n">T</span><span class="err">}}</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Returns the upper-right <a href="./#Devices.Points.Point"><code>Point</code></a> of the smallest bounding rectangle (with sides parallel to the x- and y-axes) that contains all points in <code>A</code>.</p>
 <p>Example:</p>
-<div class="codehilite"><pre><span></span>julia&gt; upperright([Point(2,0),Point(1,1),Point(0,2),Point(-1,3)])
-2-element Point{Int64}:
- 2
- 3
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">upperright</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+<span class="mi">2</span><span class="o">-</span><span class="n">element</span> <span class="n">Point</span><span class="err">{</span><span class="n">Int64</span><span class="err">}</span><span class="p">:</span>
+ <span class="mi">2</span>
+ <span class="mi">3</span>
 </pre></div>
 
 
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/points.jl#L97-L109' class='documenter-source'>source</a><br></p>
-<div class="codehilite"><pre><span></span>upperright(r::Rectangle)
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/points.jl#L97-L109' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="n">upperright</span><span class="p">(</span><span class="n">r</span><span class="p">::</span><span class="n">Rectangle</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Returns the upper-right corner of a rectangle (Point object).</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/rectangles.jl#L117-L120' class='documenter-source'>source</a><br></p>
-<div class="codehilite"><pre><span></span>upperright(x::Polygon)
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/rectangles.jl#L117-L120' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span><span class="n">upperright</span><span class="p">(</span><span class="n">x</span><span class="p">::</span><span class="n">Polygon</span><span class="p">)</span>
 </pre></div>
 
 
 <p>Return the upper-right-most corner of a rectangle bounding polygon <code>x</code>. Note that this point doesn't have to be in the polygon.</p>
-<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/c24495281abfa0b3f3d55b007625b934d46a7685/src/polygons.jl#L112-L116' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/PainterQubits/Devices.jl/blob/8b1ece8f8c87f6cbaaee9de209f23754068a1786/src/polygons.jl#L112-L116' class='documenter-source'>source</a><br></p>
 <p><a id='Implementation-details-1'></a></p>
 <h2 id="implementation-details">Implementation details</h2>
 <p>Points are implemented using the abstract type <code>FieldVector</code> from <a href="https://github.com/JuliaArrays/StaticArrays.jl">StaticArrays.jl</a>. This permits a fast, efficient representation of coordinates in the plane. Additionally, unlike <code>Tuple</code> objects, we can add points together, simplifying many function definitions.</p>
