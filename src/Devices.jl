@@ -1,6 +1,5 @@
 module Devices
-using Random
-using LinearAlgebra
+using Random, LinearAlgebra
 using ForwardDiff
 using FileIO
 include("units.jl")
