@@ -19,7 +19,7 @@ import Unitful
 import Unitful: Quantity, Length, dimension, unit, ustrip, uconvert, °
 using ..Points
 using ..Rectangles
-import ..cclipper
+import ..libcclipper
 
 import IntervalSets.(..)
 import IntervalSets.endpoints
@@ -258,7 +258,7 @@ end
 
 function add_path!(c::Clipper.Clip, path::Vector{Point{T}}, polyType::Clipper.PolyType,
         closed::Bool) where {T<:Union{Int64, Unitful.Quantity{Int64}}}
-    ccall((:add_path, cclipper), Cuchar, (Ptr{Cvoid}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cuchar),
+    ccall((:add_path, libcclipper), Cuchar, (Ptr{Cvoid}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cuchar),
           c.clipper_ptr,
           path,
           length(path),
@@ -403,7 +403,7 @@ end
 
 function add_path!(c::Clipper.ClipperOffset, path::Vector{Point{T}},
         joinType::Clipper.JoinType, endType::Clipper.EndType) where {T<:Union{Int64, Unitful.Quantity{Int64}}}
-    ccall((:add_offset_path, cclipper), Cvoid, (Ptr{Cvoid}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cint),
+    ccall((:add_offset_path, libcclipper), Cvoid, (Ptr{Cvoid}, Ptr{Clipper.IntPoint}, Csize_t, Cint, Cint),
           c.clipper_ptr,
           path,
           length(path),
@@ -506,7 +506,7 @@ Returns 1 if the points in the polygon contour are going counter-clockwise, -1 i
 Clipper considers clockwise-oriented polygons to be holes for some polygon fill types.
 """
 function orientation(p::Polygon)
-    ccall((:orientation, cclipper), Cuchar, (Ptr{Clipper.IntPoint}, Csize_t),
+    ccall((:orientation, libcclipper), Cuchar, (Ptr{Clipper.IntPoint}, Csize_t),
         reinterpret(Clipper.IntPoint, p.p),length(p.p)) == 1 ? 1 : -1
 end
 

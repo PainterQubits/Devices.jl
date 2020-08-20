@@ -7,7 +7,7 @@ include("units.jl")
 
 import StaticArrays
 import Clipper
-import Clipper: cclipper
+import Clipper: libcclipper
 import FileIO: save, load
 
 import Base: length, show, eltype, intersect!
