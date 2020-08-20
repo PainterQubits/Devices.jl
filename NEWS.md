@@ -1,3 +1,5 @@
+- v0.5.1
+  - Support for julia 1.0+ versions. Removed REQUIRE file and created Project.toml
 - v0.5.0
   - Rewrite some line/ray/line-segment intersection code.
   - `adjust!` has been renamed `reconcile!`

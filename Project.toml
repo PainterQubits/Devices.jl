@@ -1,0 +1,14 @@
+name = "Devices"
+uuid = "6fe4a0ef-4c35-4686-8fec-3c9b50203484"
+version = "0.5.1"
+
+[deps]
+Cairo = "159f3aea-2a34-519c-b102-8c37f9878175"
+Clipper = "c8f6d549-b3ab-5508-a0d1-48fe138e8cc1"
+CoordinateTransformations = "150eb455-5306-5404-9cee-2592286d6298"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
